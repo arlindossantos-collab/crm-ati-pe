@@ -38,6 +38,12 @@
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 py-6">
 
+        <!-- Storage Status Banner -->
+        <div id="storage-warning" class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+            <span><strong>Aviso de Armazenamento:</strong> O LocalStorage está bloqueado neste navegador. A aplicação está rodando em modo de memória temporária.</span>
+        </div>
+
         <!-- KPI Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
@@ -233,13 +239,7 @@
             { id: 'dem-103', orgaoId: 'org-3', titulo: 'Atualização do Portal Institucional', categoria: 'Sistemas / Web', prioridade: 'Baixa', status: 'Pendente' }
         ];
 
-        let state = {
-            orgaos: loadArray(STORAGE.orgaos, DEFAULT_ORGAOS),
-            demandas: loadArray(STORAGE.demandas, DEFAULT_DEMANDAS)
-        };
-
-        let abaAtual = 'demandas';
-        let buscaAtual = '';
+        let canUseLocalStorage = true;
 
         function loadArray(key, fallback) {
             try {
@@ -248,20 +248,38 @@
                 const parsed = JSON.parse(raw);
                 return Array.isArray(parsed) ? parsed : structuredClone(fallback);
             } catch (error) {
-                console.warn(`Não foi possível ler ${key}. Dados padrão carregados.`, error);
+                console.warn(`LocalStorage inacessível ou bloqueado. Usando fallback na memória.`, error);
+                canUseLocalStorage = false;
+                document.getElementById('storage-warning')?.classList.remove('hidden');
                 return structuredClone(fallback);
             }
         }
 
+        let state = {
+            orgaos: loadArray(STORAGE.orgaos, DEFAULT_ORGAOS),
+            demandas: loadArray(STORAGE.demandas, DEFAULT_DEMANDAS)
+        };
+
+        // Fix legacy numeric or missing IDs mapping (SEFAZ org-1, etc.)
+        state.demandas.forEach((d, idx) => {
+            if (d.orgaoId === '1' || d.orgaoId === 1) d.orgaoId = 'org-1';
+            if (d.orgaoId === '2' || d.orgaoId === 2) d.orgaoId = 'org-2';
+            if (d.orgaoId === '3' || d.orgaoId === 3) d.orgaoId = 'org-3';
+        });
+
+        let abaAtual = 'demandas';
+        let buscaAtual = '';
+
         function persist() {
-            try {
-                localStorage.setItem(STORAGE.orgaos, JSON.stringify(state.orgaos));
-                localStorage.setItem(STORAGE.demandas, JSON.stringify(state.demandas));
-                render();
-            } catch (error) {
-                console.error(error);
-                alert('Não foi possível salvar os dados neste navegador. Verifique o espaço disponível ou as permissões de armazenamento.');
+            if (canUseLocalStorage) {
+                try {
+                    localStorage.setItem(STORAGE.orgaos, JSON.stringify(state.orgaos));
+                    localStorage.setItem(STORAGE.demandas, JSON.stringify(state.demandas));
+                } catch (error) {
+                    console.warn('Erro ao salvar no LocalStorage. Mantendo dados na memória local.', error);
+                }
             }
+            render();
         }
 
         function id(prefix) {
