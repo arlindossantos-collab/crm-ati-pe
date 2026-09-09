@@ -1,15 +1,15 @@
-# CRM Relacionamento de Governo Digital - ATI/PE (`crm-ati-pe`) v3.0
+# CRM Relacionamento de Governo Digital - ATI/PE (`crm-ati-pe`) v4.0
 
 Sistema de Gerenciamento de Relacionamento de Clientes (CRM) desenvolvido para a Agência Estadual de Tecnologia da Informação de Pernambuco (ATI-PE).
 
-## 🛠️ Correção de Erros da Versão 3.0
-* **Resiliência de Armazenamento:** Tratamento do bloqueio de cookies de terceiros / LocalStorage em ambientes incorporados (iframes e previewers).
-* **Mapeamento de IDs (N/A Corrigido):** Correção do mapeamento de IDs padrão (`org-1`, `org-2`, `org-3`) que causavam a exibição de "N/A - Órgão não encontrado".
-* **Fallbacks na Memória:** A aplicação roda e permite manipulação de dados mesmo quando o armazenamento do navegador é bloqueado pelo sistema de segurança do cliente.
+## 🚀 Novidades da Versão 4.0
+* **Modal de Histórico da Demanda:** Clique em qualquer demanda para visualizar a descrição completa, linha do tempo de atendimentos e adicione pareceres/notas de reunião.
+* **Perfil da Secretaria / Órgão:** Clique no card da secretaria para ver contatos, telefones/ramais, atribuições institucionais e todos os chamados vinculados.
+* **Histórico Automático:** Alterações de status geram carimbos automáticos de data/hora na linha do tempo do projeto.
 
-## 📌 Atualização via Git
+## 📌 Atualização no GitHub
 ```bash
 git add .
-git commit -m "v3.0: Correcao do LocalStorage e mapeamento relacional dos órgãos"
+git commit -m "v4.0: Adicionadas visões detalhadas de histórico de demandas e perfil executivo de secretarias"
 git push origin main
 ```
