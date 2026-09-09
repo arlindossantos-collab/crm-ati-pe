@@ -1,62 +1,48 @@
-# System Design Document (SDD): CRM de Relacionamento ATI-PE
+# System Design Document (SDD): CRM de Relacionamento ATI-PE (v2.0)
 
 ## 1. Visão Geral
-O **CRM ATI-PE (`crm-ati-pe`)** é uma aplicação Web SPA (Single Page Application) desenvolvida para gerenciar o relacionamento, projetos e demandas tecnológicas entre a Agência Estadual de Tecnologia da Informação (ATI-PE) e as secretarias e órgãos do Governo do Estado de Pernambuco.
+O **CRM ATI-PE (`crm-ati-pe`)** é uma aplicação Web SPA (Single Page Application) desenvolvida para a Agência Estadual de Tecnologia da Informação (ATI-PE). Seu objetivo é gerenciar o relacionamento, projetos e demandas tecnológicas junto aos órgãos e secretarias do Governo do Estado de Pernambuco.
 
 ---
 
-## 2. Tech Stack & Decisões de Arquitetura
+## 2. Controle de Versão e Gestão de Código
+Para garantir o rastreamento de alterações, o versionamento oficial do código é realizado via **Git & GitHub** no repositório **`crm-ati-pe`**.
 
-### 2.1. Frontend & UX/UI
+* **Plataforma Recomendada de Controle de Versão:** [GitHub](https://github.com)
+* **Fluxo de Trabalho (Workflow):**
+  * `main`: Branch de produção conectada diretamente ao **GitHub Pages**.
+  * `feat/*` ou `fix/*`: Branches secundárias para criação de funcionalidades ou correção de bugs antes do merge.
+
+---
+
+## 3. Tech Stack & Correções da Versão 2.0
+
+### 3.1. Frontend & UX/UI
 * **Linguagem:** HTML5, CSS3, JavaScript (ES6+ Vanilla).
-* **Styling Framework:** Tailwind CSS 3.x (via CDN para implantação imediata sem build step).
-* **Ícones:** Font Awesome 6.x.
-* **Design System / Theme:** *Government Digital Executive* (Tons de Azul Institucional `#1e3a8a`, Slate Gray `#f8fafc` e destaques em verde/amber para status).
-* **UX Highlights:**
-  * Dashboard de Métricas / KPIs em tempo real.
-  * Visão em Lista e Cards para Órgãos e Demandas.
-  * Formulários dinâmicos em modais responsivas.
-  * Filtros dinâmicos e navegação por abas sem reload.
+* **Styling:** Tailwind CSS 3.x + Font Awesome 6.x.
+* **Recursos Corrigidos na v2.0:**
+  * **Edição Completa de Órgãos e Demandas:** Suporte a formulários dinâmicos com carregamento prévio dos campos e persistência de IDs (`org-edit-id` e `dem-edit-id`).
+  * **Validação de Exclusão Relacional:** Impede a exclusão acidental de órgãos que possuem demandas ativas vinculadas.
+  * **Sanitização (XSS Prevention):** Função de escape em todos os dados dinamicamente inseridos na DOM.
+  * **Acessibilidade & UX:** Suporte a fechamento de modais com a tecla `Escape` e clique no backdrop.
 
-### 2.2. Persistência de Dados & Backend
-* **Prototipagem & GitHub Pages:** Persistência no `LocalStorage` do navegador com estrutura JSON relacional, permitindo que a aplicação rode 100% no cliente sem custo de servidor.
-* **Pronto para Produção (Roadmap Backend):**
-  * **API:** FastAPI (Python) ou Node.js (TypeScript).
-  * **Banco de Dados:** PostgreSQL para armazenamento relacional de órgãos, contatos e histórico de interações.
+### 3.2. Persistência de Dados
+* **LocalStorage:** Armazenamento relacional dinâmico utilizando as chaves `ati_crm_orgaos` e `ati_crm_demandas`.
 
 ---
 
-## 3. Modelo de Dados (JSON Schema)
-
-```json
-{
-  "orgaos": [
-    {
-      "id": "1",
-      "nome": "Secretaria da Fazenda",
-      "sigla": "SEFAZ",
-      "contato": "Carlos Eduardo",
-      "email": "carlos@sefaz.pe.gov.br"
-    }
-  ],
-  "demandas": [
-    {
-      "id": "101",
-      "orgaoId": "1",
-      "titulo": "Migração de E-mails Expresso -> SOGo.PE",
-      "categoria": "Infraestrutura / E-mail",
-      "prioridade": "Alta",
-      "status": "Em Andamento"
-    }
-  ]
-}
+## 4. Estrutura do Repositório
+```
+crm-ati-pe/
+├── index.html          # Aplicação completa (Frontend + Scripts de Estado e Modais)
+├── SDD_CRM_ATI.md      # System Design Document (v2.0)
+└── README.md           # Guia de implantação e controle de versão Git
 ```
 
 ---
 
-## 4. Instruções de Publicação no GitHub Pages
-1. Extraia o conteúdo deste `.zip`.
-2. Suba o conteúdo para o seu repositório `crm-ati-pe` na branch `main`.
-3. No GitHub, acesse **Settings > Pages**.
-4. Em **Source**, selecione `Deploy from a branch`, escolha a branch `main` e diretório `/ (root)`.
-5. Salve. Em poucos segundos a aplicação estará no ar!
+## 5. Publicação no GitHub Pages
+1. Suba os arquivos atualizados para o seu repositório `crm-ati-pe`.
+2. Acesse **Settings > Pages** no GitHub.
+3. Configure a branch `main` e diretório `/ (root)`.
+4. Salve. O sistema será publicado automaticamente.

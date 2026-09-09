@@ -124,14 +124,15 @@
 
     </main>
 
-    <!-- MODAL NOVO ÓRGÃO -->
+    <!-- MODAL NOVO/EDITAR ÓRGÃO -->
     <div id="modal-orgao" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="titulo-modal-orgao" class="text-lg font-bold text-slate-900">Cadastrar Novo Órgão</h3>
                 <button onclick="fecharModal('modal-orgao')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="form-orgao" onsubmit="salvarOrgao(event)"><input type="hidden" id="org-edit-id">
+            <form id="form-orgao" onsubmit="salvarOrgao(event)">
+                <input type="hidden" id="org-edit-id">
                 <div class="space-y-3 text-sm">
                     <div>
                         <label class="block font-medium text-slate-700 mb-1">Nome do Órgão / Secretaria</label>
@@ -158,14 +159,15 @@
         </div>
     </div>
 
-    <!-- MODAL NOVA DEMANDA -->
+    <!-- MODAL NOVA/EDITAR DEMANDA -->
     <div id="modal-demanda" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="titulo-modal-demanda" class="text-lg font-bold text-slate-900">Nova Demanda / Projeto</h3>
                 <button onclick="fecharModal('modal-demanda')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="form-demanda" onsubmit="salvarDemanda(event)"><input type="hidden" id="dem-edit-id">
+            <form id="form-demanda" onsubmit="salvarDemanda(event)">
+                <input type="hidden" id="dem-edit-id">
                 <div class="space-y-3 text-sm">
                     <div>
                         <label class="block font-medium text-slate-700 mb-1">Órgão Solicitante</label>
@@ -212,440 +214,438 @@
     </div>
 
     <!-- Application Script -->
-    
-<script>
-(() => {
-    const STORAGE = {
-        orgaos: 'ati_crm_orgaos',
-        demandas: 'ati_crm_demandas'
-    };
+    <script>
+    (() => {
+        const STORAGE = {
+            orgaos: 'ati_crm_orgaos',
+            demandas: 'ati_crm_demandas'
+        };
 
-    const DEFAULT_ORGAOS = [
-        { id: 'org-1', nome: 'Secretaria da Fazenda', sigla: 'SEFAZ', contato: 'Carlos Eduardo', email: 'carlos@sefaz.pe.gov.br' },
-        { id: 'org-2', nome: 'Secretaria de Planejamento e Gestão', sigla: 'SEPLAG', contato: 'Mariana Lima', email: 'mariana@seplag.pe.gov.br' },
-        { id: 'org-3', nome: 'Secretaria de Educação', sigla: 'SEE', contato: 'Roberto Mendes', email: 'roberto@see.pe.gov.br' }
-    ];
+        const DEFAULT_ORGAOS = [
+            { id: 'org-1', nome: 'Secretaria da Fazenda', sigla: 'SEFAZ', contato: 'Carlos Eduardo', email: 'carlos@sefaz.pe.gov.br' },
+            { id: 'org-2', nome: 'Secretaria de Planejamento e Gestão', sigla: 'SEPLAG', contato: 'Mariana Lima', email: 'mariana@seplag.pe.gov.br' },
+            { id: 'org-3', nome: 'Secretaria de Educação', sigla: 'SEE', contato: 'Roberto Mendes', email: 'roberto@see.pe.gov.br' }
+        ];
 
-    const DEFAULT_DEMANDAS = [
-        { id: 'dem-101', orgaoId: 'org-1', titulo: 'Migração de E-mails Expresso -> SOGo.PE', categoria: 'Infraestrutura / E-mail', prioridade: 'Alta', status: 'Em Andamento' },
-        { id: 'dem-102', orgaoId: 'org-2', titulo: 'Adesão ao Projeto Residência Digital', categoria: 'Transformação Digital', prioridade: 'Média', status: 'Concluído' },
-        { id: 'dem-103', orgaoId: 'org-3', titulo: 'Atualização do Portal Institucional', categoria: 'Sistemas / Web', prioridade: 'Baixa', status: 'Pendente' }
-    ];
+        const DEFAULT_DEMANDAS = [
+            { id: 'dem-101', orgaoId: 'org-1', titulo: 'Migração de E-mails Expresso -> SOGo.PE', categoria: 'Infraestrutura / E-mail', prioridade: 'Alta', status: 'Em Andamento' },
+            { id: 'dem-102', orgaoId: 'org-2', titulo: 'Adesão ao Projeto Residência Digital', categoria: 'Transformação Digital', prioridade: 'Média', status: 'Concluído' },
+            { id: 'dem-103', orgaoId: 'org-3', titulo: 'Atualização do Portal Institucional', categoria: 'Sistemas / Web', prioridade: 'Baixa', status: 'Pendente' }
+        ];
 
-    let state = {
-        orgaos: loadArray(STORAGE.orgaos, DEFAULT_ORGAOS),
-        demandas: loadArray(STORAGE.demandas, DEFAULT_DEMANDAS)
-    };
+        let state = {
+            orgaos: loadArray(STORAGE.orgaos, DEFAULT_ORGAOS),
+            demandas: loadArray(STORAGE.demandas, DEFAULT_DEMANDAS)
+        };
 
-    let abaAtual = 'demandas';
-    let buscaAtual = '';
+        let abaAtual = 'demandas';
+        let buscaAtual = '';
 
-    function loadArray(key, fallback) {
-        try {
-            const raw = localStorage.getItem(key);
-            if (!raw) return structuredClone(fallback);
-            const parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : structuredClone(fallback);
-        } catch (error) {
-            console.warn(`Não foi possível ler ${key}. Dados padrão carregados.`, error);
-            return structuredClone(fallback);
-        }
-    }
-
-    function persist() {
-        try {
-            localStorage.setItem(STORAGE.orgaos, JSON.stringify(state.orgaos));
-            localStorage.setItem(STORAGE.demandas, JSON.stringify(state.demandas));
-            render();
-        } catch (error) {
-            console.error(error);
-            alert('Não foi possível salvar os dados neste navegador. Verifique o espaço disponível ou as permissões de armazenamento.');
-        }
-    }
-
-    function id(prefix) {
-        return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    }
-
-    function normalize(value) {
-        return String(value ?? '')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .trim();
-    }
-
-    // Escape obrigatório porque os dados do usuário são inseridos no HTML.
-    function escapeHtml(value) {
-        return String(value ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
-
-    function getOrg(id) {
-        return state.orgaos.find(o => o.id === id);
-    }
-
-    function getFilteredDemandas() {
-        const q = normalize(buscaAtual);
-        if (!q) return state.demandas;
-        return state.demandas.filter(d => {
-            const org = getOrg(d.orgaoId);
-            return [
-                d.titulo, d.categoria, d.prioridade, d.status,
-                org?.nome, org?.sigla, org?.contato, org?.email
-            ].some(value => normalize(value).includes(q));
-        });
-    }
-
-    function getFilteredOrgaos() {
-        const q = normalize(buscaAtual);
-        if (!q) return state.orgaos;
-        return state.orgaos.filter(o =>
-            [o.nome, o.sigla, o.contato, o.email]
-                .some(value => normalize(value).includes(q))
-        );
-    }
-
-    function render() {
-        document.getElementById('kpi-orgaos').textContent = state.orgaos.length;
-        document.getElementById('kpi-demandas').textContent = state.demandas.length;
-        document.getElementById('kpi-andamento').textContent =
-            state.demandas.filter(d => d.status === 'Em Andamento').length;
-        document.getElementById('kpi-concluidas').textContent =
-            state.demandas.filter(d => d.status === 'Concluído').length;
-
-        renderDemandas();
-        renderOrgaos();
-        populateOrgSelect();
-        applyTab();
-    }
-
-    function renderDemandas() {
-        const tabela = document.getElementById('tabela-demandas');
-        const demandas = getFilteredDemandas();
-
-        if (!demandas.length) {
-            tabela.innerHTML = `
-                <tr>
-                    <td colspan="6" class="p-8 text-center text-slate-400">
-                        ${buscaAtual ? 'Nenhuma demanda encontrada para a busca.' : 'Nenhuma demanda cadastrada.'}
-                    </td>
-                </tr>`;
-            return;
+        function loadArray(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                if (!raw) return structuredClone(fallback);
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : structuredClone(fallback);
+            } catch (error) {
+                console.warn(`Não foi possível ler ${key}. Dados padrão carregados.`, error);
+                return structuredClone(fallback);
+            }
         }
 
-        tabela.innerHTML = demandas.map(d => {
-            const org = getOrg(d.orgaoId);
-            const badgeColor =
-                d.status === 'Concluído'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : d.status === 'Em Andamento'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-amber-100 text-amber-800';
-
-            const prioColor =
-                d.prioridade === 'Alta'
-                    ? 'text-red-600 font-bold'
-                    : d.prioridade === 'Média'
-                        ? 'text-amber-600 font-medium'
-                        : 'text-slate-500';
-
-            return `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-4">
-                        <div class="font-bold text-blue-950">${escapeHtml(org?.sigla || 'N/A')}</div>
-                        <div class="text-xs text-slate-400">${escapeHtml(org?.nome || 'Órgão não encontrado')}</div>
-                    </td>
-                    <td class="p-4 font-medium text-slate-900">${escapeHtml(d.titulo)}</td>
-                    <td class="p-4 text-slate-500 text-xs">${escapeHtml(d.categoria)}</td>
-                    <td class="p-4 ${prioColor} text-xs">${escapeHtml(d.prioridade)}</td>
-                    <td class="p-4">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeColor}">
-                            ${escapeHtml(d.status)}
-                        </span>
-                    </td>
-                    <td class="p-4 text-center whitespace-nowrap">
-                        <button type="button" onclick="alternarStatus('${escapeHtml(d.id)}')"
-                            class="text-slate-400 hover:text-blue-600 p-1.5 transition"
-                            title="Avançar status" aria-label="Avançar status">
-                            <i class="fa-solid fa-rotate"></i>
-                        </button>
-                        <button type="button" onclick="editarDemanda('${escapeHtml(d.id)}')"
-                            class="text-slate-400 hover:text-amber-600 p-1.5 transition"
-                            title="Editar demanda" aria-label="Editar demanda">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button type="button" onclick="excluirDemanda('${escapeHtml(d.id)}')"
-                            class="text-slate-400 hover:text-red-600 p-1.5 transition"
-                            title="Excluir demanda" aria-label="Excluir demanda">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>`;
-        }).join('');
-    }
-
-    function renderOrgaos() {
-        const container = document.getElementById('cards-orgaos');
-        const orgaos = getFilteredOrgaos();
-
-        if (!orgaos.length) {
-            container.innerHTML = `
-                <p class="col-span-full text-center text-slate-400 py-8">
-                    ${buscaAtual ? 'Nenhum órgão encontrado para a busca.' : 'Nenhum órgão cadastrado.'}
-                </p>`;
-            return;
+        function persist() {
+            try {
+                localStorage.setItem(STORAGE.orgaos, JSON.stringify(state.orgaos));
+                localStorage.setItem(STORAGE.demandas, JSON.stringify(state.demandas));
+                render();
+            } catch (error) {
+                console.error(error);
+                alert('Não foi possível salvar os dados neste navegador. Verifique o espaço disponível ou as permissões de armazenamento.');
+            }
         }
 
-        container.innerHTML = orgaos.map(o => {
-            const demandas = state.demandas.filter(d => d.orgaoId === o.id).length;
-            return `
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                    <div class="flex justify-between items-start mb-3 gap-3">
-                        <div class="min-w-0">
-                            <span class="bg-blue-100 text-blue-900 text-xs font-bold px-2.5 py-0.5 rounded-md">
-                                ${escapeHtml(o.sigla)}
+        function id(prefix) {
+            return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        }
+
+        function normalize(value) {
+            return String(value ?? '')
+                .normalize('NFD')
+                .replace(/[̀-ͯ]/g, '')
+                .toLowerCase()
+                .trim();
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getOrg(id) {
+            return state.orgaos.find(o => o.id === id);
+        }
+
+        function getFilteredDemandas() {
+            const q = normalize(buscaAtual);
+            if (!q) return state.demandas;
+            return state.demandas.filter(d => {
+                const org = getOrg(d.orgaoId);
+                return [
+                    d.titulo, d.categoria, d.prioridade, d.status,
+                    org?.nome, org?.sigla, org?.contato, org?.email
+                ].some(value => normalize(value).includes(q));
+            });
+        }
+
+        function getFilteredOrgaos() {
+            const q = normalize(buscaAtual);
+            if (!q) return state.orgaos;
+            return state.orgaos.filter(o =>
+                [o.nome, o.sigla, o.contato, o.email]
+                    .some(value => normalize(value).includes(q))
+            );
+        }
+
+        function render() {
+            document.getElementById('kpi-orgaos').textContent = state.orgaos.length;
+            document.getElementById('kpi-demandas').textContent = state.demandas.length;
+            document.getElementById('kpi-andamento').textContent =
+                state.demandas.filter(d => d.status === 'Em Andamento').length;
+            document.getElementById('kpi-concluidas').textContent =
+                state.demandas.filter(d => d.status === 'Concluído').length;
+
+            renderDemandas();
+            renderOrgaos();
+            populateOrgSelect();
+            applyTab();
+        }
+
+        function renderDemandas() {
+            const tabela = document.getElementById('tabela-demandas');
+            const demandas = getFilteredDemandas();
+
+            if (!demandas.length) {
+                tabela.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-slate-400">
+                            ${buscaAtual ? 'Nenhuma demanda encontrada para a busca.' : 'Nenhuma demanda cadastrada.'}
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tabela.innerHTML = demandas.map(d => {
+                const org = getOrg(d.orgaoId);
+                const badgeColor =
+                    d.status === 'Concluído'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : d.status === 'Em Andamento'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-amber-100 text-amber-800';
+
+                const prioColor =
+                    d.prioridade === 'Alta'
+                        ? 'text-red-600 font-bold'
+                        : d.prioridade === 'Média'
+                            ? 'text-amber-600 font-medium'
+                            : 'text-slate-500';
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-4">
+                            <div class="font-bold text-blue-950">${escapeHtml(org?.sigla || 'N/A')}</div>
+                            <div class="text-xs text-slate-400">${escapeHtml(org?.nome || 'Órgão não encontrado')}</div>
+                        </td>
+                        <td class="p-4 font-medium text-slate-900">${escapeHtml(d.titulo)}</td>
+                        <td class="p-4 text-slate-500 text-xs">${escapeHtml(d.categoria)}</td>
+                        <td class="p-4 ${prioColor} text-xs">${escapeHtml(d.prioridade)}</td>
+                        <td class="p-4">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeColor}">
+                                ${escapeHtml(d.status)}
                             </span>
-                            <h4 class="font-bold text-slate-800 mt-2">${escapeHtml(o.nome)}</h4>
-                        </div>
-                        <div class="flex gap-1 shrink-0">
-                            <button type="button" onclick="editarOrgao('${escapeHtml(o.id)}')"
-                                class="text-slate-400 hover:text-amber-600 p-1.5" title="Editar órgão" aria-label="Editar órgão">
+                        </td>
+                        <td class="p-4 text-center whitespace-nowrap">
+                            <button type="button" onclick="alternarStatus('${escapeHtml(d.id)}')"
+                                class="text-slate-400 hover:text-blue-600 p-1.5 transition"
+                                title="Avançar status" aria-label="Avançar status">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                            <button type="button" onclick="editarDemanda('${escapeHtml(d.id)}')"
+                                class="text-slate-400 hover:text-amber-600 p-1.5 transition"
+                                title="Editar demanda" aria-label="Editar demanda">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
-                            <button type="button" onclick="excluirOrgao('${escapeHtml(o.id)}')"
-                                class="text-slate-400 hover:text-red-600 p-1.5" title="Excluir órgão" aria-label="Excluir órgão">
+                            <button type="button" onclick="excluirDemanda('${escapeHtml(d.id)}')"
+                                class="text-slate-400 hover:text-red-600 p-1.5 transition"
+                                title="Excluir demanda" aria-label="Excluir demanda">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        function renderOrgaos() {
+            const container = document.getElementById('cards-orgaos');
+            const orgaos = getFilteredOrgaos();
+
+            if (!orgaos.length) {
+                container.innerHTML = `
+                    <p class="col-span-full text-center text-slate-400 py-8">
+                        ${buscaAtual ? 'Nenhum órgão encontrado para a busca.' : 'Nenhum órgão cadastrado.'}
+                    </p>`;
+                return;
+            }
+
+            container.innerHTML = orgaos.map(o => {
+                const demandas = state.demandas.filter(d => d.orgaoId === o.id).length;
+                return `
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-start mb-3 gap-3">
+                            <div class="min-w-0">
+                                <span class="bg-blue-100 text-blue-900 text-xs font-bold px-2.5 py-0.5 rounded-md">
+                                    ${escapeHtml(o.sigla)}
+                                </span>
+                                <h4 class="font-bold text-slate-800 mt-2">${escapeHtml(o.nome)}</h4>
+                            </div>
+                            <div class="flex gap-1 shrink-0">
+                                <button type="button" onclick="editarOrgao('${escapeHtml(o.id)}')"
+                                    class="text-slate-400 hover:text-amber-600 p-1.5" title="Editar órgão" aria-label="Editar órgão">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button type="button" onclick="excluirOrgao('${escapeHtml(o.id)}')"
+                                    class="text-slate-400 hover:text-red-600 p-1.5" title="Excluir órgão" aria-label="Excluir órgão">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="text-xs text-slate-600 space-y-1.5 border-t border-slate-100 pt-3">
-                        <p class="flex items-center gap-2"><i class="fa-solid fa-user text-slate-400"></i> ${escapeHtml(o.contato)}</p>
-                        <p class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400"></i> ${escapeHtml(o.email)}</p>
-                        <p class="flex items-center gap-2"><i class="fa-solid fa-list-check text-slate-400"></i> ${demandas} demanda${demandas === 1 ? '' : 's'}</p>
-                    </div>
-                </div>`;
-        }).join('');
-    }
-
-    function populateOrgSelect(selectedId = '') {
-        const select = document.getElementById('dem-orgao');
-        if (!state.orgaos.length) {
-            select.innerHTML = '<option value="">Cadastre um órgão primeiro</option>';
-            select.disabled = true;
-            return;
+                        <div class="text-xs text-slate-600 space-y-1.5 border-t border-slate-100 pt-3">
+                            <p class="flex items-center gap-2"><i class="fa-solid fa-user text-slate-400"></i> ${escapeHtml(o.contato)}</p>
+                            <p class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400"></i> ${escapeHtml(o.email)}</p>
+                            <p class="flex items-center gap-2"><i class="fa-solid fa-list-check text-slate-400"></i> ${demandas} demanda${demandas === 1 ? '' : 's'}</p>
+                        </div>
+                    </div>`;
+            }).join('');
         }
 
-        select.disabled = false;
-        select.innerHTML =
-            '<option value="">Selecione o órgão...</option>' +
-            state.orgaos.map(o =>
-                `<option value="${escapeHtml(o.id)}">${escapeHtml(o.sigla)} - ${escapeHtml(o.nome)}</option>`
-            ).join('');
+        function populateOrgSelect(selectedId = '') {
+            const select = document.getElementById('dem-orgao');
+            if (!state.orgaos.length) {
+                select.innerHTML = '<option value="">Cadastre um órgão primeiro</option>';
+                select.disabled = true;
+                return;
+            }
 
-        if (selectedId) select.value = selectedId;
-    }
+            select.disabled = false;
+            select.innerHTML =
+                '<option value="">Selecione o órgão...</option>' +
+                state.orgaos.map(o =>
+                    `<option value="${escapeHtml(o.id)}">${escapeHtml(o.sigla)} - ${escapeHtml(o.nome)}</option>`
+                ).join('');
 
-    function applyTab() {
-        const isDemandas = abaAtual === 'demandas';
-        document.getElementById('aba-demandas').classList.toggle('hidden', !isDemandas);
-        document.getElementById('aba-orgaos').classList.toggle('hidden', isDemandas);
-
-        document.getElementById('btn-tab-demandas').className =
-            `px-4 py-2 rounded-lg text-sm font-semibold transition ${isDemandas ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`;
-        document.getElementById('btn-tab-orgaos').className =
-            `px-4 py-2 rounded-lg text-sm font-semibold transition ${!isDemandas ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`;
-    }
-
-    window.mudarAba = function(aba) {
-        abaAtual = aba;
-        applyTab();
-    };
-
-    window.abrirModalOrgao = function(orgao = null) {
-        const form = document.getElementById('form-orgao');
-        form.reset();
-        document.getElementById('org-edit-id').value = orgao?.id || '';
-        document.getElementById('titulo-modal-orgao').textContent = orgao ? 'Editar Órgão' : 'Cadastrar Novo Órgão';
-        document.getElementById('btn-salvar-orgao').textContent = orgao ? 'Salvar Alterações' : 'Salvar Órgão';
-
-        if (orgao) {
-            document.getElementById('org-nome').value = orgao.nome;
-            document.getElementById('org-sigla').value = orgao.sigla;
-            document.getElementById('org-contato').value = orgao.contato;
-            document.getElementById('org-email').value = orgao.email;
+            if (selectedId) select.value = selectedId;
         }
 
-        abrirModal('modal-orgao');
-        document.getElementById('org-nome').focus();
-    };
+        function applyTab() {
+            const isDemandas = abaAtual === 'demandas';
+            document.getElementById('aba-demandas').classList.toggle('hidden', !isDemandas);
+            document.getElementById('aba-orgaos').classList.toggle('hidden', isDemandas);
 
-    window.abrirModalDemanda = function(demanda = null) {
-        if (!state.orgaos.length) {
-            alert('Cadastre pelo menos um órgão antes de criar uma demanda.');
-            abrirModalOrgao();
-            return;
+            document.getElementById('btn-tab-demandas').className =
+                `px-4 py-2 rounded-lg text-sm font-semibold transition ${isDemandas ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`;
+            document.getElementById('btn-tab-orgaos').className =
+                `px-4 py-2 rounded-lg text-sm font-semibold transition ${!isDemandas ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`;
         }
 
-        const form = document.getElementById('form-demanda');
-        form.reset();
-        document.getElementById('dem-edit-id').value = demanda?.id || '';
-        document.getElementById('titulo-modal-demanda').textContent = demanda ? 'Editar Demanda / Projeto' : 'Nova Demanda / Projeto';
-        document.getElementById('btn-salvar-demanda').textContent = demanda ? 'Salvar Alterações' : 'Cadastrar Demanda';
+        window.mudarAba = function(aba) {
+            abaAtual = aba;
+            applyTab();
+        };
 
-        populateOrgSelect(demanda?.orgaoId || state.orgaos[0].id);
+        window.abrirModalOrgao = function(orgao = null) {
+            const form = document.getElementById('form-orgao');
+            form.reset();
+            document.getElementById('org-edit-id').value = orgao?.id || '';
+            document.getElementById('titulo-modal-orgao').textContent = orgao ? 'Editar Órgão' : 'Cadastrar Novo Órgão';
+            document.getElementById('btn-salvar-orgao').textContent = orgao ? 'Salvar Alterações' : 'Salvar Órgão';
 
-        if (demanda) {
-            document.getElementById('dem-titulo').value = demanda.titulo;
-            document.getElementById('dem-categoria').value = demanda.categoria;
-            document.getElementById('dem-prioridade').value = demanda.prioridade;
-            document.getElementById('dem-status').value = demanda.status;
+            if (orgao) {
+                document.getElementById('org-nome').value = orgao.nome;
+                document.getElementById('org-sigla').value = orgao.sigla;
+                document.getElementById('org-contato').value = orgao.contato;
+                document.getElementById('org-email').value = orgao.email;
+            }
+
+            abrirModal('modal-orgao');
+            document.getElementById('org-nome').focus();
+        };
+
+        window.abrirModalDemanda = function(demanda = null) {
+            if (!state.orgaos.length) {
+                alert('Cadastre pelo menos um órgão antes de criar uma demanda.');
+                abrirModalOrgao();
+                return;
+            }
+
+            const form = document.getElementById('form-demanda');
+            form.reset();
+            document.getElementById('dem-edit-id').value = demanda?.id || '';
+            document.getElementById('titulo-modal-demanda').textContent = demanda ? 'Editar Demanda / Projeto' : 'Nova Demanda / Projeto';
+            document.getElementById('btn-salvar-demanda').textContent = demanda ? 'Salvar Alterações' : 'Cadastrar Demanda';
+
+            populateOrgSelect(demanda?.orgaoId || state.orgaos[0].id);
+
+            if (demanda) {
+                document.getElementById('dem-titulo').value = demanda.titulo;
+                document.getElementById('dem-categoria').value = demanda.categoria;
+                document.getElementById('dem-prioridade').value = demanda.prioridade;
+                document.getElementById('dem-status').value = demanda.status;
+            }
+
+            abrirModal('modal-demanda');
+            document.getElementById('dem-titulo').focus();
+        };
+
+        function abrirModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
         }
 
-        abrirModal('modal-demanda');
-        document.getElementById('dem-titulo').focus();
-    };
+        window.fecharModal = function(id) {
+            document.getElementById(id).classList.add('hidden');
+            if (document.querySelectorAll('[id^="modal-"]:not(.hidden)').length === 0) {
+                document.body.classList.remove('overflow-hidden');
+            }
+        };
 
-    function abrirModal(id) {
-        document.getElementById(id).classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-    }
+        window.salvarOrgao = function(e) {
+            e.preventDefault();
 
-    window.fecharModal = function(id) {
-        document.getElementById(id).classList.add('hidden');
-        if (document.querySelectorAll('[id^="modal-"]:not(.hidden)').length === 0) {
-            document.body.classList.remove('overflow-hidden');
-        }
-    };
+            const editId = document.getElementById('org-edit-id').value;
+            const nome = document.getElementById('org-nome').value.trim();
+            const sigla = document.getElementById('org-sigla').value.trim().toUpperCase();
+            const contato = document.getElementById('org-contato').value.trim();
+            const email = document.getElementById('org-email').value.trim().toLowerCase();
 
-    window.salvarOrgao = function(e) {
-        e.preventDefault();
+            if (!nome || !sigla || !contato || !email) return;
 
-        const editId = document.getElementById('org-edit-id').value;
-        const nome = document.getElementById('org-nome').value.trim();
-        const sigla = document.getElementById('org-sigla').value.trim().toUpperCase();
-        const contato = document.getElementById('org-contato').value.trim();
-        const email = document.getElementById('org-email').value.trim().toLowerCase();
+            const duplicate = state.orgaos.some(o =>
+                o.id !== editId && normalize(o.sigla) === normalize(sigla)
+            );
+            if (duplicate) {
+                alert('Já existe um órgão cadastrado com essa sigla.');
+                return;
+            }
 
-        if (!nome || !sigla || !contato || !email) return;
+            if (editId) {
+                const org = getOrg(editId);
+                if (org) Object.assign(org, { nome, sigla, contato, email });
+            } else {
+                state.orgaos.push({ id: id('org'), nome, sigla, contato, email });
+            }
 
-        const duplicate = state.orgaos.some(o =>
-            o.id !== editId && normalize(o.sigla) === normalize(sigla)
-        );
-        if (duplicate) {
-            alert('Já existe um órgão cadastrado com essa sigla.');
-            return;
-        }
+            persist();
+            fecharModal('modal-orgao');
+            document.getElementById('form-orgao').reset();
+        };
 
-        if (editId) {
-            const org = getOrg(editId);
-            if (org) Object.assign(org, { nome, sigla, contato, email });
-        } else {
-            state.orgaos.push({ id: id('org'), nome, sigla, contato, email });
-        }
+        window.salvarDemanda = function(e) {
+            e.preventDefault();
 
-        persist();
-        fecharModal('modal-orgao');
-        document.getElementById('form-orgao').reset();
-    };
+            const editId = document.getElementById('dem-edit-id').value;
+            const orgaoId = document.getElementById('dem-orgao').value;
+            const titulo = document.getElementById('dem-titulo').value.trim();
+            const categoria = document.getElementById('dem-categoria').value;
+            const prioridade = document.getElementById('dem-prioridade').value;
+            const status = document.getElementById('dem-status').value;
 
-    window.salvarDemanda = function(e) {
-        e.preventDefault();
+            if (!orgaoId || !titulo) {
+                alert('Selecione o órgão e informe o título da demanda.');
+                return;
+            }
 
-        const editId = document.getElementById('dem-edit-id').value;
-        const orgaoId = document.getElementById('dem-orgao').value;
-        const titulo = document.getElementById('dem-titulo').value.trim();
-        const categoria = document.getElementById('dem-categoria').value;
-        const prioridade = document.getElementById('dem-prioridade').value;
-        const status = document.getElementById('dem-status').value;
+            const payload = { orgaoId, titulo, categoria, prioridade, status };
 
-        if (!orgaoId || !titulo) {
-            alert('Selecione o órgão e informe o título da demanda.');
-            return;
-        }
+            if (editId) {
+                const demanda = state.demandas.find(d => d.id === editId);
+                if (demanda) Object.assign(demanda, payload);
+            } else {
+                state.demandas.push({ id: id('dem'), ...payload });
+            }
 
-        const payload = { orgaoId, titulo, categoria, prioridade, status };
+            persist();
+            fecharModal('modal-demanda');
+            document.getElementById('form-demanda').reset();
+        };
 
-        if (editId) {
-            const demanda = state.demandas.find(d => d.id === editId);
-            if (demanda) Object.assign(demanda, payload);
-        } else {
-            state.demandas.push({ id: id('dem'), ...payload });
-        }
+        window.alternarStatus = function(id) {
+            const d = state.demandas.find(item => item.id === id);
+            if (!d) return;
 
-        persist();
-        fecharModal('modal-demanda');
-        document.getElementById('form-demanda').reset();
-    };
+            const fluxo = ['Pendente', 'Em Andamento', 'Concluído'];
+            d.status = fluxo[(fluxo.indexOf(d.status) + 1) % fluxo.length];
+            persist();
+        };
 
-    window.alternarStatus = function(id) {
-        const d = state.demandas.find(item => item.id === id);
-        if (!d) return;
+        window.editarDemanda = function(id) {
+            const d = state.demandas.find(item => item.id === id);
+            if (d) abrirModalDemanda(d);
+        };
 
-        const fluxo = ['Pendente', 'Em Andamento', 'Concluído'];
-        d.status = fluxo[(fluxo.indexOf(d.status) + 1) % fluxo.length];
-        persist();
-    };
+        window.editarOrgao = function(id) {
+            const o = getOrg(id);
+            if (o) abrirModalOrgao(o);
+        };
 
-    window.editarDemanda = function(id) {
-        const d = state.demandas.find(item => item.id === id);
-        if (d) abrirModalDemanda(d);
-    };
+        window.excluirDemanda = function(id) {
+            const d = state.demandas.find(item => item.id === id);
+            if (!d) return;
 
-    window.editarOrgao = function(id) {
-        const o = getOrg(id);
-        if (o) abrirModalOrgao(o);
-    };
+            if (!confirm(`Excluir a demanda "${d.titulo}"? Essa ação não pode ser desfeita.`)) return;
+            state.demandas = state.demandas.filter(item => item.id !== id);
+            persist();
+        };
 
-    window.excluirDemanda = function(id) {
-        const d = state.demandas.find(item => item.id === id);
-        if (!d) return;
+        window.excluirOrgao = function(id) {
+            const o = getOrg(id);
+            if (!o) return;
 
-        if (!confirm(`Excluir a demanda "${d.titulo}"? Essa ação não pode ser desfeita.`)) return;
-        state.demandas = state.demandas.filter(item => item.id !== id);
-        persist();
-    };
+            const vinculadas = state.demandas.filter(d => d.orgaoId === id).length;
+            if (vinculadas) {
+                alert(`Não é possível excluir ${o.sigla}: existem ${vinculadas} demanda(s) vinculada(s). Edite ou exclua essas demandas primeiro.`);
+                return;
+            }
 
-    window.excluirOrgao = function(id) {
-        const o = getOrg(id);
-        if (!o) return;
+            if (!confirm(`Excluir o órgão "${o.nome}"? Essa ação não pode ser desfeita.`)) return;
+            state.orgaos = state.orgaos.filter(item => item.id !== id);
+            persist();
+        };
 
-        const vinculadas = state.demandas.filter(d => d.orgaoId === id).length;
-        if (vinculadas) {
-            alert(`Não é possível excluir ${o.sigla}: existem ${vinculadas} demanda(s) vinculada(s). Edite ou exclua essas demandas primeiro.`);
-            return;
-        }
+        window.filtrarConteudo = function() {
+            buscaAtual = document.getElementById('input-busca').value;
+            renderDemandas();
+            renderOrgaos();
+        };
 
-        if (!confirm(`Excluir o órgão "${o.nome}"? Essa ação não pode ser desfeita.`)) return;
-        state.orgaos = state.orgaos.filter(item => item.id !== id);
-        persist();
-    };
-
-    window.filtrarConteudo = function() {
-        buscaAtual = document.getElementById('input-busca').value;
-        renderDemandas();
-        renderOrgaos();
-    };
-
-    document.addEventListener('keydown', e => {
-        if (e.key !== 'Escape') return;
-        document.querySelectorAll('[id^="modal-"]:not(.hidden)').forEach(modal => fecharModal(modal.id));
-    });
-
-    document.querySelectorAll('[id^="modal-"]').forEach(modal => {
-        modal.addEventListener('click', e => {
-            if (e.target === modal) fecharModal(modal.id);
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Escape') return;
+            document.querySelectorAll('[id^="modal-"]:not(.hidden)').forEach(modal => fecharModal(modal.id));
         });
-    });
 
-    render();
-})();
-</script>
+        document.querySelectorAll('[id^="modal-"]').forEach(modal => {
+            modal.addEventListener('click', e => {
+                if (e.target === modal) fecharModal(modal.id);
+            });
+        });
 
-<footer class="max-w-7xl mx-auto px-4 pb-6 text-xs text-slate-400 text-center">CRM Relacionamento de Governo Digital · versão local</footer>
+        render();
+    })();
+    </script>
+
+    <footer class="max-w-7xl mx-auto px-4 pb-6 text-xs text-slate-400 text-center">CRM Relacionamento de Governo Digital · ATI PE</footer>
 </body>
 </html>

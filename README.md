@@ -1,22 +1,33 @@
-# CRM Relacionamento de Governo Digital - ATI/PE (`crm-ati-pe`)
+# CRM Relacionamento de Governo Digital - ATI/PE (`crm-ati-pe`) v2.0
 
-Aplicação web desenvolvida para a Agência Estadual de Tecnologia da Informação de Pernambuco (ATI-PE) para gerenciar demandas, projetos de transformação digital e relacionamento institucional com órgãos e secretarias do Estado.
+Sistema de Gerenciamento de Relacionamento de Clientes (CRM) desenvolvido para a Agência Estadual de Tecnologia da Informação de Pernambuco (ATI-PE).
 
-## 🚀 Como Publicar no GitHub Pages em 3 Passos
+## 🛠️ O que mudou na Versão 2.0?
+* **Edição de Registros:** Adicionada a funcionalidade de editar tanto órgãos cadastrados quanto demandas existentes.
+* **Integridade de Dados:** Validação para evitar o cadastro de siglas duplicadas e bloqueio de exclusão de órgãos que tenham demandas ativas vinculadas.
+* **Segurança:** Sanitização de dados de entrada contra vulnerabilidades de script (XSS).
+* **Usabilidade:** Melhores interações em modais (tecla ESC, foco automático, mensagens informativas de busca vazia).
 
-1. **Suba para o GitHub:**
-   Crie um repositório chamado `crm-ati-pe` no seu GitHub e suba todos os arquivos deste projeto.
+## 📌 Controle de Versão com Git
+Para gerenciar alterações e manter o histórico do código:
 
-2. **Ative o Pages:**
-   No GitHub, vá em **Settings** > **Pages**.
+```bash
+# Clonar o repositório existente
+git clone https://github.com/SEU-USUARIO/crm-ati-pe.git
+cd crm-ati-pe
 
-3. **Configure a Branch:**
-   Em **Build and deployment > Branch**, selecione `main` e diretório `/ (root)`. Clique em **Save**.
+# Adicionar as novas alterações
+git add .
 
-Sua aplicação ficará disponível em:
-`https://<seu-usuario>.github.io/crm-ati-pe/`
+# Registrar a alteração com uma mensagem descritiva
+git commit -m "v2.0: Adicionada edição de órgãos/demandas e melhorias na integridade de dados"
 
-## 📁 Conteúdo do Repositório
-* `index.html`: Interface do CRM com Dashboard, Tabela de Demandas e Gestão de Órgãos.
-* `SDD_CRM_ATI.md`: System Design Document com a especificação técnica completa do sistema.
-* `README.md`: Este guia rápido de configuração.
+# Enviar para o GitHub
+git push origin main
+```
+
+## 🌐 Publicação no GitHub Pages
+No seu repositório do GitHub:
+1. Acesse **Settings** > **Pages**.
+2. Em **Source**, selecione `Deploy from a branch` (Branch: `main`, Pasta: `/ (root)`).
+3. Salve. A aplicação estará ativa em `https://<seu-usuario>.github.io/crm-ati-pe/`.
