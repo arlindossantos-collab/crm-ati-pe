@@ -51,7 +51,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v12.0 FULL</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v13.0 EXPANDED</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -115,6 +115,9 @@
                 <button id="btn-tab-eventos" onclick="mudarAba('eventos')" class="px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-calendar-day mr-1.5"></i> Eventos
                 </button>
+                <button id="btn-tab-locais" onclick="mudarAba('locais')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                    <i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais de Eventos
+                </button>
                 <button id="btn-tab-orgaos" onclick="mudarAba('orgaos')" class="px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-sitemap mr-1.5"></i> Órgãos / Secretarias
                 </button>
@@ -134,7 +137,7 @@
 
         <!-- ABA DASHBOARD -->
         <div id="aba-dashboard" class="block space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <p class="text-xs font-semibold text-slate-500 uppercase">Demandas Ativas</p>
                     <h3 id="dash-tot-demandas" class="text-3xl font-bold text-blue-900 mt-1">0</h3>
@@ -142,6 +145,10 @@
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <p class="text-xs font-semibold text-slate-500 uppercase">Eventos Programados</p>
                     <h3 id="dash-tot-eventos" class="text-3xl font-bold text-amber-600 mt-1">0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Locais Auditórios</p>
+                    <h3 id="dash-tot-locais" class="text-3xl font-bold text-purple-600 mt-1">0</h3>
                 </div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <p class="text-xs font-semibold text-slate-500 uppercase">Órgãos Cadastrados</p>
@@ -190,7 +197,7 @@
             </div>
         </div>
 
-        <!-- ABA EVENTOS COM FILTRO DE PASSADOS E FUTUROS -->
+        <!-- ABA EVENTOS -->
         <div id="aba-eventos" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h3 class="text-base font-bold text-slate-800">Agenda Institucional e Histórico</h3>
@@ -208,10 +215,21 @@
             <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
+        <!-- ABA LOCAIS DE EVENTOS (NOVA) -->
+        <div id="aba-locais" class="hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-slate-800">Catálogo de Espaços e Auditórios</h3>
+                <button onclick="abrirModalForm('local')" class="bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Novo Local / Auditório
+                </button>
+            </div>
+            <div id="grid-locais" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </div>
+
         <!-- ABA ÓRGÃOS E SECRETARIAS -->
         <div id="aba-orgaos" class="hidden space-y-4">
             <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos e Secretarias</h3>
+                <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos, Secretarias e Entidades</h3>
                 <button onclick="abrirModalForm('orgao')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria
                 </button>
@@ -222,6 +240,7 @@
                         <tr>
                             <th class="p-4">Sigla</th>
                             <th class="p-4">Nome do Órgão / Secretaria</th>
+                            <th class="p-4">Tipo Jurídico</th>
                             <th class="p-4">Responsável TIC</th>
                             <th class="p-4">E-mail Contato</th>
                             <th class="p-4 text-center">Ações</th>
@@ -232,18 +251,18 @@
             </div>
         </div>
 
-        <!-- ABA FORNECEDORES -->
+        <!-- ABA FORNECEDORES DETALHADOS -->
         <div id="aba-fornecedores" class="hidden space-y-4">
             <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC</h3>
+                <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC Detalhados</h3>
                 <button onclick="abrirModalForm('fornecedor')" id="btn-novo-fornecedor" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-plus"></i> Novo Fornecedor
                 </button>
             </div>
-            <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
-        <!-- ABA USUÁRIOS (SINCRO COM FIRESTORE) -->
+        <!-- ABA USUÁRIOS -->
         <div id="aba-usuarios" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários</h3>
@@ -276,29 +295,29 @@
 
     <!-- MODAL UNIVERSAL DETALHAR & EDITAR (APENAS ADMIN) -->
     <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 id="detalhe-titulo-modal" class="text-base font-bold text-slate-900">Detalhamento do Registro</h3>
+                <h3 id="detalhe-titulo-modal" class="text-base font-bold text-slate-900">Detalhamento Completo</h3>
                 <button onclick="fecharModal('modal-detalhes')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div id="detalhe-conteudo" class="space-y-3 text-sm text-slate-700 mb-4"></div>
             
             <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-amber-50 -mx-6 -mb-6 p-6 rounded-b-2xl border-amber-200">
-                <p class="text-xs font-bold text-amber-900 mb-3 flex items-center gap-1.5"><i class="fa-solid fa-user-gear"></i> Painel de Edição do Administrador</p>
+                <p class="text-xs font-bold text-amber-900 mb-3 flex items-center gap-1.5"><i class="fa-solid fa-user-gear"></i> Painel de Edição Restrito (Administrador)</p>
                 <form id="form-edicao-admin" onsubmit="salvarEdicaoUniversal(event)" class="space-y-2.5 text-xs">
                     <input type="hidden" id="edit-colecao">
                     <input type="hidden" id="edit-doc-id">
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Campo Principal / Nome / Título</label>
+                        <label class="block font-semibold text-slate-700 mb-1">Campo Principal / Nome / Título / Sigla</label>
                         <input type="text" id="edit-campo-nome" required class="w-full p-2 border rounded bg-white font-medium">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Campo Secundário / Sigla / Órgão / Categoria</label>
+                        <label class="block font-semibold text-slate-700 mb-1">Campo Secundário / Categoria / Tipo / Responsável</label>
                         <input type="text" id="edit-campo-secundario" class="w-full p-2 border rounded bg-white">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Detalhes / Descrição Completa</label>
-                        <textarea id="edit-campo-desc" rows="3" class="w-full p-2 border rounded bg-white"></textarea>
+                        <label class="block font-semibold text-slate-700 mb-1">Detalhes / Endereço / Descrição Técnica / Estrutura</label>
+                        <textarea id="edit-campo-desc" rows="4" class="w-full p-2 border rounded bg-white"></textarea>
                     </div>
                     <div class="flex justify-end gap-2 pt-2">
                         <button type="button" onclick="fecharModal('modal-detalhes')" class="px-3 py-1.5 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Cancelar</button>
@@ -309,9 +328,9 @@
         </div>
     </div>
 
-    <!-- MODAL CRIAÇÃO / CADASTRO UNIVERSAL -->
+    <!-- MODAL CRIAÇÃO / CADASTRO UNIVERSAL DETALHADO -->
     <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 id="form-univ-titulo" class="text-base font-bold text-slate-900">Novo Cadastro</h3>
                 <button onclick="fecharModal('modal-form-universal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -326,7 +345,7 @@
 
     <script>
         window.currentUser = null;
-        window.dbData = { demandas: [], eventos: [], orgaos: [], fornecedores: [], usuarios: [] };
+        window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [] };
         let abaAtual = 'dashboard';
 
         function abrirModalLogin() { document.getElementById('modal-login').classList.remove('hidden'); }
@@ -334,7 +353,7 @@
 
         function mudarAba(aba) {
             abaAtual = aba;
-            ['dashboard', 'demandas', 'eventos', 'orgaos', 'fornecedores', 'usuarios'].forEach(a => {
+            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'].forEach(a => {
                 const el = document.getElementById(`aba-${a}`);
                 const btn = document.getElementById(`btn-tab-${a}`);
                 if (el) el.classList.toggle('hidden', a !== abaAtual);
@@ -345,7 +364,7 @@
 
         // ESCUTADORES EM TEMPO REAL NO FIRESTORE
         function iniciarSnapshotFirestore() {
-            const colecoes = ['demandas', 'eventos', 'orgaos', 'fornecedores', 'usuarios'];
+            const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
             colecoes.forEach(col => {
                 window.firebaseMethods.onSnapshot(window.firebaseMethods.collection(window.firebaseDb, col), snap => {
                     window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -359,12 +378,12 @@
             renderOrgaos();
             renderDemandas();
             renderEventos();
+            renderLocais();
             renderFornecedores();
             renderDashboardKPIs();
             preencherSelectOrgaos();
         }
 
-        // PREENCHER SELECT DE ÓRGÃOS DINAMICAMENTE
         function preencherSelectOrgaos() {
             const selects = document.querySelectorAll('.select-orgaos-dinamico');
             selects.forEach(select => {
@@ -380,7 +399,6 @@
             });
         }
 
-        // RENDERIZADORES DE TABELAS E GRIDS
         function renderUsuarios() {
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
@@ -402,11 +420,12 @@
                 <tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('orgaos', '${o.id}')">
                     <td class="p-4 font-bold text-indigo-900">${o.sigla || o.id}</td>
                     <td class="p-4 text-slate-800 font-medium">${o.nome || '-'}</td>
+                    <td class="p-4 text-xs"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">${o.tipoJuridico || 'Secretaria'}</span></td>
                     <td class="p-4 text-xs text-slate-600">${o.responsavel || '-'}</td>
                     <td class="p-4 text-xs text-slate-600">${o.email || '-'}</td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
                 </tr>
-            `).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
+            `).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
         }
 
         function renderDemandas() {
@@ -454,6 +473,29 @@
             `}).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento localizado com este filtro.</p>';
         }
 
+        function renderLocais() {
+            const grid = document.getElementById('grid-locais');
+            if (!grid) return;
+            grid.innerHTML = window.dbData.locais.map(l => `
+                <div onclick="detalharRegistro('locais', '${l.id}')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-purple-500 transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">${l.tipoEspaco || 'Auditório'}</span>
+                            <span class="text-xs font-bold ${l.natureza === 'Privado' ? 'text-amber-600' : 'text-emerald-600'}">${l.natureza || 'Público'}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mt-2">${l.nome || l.id}</h4>
+                        <p class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>${l.capacidade || '0'} sentadas</strong></p>
+                        <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-money-bill-wave mr-1"></i> Aluguel: <strong>${l.valorAluguel ? 'R$ ' + l.valorAluguel : 'Gratuito / Público'}</strong></p>
+                    </div>
+                    <div class="mt-3 border-t pt-2 flex justify-between items-center text-xs text-slate-500">
+                        <span><i class="fa-solid fa-snowflake mr-1"></i>${l.climatizacao || 'Sim'}</span>
+                        <span><i class="fa-solid fa-square-parking mr-1"></i>${l.estacionamento || 'Sim'}</span>
+                        <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local de eventos cadastrado.</p>';
+        }
+
         function renderFornecedores() {
             const grid = document.getElementById('grid-fornecedores');
             if (!grid) return;
@@ -461,7 +503,9 @@
                 <div onclick="detalharRegistro('fornecedores', '${f.id}')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-emerald-500 transition">
                     <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">${f.categoria || 'Geral'}</span>
                     <h4 class="font-bold text-slate-800 mt-2">${f.nome || f.razaoSocial || '-'}</h4>
-                    <p class="text-xs text-slate-400">CNPJ: ${f.cnpj || '-'}</p>
+                    <p class="text-xs text-slate-500"><i class="fa-solid fa-id-card mr-1"></i> CNPJ: ${f.cnpj || '-'}</p>
+                    <p class="text-xs text-slate-500"><i class="fa-solid fa-user-tie mr-1"></i> Resp: ${f.responsavel || '-'}</p>
+                    <p class="text-xs text-slate-500"><i class="fa-solid fa-phone mr-1"></i> Tel: ${f.telefone || '-'}</p>
                     <div class="mt-3 border-t pt-2 text-right"><span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span></div>
                 </div>
             `).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor cadastrado.</p>';
@@ -470,31 +514,32 @@
         function renderDashboardKPIs() {
             document.getElementById('dash-tot-demandas').textContent = window.dbData.demandas.length;
             document.getElementById('dash-tot-eventos').textContent = window.dbData.eventos.length;
+            document.getElementById('dash-tot-locais').textContent = window.dbData.locais.length;
             document.getElementById('dash-tot-orgaos').textContent = window.dbData.orgaos.length;
             document.getElementById('dash-tot-fornecedores').textContent = window.dbData.fornecedores.length;
         }
 
-        // DETALHAR & EDIÇÃO UNIVERSAL (APENAS ADMIN)
+        // DETALHAR & EDIÇÃO UNIVERSAL
         function detalharRegistro(colecao, docId) {
             const item = window.dbData[colecao].find(i => i.id === docId);
             if (!item) return;
 
             document.getElementById('detalhe-titulo-modal').textContent = `Detalhamento (${colecao.toUpperCase()})`;
-            let htmlContent = '<div class="space-y-1.5 text-xs sm:text-sm">';
+            let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">';
             for (let k in item) {
                 if (k !== 'senhaHash' && k !== 'senha') {
-                    htmlContent += `<p><strong class="capitalize">${k}:</strong> ${item[k]}</p>`;
+                    htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${k}</span><span class="font-semibold text-slate-800">${item[k]}</span></div>`;
                 }
             }
             htmlContent += '</div>';
             document.getElementById('detalhe-conteudo').innerHTML = htmlContent;
 
-            // Configurar Form de Edição Admin
+            // Form Edição Admin
             document.getElementById('edit-colecao').value = colecao;
             document.getElementById('edit-doc-id').value = docId;
             document.getElementById('edit-campo-nome').value = item.nome || item.titulo || item.sigla || item.email || '';
-            document.getElementById('edit-campo-secundario').value = item.orgao || item.categoria || item.responsavel || item.subgrupoId || '';
-            document.getElementById('edit-campo-desc').value = item.descricao || item.detalhes || '';
+            document.getElementById('edit-campo-secundario').value = item.tipoJuridico || item.categoria || item.responsavel || item.local || '';
+            document.getElementById('edit-campo-desc').value = item.descricao || item.endereco || item.estrutura || '';
 
             const isAdmin = window.currentUser && (window.currentUser.perfil || '').toLowerCase() === 'admin';
             document.getElementById('detalhe-area-admin').classList.toggle('hidden', !isAdmin);
@@ -506,28 +551,22 @@
             e.preventDefault();
             const colecao = document.getElementById('edit-colecao').value;
             const docId = document.getElementById('edit-doc-id').value;
-            const valNome = document.getElementById('edit-campo-nome').value;
-            const valSec = document.getElementById('edit-campo-secundario').value;
-            const valDesc = document.getElementById('edit-campo-desc').value;
 
             try {
                 const docRef = window.firebaseMethods.doc(window.firebaseDb, colecao, docId);
-                const docSnap = await window.firebaseMethods.getDoc(docRef);
-                const currentData = docSnap.data() || {};
-
-                if (currentData.nome) currentData.nome = valNome;
-                if (currentData.titulo) currentData.titulo = valNome;
-                if (currentData.descricao !== undefined) currentData.descricao = valDesc;
-
-                await window.firebaseMethods.updateDoc(docRef, currentData);
-                alert('Alterações salvas com sucesso no Firestore!');
+                await window.firebaseMethods.updateDoc(docRef, {
+                    nome: document.getElementById('edit-campo-nome').value,
+                    categoria: document.getElementById('edit-campo-secundario').value,
+                    descricao: document.getElementById('edit-campo-desc').value
+                });
+                alert('Registro atualizado com sucesso no Firestore!');
                 fecharModal('modal-detalhes');
             } catch (err) {
                 alert('Erro ao editar: ' + err.message);
             }
         }
 
-        // CADASTRO UNIVERSAL DINÂMICO
+        // CADASTRO UNIVERSAL DETALHADO
         function abrirModalForm(tipo) {
             document.getElementById('form-univ-tipo').value = tipo;
             const container = document.getElementById('form-univ-campos');
@@ -537,8 +576,38 @@
                 container.innerHTML = `
                     <div><label class="block font-medium text-slate-700 mb-1">Sigla do Órgão</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded uppercase"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Responsável TIC</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">E-mail Contato</label><input type="email" id="univ-c4" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Tipo Jurídico / Classificação</label><select id="univ-c3" class="w-full p-2 border rounded"><option value="Secretaria">Secretaria de Estado</option><option value="Autarquia">Autarquia</option><option value="Empresa Pública">Empresa Pública</option><option value="Fundação">Fundação Pública</option><option value="Sociedade de Economia Mista">Sociedade de Economia Mista</option></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Responsável TIC</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">E-mail Contato</label><input type="email" id="univ-c5" class="w-full p-2 border rounded"></div>
+                `;
+            } else if (tipo === 'fornecedor') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Razão Social / Nome Fantasia</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">CNPJ</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Categoria do Serviço TIC</label><input type="text" id="univ-c3" placeholder="Ex: Cloud, Desenvolvimento, Redes" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome do Responsável / Contato</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Telefone / WhatsApp</label><input type="text" id="univ-c5" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">E-mail Corporativo</label><input type="email" id="univ-c6" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Endereço Completo</label><input type="text" id="univ-c7" class="w-full p-2 border rounded"></div>
+                `;
+            } else if (tipo === 'local') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome do Espaço / Auditório</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Tipo de Espaço</label><select id="univ-c2" class="w-full p-2 border rounded"><option value="Auditório">Auditório</option><option value="Casa de Eventos">Casa de Eventos</option><option value="Centro de Convenções">Centro de Convenções</option><option value="Sala de Reunião VIP">Sala de Reunião VIP</option></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Natureza do Local</label><select id="univ-c3" class="w-full p-2 border rounded"><option value="Público">Público (Governamental)</option><option value="Privado">Privado</option></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Capacidade de Pessoas Sentadas</label><input type="number" id="univ-c4" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Valor do Aluguel (R$ / Diária)</label><input type="text" id="univ-c5" placeholder="Gratuito ou Valor" class="w-full p-2 border rounded"></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block font-medium text-slate-700 mb-1">Climatização?</label><select id="univ-c6" class="w-full p-2 border rounded"><option value="Sim (Ar-Condicionado)">Sim</option><option value="Não">Não</option></select></div>
+                        <div><label class="block font-medium text-slate-700 mb-1">Som / Microfones?</label><select id="univ-c7" class="w-full p-2 border rounded"><option value="Sim (Mesa + Som)">Sim</option><option value="Não">Não</option></select></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div><label class="block font-medium text-slate-700 mb-1">Estacionamento?</label><select id="univ-c8" class="w-full p-2 border rounded"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+                        <div><label class="block font-medium text-slate-700 mb-1">Cozinha/Copa?</label><select id="univ-c9" class="w-full p-2 border rounded"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+                        <div><label class="block font-medium text-slate-700 mb-1">Banheiros?</label><select id="univ-c10" class="w-full p-2 border rounded"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+                    </div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Responsável / Telefone Contato</label><input type="text" id="univ-c11" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Endereço Completo</label><input type="text" id="univ-c12" class="w-full p-2 border rounded"></div>
                 `;
             } else if (tipo === 'usuario') {
                 container.innerHTML = `
@@ -553,8 +622,8 @@
                 container.innerHTML = `
                     <div><label class="block font-medium text-slate-700 mb-1">Título do Evento</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">Data e Horário</label><input type="datetime-local" id="univ-c2" required class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Local</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Descrição</label><textarea id="univ-c4" rows="2" class="w-full p-2 border rounded"></textarea></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Local do Evento</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Descrição do Evento</label><textarea id="univ-c4" rows="2" class="w-full p-2 border rounded"></textarea></div>
                 `;
             } else if (tipo === 'demanda') {
                 container.innerHTML = `
@@ -563,12 +632,6 @@
                     <div><label class="block font-medium text-slate-700 mb-1">Categoria</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
                 `;
                 preencherSelectOrgaos();
-            } else if (tipo === 'fornecedor') {
-                container.innerHTML = `
-                    <div><label class="block font-medium text-slate-700 mb-1">Razão Social / Nome</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">CNPJ</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Categoria</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
-                `;
             }
             document.getElementById('modal-form-universal').classList.remove('hidden');
         }
@@ -582,8 +645,34 @@
                     const sigla = document.getElementById('univ-c1').value.toUpperCase();
                     await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "orgaos", sigla), {
                         sigla, nome: document.getElementById('univ-c2').value,
-                        responsavel: document.getElementById('univ-c3').value,
-                        email: document.getElementById('univ-c4').value
+                        tipoJuridico: document.getElementById('univ-c3').value,
+                        responsavel: document.getElementById('univ-c4').value,
+                        email: document.getElementById('univ-c5').value
+                    });
+                } else if (tipo === 'fornecedor') {
+                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "fornecedores"), {
+                        nome: document.getElementById('univ-c1').value,
+                        cnpj: document.getElementById('univ-c2').value,
+                        categoria: document.getElementById('univ-c3').value,
+                        responsavel: document.getElementById('univ-c4').value,
+                        telefone: document.getElementById('univ-c5').value,
+                        email: document.getElementById('univ-c6').value,
+                        endereco: document.getElementById('univ-c7').value
+                    });
+                } else if (tipo === 'local') {
+                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "locais"), {
+                        nome: document.getElementById('univ-c1').value,
+                        tipoEspaco: document.getElementById('univ-c2').value,
+                        natureza: document.getElementById('univ-c3').value,
+                        capacidade: document.getElementById('univ-c4').value,
+                        valorAluguel: document.getElementById('univ-c5').value,
+                        climatizacao: document.getElementById('univ-c6').value,
+                        som: document.getElementById('univ-c7').value,
+                        estacionamento: document.getElementById('univ-c8').value,
+                        cozinha: document.getElementById('univ-c9').value,
+                        banheiro: document.getElementById('univ-c10').value,
+                        responsavel: document.getElementById('univ-c11').value,
+                        endereco: document.getElementById('univ-c12').value
                     });
                 } else if (tipo === 'usuario') {
                     const email = document.getElementById('univ-c2').value.toLowerCase();
@@ -607,12 +696,6 @@
                         orgao: document.getElementById('univ-c2').value,
                         categoria: document.getElementById('univ-c3').value,
                         prioridade: 'Alta', status: 'Pendente'
-                    });
-                } else if (tipo === 'fornecedor') {
-                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "fornecedores"), {
-                        nome: document.getElementById('univ-c1').value,
-                        cnpj: document.getElementById('univ-c2').value,
-                        categoria: document.getElementById('univ-c3').value
                     });
                 }
 
@@ -670,14 +753,16 @@
         }
 
         function exportarUsuariosCSV() {
-            let csv = "Nome;Email;Orgao;Perfil\n";
+            let csv = "Nome;Email;Orgao;Perfil
+";
             window.dbData.usuarios.forEach(u => {
-                csv += `${u.nome || ''};${u.email || u.id};${u.subgrupoId || ''};${u.perfil || ''}\n`;
+                csv += `${u.nome || ''};${u.email || u.id};${u.subgrupoId || ''};${u.perfil || ''}
+`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "usuarios_prgd_v12.csv");
+            link.setAttribute("download", "usuarios_prgd_v13.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -716,7 +801,7 @@
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v12.0 FULL</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v13.0 EXPANDED</span>
     </footer>
 </body>
 </html>
