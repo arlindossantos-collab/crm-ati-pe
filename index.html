@@ -11,7 +11,7 @@
     <!-- Chart.js para Dashboard Gerencial -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Firebase SDK v10 (Modular) -->
+    <!-- Firebase SDK v10 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -106,12 +106,12 @@
                         <input type="email" id="reg-email" required placeholder="nome@orgao.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block font-medium text-slate-700 mb-1">Grupo de Pertencimento</label>
-                        <select id="reg-grupo" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                            <option value="Gestores">Gestores</option>
-                            <option value="Técnicos">Técnicos</option>
-                            <option value="Servidores ATI">Servidores ATI</option>
-                            <option value="Órgão Solicitante">Órgão Solicitante</option>
+                        <label class="block font-medium text-slate-700 mb-1">Subgrupo / Órgão Vinculado</label>
+                        <select id="reg-subgrupo" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                            <option value="ATI">ATI - Agência Estadual de Tecnologia da Informação</option>
+                            <option value="SEFAZ">SEFAZ - Secretaria da Fazenda</option>
+                            <option value="SEPLAG">SEPLAG - Secretaria de Planejamento e Gestão</option>
+                            <option value="OUTRO">Outras Secretarias / Órgãos</option>
                         </select>
                     </div>
                     <div>
@@ -127,9 +127,8 @@
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
 
-        <!-- Bar Status Sessão -->
         <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
-            <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Acesso Ativo:</strong> <span id="session-info">Visitante (Leitura Restrita)</span></span>
+            <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Visitante (Leitura Restrita)</span></span>
             <span class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold" id="db-status">Cloud Firestore</span>
         </div>
 
@@ -152,7 +151,7 @@
                     <i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores
                 </button>
                 <button id="btn-tab-admin" onclick="mudarAba('admin')" class="hidden px-4 py-2 rounded-lg transition text-amber-700 font-bold bg-amber-100 hover:bg-amber-200">
-                    <i class="fa-solid fa-user-gear mr-1.5"></i> Gestão de Usuários
+                    <i class="fa-solid fa-user-gear mr-1.5"></i> Gestão de Usuários (Admin)
                 </button>
             </div>
             <div class="flex items-center gap-2">
@@ -162,7 +161,7 @@
             </div>
         </div>
 
-        <!-- ABA 0: DASHBOARD GERENCIAL -->
+        <!-- ABA DASHBOARD -->
         <div id="aba-dashboard" class="block space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
@@ -185,23 +184,20 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                    <h4 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-bar text-blue-800"></i> Demandas por Categoria</h4>
+                    <h4 class="text-sm font-bold text-slate-700 mb-4"><i class="fa-solid fa-chart-bar text-blue-800 mr-2"></i>Demandas por Categoria</h4>
                     <canvas id="chartCategorias" class="max-h-64"></canvas>
                 </div>
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                    <h4 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-pie text-emerald-600"></i> Status das Solicitações</h4>
+                    <h4 class="text-sm font-bold text-slate-700 mb-4"><i class="fa-solid fa-chart-pie text-emerald-600 mr-2"></i>Status das Solicitações</h4>
                     <canvas id="chartStatus" class="max-h-64"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- ABA 1: DEMANDAS -->
+        <!-- ABA DEMANDAS -->
         <div id="aba-demandas" class="hidden space-y-4">
             <div class="flex justify-between items-center">
                 <h3 class="text-base font-bold text-slate-800">Solicitações de Governo Digital</h3>
-                <button onclick="abrirModalDemanda()" id="btn-nova-demanda" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> Nova Demanda
-                </button>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[700px]">
@@ -212,7 +208,6 @@
                             <th class="p-4">Categoria</th>
                             <th class="p-4">Prioridade</th>
                             <th class="p-4">Status</th>
-                            <th class="p-4 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-demandas" class="divide-y divide-slate-100 text-sm"></tbody>
@@ -220,7 +215,7 @@
             </div>
         </div>
 
-        <!-- ABA 2: EVENTOS -->
+        <!-- ABA EVENTOS -->
         <div id="aba-eventos" class="hidden space-y-4">
             <div class="flex justify-between items-center">
                 <h3 class="text-base font-bold text-slate-800">Agenda Institucional</h3>
@@ -231,38 +226,21 @@
             <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
-        <!-- ABA 3: LOCAIS -->
-        <div id="aba-locais" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-800">Catálogo de Espaços e Auditórios</h3>
-                <button onclick="abrirModalLocal()" id="btn-novo-local" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> Novo Local
-                </button>
-            </div>
-            <div id="grid-locais" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        </div>
-
-        <!-- ABA 4: FORNECEDORES -->
-        <div id="aba-fornecedores" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC</h3>
-                <button onclick="abrirModalFornecedor()" id="btn-novo-fornecedor" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> Novo Fornecedor
-                </button>
-            </div>
-            <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-        </div>
-
-        <!-- ABA 5: GESTÃO DE USUÁRIOS (ADMIN) -->
+        <!-- ABA GESTÃO DE USUÁRIOS (ADMIN) -->
         <div id="aba-admin" class="hidden space-y-4">
-            <h3 class="text-base font-bold text-slate-800">Painel de Usuários do Sistema</h3>
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-slate-800">Gerenciamento de Usuários e Permissões</h3>
+                <button onclick="abrirModalNovoAdmin()" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-plus"></i> Criar Novo Administrador
+                </button>
+            </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[700px]">
                     <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
                         <tr>
                             <th class="p-4">Nome</th>
                             <th class="p-4">E-mail</th>
-                            <th class="p-4">Grupo</th>
+                            <th class="p-4">Subgrupo / Órgão</th>
                             <th class="p-4">Perfil</th>
                             <th class="p-4 text-center">Ações</th>
                         </tr>
@@ -274,11 +252,11 @@
 
     </main>
 
-    <!-- MODAL NOVO EVENTO COM UPLOAD DE FOTOS -->
+    <!-- MODAL NOVO EVENTO COM PÚBLICO ALVO -->
     <div id="modal-evento" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="text-lg font-bold text-slate-900">Novo Evento Institucional</h3>
+                <h3 class="text-lg font-bold text-slate-900">Criar Evento Institucional</h3>
                 <button onclick="fecharModal('modal-evento')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form id="form-evento" onsubmit="salvarEvento(event)">
@@ -292,7 +270,16 @@
                         <input type="datetime-local" id="evt-data" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block font-medium text-slate-700 mb-1">Anexar Foto/Imagem (Máx: 2 MB)</label>
+                        <label class="block font-medium text-slate-700 mb-1">Restrição de Visibilidade / Público</label>
+                        <select id="evt-publico" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                            <option value="GERAL">Aberto a Qualquer Usuário Logado</option>
+                            <option value="ATI">Restrito a Servidores ATI</option>
+                            <option value="SEFAZ">Restrito a Integrantes SEFAZ</option>
+                            <option value="SEPLAG">Restrito a Integrantes SEPLAG</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Anexar Imagem (Máx: 2 MB)</label>
                         <input type="file" id="evt-foto" accept="image/*" onchange="validarEConverterFoto(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                         <input type="hidden" id="evt-foto-base64">
                     </div>
@@ -309,32 +296,60 @@
         </div>
     </div>
 
-    <!-- Script de Aplicação Reativa v9.0 -->
+    <!-- MODAL NOVO ADMINISTRADOR -->
+    <div id="modal-novo-admin" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-base font-bold text-slate-900">Cadastrar Novo Administrador</h3>
+                <button onclick="fecharModal('modal-novo-admin')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-novo-admin" onsubmit="criarAdminDireto(event)">
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nome Completo</label>
+                        <input type="text" id="admin-nome" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label>
+                        <input type="email" id="admin-email" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Órgão / Lotação</label>
+                        <select id="admin-subgrupo" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                            <option value="ATI">ATI - Agência Estadual de Tecnologia da Informação</option>
+                            <option value="SEFAZ">SEFAZ - Secretaria da Fazenda</option>
+                            <option value="SEPLAG">SEPLAG - Secretaria de Planejamento e Gestão</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Senha de Acesso</label>
+                        <input type="password" id="admin-senha" required minlength="6" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </div>
+                </div>
+                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar Administrador</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         window.currentUser = null;
-        let abaAtual = 'dashboard';
 
         function abrirModalLogin() { document.getElementById('modal-login').classList.remove('hidden'); }
+        function abrirModalNovoAdmin() { document.getElementById('modal-novo-admin').classList.remove('hidden'); }
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
         function abrirModalEvento() { document.getElementById('modal-evento').classList.remove('hidden'); }
-
-        function mudarAbaAuth(tipo) {
-            const isLogin = tipo === 'login';
-            document.getElementById('form-login').classList.toggle('hidden', !isLogin);
-            document.getElementById('form-register').classList.toggle('hidden', isLogin);
-        }
 
         async function hashPassword(str) {
             const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
             return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        async function cadastrarUsuarioLocal(e) {
+        async function criarAdminDireto(e) {
             e.preventDefault();
-            const nome = document.getElementById('reg-nome').value.trim();
-            const email = document.getElementById('reg-email').value.trim().toLowerCase();
-            const grupo = document.getElementById('reg-grupo').value;
-            const senha = document.getElementById('reg-senha').value;
+            const nome = document.getElementById('admin-nome').value.trim();
+            const email = document.getElementById('admin-email').value.trim().toLowerCase();
+            const subgrupo = document.getElementById('admin-subgrupo').value;
+            const senha = document.getElementById('admin-senha').value;
 
             try {
                 const senhaHash = await hashPassword(senha);
@@ -344,16 +359,16 @@
                     nome: nome,
                     email: email,
                     senhaHash: senhaHash,
-                    perfil: "comum",
-                    grupo: grupo,
+                    perfil: "admin",
+                    subgrupoId: subgrupo,
                     ativo: true,
                     criadoEm: new Date().toISOString()
                 });
 
-                alert('Usuário registrado com sucesso!');
-                mudarAbaAuth('login');
+                alert('Novo administrador cadastrado com sucesso!');
+                fecharModal('modal-novo-admin');
             } catch (err) {
-                alert('Erro ao cadastrar: ' + err.message);
+                alert('Erro ao criar admin: ' + err.message);
             }
         }
 
@@ -377,7 +392,7 @@
                     window.currentUser = userData;
 
                     document.getElementById('user-name-display').textContent = userData.nome;
-                    document.getElementById('user-role-display').textContent = `${userData.perfil} (${userData.grupo || 'ADMIN'})`;
+                    document.getElementById('user-role-display').textContent = `${userData.perfil} (${userData.subgrupoId || 'GERAL'})`;
                     document.getElementById('session-info').textContent = `${userData.nome} [${userData.perfil.toUpperCase()}]`;
 
                     document.getElementById('btn-login').classList.add('hidden');
@@ -388,7 +403,6 @@
                     }
 
                     fecharModal('modal-login');
-                    render();
                 } else {
                     alert('Erro: Usuário não cadastrado na base ou senha inválida.');
                 }
@@ -403,92 +417,11 @@
             document.getElementById('user-logged').classList.add('hidden');
             document.getElementById('btn-tab-admin').classList.add('hidden');
             document.getElementById('session-info').textContent = "Visitante (Leitura Restrita)";
-            mudarAba('dashboard');
         }
-
-        function mudarAba(aba) {
-            abaAtual = aba;
-            ['dashboard', 'demandas', 'eventos', 'locais', 'fornecedores', 'admin'].forEach(a => {
-                const el = document.getElementById(`aba-${a}`);
-                const btn = document.getElementById(`btn-tab-${a}`);
-                if (el) el.classList.toggle('hidden', a !== abaAtual);
-                if (btn && a !== 'admin') btn.className = `px-4 py-2 rounded-lg transition ${a === abaAtual ? 'tab-active' : 'tab-inactive'}`;
-            });
-        }
-
-        function validarEConverterFoto(input) {
-            const file = input.files[0];
-            if (file) {
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('Tamanho limite excedido: A imagem deve ter no máximo 2 MB.');
-                    input.value = '';
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = e => { document.getElementById('evt-foto-base64').value = e.target.result; };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        async function salvarEvento(e) {
-            e.preventDefault();
-            try {
-                await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "eventos"), {
-                    titulo: document.getElementById('evt-titulo').value,
-                    data: document.getElementById('evt-data').value,
-                    descricao: document.getElementById('evt-descricao').value,
-                    foto: document.getElementById('evt-foto-base64').value || null,
-                    criadoPor: window.currentUser?.email || 'anonimo'
-                });
-                fecharModal('modal-evento');
-                alert('Evento registrado no Firestore!');
-            } catch (err) {
-                alert('Erro ao salvar evento: ' + err.message);
-            }
-        }
-
-        function exportarRelatorioCSV() {
-            const csv = "Orgao;Categoria;Status\nSEFAZ;Infraestrutura;Em Andamento\nSEPLAG;Sistemas;Concluido";
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "relatorio_prgd.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function render() {
-            // Inicialização dos gráficos do Dashboard via Chart.js
-            const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
-            if (ctx1) {
-                new Chart(ctx1, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Infraestrutura', 'Sistemas Web', 'Transformação Digital', 'Capacitação'],
-                        datasets: [{ data: [12, 19, 7, 5], backgroundColor: '#1e3a8a' }]
-                    },
-                    options: { plugins: { legend: { display: false } } }
-                });
-            }
-
-            const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
-            if (ctx2) {
-                new Chart(ctx2, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Pendentes', 'Em Andamento', 'Concluídos'],
-                        datasets: [{ data: [5, 15, 23], backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'] }]
-                    }
-                });
-            }
-        }
-
-        window.onload = () => { render(); };
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE v9.0 · Comunicação via <span class="font-bold text-slate-600">relacionamento@ati.pe.gov.br</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE v10.0 · Comunicação via <span class="font-bold text-slate-600">relacionamento@ati.pe.gov.br</span>
     </footer>
 </body>
 </html>
