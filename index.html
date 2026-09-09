@@ -559,14 +559,67 @@
 
             document.getElementById('detalhe-titulo-modal').textContent = `Detalhamento (${colecao.toUpperCase()})`;
             
-            // Visualização
+            // Visualização de Campos
             let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-4">';
             for (let k in item) {
-                if (k !== 'senhaHash' && k !== 'senha') {
+                if (k !== 'senhaHash' && k !== 'senha' && k !== 'historicoStatus') {
                     htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${k}</span><span class="font-semibold text-slate-800">${item[k]}</span></div>`;
                 }
             }
             htmlContent += '</div>';
+
+            // Módulo Especial de Acompanhamento e Histórico de Status para Demandas
+            if (colecao === 'demandas') {
+                if (!item.historicoStatus) {
+                    item.historicoStatus = [
+                        { data: new Date().toISOString(), status: item.status || 'Pendente', descricao: 'Abertura da demanda registrada na plataforma PRGD.' }
+                    ];
+                }
+
+                htmlContent += `
+                <div class="border-t pt-4 mt-2 mb-4">
+                    <h4 class="font-bold text-slate-800 text-xs sm:text-sm mb-3 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock-rotate-left text-blue-800"></i> Histórico & Acompanhamento de Status da Demanda
+                    </h4>
+                    <div class="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1">
+                        ${item.historicoStatus.map(h => `
+                            <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 text-xs">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">${h.status}</span>
+                                    <span class="text-slate-400 text-[10px] font-semibold"><i class="fa-regular fa-calendar-alt mr-1"></i>${new Date(h.data).toLocaleString('pt-BR')}</span>
+                                </div>
+                                <p class="text-slate-700 font-medium">${h.descricao || 'Sem observações.'}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2 text-xs">
+                        <p class="font-bold text-slate-800"><i class="fa-solid fa-plus-circle text-emerald-600 mr-1"></i> Inserir Novo Acompanhamento / Atualização</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-slate-600 font-semibold mb-1">Novo Status</label>
+                                <select id="demanda-novo-status" class="w-full p-2 border rounded bg-white font-medium">
+                                    <option value="Em Andamento">Em Andamento</option>
+                                    <option value="Aguardando Validação">Aguardando Validação</option>
+                                    <option value="Em Análise Técnica">Em Análise Técnica</option>
+                                    <option value="Concluído">Concluído</option>
+                                    <option value="Pendente">Pendente</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-600 font-semibold mb-1">Detalhamento / Evento de Acompanhamento</label>
+                                <input type="text" id="demanda-nova-obs" placeholder="Ex: Reunião realizada com a equipe técnica..." class="w-full p-2 border rounded bg-white">
+                            </div>
+                        </div>
+                        <button type="button" onclick="adicionarAcompanhamentoDemanda('${docId}')" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded transition shadow-sm flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-check-double"></i> Registrar Acompanhamento e Salvar Histórico
+                        </button>
+                    </div>
+                </div>
+                `;
+            }
+
             document.getElementById('detalhe-conteudo').innerHTML = htmlContent;
 
             // Form Edição de TODOS os campos
@@ -575,14 +628,24 @@
 
             let editFieldsHtml = '';
             for (let k in item) {
-                if (k === 'id' || k === 'senhaHash') continue;
+                if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus') continue;
                 const fieldVal = item[k] !== undefined ? item[k] : '';
-                const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'estrutura';
+                const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'estrutura' || k === 'escopoServico';
                 
                 editFieldsHtml += `<div class="mb-2">
-                    <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k}</label>`;
-                if (isLongText) {
-                    editFieldsHtml += `<textarea data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="2">${fieldVal}</textarea>`;
+                    <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k === 'tipoJuridico' ? 'Tipo Jurídico / Natureza Jurídica' : k}</label>`;
+                
+                if (k === 'tipoJuridico' || k === 'naturezaJuridica') {
+                    editFieldsHtml += `<select data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">
+                        <option value="Administração Direta (Secretaria)" ${fieldVal.includes('Direta') || fieldVal.includes('Secretaria') ? 'selected' : ''}>Administração Direta (Secretaria)</option>
+                        <option value="Autarquia" ${fieldVal === 'Autarquia' ? 'selected' : ''}>Autarquia</option>
+                        <option value="Empresa Pública" ${fieldVal === 'Empresa Pública' ? 'selected' : ''}>Empresa Pública</option>
+                        <option value="Fundação Pública" ${fieldVal.includes('Fundação') ? 'selected' : ''}>Fundação Pública</option>
+                        <option value="Sociedade de Economia Mista" ${fieldVal.includes('Mista') ? 'selected' : ''}>Sociedade de Economia Mista</option>
+                        <option value="Órgão Constitucional Independente" ${fieldVal.includes('Independente') ? 'selected' : ''}>Órgão Constitucional Independente</option>
+                    </select>`;
+                } else if (isLongText) {
+                    editFieldsHtml += `<textarea data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">${fieldVal}</textarea>`;
                 } else {
                     editFieldsHtml += `<input type="text" data-field="${k}" value="${fieldVal}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">`;
                 }
@@ -591,11 +654,49 @@
 
             document.getElementById('edit-campos-dinamicos').innerHTML = editFieldsHtml;
 
-            // Se for admin ou visitante em modo livre, exibe area de edição/exclusão
-            const isAdmin = !window.currentUser || (window.currentUser && (window.currentUser.perfil || '').toLowerCase() === 'admin');
-            document.getElementById('detalhe-area-admin').classList.toggle('hidden', false); // Permite edição para o gestor
+            // Exibe área de gerenciamento
+            document.getElementById('detalhe-area-admin').classList.remove('hidden');
 
             document.getElementById('modal-detalhes').classList.remove('hidden');
+        };
+
+        window.adicionarAcompanhamentoDemanda = async function(docId) {
+            const demanda = window.dbData.demandas.find(d => d.id === docId);
+            if (!demanda) return;
+
+            const novoStatus = document.getElementById('demanda-novo-status').value;
+            const novaObs = document.getElementById('demanda-nova-obs').value.trim();
+
+            if (!novaObs) {
+                alert('Por favor, informe a descrição do acompanhamento antes de salvar.');
+                return;
+            }
+
+            if (!demanda.historicoStatus) demanda.historicoStatus = [];
+            
+            const novoAcompanhamento = {
+                data: new Date().toISOString(),
+                status: novoStatus,
+                descricao: novaObs
+            };
+
+            demanda.status = novoStatus;
+            demanda.historicoStatus.unshift(novoAcompanhamento);
+
+            renderizarTudo();
+
+            try {
+                const docRef = window.firebaseMethods.doc(window.firebaseDb, 'demandas', docId);
+                await window.firebaseMethods.updateDoc(docRef, {
+                    status: novoStatus,
+                    historicoStatus: demanda.historicoStatus
+                });
+            } catch (err) {
+                console.warn('Erro ao salvar acompanhamento no Firestore, mantido em memória local.', err);
+            }
+
+            alert('Novo status e histórico de acompanhamento registrados com sucesso!');
+            detalharRegistro('demandas', docId);
         };
 
         window.salvarEdicaoUniversal = async function(e) {
@@ -656,20 +757,41 @@
             if (tipo === 'orgao') {
                 container.innerHTML = `
                     <div><label class="block font-medium text-slate-700 mb-1">Sigla do Órgão</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded uppercase"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Tipo Jurídico / Classificação</label><select id="univ-c3" class="w-full p-2 border rounded"><option value="Secretaria">Secretaria de Estado</option><option value="Autarquia">Autarquia</option><option value="Empresa Pública">Empresa Pública</option><option value="Fundação">Fundação Pública</option><option value="Sociedade de Economia Mista">Sociedade de Economia Mista</option></select></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Responsável TIC</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">E-mail Contato</label><input type="email" id="univ-c5" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome Completo do Órgão / Secretaria</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Natureza Jurídica / Tipo de Administração</label>
+                        <select id="univ-c3" class="w-full p-2 border rounded bg-white font-semibold text-slate-800">
+                            <option value="Administração Direta (Secretaria)">Administração Direta (Secretaria)</option>
+                            <option value="Autarquia">Autarquia</option>
+                            <option value="Empresa Pública">Empresa Pública</option>
+                            <option value="Fundação Pública">Fundação Pública</option>
+                            <option value="Sociedade de Economia Mista">Sociedade de Economia Mista</option>
+                            <option value="Órgão Constitucional Independente">Órgão Constitucional Independente</option>
+                        </select>
+                    </div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Responsável / Gestor de TIC</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">E-mail Institucional de Contato</label><input type="email" id="univ-c5" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Telefone Institucional</label><input type="text" id="univ-c6" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Endereço / Sede</label><input type="text" id="univ-c7" class="w-full p-2 border rounded"></div>
                 `;
             } else if (tipo === 'fornecedor') {
                 container.innerHTML = `
                     <div><label class="block font-medium text-slate-700 mb-1">Razão Social / Nome Fantasia</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">CNPJ</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Categoria do Serviço TIC</label><input type="text" id="univ-c3" placeholder="Ex: Cloud, Desenvolvimento, Redes" class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Nome do Responsável / Contato</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Telefone / WhatsApp</label><input type="text" id="univ-c5" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Categoria Principal do Serviço TIC</label><input type="text" id="univ-c3" placeholder="Ex: Cloud Computing, Desenvolvimento Web, Segurança da Informação" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome do Gestor de Conta / Responsável</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Telefone / WhatsApp Comercial</label><input type="text" id="univ-c5" class="w-full p-2 border rounded"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">E-mail Corporativo</label><input type="email" id="univ-c6" class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Endereço Completo</label><input type="text" id="univ-c7" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Número do Contrato / Ata de Registro de Preços</label><input type="text" id="univ-c7" placeholder="Ex: Contrato nº 042/2026-ATI" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Valor Contratual Registrado (R$)</label><input type="text" id="univ-c8" placeholder="Ex: R$ 1.500.000,00" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Status da Parceria / Contrato</label>
+                        <select id="univ-c9" class="w-full p-2 border rounded bg-white">
+                            <option value="Ativo / Em Execução">Ativo / Em Execução</option>
+                            <option value="Em Homologação">Em Homologação</option>
+                            <option value="Encerrado">Encerrado</option>
+                        </select>
+                    </div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Escopo Completo dos Serviços Prestados</label><textarea id="univ-c10" rows="3" class="w-full p-2 border rounded" placeholder="Detalhamento técnico dos serviços fornecidos..."></textarea></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Endereço Comercial</label><input type="text" id="univ-c11" class="w-full p-2 border rounded"></div>
                 `;
             } else if (tipo === 'local') {
                 container.innerHTML = `
@@ -728,8 +850,11 @@
                     id: sigla, sigla,
                     nome: document.getElementById('univ-c2').value,
                     tipoJuridico: document.getElementById('univ-c3').value,
+                    naturezaJuridica: document.getElementById('univ-c3').value,
                     responsavel: document.getElementById('univ-c4').value,
-                    email: document.getElementById('univ-c5').value
+                    email: document.getElementById('univ-c5').value,
+                    telefone: document.getElementById('univ-c6')?.value || '',
+                    endereco: document.getElementById('univ-c7')?.value || ''
                 };
                 window.dbData.orgaos.push(novoObj);
                 try {
@@ -744,7 +869,11 @@
                     responsavel: document.getElementById('univ-c4').value,
                     telefone: document.getElementById('univ-c5').value,
                     email: document.getElementById('univ-c6').value,
-                    endereco: document.getElementById('univ-c7').value
+                    numeroContrato: document.getElementById('univ-c7')?.value || '',
+                    valorContratual: document.getElementById('univ-c8')?.value || '',
+                    statusContrato: document.getElementById('univ-c9')?.value || 'Ativo',
+                    escopoServico: document.getElementById('univ-c10')?.value || '',
+                    endereco: document.getElementById('univ-c11')?.value || ''
                 };
                 window.dbData.fornecedores.push(novoObj);
                 try {
