@@ -9,12 +9,11 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDK v10 (Modular) -->
+    <!-- Firebase SDK v10 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // CREDENCIAIS DO SEU PROJETO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
             authDomain: "prgd-ati-pe.firebaseapp.com",
@@ -30,7 +29,7 @@
 
         window.firebaseDb = db;
         window.firebaseMethods = { 
-            collection, addDoc, getDocs, doc, setDoc, query, where, onSnapshot 
+            collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot 
         };
     </script>
     <style>
@@ -57,34 +56,34 @@
                     <i class="fa-solid fa-right-to-bracket"></i> Entrar / Cadastrar (.pe.gov.br)
                 </button>
                 <div id="user-logged" class="hidden flex items-center gap-3">
-                    <span id="user-email-display" class="text-xs font-semibold text-blue-100"></span>
+                    <div class="text-right">
+                        <p id="user-name-display" class="text-xs font-bold text-white"></p>
+                        <p id="user-role-display" class="text-[10px] text-blue-200"></p>
+                    </div>
                     <button onclick="fazerLogout()" class="bg-blue-800 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition">Sair</button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Modal Login / Cadastro Institucional na Tabela Firestore -->
+    <!-- Modal Login / Cadastro -->
     <div id="modal-login" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 id="modal-auth-title" class="text-base font-bold text-slate-900">Autenticação de Usuário Local</h3>
+                <h3 class="text-base font-bold text-slate-900">Autenticação PRGD</h3>
                 <button onclick="fecharModal('modal-login')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <!-- Abas do Modal: Login vs Criar Conta -->
             <div class="flex bg-slate-100 p-1 rounded-lg mb-4 text-xs font-semibold">
                 <button id="tab-auth-login" onclick="mudarAbaAuth('login')" class="w-1/2 py-1.5 rounded-md bg-white shadow-sm text-blue-900">Entrar</button>
-                <button id="tab-auth-register" onclick="mudarAbaAuth('register')" class="w-1/2 py-1.5 rounded-md text-slate-500">Cadastrar Usuário</button>
+                <button id="tab-auth-register" onclick="mudarAbaAuth('register')" class="w-1/2 py-1.5 rounded-md text-slate-500">Solicitar Cadastro</button>
             </div>
 
-            <!-- Form Entrar -->
             <form id="form-login" onsubmit="fazerLoginLocal(event)">
                 <div class="space-y-3 text-sm">
                     <div>
                         <label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label>
                         <input type="email" id="login-email" required placeholder="usuario@ati.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                        <p class="text-[11px] text-slate-400 mt-1">Apenas domínios do Estado (<strong>@*.pe.gov.br</strong>).</p>
                     </div>
                     <div>
                         <label class="block font-medium text-slate-700 mb-1">Senha</label>
@@ -94,7 +93,6 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Acessar Plataforma</button>
             </form>
 
-            <!-- Form Cadastrar na Coleção 'usuarios' -->
             <form id="form-register" onsubmit="cadastrarUsuarioLocal(event)" class="hidden">
                 <div class="space-y-3 text-sm">
                     <div>
@@ -106,11 +104,20 @@
                         <input type="email" id="reg-email" required placeholder="usuario@ati.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     </div>
                     <div>
+                        <label class="block font-medium text-slate-700 mb-1">Grupo de Acesso</label>
+                        <select id="reg-grupo" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                            <option value="gestores">Gestores</option>
+                            <option value="tecnicos">Técnicos</option>
+                            <option value="servidores_ati">Servidores da ATI</option>
+                            <option value="orgao">Órgão Solicitante</option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="block font-medium text-slate-700 mb-1">Senha</label>
                         <input type="password" id="reg-senha" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     </div>
                 </div>
-                <button type="submit" class="w-full mt-5 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-500 transition">Salvar Usuário no Banco</button>
+                <button type="submit" class="w-full mt-5 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-500 transition">Cadastrar na Base</button>
             </form>
         </div>
     </div>
@@ -118,63 +125,29 @@
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 py-6">
 
+        <!-- Bar Status -->
         <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
-            <span><i class="fa-solid fa-database text-blue-600 mr-2"></i> <strong>Base Local Firestore:</strong> Usuários armazenados na coleção <code>usuarios</code> da base <code>prgd-ati-pe</code>.</span>
-            <span class="bg-blue-200 text-blue-800 px-2 py-0.5 rounded font-bold">Base Local Conectada</span>
+            <span><i class="fa-solid fa-shield-halved text-blue-600 mr-2"></i> <strong>Sessão Atual:</strong> <span id="session-info">Visitante (Apenas Leitura)</span></span>
+            <span class="bg-blue-200 text-blue-800 px-2 py-0.5 rounded font-bold">Firestore Sync</span>
         </div>
 
-        <!-- KPIs Globais -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between cursor-pointer hover:border-blue-300 transition">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Demandas / Chamados</p>
-                    <h3 id="kpi-demandas" class="text-2xl font-bold text-blue-900 mt-1">0</h3>
-                </div>
-                <div class="p-3 bg-blue-50 text-blue-700 rounded-xl"><i class="fa-solid fa-list-check text-xl"></i></div>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between cursor-pointer hover:border-amber-300 transition">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Eventos Programados</p>
-                    <h3 id="kpi-eventos" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
-                </div>
-                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl"><i class="fa-solid fa-calendar-day text-xl"></i></div>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between cursor-pointer hover:border-indigo-300 transition">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Locais Cadastrados</p>
-                    <h3 id="kpi-locais" class="text-2xl font-bold text-indigo-600 mt-1">0</h3>
-                </div>
-                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl"><i class="fa-solid fa-map-location-dot text-xl"></i></div>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between cursor-pointer hover:border-emerald-300 transition">
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Fornecedores TIC</p>
-                    <h3 id="kpi-fornecedores" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
-                </div>
-                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><i class="fa-solid fa-handshake text-xl"></i></div>
-            </div>
+        <!-- Módulos da Aplicação -->
+        <div class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto mb-6">
+            <button id="btn-tab-demandas" onclick="mudarAba('demandas')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-active">Gestão de Demandas</button>
+            <button id="btn-tab-eventos" onclick="mudarAba('eventos')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-inactive">Eventos Institucionais</button>
+            <button id="btn-tab-locais" onclick="mudarAba('locais')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-inactive">Locais de Eventos</button>
+            <button id="btn-tab-fornecedores" onclick="mudarAba('fornecedores')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-inactive">Fornecedores TIC</button>
         </div>
 
-        <!-- Tabela demonstrativa -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[700px]">
-                <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
-                    <tr>
-                        <th class="p-4">Órgão</th>
-                        <th class="p-4">Título / Demanda</th>
-                        <th class="p-4">Categoria</th>
-                        <th class="p-4">Prioridade</th>
-                        <th class="p-4">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-demandas" class="divide-y divide-slate-100 text-sm">
-                    <tr><td colspan="5" class="p-8 text-center text-slate-400">Pronto para operação com autenticação em base Firestore local.</td></tr>
-                </tbody>
-            </table>
+        <!-- Conteúdo dinâmico renderizado via JavaScript -->
+        <div id="conteudo-modulo" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <p class="text-slate-500 text-sm">Carregando dados dos módulos...</p>
         </div>
     </main>
 
     <script>
+        window.currentUser = null;
+
         function abrirModalLogin() { document.getElementById('modal-login').classList.remove('hidden'); }
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
 
@@ -182,8 +155,6 @@
             const isLogin = tipo === 'login';
             document.getElementById('form-login').classList.toggle('hidden', !isLogin);
             document.getElementById('form-register').classList.toggle('hidden', isLogin);
-            document.getElementById('tab-auth-login').className = isLogin ? 'w-1/2 py-1.5 rounded-md bg-white shadow-sm text-blue-900' : 'w-1/2 py-1.5 rounded-md text-slate-500';
-            document.getElementById('tab-auth-register').className = !isLogin ? 'w-1/2 py-1.5 rounded-md bg-white shadow-sm text-emerald-700' : 'w-1/2 py-1.5 rounded-md text-slate-500';
         }
 
         async function hashPassword(str) {
@@ -195,10 +166,11 @@
             e.preventDefault();
             const nome = document.getElementById('reg-nome').value.trim();
             const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const grupo = document.getElementById('reg-grupo').value;
             const senha = document.getElementById('reg-senha').value;
 
             if (!email.endsWith('.pe.gov.br')) {
-                alert('Acesso negado: O e-mail deve possuir o domínio institucional do Estado (@*.pe.gov.br).');
+                alert('Acesso negado: O e-mail deve possuir o domínio institucional (@*.pe.gov.br).');
                 return;
             }
 
@@ -210,15 +182,16 @@
                     nome: nome,
                     email: email,
                     senhaHash: senhaHash,
+                    perfil: "comum",
+                    grupo: grupo,
                     ativo: true,
                     criadoEm: new Date().toISOString()
                 });
 
-                alert('Usuário cadastrado com sucesso na base local!');
+                alert('Usuário cadastrado com sucesso! Faça login para continuar.');
                 mudarAbaAuth('login');
-                document.getElementById('login-email').value = email;
             } catch (err) {
-                alert('Erro ao salvar usuário no Firestore: ' + err.message);
+                alert('Erro ao salvar usuário: ' + err.message);
             }
         }
 
@@ -226,11 +199,6 @@
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const senha = document.getElementById('login-senha').value;
-
-            if (!email.endsWith('.pe.gov.br')) {
-                alert('Acesso negado: Domínio restrito a @*.pe.gov.br');
-                return;
-            }
 
             try {
                 const senhaHash = await hashPassword(senha);
@@ -243,27 +211,35 @@
                 const snapshot = await window.firebaseMethods.getDocs(q);
 
                 if (!snapshot.empty) {
-                    document.getElementById('user-email-display').textContent = email;
+                    const userData = snapshot.docs[0].data();
+                    window.currentUser = userData;
+
+                    document.getElementById('user-name-display').textContent = userData.nome;
+                    document.getElementById('user-role-display').textContent = `${userData.perfil.toUpperCase()} (${userData.grupo || 'ADMIN'})`;
+                    document.getElementById('session-info').textContent = `${userData.nome} [${userData.perfil.toUpperCase()}]`;
+
                     document.getElementById('btn-login').classList.add('hidden');
                     document.getElementById('user-logged').classList.remove('hidden');
                     fecharModal('modal-login');
-                    alert('Autenticação local realizada com sucesso!');
+                    alert(`Bem-vindo, ${userData.nome}!`);
                 } else {
-                    alert('E-mail ou senha incorretos na base local de usuários.');
+                    alert('Acesso Negado: E-mail não cadastrado na base ou senha incorreta.');
                 }
             } catch (err) {
-                alert('Erro durante autenticação local: ' + err.message);
+                alert('Erro ao autenticar: ' + err.message);
             }
         }
 
         function fazerLogout() {
+            window.currentUser = null;
             document.getElementById('btn-login').classList.remove('hidden');
             document.getElementById('user-logged').classList.add('hidden');
+            document.getElementById('session-info').textContent = "Visitante (Apenas Leitura)";
         }
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE v7.0 · Comunicação Oficial via <span class="font-bold text-slate-600">relacionamento@ati.pe.gov.br</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE v8.0 · Comunicação via <span class="font-bold text-slate-600">relacionamento@ati.pe.gov.br</span>
     </footer>
 </body>
 </html>
