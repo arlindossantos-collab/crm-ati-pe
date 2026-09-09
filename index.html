@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Relacionamento ATI-PE | Governo Digital</title>
+    <title>PRGD - Plataforma de Relacionamento do Governo Digital | ATI-PE</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -21,18 +21,15 @@
     <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <div class="bg-white text-blue-900 px-3 py-1.5 rounded-lg font-bold text-xl tracking-wider">ATI</div>
+                <div class="bg-white text-blue-900 px-3 py-1.5 rounded-lg font-bold text-xl tracking-wider">PRGD</div>
                 <div>
-                    <h1 class="font-bold text-lg leading-tight">CRM Relacionamento de Governo Digital</h1>
-                    <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação de Pernambuco</p>
+                    <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
+                    <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação de Pernambuco (ATI-PE)</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 sm:space-x-3">
-                <button onclick="abrirModalOrgao()" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-building-circle-check"></i> Novo Órgão
-                </button>
-                <button onclick="abrirModalDemanda()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-plus"></i> Nova Demanda
+            <div class="flex items-center space-x-2 sm:space-x-3" id="admin-header-actions">
+                <button onclick="autenticarAdmin()" id="btn-login-admin" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-lock"></i> Área Restrita (@ati.pe.gov.br)
                 </button>
             </div>
         </div>
@@ -41,69 +38,70 @@
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 py-6">
 
-        <!-- Storage Status Banner -->
-        <div id="storage-warning" class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl flex items-center gap-2">
-            <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
-            <span><strong>Aviso de Armazenamento:</strong> O LocalStorage está inacessível. A aplicação está rodando em modo de memória temporária.</span>
+        <!-- Banner Admin Status -->
+        <div id="admin-banner" class="hidden mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-user-check text-emerald-600 text-sm"></i>
+                <span><strong>Sessão Administrativa Ativa:</strong> Acesso autenticado para gestor <strong id="admin-email-display"></strong></span>
+            </div>
+            <button onclick="logoutAdmin()" class="text-xs text-red-600 hover:underline font-bold">Sair</button>
         </div>
 
-        <!-- KPI Cards -->
+        <!-- KPIs Globais -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Órgãos do Estado</p>
-                    <h3 id="kpi-orgaos" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Demandas / Chamados</p>
+                    <h3 id="kpi-demandas" class="text-2xl font-bold text-blue-900 mt-1">0</h3>
                 </div>
-                <div class="p-3 bg-blue-50 text-blue-700 rounded-xl">
-                    <i class="fa-solid fa-landmark text-xl"></i>
-                </div>
+                <div class="p-3 bg-blue-50 text-blue-700 rounded-xl"><i class="fa-solid fa-list-check text-xl"></i></div>
             </div>
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Demandas</p>
-                    <h3 id="kpi-demandas" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Eventos Programados</p>
+                    <h3 id="kpi-eventos" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
                 </div>
-                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
-                    <i class="fa-solid fa-list-check text-xl"></i>
-                </div>
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl"><i class="fa-solid fa-calendar-day text-xl"></i></div>
             </div>
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Em Andamento</p>
-                    <h3 id="kpi-andamento" class="text-2xl font-bold text-blue-600 mt-1">0</h3>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Locais Cadastrados</p>
+                    <h3 id="kpi-locais" class="text-2xl font-bold text-indigo-600 mt-1">0</h3>
                 </div>
-                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                    <i class="fa-solid fa-spinner text-xl"></i>
-                </div>
+                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl"><i class="fa-solid fa-map-location-dot text-xl"></i></div>
             </div>
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Concluídas</p>
-                    <h3 id="kpi-concluidas" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Fornecedores TIC</p>
+                    <h3 id="kpi-fornecedores" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
                 </div>
-                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                    <i class="fa-solid fa-circle-check text-xl"></i>
-                </div>
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><i class="fa-solid fa-handshake text-xl"></i></div>
             </div>
         </div>
 
-        <!-- Toolbar: Tabs & Filter -->
+        <!-- Navegação por Abas -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div class="flex bg-slate-200 p-1 rounded-xl w-fit">
+            <div class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto">
                 <button id="btn-tab-demandas" onclick="mudarAba('demandas')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-active">
-                    <i class="fa-solid fa-tasks mr-1.5"></i> Demandas & Projetos
+                    <i class="fa-solid fa-tasks mr-1.5"></i> Gestão de Demandas
                 </button>
-                <button id="btn-tab-orgaos" onclick="mudarAba('orgaos')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-inactive">
-                    <i class="fa-solid fa-building mr-1.5"></i> Órgãos Cadastrados
+                <button id="btn-tab-eventos" onclick="mudarAba('eventos')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-inactive">
+                    <i class="fa-solid fa-calendar-alt mr-1.5"></i> Gestão de Eventos
+                </button>
+                <button id="btn-tab-locais" onclick="mudarAba('locais')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-inactive">
+                    <i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais de Eventos
+                </button>
+                <button id="btn-tab-fornecedores" onclick="mudarAba('fornecedores')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-inactive">
+                    <i class="fa-solid fa-truck-field mr-1.5"></i> Gestão de Fornecedores
                 </button>
             </div>
             <div class="relative w-full md:w-80">
-                <input type="text" id="input-busca" onkeyup="filtrarConteudo()" placeholder="Buscar por órgão, projeto, chamado..." class="w-full pl-10 pr-4 py-2 text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-none shadow-sm">
+                <input type="text" id="input-busca" onkeyup="filtrarConteudo()" placeholder="Buscar na plataforma PRGD..." class="w-full pl-10 pr-4 py-2 text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-none shadow-sm">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
             </div>
         </div>
 
-        <!-- TAB 1: DEMANDAS E PROJETOS -->
+        <!-- ABA 1: GESTÃO DE DEMANDAS -->
         <div id="aba-demandas" class="block">
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[700px]">
@@ -124,811 +122,81 @@
             </div>
         </div>
 
-        <!-- TAB 2: ÓRGÃOS -->
-        <div id="aba-orgaos" class="hidden">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-orgaos">
-                <!-- Render via JS -->
+        <!-- ABA 2: GESTÃO DE EVENTOS -->
+        <div id="aba-eventos" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-xs text-slate-500">Calendário de eventos institucionais do Governo Digital com divulgação oficial.</p>
+                <button id="btn-novo-evento" onclick="abrirModalEvento()" class="hidden bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Criar Evento
+                </button>
+            </div>
+            <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Cards de eventos -->
+            </div>
+        </div>
+
+        <!-- ABA 3: LOCAIS DE EVENTOS -->
+        <div id="aba-locais" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-xs text-slate-500">Catálogo de espaços com estrutura completa (palco, som, climatização, acessibilidade e conectividade).</p>
+                <button id="btn-novo-local" onclick="abrirModalLocal()" class="hidden bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Novo Local
+                </button>
+            </div>
+            <div id="grid-locais" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Cards de locais -->
+            </div>
+        </div>
+
+        <!-- ABA 4: GESTÃO DE FORNECEDORES -->
+        <div id="aba-fornecedores" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-xs text-slate-500">Parceiros e prestadores de serviços de TIC categorizados por área de fornecimento.</p>
+                <button id="btn-novo-fornecedor" onclick="abrirModalFornecedor()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Cadastrar Fornecedor
+                </button>
+            </div>
+            <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Cards de fornecedores -->
             </div>
         </div>
 
     </main>
 
-    <!-- MODAL DETALHES / HISTÓRICO DA DEMANDA -->
-    <div id="modal-detalhe-demanda" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
-                <div>
-                    <span id="det-dem-badge-orgao" class="bg-blue-100 text-blue-900 text-xs font-bold px-2.5 py-0.5 rounded-md"></span>
-                    <h3 id="det-dem-titulo" class="text-xl font-bold text-slate-900 mt-1"></h3>
-                    <p id="det-dem-sub" class="text-xs text-slate-500 mt-0.5"></p>
-                </div>
-                <button onclick="fecharModal('modal-detalhe-demanda')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            
-            <div class="overflow-y-auto space-y-5 pr-2 flex-1">
-                <!-- Descrição -->
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Descrição do Projeto / Chamado</h4>
-                    <p id="det-dem-descricao" class="text-sm text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100 whitespace-pre-line"></p>
-                </div>
+    <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE v5.1 · Comunicação Oficial via <span class="font-bold text-slate-600">relacionamento@ati.pe.gov.br</span>
+    </footer>
 
-                <!-- Histórico de Interações / Timeline -->
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Histórico de Atendimentos & Atualizações</h4>
-                    </div>
-                    <div id="timeline-demanda" class="space-y-3 border-l-2 border-slate-200 pl-4 my-2">
-                        <!-- Items rendered dynamically -->
-                    </div>
-                </div>
-
-                <!-- Adicionar Nova Interação -->
-                <div class="pt-3 border-t border-slate-100">
-                    <h4 class="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-comment-dots text-blue-600"></i> Registrar Nova Interação / Parecer</h4>
-                    <form id="form-interacao" onsubmit="adicionarInteracao(event)">
-                        <input type="hidden" id="interacao-demanda-id">
-                        <textarea id="interacao-texto" required rows="2" placeholder="Digite uma atualização, registro de reunião ou parecer da ATI..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none mb-2"></textarea>
-                        <div class="flex justify-end">
-                            <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white text-xs font-medium px-4 py-2 rounded-lg transition">Adicionar ao Histórico</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DETALHES DA SECRETARIA / ÓRGÃO -->
-    <div id="modal-detalhe-orgao" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="bg-blue-900 text-white font-bold p-3 rounded-xl text-lg" id="det-org-sigla-box"></div>
-                    <div>
-                        <h3 id="det-org-nome" class="text-xl font-bold text-slate-900"></h3>
-                        <p id="det-org-sigla" class="text-xs font-bold text-blue-700"></p>
-                    </div>
-                </div>
-                <button onclick="fecharModal('modal-detalhe-orgao')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-
-            <div class="overflow-y-auto space-y-5 pr-2 flex-1">
-                <!-- Informações e Contatos -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <div>
-                        <p class="font-semibold text-slate-500">Ponto Focal / Contato Principal:</p>
-                        <p id="det-org-contato" class="font-bold text-slate-800 text-sm mt-0.5"></p>
-                    </div>
-                    <div>
-                        <p class="font-semibold text-slate-500">E-mail Institucional:</p>
-                        <p id="det-org-email" class="font-bold text-slate-800 text-sm mt-0.5"></p>
-                    </div>
-                    <div>
-                        <p class="font-semibold text-slate-500">Telefone / Ramal:</p>
-                        <p id="det-org-telefone" class="font-bold text-slate-800 text-sm mt-0.5"></p>
-                    </div>
-                    <div>
-                        <p class="font-semibold text-slate-500">Status no Relacionamento:</p>
-                        <span id="det-org-status-tag" class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">Ativo</span>
-                    </div>
-                </div>
-
-                <!-- Descrição / Contexto do Órgão -->
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Descrição / Escopo Institucional</h4>
-                    <p id="det-org-descricao" class="text-sm text-slate-700 bg-white p-3 rounded-xl border border-slate-200"></p>
-                </div>
-
-                <!-- Chamados / Demandas Vinculadas -->
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex justify-between items-center">
-                        <span>Demandas & Chamados do Órgão</span>
-                        <span id="det-org-count-demandas" class="bg-blue-100 text-blue-900 px-2 py-0.5 rounded-full text-xs"></span>
-                    </h4>
-                    <div id="lista-demandas-orgao" class="space-y-2">
-                        <!-- List rendered dynamically -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL NOVO/EDITAR ÓRGÃO -->
-    <div id="modal-orgao" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 id="titulo-modal-orgao" class="text-lg font-bold text-slate-900">Cadastrar Novo Órgão</h3>
-                <button onclick="fecharModal('modal-orgao')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form id="form-orgao" onsubmit="salvarOrgao(event)">
-                <input type="hidden" id="org-edit-id">
-                <div class="space-y-3 text-sm">
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Nome do Órgão / Secretaria</label>
-                        <input type="text" id="org-nome" required placeholder="Ex: Secretaria da Fazenda" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Sigla</label>
-                        <input type="text" id="org-sigla" required placeholder="Ex: SEFAZ" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Contato Principal</label>
-                        <input type="text" id="org-contato" required placeholder="Nome do gestor ou ponto focal" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label>
-                        <input type="email" id="org-email" required placeholder="contato@orgao.pe.gov.br" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Telefone / Ramal</label>
-                        <input type="text" id="org-telefone" placeholder="Ex: (81) 3181-0000" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Descrição / Atribuições</label>
-                        <textarea id="org-descricao" rows="2" placeholder="Resumo das principais atribuições do órgão ou contexto..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none"></textarea>
-                    </div>
-                </div>
-                <div class="flex justify-end gap-2 mt-6">
-                    <button type="button" onclick="fecharModal('modal-orgao')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium">Cancelar</button>
-                    <button id="btn-salvar-orgao" type="submit" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition">Salvar Órgão</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL NOVA/EDITAR DEMANDA -->
-    <div id="modal-demanda" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 id="titulo-modal-demanda" class="text-lg font-bold text-slate-900">Nova Demanda / Projeto</h3>
-                <button onclick="fecharModal('modal-demanda')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form id="form-demanda" onsubmit="salvarDemanda(event)">
-                <input type="hidden" id="dem-edit-id">
-                <div class="space-y-3 text-sm">
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Órgão Solicitante</label>
-                        <select id="dem-orgao" required class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                            <!-- Populado via JS -->
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Título da Demanda</label>
-                        <input type="text" id="dem-titulo" required placeholder="Ex: Migração de E-mails SOGo" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Descrição / Detalhes</label>
-                        <textarea id="dem-descricao" rows="2" placeholder="Detalhamento do projeto, requisitos ou número de chamados..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none"></textarea>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Categoria</label>
-                        <select id="dem-categoria" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                            <option value="Infraestrutura / E-mail">Infraestrutura / E-mail</option>
-                            <option value="Transformação Digital">Transformação Digital</option>
-                            <option value="Sistemas / Web">Sistemas / Web</option>
-                            <option value="Capacitação & Treinamento">Capacitação & Treinamento</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Prioridade</label>
-                        <select id="dem-prioridade" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                            <option value="Baixa">Baixa</option>
-                            <option value="Média" selected>Média</option>
-                            <option value="Alta">Alta</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Status Inicial</label>
-                        <select id="dem-status" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                            <option value="Pendente">Pendente</option>
-                            <option value="Em Andamento" selected>Em Andamento</option>
-                            <option value="Concluído">Concluído</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex justify-end gap-2 mt-6">
-                    <button type="button" onclick="fecharModal('modal-demanda')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium">Cancelar</button>
-                    <button id="btn-salvar-demanda" type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-500 transition">Cadastrar Demanda</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Application Script -->
     <script>
-    (() => {
-        const STORAGE = {
-            orgaos: 'ati_crm_orgaos',
-            demandas: 'ati_crm_demandas'
-        };
+        let adminEmail = null;
 
-        const DEFAULT_ORGAOS = [
-            { id: 'org-1', nome: 'Secretaria da Fazenda', sigla: 'SEFAZ', contato: 'Carlos Eduardo', email: 'carlos@sefaz.pe.gov.br', telefone: '(81) 3181-1000', descricao: 'Responsável pela gestão financeira e arrecadação tributária do Estado de Pernambuco.' },
-            { id: 'org-2', nome: 'Secretaria de Planejamento e Gestão', sigla: 'SEPLAG', contato: 'Mariana Lima', email: 'mariana@seplag.pe.gov.br', telefone: '(81) 3181-2000', descricao: 'Planejamento estratégico estadual, orçamentos e diretrizes de desenvolvimento.' },
-            { id: 'org-3', nome: 'Secretaria de Educação', sigla: 'SEE', contato: 'Roberto Mendes', email: 'roberto@see.pe.gov.br', telefone: '(81) 3181-3000', descricao: 'Gestão da rede pública estadual de ensino e políticas educacionais.' }
-        ];
+        function autenticarAdmin() {
+            const email = prompt("Informe seu e-mail institucional (@ati.pe.gov.br) para acessar o painel de administração da PRGD:");
+            if (!email) return;
 
-        const DEFAULT_DEMANDAS = [
-            { 
-                id: 'dem-101', 
-                orgaoId: 'org-1', 
-                titulo: 'Migração de E-mails Expresso -> SOGo.PE', 
-                categoria: 'Infraestrutura / E-mail', 
-                prioridade: 'Alta', 
-                status: 'Em Andamento',
-                descricao: 'Projeto prioritário de migração de 120.000 contas de e-mail institucional para o ambiente SOGo.PE.',
-                historico: [
-                    { data: '2026-08-10 09:30', texto: 'Reunião técnica de alinhamento com a equipe de TI da SEFAZ.' },
-                    { data: '2026-08-20 14:15', texto: 'Início dos testes de homologação dos lotes de usuários do setor financeiro.' }
-                ]
-            },
-            { 
-                id: 'dem-102', 
-                orgaoId: 'org-2', 
-                titulo: 'Adesão ao Projeto Residência Digital', 
-                categoria: 'Transformação Digital', 
-                prioridade: 'Média', 
-                status: 'Concluído',
-                descricao: 'Inclusão da SEPLAG no programa de Residência em Transformação Digital UPE/ATI.',
-                historico: [
-                    { data: '2026-07-05 11:00', texto: 'Assinatura do termo de cooperação técnica.' }
-                ]
-            },
-            { 
-                id: 'dem-103', 
-                orgaoId: 'org-3', 
-                titulo: 'Atualização do Portal Institucional', 
-                categoria: 'Sistemas / Web', 
-                prioridade: 'Baixa', 
-                status: 'Pendente',
-                descricao: 'Ajuste de layout e modernização do portal de serviços e transparência.',
-                historico: [
-                    { data: '2026-09-01 16:00', texto: 'Chamado registrado aguardando envio do briefing visual.' }
-                ]
-            }
-        ];
-
-        let canUseLocalStorage = true;
-
-        function loadArray(key, fallback) {
-            try {
-                const raw = localStorage.getItem(key);
-                if (!raw) return structuredClone(fallback);
-                const parsed = JSON.parse(raw);
-                return Array.isArray(parsed) ? parsed : structuredClone(fallback);
-            } catch (error) {
-                canUseLocalStorage = false;
-                document.getElementById('storage-warning')?.classList.remove('hidden');
-                return structuredClone(fallback);
+            if (/^[a-zA-Z0-9._%+-]+@ati\.pe\.gov\.br$/.test(email.trim().toLowerCase())) {
+                adminEmail = email.trim().toLowerCase();
+                document.getElementById('admin-email-display').textContent = adminEmail;
+                document.getElementById('admin-banner').classList.remove('hidden');
+                document.getElementById('btn-login-admin').classList.add('hidden');
+                
+                ['btn-novo-evento', 'btn-novo-local', 'btn-novo-fornecedor'].forEach(id => {
+                    document.getElementById(id)?.classList.remove('hidden');
+                });
+                alert('Acesso administrativo concedido na PRGD!');
+            } else {
+                alert('Acesso negado: Apenas e-mails do domínio @ati.pe.gov.br possuem permissão de administração.');
             }
         }
 
-        let state = {
-            orgaos: loadArray(STORAGE.orgaos, DEFAULT_ORGAOS),
-            demandas: loadArray(STORAGE.demandas, DEFAULT_DEMANDAS)
-        };
-
-        // Standardize IDs and fields
-        state.demandas.forEach(d => {
-            if (d.orgaoId === '1' || d.orgaoId === 1) d.orgaoId = 'org-1';
-            if (d.orgaoId === '2' || d.orgaoId === 2) d.orgaoId = 'org-2';
-            if (d.orgaoId === '3' || d.orgaoId === 3) d.orgaoId = 'org-3';
-            if (!d.historico) d.historico = [];
-            if (!d.descricao) d.descricao = 'Sem descrição informada.';
-        });
-
-        state.orgaos.forEach(o => {
-            if (!o.telefone) o.telefone = '(81) 3181-0000';
-            if (!o.descricao) o.descricao = 'Órgão integrante da estrutura do Poder Executivo do Estado de Pernambuco.';
-        });
-
-        let abaAtual = 'demandas';
-        let buscaAtual = '';
-
-        function persist() {
-            if (canUseLocalStorage) {
-                try {
-                    localStorage.setItem(STORAGE.orgaos, JSON.stringify(state.orgaos));
-                    localStorage.setItem(STORAGE.demandas, JSON.stringify(state.demandas));
-                } catch (e) {
-                    console.warn('LocalStorage inacessível.', e);
-                }
-            }
-            render();
-        }
-
-        function id(prefix) {
-            return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        }
-
-        function normalize(value) {
-            return String(value ?? '')
-                .normalize('NFD')
-                .replace(/[̀-ͯ]/g, '')
-                .toLowerCase()
-                .trim();
-        }
-
-        function escapeHtml(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        function getOrg(id) {
-            return state.orgaos.find(o => o.id === id);
-        }
-
-        function getFilteredDemandas() {
-            const q = normalize(buscaAtual);
-            if (!q) return state.demandas;
-            return state.demandas.filter(d => {
-                const org = getOrg(d.orgaoId);
-                return [
-                    d.titulo, d.categoria, d.prioridade, d.status, d.descricao,
-                    org?.nome, org?.sigla, org?.contato, org?.email
-                ].some(value => normalize(value).includes(q));
+        function logoutAdmin() {
+            adminEmail = null;
+            document.getElementById('admin-banner').classList.add('hidden');
+            document.getElementById('btn-login-admin').classList.remove('hidden');
+            ['btn-novo-evento', 'btn-novo-local', 'btn-novo-fornecedor'].forEach(id => {
+                document.getElementById(id)?.classList.add('hidden');
             });
         }
-
-        function getFilteredOrgaos() {
-            const q = normalize(buscaAtual);
-            if (!q) return state.orgaos;
-            return state.orgaos.filter(o =>
-                [o.nome, o.sigla, o.contato, o.email, o.descricao, o.telefone]
-                    .some(value => normalize(value).includes(q))
-            );
-        }
-
-        function render() {
-            document.getElementById('kpi-orgaos').textContent = state.orgaos.length;
-            document.getElementById('kpi-demandas').textContent = state.demandas.length;
-            document.getElementById('kpi-andamento').textContent =
-                state.demandas.filter(d => d.status === 'Em Andamento').length;
-            document.getElementById('kpi-concluidas').textContent =
-                state.demandas.filter(d => d.status === 'Concluído').length;
-
-            renderDemandas();
-            renderOrgaos();
-            populateOrgSelect();
-            applyTab();
-        }
-
-        function renderDemandas() {
-            const tabela = document.getElementById('tabela-demandas');
-            const demandas = getFilteredDemandas();
-
-            if (!demandas.length) {
-                tabela.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="p-8 text-center text-slate-400">
-                            ${buscaAtual ? 'Nenhuma demanda encontrada para a busca.' : 'Nenhuma demanda cadastrada.'}
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            tabela.innerHTML = demandas.map(d => {
-                const org = getOrg(d.orgaoId);
-                const badgeColor =
-                    d.status === 'Concluído'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : d.status === 'Em Andamento'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-amber-100 text-amber-800';
-
-                const prioColor =
-                    d.prioridade === 'Alta'
-                        ? 'text-red-600 font-bold'
-                        : d.prioridade === 'Média'
-                            ? 'text-amber-600 font-medium'
-                            : 'text-slate-500';
-
-                return `
-                    <tr class="hover:bg-slate-50 transition cursor-pointer group" onclick="abrirDetalheDemanda('${escapeHtml(d.id)}')">
-                        <td class="p-4" onclick="event.stopPropagation(); verDetalheOrgaoDireto('${escapeHtml(org?.id)}')">
-                            <span class="font-bold text-blue-900 group-hover:underline">${escapeHtml(org?.sigla || 'N/A')}</span>
-                            <div class="text-xs text-slate-400">${escapeHtml(org?.nome || 'Órgão não encontrado')}</div>
-                        </td>
-                        <td class="p-4">
-                            <div class="font-medium text-slate-900 group-hover:text-blue-600 transition flex items-center gap-2">
-                                ${escapeHtml(d.titulo)}
-                                <i class="fa-solid fa-chevron-right text-slate-300 text-xs opacity-0 group-hover:opacity-100 transition"></i>
-                            </div>
-                            <div class="text-xs text-slate-400 line-clamp-1">${escapeHtml(d.descricao)}</div>
-                        </td>
-                        <td class="p-4 text-slate-500 text-xs">${escapeHtml(d.categoria)}</td>
-                        <td class="p-4 ${prioColor} text-xs">${escapeHtml(d.prioridade)}</td>
-                        <td class="p-4">
-                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeColor}">
-                                ${escapeHtml(d.status)}
-                            </span>
-                        </td>
-                        <td class="p-4 text-center whitespace-nowrap" onclick="event.stopPropagation()">
-                            <button type="button" onclick="alternarStatus('${escapeHtml(d.id)}')"
-                                class="text-slate-400 hover:text-blue-600 p-1.5 transition"
-                                title="Avançar status" aria-label="Avançar status">
-                                <i class="fa-solid fa-rotate"></i>
-                            </button>
-                            <button type="button" onclick="editarDemanda('${escapeHtml(d.id)}')"
-                                class="text-slate-400 hover:text-amber-600 p-1.5 transition"
-                                title="Editar demanda" aria-label="Editar demanda">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button type="button" onclick="excluirDemanda('${escapeHtml(d.id)}')"
-                                class="text-slate-400 hover:text-red-600 p-1.5 transition"
-                                title="Excluir demanda" aria-label="Excluir demanda">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>`;
-            }).join('');
-        }
-
-        function renderOrgaos() {
-            const container = document.getElementById('cards-orgaos');
-            const orgaos = getFilteredOrgaos();
-
-            if (!orgaos.length) {
-                container.innerHTML = `
-                    <p class="col-span-full text-center text-slate-400 py-8">
-                        ${buscaAtual ? 'Nenhum órgão encontrado para a busca.' : 'Nenhum órgão cadastrado.'}
-                    </p>`;
-                return;
-            }
-
-            container.innerHTML = orgaos.map(o => {
-                const chamados = state.demandas.filter(d => d.orgaoId === o.id);
-                return `
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:border-blue-300 transition cursor-pointer group" onclick="abrirDetalheOrgao('${escapeHtml(o.id)}')">
-                        <div class="flex justify-between items-start mb-3 gap-3">
-                            <div class="min-w-0">
-                                <span class="bg-blue-100 text-blue-900 text-xs font-bold px-2.5 py-0.5 rounded-md">
-                                    ${escapeHtml(o.sigla)}
-                                </span>
-                                <h4 class="font-bold text-slate-800 mt-2 group-hover:text-blue-600 transition flex items-center gap-1.5">
-                                    ${escapeHtml(o.nome)}
-                                </h4>
-                            </div>
-                            <div class="flex gap-1 shrink-0" onclick="event.stopPropagation()">
-                                <button type="button" onclick="editarOrgao('${escapeHtml(o.id)}')"
-                                    class="text-slate-400 hover:text-amber-600 p-1.5" title="Editar órgão">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <button type="button" onclick="excluirOrgao('${escapeHtml(o.id)}')"
-                                    class="text-slate-400 hover:text-red-600 p-1.5" title="Excluir órgão">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-500 line-clamp-2 mb-3">${escapeHtml(o.descricao)}</p>
-                        <div class="text-xs text-slate-600 space-y-1.5 border-t border-slate-100 pt-3">
-                            <p class="flex items-center gap-2"><i class="fa-solid fa-user text-slate-400"></i> ${escapeHtml(o.contato)}</p>
-                            <p class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400"></i> ${escapeHtml(o.email)}</p>
-                            <p class="flex items-center gap-2 font-medium text-blue-900"><i class="fa-solid fa-list-check text-blue-600"></i> ${chamados.length} demanda(s) / chamado(s)</p>
-                        </div>
-                    </div>`;
-            }).join('');
-        }
-
-        // --- DETALHES DA DEMANDA / HISTÓRICO ---
-        window.abrirDetalheDemanda = function(id) {
-            const d = state.demandas.find(item => item.id === id);
-            if (!d) return;
-
-            const org = getOrg(d.orgaoId);
-
-            document.getElementById('det-dem-badge-orgao').textContent = org?.sigla || 'N/A';
-            document.getElementById('det-dem-titulo').textContent = d.titulo;
-            document.getElementById('det-dem-sub').textContent = `${d.categoria} · Prioridade ${d.prioridade} · Status: ${d.status}`;
-            document.getElementById('det-dem-descricao').textContent = d.descricao || 'Sem detalhes informados.';
-            document.getElementById('interacao-demanda-id').value = d.id;
-
-            renderTimeline(d);
-            abrirModal('modal-detalhe-demanda');
-        };
-
-        function renderTimeline(demanda) {
-            const container = document.getElementById('timeline-demanda');
-            if (!demanda.historico || !demanda.historico.length) {
-                container.innerHTML = `<p class="text-xs text-slate-400 italic">Nenhuma interação ou parecer registrado até o momento.</p>`;
-                return;
-            }
-
-            container.innerHTML = demanda.historico.map(h => `
-                <div class="relative pl-2">
-                    <div class="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-blue-600 border-2 border-white"></div>
-                    <p class="text-[11px] font-bold text-slate-400">${escapeHtml(h.data)}</p>
-                    <p class="text-xs text-slate-700 mt-0.5">${escapeHtml(h.texto)}</p>
-                </div>
-            `).join('');
-        }
-
-        window.adicionarInteracao = function(e) {
-            e.preventDefault();
-            const demId = document.getElementById('interacao-demanda-id').value;
-            const texto = document.getElementById('interacao-texto').value.trim();
-
-            if (!demId || !texto) return;
-
-            const demanda = state.demandas.find(d => d.id === demId);
-            if (demanda) {
-                if (!demanda.historico) demanda.historico = [];
-                const agora = new Date();
-                const dataFormatada = agora.toISOString().replace('T', ' ').slice(0, 16);
-                demanda.historico.unshift({ data: dataFormatada, texto });
-                persist();
-                renderTimeline(demanda);
-                document.getElementById('interacao-texto').value = '';
-            }
-        };
-
-        // --- DETALHES DO ÓRGÃO / SECRETARIA ---
-        window.abrirDetalheOrgao = function(id) {
-            const o = getOrg(id);
-            if (!o) return;
-
-            document.getElementById('det-org-sigla-box').textContent = o.sigla;
-            document.getElementById('det-org-sigla').textContent = o.sigla;
-            document.getElementById('det-org-nome').textContent = o.nome;
-            document.getElementById('det-org-contato').textContent = o.contato;
-            document.getElementById('det-org-email').textContent = o.email;
-            document.getElementById('det-org-telefone').textContent = o.telefone || '(81) 3181-0000';
-            document.getElementById('det-org-descricao').textContent = o.descricao || 'Sem descrição cadastrada.';
-
-            const chamados = state.demandas.filter(d => d.orgaoId === o.id);
-            document.getElementById('det-org-count-demandas').textContent = `${chamados.length} registrada(s)`;
-
-            const listaChamados = document.getElementById('lista-demandas-orgao');
-            if (!chamados.length) {
-                listaChamados.innerHTML = `<p class="text-xs text-slate-400 py-2">Nenhum chamado ou demanda vinculada a esta secretaria.</p>`;
-            } else {
-                listaChamados.innerHTML = chamados.map(d => `
-                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex justify-between items-center cursor-pointer hover:bg-white hover:border-blue-300 transition" onclick="fecharModal('modal-detalhe-orgao'); abrirDetalheDemanda('${escapeHtml(d.id)}')">
-                        <div>
-                            <p class="font-bold text-xs text-slate-800">${escapeHtml(d.titulo)}</p>
-                            <p class="text-[11px] text-slate-400">${escapeHtml(d.categoria)} · Prioridade ${escapeHtml(d.prioridade)}</p>
-                        </div>
-                        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${d.status === 'Concluído' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">${escapeHtml(d.status)}</span>
-                    </div>
-                `).join('');
-            }
-
-            abrirModal('modal-detalhe-orgao');
-        };
-
-        window.verDetalheOrgaoDireto = function(id) {
-            if (id && id !== 'undefined') abrirDetalheOrgao(id);
-        };
-
-        function populateOrgSelect(selectedId = '') {
-            const select = document.getElementById('dem-orgao');
-            if (!state.orgaos.length) {
-                select.innerHTML = '<option value="">Cadastre um órgão primeiro</option>';
-                select.disabled = true;
-                return;
-            }
-
-            select.disabled = false;
-            select.innerHTML =
-                '<option value="">Selecione o órgão...</option>' +
-                state.orgaos.map(o =>
-                    `<option value="${escapeHtml(o.id)}">${escapeHtml(o.sigla)} - ${escapeHtml(o.nome)}</option>`
-                ).join('');
-
-            if (selectedId) select.value = selectedId;
-        }
-
-        function applyTab() {
-            const isDemandas = abaAtual === 'demandas';
-            document.getElementById('aba-demandas').classList.toggle('hidden', !isDemandas);
-            document.getElementById('aba-orgaos').classList.toggle('hidden', isDemandas);
-
-            document.getElementById('btn-tab-demandas').className =
-                `px-4 py-2 rounded-lg text-sm font-semibold transition ${isDemandas ? 'tab-active' : 'tab-inactive'}`;
-            document.getElementById('btn-tab-orgaos').className =
-                `px-4 py-2 rounded-lg text-sm font-semibold transition ${!isDemandas ? 'tab-active' : 'tab-inactive'}`;
-        }
-
-        window.mudarAba = function(aba) {
-            abaAtual = aba;
-            applyTab();
-        };
-
-        window.abrirModalOrgao = function(orgao = null) {
-            const form = document.getElementById('form-orgao');
-            form.reset();
-            document.getElementById('org-edit-id').value = orgao?.id || '';
-            document.getElementById('titulo-modal-orgao').textContent = orgao ? 'Editar Órgão' : 'Cadastrar Novo Órgão';
-            document.getElementById('btn-salvar-orgao').textContent = orgao ? 'Salvar Alterações' : 'Salvar Órgão';
-
-            if (orgao) {
-                document.getElementById('org-nome').value = orgao.nome;
-                document.getElementById('org-sigla').value = orgao.sigla;
-                document.getElementById('org-contato').value = orgao.contato;
-                document.getElementById('org-email').value = orgao.email;
-                document.getElementById('org-telefone').value = orgao.telefone || '';
-                document.getElementById('org-descricao').value = orgao.descricao || '';
-            }
-
-            abrirModal('modal-orgao');
-            document.getElementById('org-nome').focus();
-        };
-
-        window.abrirModalDemanda = function(demanda = null) {
-            if (!state.orgaos.length) {
-                alert('Cadastre pelo menos um órgão antes de criar uma demanda.');
-                abrirModalOrgao();
-                return;
-            }
-
-            const form = document.getElementById('form-demanda');
-            form.reset();
-            document.getElementById('dem-edit-id').value = demanda?.id || '';
-            document.getElementById('titulo-modal-demanda').textContent = demanda ? 'Editar Demanda / Projeto' : 'Nova Demanda / Projeto';
-            document.getElementById('btn-salvar-demanda').textContent = demanda ? 'Salvar Alterações' : 'Cadastrar Demanda';
-
-            populateOrgSelect(demanda?.orgaoId || state.orgaos[0].id);
-
-            if (demanda) {
-                document.getElementById('dem-titulo').value = demanda.titulo;
-                document.getElementById('dem-descricao').value = demanda.descricao || '';
-                document.getElementById('dem-categoria').value = demanda.categoria;
-                document.getElementById('dem-prioridade').value = demanda.prioridade;
-                document.getElementById('dem-status').value = demanda.status;
-            }
-
-            abrirModal('modal-demanda');
-            document.getElementById('dem-titulo').focus();
-        };
-
-        function abrirModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-        }
-
-        window.fecharModal = function(id) {
-            document.getElementById(id).classList.add('hidden');
-            if (document.querySelectorAll('[id^="modal-"]:not(.hidden)').length === 0) {
-                document.body.classList.remove('overflow-hidden');
-            }
-        };
-
-        window.salvarOrgao = function(e) {
-            e.preventDefault();
-
-            const editId = document.getElementById('org-edit-id').value;
-            const nome = document.getElementById('org-nome').value.trim();
-            const sigla = document.getElementById('org-sigla').value.trim().toUpperCase();
-            const contato = document.getElementById('org-contato').value.trim();
-            const email = document.getElementById('org-email').value.trim().toLowerCase();
-            const telefone = document.getElementById('org-telefone').value.trim();
-            const descricao = document.getElementById('org-descricao').value.trim();
-
-            if (!nome || !sigla || !contato || !email) return;
-
-            const duplicate = state.orgaos.some(o =>
-                o.id !== editId && normalize(o.sigla) === normalize(sigla)
-            );
-            if (duplicate) {
-                alert('Já existe um órgão cadastrado com essa sigla.');
-                return;
-            }
-
-            if (editId) {
-                const org = getOrg(editId);
-                if (org) Object.assign(org, { nome, sigla, contato, email, telefone, descricao });
-            } else {
-                state.orgaos.push({ id: id('org'), nome, sigla, contato, email, telefone, descricao });
-            }
-
-            persist();
-            fecharModal('modal-orgao');
-            document.getElementById('form-orgao').reset();
-        };
-
-        window.salvarDemanda = function(e) {
-            e.preventDefault();
-
-            const editId = document.getElementById('dem-edit-id').value;
-            const orgaoId = document.getElementById('dem-orgao').value;
-            const titulo = document.getElementById('dem-titulo').value.trim();
-            const descricao = document.getElementById('dem-descricao').value.trim();
-            const categoria = document.getElementById('dem-categoria').value;
-            const prioridade = document.getElementById('dem-prioridade').value;
-            const status = document.getElementById('dem-status').value;
-
-            if (!orgaoId || !titulo) {
-                alert('Selecione o órgão e informe o título da demanda.');
-                return;
-            }
-
-            const payload = { orgaoId, titulo, descricao, categoria, prioridade, status };
-
-            if (editId) {
-                const demanda = state.demandas.find(d => d.id === editId);
-                if (demanda) Object.assign(demanda, payload);
-            } else {
-                state.demandas.push({ id: id('dem'), ...payload, historico: [{ data: new Date().toISOString().replace('T', ' ').slice(0, 16), texto: 'Demanda aberta no sistema.' }] });
-            }
-
-            persist();
-            fecharModal('modal-demanda');
-            document.getElementById('form-demanda').reset();
-        };
-
-        window.alternarStatus = function(id) {
-            const d = state.demandas.find(item => item.id === id);
-            if (!d) return;
-
-            const fluxo = ['Pendente', 'Em Andamento', 'Concluído'];
-            const novoStatus = fluxo[(fluxo.indexOf(d.status) + 1) % fluxo.length];
-            d.status = novoStatus;
-            
-            if (!d.historico) d.historico = [];
-            const dataFormatada = new Date().toISOString().replace('T', ' ').slice(0, 16);
-            d.historico.unshift({ data: dataFormatada, texto: `Status alterado para "${novoStatus}".` });
-
-            persist();
-        };
-
-        window.editarDemanda = function(id) {
-            const d = state.demandas.find(item => item.id === id);
-            if (d) abrirModalDemanda(d);
-        };
-
-        window.editarOrgao = function(id) {
-            const o = getOrg(id);
-            if (o) abrirModalOrgao(o);
-        };
-
-        window.excluirDemanda = function(id) {
-            const d = state.demandas.find(item => item.id === id);
-            if (!d) return;
-
-            if (!confirm(`Excluir a demanda "${d.titulo}"? Essa ação não pode ser desfeita.`)) return;
-            state.demandas = state.demandas.filter(item => item.id !== id);
-            persist();
-        };
-
-        window.excluirOrgao = function(id) {
-            const o = getOrg(id);
-            if (!o) return;
-
-            const vinculadas = state.demandas.filter(d => d.orgaoId === id).length;
-            if (vinculadas) {
-                alert(`Não é possível excluir ${o.sigla}: existem ${vinculadas} demanda(s) vinculada(s). Edite ou exclua essas demandas primeiro.`);
-                return;
-            }
-
-            if (!confirm(`Excluir o órgão "${o.nome}"? Essa ação não pode ser desfeita.`)) return;
-            state.orgaos = state.orgaos.filter(item => item.id !== id);
-            persist();
-        };
-
-        window.filtrarConteudo = function() {
-            buscaAtual = document.getElementById('input-busca').value;
-            renderDemandas();
-            renderOrgaos();
-        };
-
-        document.addEventListener('keydown', e => {
-            if (e.key !== 'Escape') return;
-            document.querySelectorAll('[id^="modal-"]:not(.hidden)').forEach(modal => fecharModal(modal.id));
-        });
-
-        document.querySelectorAll('[id^="modal-"]').forEach(modal => {
-            modal.addEventListener('click', e => {
-                if (e.target === modal) fecharModal(modal.id);
-            });
-        });
-
-        render();
-    })();
     </script>
-
-    <footer class="max-w-7xl mx-auto px-4 pb-6 text-xs text-slate-400 text-center">CRM Relacionamento de Governo Digital · ATI PE v4.1</footer>
 </body>
 </html>

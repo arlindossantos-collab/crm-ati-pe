@@ -1,17 +1,18 @@
-# CRM Relacionamento de Governo Digital - ATI/PE (`crm-ati-pe`) v4.1
+# PRGD - Plataforma de Relacionamento do Governo Digital (v5.1)
 
-Sistema de Gerenciamento de Relacionamento de Clientes (CRM) desenvolvido para a Agência Estadual de Tecnologia da Informação de Pernambuco (ATI-PE).
+A **PRGD** é o sistema centralizado da Agência Estadual de Tecnologia da Informação de Pernambuco (ATI-PE) para gestão de relacionamento com órgãos governamentais, eventos institucionais e fornecedores de tecnologia.
 
-## 🚀 Novidades da Versão 4.1
-* **Definição Clara de Escopo (Positivo vs. Negativo):** Mapeamento explícito de escopo positivo (MVP funcional) e escopo negativo no arquivo SDD para direcionamento rigoroso de geração via IAs Agentivas (Entigraft, Cursor, Codex, Cloud Code).
-* **Requisitos Não Funcionais & Diretrizes de Segurança:** Adicionadas especificações de sanitização contra XSS, armazenamento seguro local e diretrizes de acessibilidade e segurança da informação.
-* **Modal de Histórico da Demanda:** Clique em qualquer demanda para visualizar a descrição completa, linha do tempo de atendimentos e adicione pareceres/notas de reunião.
-* **Perfil da Secretaria / Órgão:** Clique no card da secretaria para ver contatos, telefones/ramais, atribuições institucionais e todos os chamados vinculados.
-* **Histórico Automático:** Alterações de status geram carimbos automáticos de data/hora na linha do tempo do projeto.
+## 🚀 Módulos da Plataforma
+1. **Gestão de Demandas:** Acompanhamento centralizado de chamados e solicitações com histórico de interações.
+2. **Gestão de Eventos e Locais:** Calendário institucional, ficha técnica completa de espaços de eventos (Acessibilidade, Climatização, Som, Wi-Fi, Estacionamento) e divulgação oficial.
+3. **Gestão de Fornecedores:** Catálogo de parceiros em TIC categorizado por segmento com gestão contratual.
 
-## 📌 Atualização no GitHub
+## ✉️ Canal Oficial de Comunicação
+Eventos e notas institucionais da PRGD são divulgados com a assinatura do e-mail oficial **`relacionamento@ati.pe.gov.br`**.
+
+## 📌 Atualização do Repositório GitHub
 ```bash
 git add .
-git commit -m "v4.1: Ajustes de SDD com Escopo Positivo/Negativo, Segurança e RNF conforme orientacoes do Prof. Alvaro"
+git commit -m "v5.1: Renomeando aplicacao para PRGD - Plataforma de Relacionamento do Governo Digital"
 git push origin main
 ```
