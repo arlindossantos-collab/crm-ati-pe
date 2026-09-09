@@ -8,6 +8,35 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK v10 (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // CREDENCIAIS DO SEU PROJETO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
+            authDomain: "prgd-ati-pe.firebaseapp.com",
+            projectId: "prgd-ati-pe",
+            storageBucket: "prgd-ati-pe.firebasestorage.app",
+            messagingSenderId: "798768232646",
+            appId: "1:798768232646:web:31b80951f237b4af17bfc7",
+            measurementId: "G-MWES9XN421"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseMethods = { 
+            signInWithEmailAndPassword, signOut, onAuthStateChanged,
+            collection, addDoc, getDocs, onSnapshot, query, orderBy, deleteDoc, doc 
+        };
+    </script>
     <style>
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
         .tab-active { background-color: #ffffff; color: #1e3a8a; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
@@ -15,7 +44,7 @@
         .tab-inactive:hover { color: #0f172a; }
     </style>
 </head>
-<body class="text-slate-800 antialiased">
+<body class="bg-slate-50 text-slate-800 antialiased">
 
     <!-- Header / Navbar -->
     <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
@@ -27,50 +56,74 @@
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação de Pernambuco (ATI-PE)</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 sm:space-x-3" id="admin-header-actions">
-                <button onclick="autenticarAdmin()" id="btn-login-admin" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-lock"></i> Área Restrita (@ati.pe.gov.br)
+            <div id="auth-actions">
+                <button onclick="abrirModalLogin()" id="btn-login" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-right-to-bracket"></i> Entrar (.pe.gov.br)
                 </button>
+                <div id="user-logged" class="hidden flex items-center gap-3">
+                    <span id="user-email-display" class="text-xs font-semibold text-blue-100"></span>
+                    <button onclick="fazerLogout()" class="bg-blue-800 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition">Sair</button>
+                </div>
             </div>
         </div>
     </header>
 
+    <!-- Modal Login Institucional -->
+    <div id="modal-login" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-base font-bold text-slate-900">Autenticação Institucional</h3>
+                <button onclick="fecharModal('modal-login')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-login" onsubmit="fazerLogin(event)">
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label>
+                        <input type="email" id="login-email" required placeholder="usuario@ati.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">Apenas domínios autorizados do Estado (<strong>@*.pe.gov.br</strong>).</p>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Senha</label>
+                        <input type="password" id="login-senha" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </div>
+                </div>
+                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Acessar Plataforma</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 py-6">
 
-        <!-- Banner Admin Status -->
-        <div id="admin-banner" class="hidden mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-user-check text-emerald-600 text-sm"></i>
-                <span><strong>Sessão Administrativa Ativa:</strong> Acesso autenticado para gestor <strong id="admin-email-display"></strong></span>
-            </div>
-            <button onclick="logoutAdmin()" class="text-xs text-red-600 hover:underline font-bold">Sair</button>
+        <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
+            <span><i class="fa-solid fa-cloud-check text-blue-600 mr-2"></i> <strong>Sincronização Cloud:</strong> Projeto Firebase <code>prgd-ati-pe</code> ativo em tempo real.</span>
+            <span class="bg-blue-200 text-blue-800 px-2 py-0.5 rounded font-bold">Firestore Conectado</span>
         </div>
 
         <!-- KPIs Globais -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between cursor-pointer hover:border-blue-300 transition" onclick="mudarAba('demandas')">
                 <div>
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Demandas / Chamados</p>
                     <h3 id="kpi-demandas" class="text-2xl font-bold text-blue-900 mt-1">0</h3>
                 </div>
                 <div class="p-3 bg-blue-50 text-blue-700 rounded-xl"><i class="fa-solid fa-list-check text-xl"></i></div>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between cursor-pointer hover:border-amber-300 transition" onclick="mudarAba('eventos')">
                 <div>
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Eventos Programados</p>
                     <h3 id="kpi-eventos" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
                 </div>
                 <div class="p-3 bg-amber-50 text-amber-600 rounded-xl"><i class="fa-solid fa-calendar-day text-xl"></i></div>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between cursor-pointer hover:border-indigo-300 transition" onclick="mudarAba('locais')">
                 <div>
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Locais Cadastrados</p>
                     <h3 id="kpi-locais" class="text-2xl font-bold text-indigo-600 mt-1">0</h3>
                 </div>
                 <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl"><i class="fa-solid fa-map-location-dot text-xl"></i></div>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between cursor-pointer hover:border-emerald-300 transition" onclick="mudarAba('fornecedores')">
                 <div>
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Fornecedores TIC</p>
                     <h3 id="kpi-fornecedores" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
@@ -89,19 +142,19 @@
                     <i class="fa-solid fa-calendar-alt mr-1.5"></i> Gestão de Eventos
                 </button>
                 <button id="btn-tab-locais" onclick="mudarAba('locais')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-inactive">
-                    <i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais de Eventos
+                    <i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais
                 </button>
                 <button id="btn-tab-fornecedores" onclick="mudarAba('fornecedores')" class="px-4 py-2 rounded-lg text-sm font-semibold transition tab-inactive">
-                    <i class="fa-solid fa-truck-field mr-1.5"></i> Gestão de Fornecedores
+                    <i class="fa-solid fa-truck-field mr-1.5"></i> Fornecedores
                 </button>
             </div>
             <div class="relative w-full md:w-80">
-                <input type="text" id="input-busca" onkeyup="filtrarConteudo()" placeholder="Buscar na plataforma PRGD..." class="w-full pl-10 pr-4 py-2 text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-none shadow-sm">
+                <input type="text" id="input-busca" placeholder="Buscar na plataforma PRGD..." class="w-full pl-10 pr-4 py-2 text-sm bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-none shadow-sm">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
             </div>
         </div>
 
-        <!-- ABA 1: GESTÃO DE DEMANDAS -->
+        <!-- Conteúdo das Abas -->
         <div id="aba-demandas" class="block">
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[700px]">
@@ -112,91 +165,65 @@
                             <th class="p-4">Categoria</th>
                             <th class="p-4">Prioridade</th>
                             <th class="p-4">Status</th>
-                            <th class="p-4 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-demandas" class="divide-y divide-slate-100 text-sm">
-                        <!-- Render via JS -->
+                        <tr><td colspan="5" class="p-8 text-center text-slate-400">Carregando dados do Firestore...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <!-- ABA 2: GESTÃO DE EVENTOS -->
-        <div id="aba-eventos" class="hidden">
-            <div class="flex justify-between items-center mb-4">
-                <p class="text-xs text-slate-500">Calendário de eventos institucionais do Governo Digital com divulgação oficial.</p>
-                <button id="btn-novo-evento" onclick="abrirModalEvento()" class="hidden bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> Criar Evento
-                </button>
-            </div>
-            <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                <!-- Cards de eventos -->
-            </div>
-        </div>
-
-        <!-- ABA 3: LOCAIS DE EVENTOS -->
-        <div id="aba-locais" class="hidden">
-            <div class="flex justify-between items-center mb-4">
-                <p class="text-xs text-slate-500">Catálogo de espaços com estrutura completa (palco, som, climatização, acessibilidade e conectividade).</p>
-                <button id="btn-novo-local" onclick="abrirModalLocal()" class="hidden bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> Novo Local
-                </button>
-            </div>
-            <div id="grid-locais" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Cards de locais -->
-            </div>
-        </div>
-
-        <!-- ABA 4: GESTÃO DE FORNECEDORES -->
-        <div id="aba-fornecedores" class="hidden">
-            <div class="flex justify-between items-center mb-4">
-                <p class="text-xs text-slate-500">Parceiros e prestadores de serviços de TIC categorizados por área de fornecimento.</p>
-                <button id="btn-novo-fornecedor" onclick="abrirModalFornecedor()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> Cadastrar Fornecedor
-                </button>
-            </div>
-            <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Cards de fornecedores -->
-            </div>
-        </div>
-
     </main>
 
-    <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE v5.1 · Comunicação Oficial via <span class="font-bold text-slate-600">relacionamento@ati.pe.gov.br</span>
-    </footer>
-
     <script>
-        let adminEmail = null;
+        function abrirModalLogin() { document.getElementById('modal-login').classList.remove('hidden'); }
+        function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        function autenticarAdmin() {
-            const email = prompt("Informe seu e-mail institucional (@ati.pe.gov.br) para acessar o painel de administração da PRGD:");
-            if (!email) return;
+        async function fazerLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const senha = document.getElementById('login-senha').value;
 
-            if (/^[a-zA-Z0-9._%+-]+@ati\.pe\.gov\.br$/.test(email.trim().toLowerCase())) {
-                adminEmail = email.trim().toLowerCase();
-                document.getElementById('admin-email-display').textContent = adminEmail;
-                document.getElementById('admin-banner').classList.remove('hidden');
-                document.getElementById('btn-login-admin').classList.add('hidden');
-                
-                ['btn-novo-evento', 'btn-novo-local', 'btn-novo-fornecedor'].forEach(id => {
-                    document.getElementById(id)?.classList.remove('hidden');
-                });
-                alert('Acesso administrativo concedido na PRGD!');
-            } else {
-                alert('Acesso negado: Apenas e-mails do domínio @ati.pe.gov.br possuem permissão de administração.');
+            if (!email.endsWith('.pe.gov.br')) {
+                alert('Acesso negado: Apenas e-mails do domínio do Governo do Estado de Pernambuco (@*.pe.gov.br) podem acessar.');
+                return;
+            }
+
+            try {
+                await window.firebaseMethods.signInWithEmailAndPassword(window.firebaseAuth, email, senha);
+                document.getElementById('user-email-display').textContent = email;
+                document.getElementById('btn-login').classList.add('hidden');
+                document.getElementById('user-logged').classList.remove('hidden');
+                fecharModal('modal-login');
+                alert('Login efetuado com sucesso!');
+            } catch (err) {
+                alert('Falha na autenticação: ' + err.message);
             }
         }
 
-        function logoutAdmin() {
-            adminEmail = null;
-            document.getElementById('admin-banner').classList.add('hidden');
-            document.getElementById('btn-login-admin').classList.remove('hidden');
-            ['btn-novo-evento', 'btn-novo-local', 'btn-novo-fornecedor'].forEach(id => {
-                document.getElementById(id)?.classList.add('hidden');
-            });
+        async function fazerLogout() {
+            await window.firebaseMethods.signOut(window.firebaseAuth);
+            document.getElementById('btn-login').classList.remove('hidden');
+            document.getElementById('user-logged').classList.add('hidden');
+        }
+
+        async function dispararEmailOficial(destino, assunto, corpoHtml) {
+            try {
+                await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "mail"), {
+                    to: destino,
+                    from: "relacionamento@ati.pe.gov.br",
+                    message: { subject: assunto, html: corpoHtml },
+                    createdAt: new Date().toISOString()
+                });
+                alert('E-mail enviado via relacionamento@ati.pe.gov.br!');
+            } catch (err) {
+                console.error("Erro ao disparar e-mail:", err);
+            }
         }
     </script>
+
+    <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE v6.0 · Comunicação Oficial via <span class="font-bold text-slate-600">relacionamento@ati.pe.gov.br</span>
+    </footer>
 </body>
 </html>

@@ -1,54 +1,60 @@
-# System Design Document (SDD): PRGD - Plataforma de Relacionamento do Governo Digital (v5.1)
+# System Design Document (SDD): PRGD - Plataforma de Relacionamento do Governo Digital (v6.0 - Firebase Edition)
 
 ## 1. Visão Geral
-A **PRGD - Plataforma de Relacionamento do Governo Digital** v5.1 é o sistema oficial de gestão da Agência Estadual de Tecnologia da Informação de Pernambuco (ATI-PE) composto por três módulos integrados:
+A **PRGD - Plataforma de Relacionamento do Governo Digital** v6.0 é o sistema oficial de gestão da Agência Estadual de Tecnologia da Informação de Pernambuco (ATI-PE) composto por três módulos integrados:
 1. **Gestão de Demandas:** Acompanhamento e histórico de chamados e projetos dos órgãos do Estado de Pernambuco.
 2. **Gestão de Eventos & Locais:** Agendamento de eventos, catálogo estrutural de locais e divulgação oficial via `relacionamento@ati.pe.gov.br`.
 3. **Gestão de Fornecedores:** Mapeamento categorizado de fornecedores e parceiros de Soluções em TIC.
 
 ---
 
-## 2. Instruções para Ferramentas Agentivas (Entigraft, Cursor, Codex, SpecOpen)
-
-> **DIRETRIZ DE EXECUÇÃO:** 
-> O agente de código deve implementar **estritamente** os requisitos e componentes marcados como **`[ESCOPO POSITIVO]`**.
-> Qualquer item rotulado como **`[ESCOPO NEGATIVO]`** deve ser desconsiderado na build atual.
+## 2. Autenticação & Regras de Segurança
+* **Domínio Restrito:** Autenticação restrita exclusivamente para contas de e-mail com sufixo **`@*.pe.gov.br`** (ex: `@ati.pe.gov.br`, `@sefaz.pe.gov.br`, `@seplag.pe.gov.br`).
+* **Firestore Security Rules:** Acesso de leitura e escrita negado para requisições anônimas ou fora do domínio padrão do Estado de Pernambuco.
 
 ---
 
-## 3. Especificação dos Módulos
-
-### 3.1. Módulo 1: Gestão de Demandas
-* **[ESCOPO POSITIVO] Painel & Indicadores:** Painel geral de órgãos solicitantes, categorias de projeto, prioridade e status (`Pendente`, `Em Andamento`, `Concluído`).
-* **[ESCOPO POSITIVO] Linha do Tempo de Atendimento:** Registro contínuo de pareceres técnicos e atas de reunião com carimbo automático de data/hora.
-
-### 3.2. Módulo 2: Gestão de Eventos & Locais
-* **[ESCOPO POSITIVO] Cadastro de Espaços / Locais de Eventos:** Ficha detalhada contendo:
-  * Endereço completo e geolocalização básica
-  * Capacidade total de lugares
-  * Infraestrutura: Estacionamento, sistema de som, iluminação, palco, climatização, cozinha, banheiros, acessibilidade PCD e conectividade/Wi-Fi
-  * Esfera / Propriedade: Público vs. Privado | Municipal (Prefeitura) vs. Estadual vs. Federal
-* **[ESCOPO POSITIVO] Calendário de Eventos & Card Padronizado:** Exibição em grid de cards com dimensões fixas (320x240px / layout responsivo).
-* **[ESCOPO POSITIVO] Painel Admin Restrito:** Autenticação de gestores por domínio de e-mail institucional `@ati.pe.gov.br`.
-* **[ESCOPO POSITIVO] Divulgação Oficial:** Geração de links públicos e disparo automático formatado em Português do Brasil a partir do e-mail `relacionamento@ati.pe.gov.br`.
-* **[ESCOPO POSITIVO] Histórico & Filtros:** Filtro avançado por data, local e status (Agendado vs. Realizado).
-
-### 3.3. Módulo 3: Gestão de Fornecedores
-* **[ESCOPO POSITIVO] Cadastro de Fornecedores:** Razão social, CNPJ, ponto focal, contatos e status contratual (`Ativo`, `Em Renovação`, `Encerrado`).
-* **[ESCOPO POSITIVO] Categorização por Tipo de Fornecimento:** Classificação por segmento (*Licenciamento*, *Nuvem/Infraestrutura*, *Telecom/Conectividade*, *Segurança da Informação*, *Consultoria*).
+## 3. Disparo Oficial de E-mails (`relacionamento@ati.pe.gov.br`)
+* **Mecanismo:** Integração com a extensão **Firebase Trigger Email**.
+* **Coleção:** `mail` no Firestore.
+* **Remetente Fixo:** `relacionamento@ati.pe.gov.br` configurado através de servidor SMTP institucional.
+* **Gatilho:** Inserção automática de documentos ao publicar ou divulgar novos eventos institucionais.
 
 ---
 
-## 4. Escopo Negativo (Fora do Escopo Atual)
+## 4. Estrutura das Coleções Firestore
 
-* **[ESCOPO NEGATIVO] Comercialização de Ingressos:** Todos os eventos da PRGD são estritamente institucionais e gratuitos.
-* **[ESCOPO NEGATIVO] Servidor SMTP Nativo:** Os disparos do e-mail `relacionamento@ati.pe.gov.br` utilizam protocolo `mailto:` client-side no MVP.
-* **[ESCOPO NEGATIVO] Assinatura Digital de Contratos:** Apenas cadastro e metadados dos fornecedores.
+### Coleção `orgaos`
+```json
+{
+  "nome": "Secretaria da Fazenda",
+  "sigla": "SEFAZ",
+  "contato": "Carlos Eduardo",
+  "email": "carlos@sefaz.pe.gov.br",
+  "telefone": "(81) 3181-1000"
+}
+```
 
----
+### Coleção `eventos`
+```json
+{
+  "titulo": "GOV IN PLAY 2026",
+  "data": "2026-10-24T14:00",
+  "localId": "loc_123",
+  "descricao": "Encontro de gestores de TIC do Estado de Pernambuco.",
+  "status": "Agendado",
+  "criadoPor": "gestor@ati.pe.gov.br"
+}
+```
 
-## 5. Requisitos Não Funcionais & Segurança da Informação
-
-* **RNF-01 (Sanitização XSS):** Escapamento obrigatório de entidades HTML em todos os inputs de formulários antes da inserção na DOM.
-* **RNF-02 (Validação de Domínio Institucional):** Restrição estrita do painel admin para contas `@ati.pe.gov.br`.
-* **RNF-03 (Desempenho & Interface):** UI/UX reativa em Tailwind CSS otimizada para navegação em desktop e dispositivos móveis.
+### Coleção `mail` (Trigger Email)
+```json
+{
+  "to": "destinatario@seplag.pe.gov.br",
+  "from": "relacionamento@ati.pe.gov.br",
+  "message": {
+    "subject": "[ATI-PE] Divulgação de Evento: GOV IN PLAY 2026",
+    "html": "<p>Convidamos para o evento institucional do Governo Digital...</p>"
+  }
+}
+```
