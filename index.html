@@ -829,11 +829,9 @@
         }
 
         function exportarUsuariosCSV() {
-            let csv = "Nome;Email;Orgao;Perfil
-";
+            let csv = "Nome;Email;Orgao;Perfil\n";
             window.dbData.usuarios.forEach(u => {
-                csv += `${u.nome || ''};${u.email || u.id};${u.subgrupoId || u.orgao || ''};${u.perfil || ''}
-`;
+                csv += `${u.nome || ''};${u.email || u.id};${u.subgrupoId || u.orgao || ''};${u.perfil || ''}\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
