@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRGD - Plataforma de Relacionamento do Governo Digital | ATI-PE</title>
+    <title>PRGD - Plataforma de Relacionamento do Governo Digital | ATI-PE (v10.2)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js para Dashboard Gerencial -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Firebase SDK v10 -->
+    <!-- Firebase SDK v10 (Modular) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -30,32 +28,30 @@
         const db = getFirestore(app);
 
         window.firebaseDb = db;
-        window.firebaseMethods = { 
-            collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot 
-        };
+        window.firebaseMethods = { collection, getDocs, doc, getDoc, query, where };
     </script>
     <style>
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
-        .tab-active { background-color: #ffffff; color: #1e3a8a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .tab-inactive { color: #64748b; font-weight: 500; }
-        .tab-inactive:hover { color: #0f172a; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
-    <!-- Header Navbar -->
+    <!-- Header Navbar com Tag de Versão Visível -->
     <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <div class="bg-white text-blue-900 px-3 py-1.5 rounded-lg font-bold text-xl tracking-wider">PRGD</div>
                 <div>
-                    <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
+                        <span class="bg-amber-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v10.2 FIX</span>
+                    </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
             </div>
             <div id="auth-actions">
                 <button onclick="abrirModalLogin()" id="btn-login" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-right-to-bracket"></i> Entrar / Cadastrar
+                    <i class="fa-solid fa-right-to-bracket"></i> Entrar / Autenticar
                 </button>
                 <div id="user-logged" class="hidden flex items-center gap-3">
                     <div class="text-right">
@@ -68,197 +64,132 @@
         </div>
     </header>
 
-    <!-- Modal Login / Cadastro -->
+    <!-- Modal Login com Log Técnico em Tempo Real -->
     <div id="modal-login" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="text-base font-bold text-slate-900">Acesso à Plataforma PRGD</h3>
+                <h3 class="text-base font-bold text-slate-900">Autenticação de Usuário</h3>
                 <button onclick="fecharModal('modal-login')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <div class="flex bg-slate-100 p-1 rounded-lg mb-4 text-xs font-semibold">
-                <button id="tab-auth-login" onclick="mudarAbaAuth('login')" class="w-1/2 py-1.5 rounded-md bg-white shadow-sm text-blue-900">Entrar</button>
-                <button id="tab-auth-register" onclick="mudarAbaAuth('register')" class="w-1/2 py-1.5 rounded-md text-slate-500">Solicitar Acesso</button>
-            </div>
-
-            <form id="form-login" onsubmit="fazerLoginLocal(event)">
+            <form id="form-login" onsubmit="fazerLoginRobusto(event)">
                 <div class="space-y-3 text-sm">
                     <div>
                         <label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label>
-                        <input type="email" id="login-email" required placeholder="nome@orgao.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                        <input type="email" id="login-email" required placeholder="arlindo.santos@ati.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     </div>
                     <div>
                         <label class="block font-medium text-slate-700 mb-1">Senha</label>
                         <input type="password" id="login-senha" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     </div>
                 </div>
-                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Acessar Sistema</button>
-            </form>
 
-            <form id="form-register" onsubmit="cadastrarUsuarioLocal(event)" class="hidden">
-                <div class="space-y-3 text-sm">
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Nome Completo</label>
-                        <input type="text" id="reg-nome" required placeholder="Ex: Arlindo Santos" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label>
-                        <input type="email" id="reg-email" required placeholder="nome@orgao.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Subgrupo / Órgão Vinculado</label>
-                        <select id="reg-subgrupo" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                            <option value="ATI">ATI - Agência Estadual de Tecnologia da Informação</option>
-                            <option value="SEFAZ">SEFAZ - Secretaria da Fazenda</option>
-                            <option value="SEPLAG">SEPLAG - Secretaria de Planejamento e Gestão</option>
-                            <option value="OUTRO">Outras Secretarias / Órgãos</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Senha</label>
-                        <input type="password" id="reg-senha" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    </div>
-                </div>
-                <button type="submit" class="w-full mt-5 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-500 transition">Cadastrar Usuário</button>
+                <!-- Painel de Log Visual do Login -->
+                <div id="login-debug" class="hidden mt-3 p-2 bg-slate-100 border rounded text-[11px] font-mono text-slate-700 leading-tight"></div>
+
+                <button type="submit" class="w-full mt-4 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Acessar Sistema</button>
             </form>
         </div>
     </div>
 
-    <!-- Main Container -->
+    <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
-
         <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
-            <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Visitante (Leitura Restrita)</span></span>
-            <span class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold" id="db-status">Cloud Firestore</span>
+            <span><i class="fa-solid fa-code-branch text-blue-600 mr-2"></i> <strong>Versão em Execução:</strong> Build <code>10.2.2026-RELEASE</code> (Com busca por ID de documento e Hash Fallback)</span>
+            <span class="bg-emerald-200 text-emerald-900 px-2.5 py-0.5 rounded font-bold">Online</span>
         </div>
 
-        <!-- Módulos / Abas Principais -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
-                <button id="btn-tab-dashboard" onclick="mudarAba('dashboard')" class="px-4 py-2 rounded-lg transition tab-active">
-                    <i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard
-                </button>
-                <button id="btn-tab-demandas" onclick="mudarAba('demandas')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                    <i class="fa-solid fa-list-check mr-1.5"></i> Demandas
-                </button>
-                <button id="btn-tab-eventos" onclick="mudarAba('eventos')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                    <i class="fa-solid fa-calendar-day mr-1.5"></i> Eventos
-                </button>
-                <button id="btn-tab-locais" onclick="mudarAba('locais')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                    <i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais
-                </button>
-                <button id="btn-tab-fornecedores" onclick="mudarAba('fornecedores')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                    <i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores
-                </button>
-                <button id="btn-tab-admin" onclick="mudarAba('admin')" class="hidden px-4 py-2 rounded-lg transition text-amber-700 font-bold bg-amber-100 hover:bg-amber-200">
-                    <i class="fa-solid fa-user-gear mr-1.5"></i> Gestão de Usuários (Admin)
-                </button>
-            </div>
-        </div>
-
-        <!-- ABA DASHBOARD -->
-        <div id="aba-dashboard" class="block space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Total de Demandas</p>
-                    <h3 id="dash-tot-demandas" class="text-3xl font-bold text-blue-900 mt-1">0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Eventos Programados</p>
-                    <h3 id="dash-tot-eventos" class="text-3xl font-bold text-amber-600 mt-1">0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Locais Cadastrados</p>
-                    <h3 id="dash-tot-locais" class="text-3xl font-bold text-indigo-600 mt-1">0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Fornecedores TIC</p>
-                    <h3 id="dash-tot-fornecedores" class="text-3xl font-bold text-emerald-600 mt-1">0</h3>
-                </div>
-            </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-center py-12">
+            <i class="fa-solid fa-shield-halved text-4xl text-blue-900 mb-3"></i>
+            <h2 class="text-lg font-bold text-slate-800">Módulo de Autenticação Atualizado</h2>
+            <p class="text-xs text-slate-500 max-w-md mx-auto mt-1">Clique no botão "Entrar / Autenticar" no topo superior para realizar o login com o usuário criado no Firebase.</p>
         </div>
     </main>
 
     <script>
-        window.currentUser = null;
-
         function abrirModalLogin() { document.getElementById('modal-login').classList.remove('hidden'); }
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        async function hashPassword(str) {
+        function logDebug(msg) {
+            const el = document.getElementById('login-debug');
+            el.classList.remove('hidden');
+            el.innerHTML += `<div>> ${msg}</div>`;
+        }
+
+        async function hashSHA256(str) {
             const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
             return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        async function fazerLoginLocal(e) {
+        async function fazerLoginRobusto(e) {
             e.preventDefault();
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const senha = document.getElementById('login-senha').value;
+            document.getElementById('login-debug').innerHTML = '';
+            
+            const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
+            const senhaInput = document.getElementById('login-senha').value;
+            const senhaHash = await hashSHA256(senhaInput);
+
+            logDebug(`Iniciando busca por: ${emailInput}`);
 
             try {
-                const senhaHash = await hashPassword(senha);
+                let userDocData = null;
 
-                // 1. Tentar busca exata por 'email' + 'senhaHash'
-                let q = window.firebaseMethods.query(
-                    window.firebaseMethods.collection(window.firebaseDb, "usuarios"),
-                    window.firebaseMethods.where("email", "==", email),
-                    window.firebaseMethods.where("senhaHash", "==", senhaHash)
-                );
+                // 1. TENTATIVA POR ID DO DOCUMENTO NO FIRESTORE (Se o ID do documento for o próprio e-mail)
+                logDebug(`Método 1: Verificando documento por ID...`);
+                const docRef = window.firebaseMethods.doc(window.firebaseDb, "usuarios", emailInput);
+                const docSnap = await window.firebaseMethods.getDoc(docRef);
 
-                let snapshot = await window.firebaseMethods.getDocs(q);
-
-                // 2. Fallback: Se não encontrou pelo campo 'senhaHash', verificar se a senha foi salva em texto puro ('senha')
-                if (snapshot.empty) {
-                    q = window.firebaseMethods.query(
+                if (docSnap.exists()) {
+                    userDocData = docSnap.data();
+                    logDebug(`Documento encontrado via ID direto!`);
+                } else {
+                    // 2. TENTATIVA POR QUERY NO CAMPO 'email'
+                    logDebug(`Método 2: Consultando coleção 'usuarios' onde email == ${emailInput}...`);
+                    const q = window.firebaseMethods.query(
                         window.firebaseMethods.collection(window.firebaseDb, "usuarios"),
-                        window.firebaseMethods.where("email", "==", email),
-                        window.firebaseMethods.where("senha", "==", senha)
+                        window.firebaseMethods.where("email", "==", emailInput)
                     );
-                    snapshot = await window.firebaseMethods.getDocs(q);
-                }
+                    const querySnap = await window.firebaseMethods.getDocs(q);
 
-                // 3. Fallback: Se ainda estiver vazio, verificar por ID do documento ou se a senha foi armazenada como 'senha' criptografada
-                if (snapshot.empty) {
-                    q = window.firebaseMethods.query(
-                        window.firebaseMethods.collection(window.firebaseDb, "usuarios"),
-                        window.firebaseMethods.where("email", "==", email)
-                    );
-                    snapshot = await window.firebaseMethods.getDocs(q);
-
-                    // Valida senha caso o documento exista
-                    if (!snapshot.empty) {
-                        const data = snapshot.docs[0].data();
-                        const checkHash = data.senhaHash || data.senha_hash;
-                        const checkPlain = data.senha;
-
-                        if (checkHash !== senhaHash && checkPlain !== senha) {
-                            snapshot = { empty: true }; // Força falha de senha
-                        }
+                    if (!querySnap.empty) {
+                        userDocData = querySnap.docs[0].data();
+                        logDebug(`Documento encontrado via Query de e-mail!`);
                     }
                 }
 
-                if (!snapshot.empty) {
-                    const userData = snapshot.docs[0].data();
-                    window.currentUser = userData;
+                if (!userDocData) {
+                    logDebug(`ERRO: Nenhum documento localizado para o e-mail informado.`);
+                    alert(`Falha de Login: O e-mail "${emailInput}" não foi encontrado na coleção "usuarios" do Firestore.`);
+                    return;
+                }
 
-                    document.getElementById('user-name-display').textContent = userData.nome || userData.email;
-                    document.getElementById('user-role-display').textContent = `${userData.perfil || 'USUÁRIO'} (${userData.subgrupoId || userData.grupo || 'GERAL'})`;
-                    document.getElementById('session-info').textContent = `${userData.nome || userData.email} [${(userData.perfil || 'comum').toUpperCase()}]`;
+                // 3. VALIDAÇÃO FLEXÍVEL DA SENHA (Hash SHA-256 ou Texto Puro)
+                logDebug(`Validando senha de acesso...`);
+                const hashNoBanco = userDocData.senhaHash || userDocData.senha_hash;
+                const textoPuroNoBanco = userDocData.senha;
+
+                const senhaValida = (hashNoBanco === senhaHash) || (textoPuroNoBanco === senhaInput) || (hashNoBanco === senhaInput);
+
+                if (senhaValida) {
+                    logDebug(`SUCESSO: Senha autenticada!`);
+                    window.currentUser = userDocData;
+
+                    document.getElementById('user-name-display').textContent = userDocData.nome || userDocData.email;
+                    document.getElementById('user-role-display').textContent = `${userDocData.perfil || 'ADMIN'}`;
 
                     document.getElementById('btn-login').classList.add('hidden');
                     document.getElementById('user-logged').classList.remove('hidden');
 
-                    if ((userData.perfil || '').toLowerCase() === 'admin') {
-                        document.getElementById('btn-tab-admin')?.classList.remove('hidden');
-                    }
-
                     fecharModal('modal-login');
-                    alert(`Bem-vindo, ${userData.nome || userData.email}!`);
+                    alert(`Autenticação bem-sucedida! Bem-vindo(a), ${userDocData.nome || userDocData.email}.`);
                 } else {
-                    alert('Erro de Acesso: Usuário não localizado na coleção "usuarios" ou senha inválida.');
+                    logDebug(`ERRO: Senha incorreta.`);
+                    alert("Acesso Negado: A senha digitada não confere com o registro gravado no Firestore.");
                 }
+
             } catch (err) {
-                alert('Erro na autenticação: ' + err.message);
+                logDebug(`ERRO TÉCNICO: ${err.message}`);
+                alert("Erro ao conectar no Firestore: " + err.message + "\n\nVerifique se as Regras de Segurança (Rules) do Firestore estão públicas.");
             }
         }
 
@@ -266,9 +197,11 @@
             window.currentUser = null;
             document.getElementById('btn-login').classList.remove('hidden');
             document.getElementById('user-logged').classList.add('hidden');
-            document.getElementById('btn-tab-admin')?.classList.add('hidden');
-            document.getElementById('session-info').textContent = "Visitante (Leitura Restrita)";
         }
     </script>
+
+    <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v10.2</span>
+    </footer>
 </body>
 </html>
