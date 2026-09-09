@@ -1,15 +1,15 @@
-# PRGD - Plataforma de Relacionamento do Governo Digital (v6.0)
+# PRGD - Plataforma de Relacionamento do Governo Digital (v7.0)
 
 A **PRGD** é a solução centralizada da Agência Estadual de Tecnologia da Informação de Pernambuco (ATI-PE) para a gestão de demandas, eventos, locais e fornecedores de TIC do Poder Executivo Estadual.
 
-## 🌩️ Integração Firebase & Cloud
-* **Autenticação:** Restrita a e-mails institucionais do domínio **`@*.pe.gov.br`**.
-* **Banco de Dados:** Cloud Firestore com sincronização em tempo real (Projeto `prgd-ati-pe`).
-* **E-mails Oficiais:** Disparos automatizados assinados por **`relacionamento@ati.pe.gov.br`** via Firebase Trigger Email Extension.
+## 🗄️ Base de Usuários Local no Firestore
+* **Gestão de Usuários:** Cadastro e login direto na coleção `usuarios` do banco Firestore.
+* **Criptografia:** Senhas gravadas via SHA-256 (`crypto.subtle.digest`).
+* **Validação:** Acesso restrito a e-mails institucionais **`@*.pe.gov.br`**.
 
-## 📌 Publicação e Deploy
+## 📌 Publicação
 ```bash
 git add .
-git commit -m "v6.0: Integracao com Firebase Auth, Cloud Firestore e Trigger Email para relacionamento@ati.pe.gov.br"
+git commit -m "v7.0: Migracao da autenticacao para colecao local de usuarios no Firestore"
 git push origin main
 ```
