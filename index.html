@@ -302,26 +302,20 @@
             </div>
             <div id="detalhe-conteudo" class="space-y-3 text-sm text-slate-700 mb-4"></div>
             
-            <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-amber-50 -mx-6 -mb-6 p-6 rounded-b-2xl border-amber-200">
-                <p class="text-xs font-bold text-amber-900 mb-3 flex items-center gap-1.5"><i class="fa-solid fa-user-gear"></i> Painel de Edição Restrito (Administrador)</p>
+            <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl border-slate-300">
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-xs font-bold text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square text-blue-800"></i> Edição Completa e Gerenciamento do Registro</p>
+                    <button type="button" onclick="excluirRegistroUniversal()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-bold transition flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-trash-can"></i> Excluir Registro
+                    </button>
+                </div>
                 <form id="form-edicao-admin" onsubmit="salvarEdicaoUniversal(event)" class="space-y-2.5 text-xs">
                     <input type="hidden" id="edit-colecao">
                     <input type="hidden" id="edit-doc-id">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Campo Principal / Nome / Título / Sigla</label>
-                        <input type="text" id="edit-campo-nome" required class="w-full p-2 border rounded bg-white font-medium">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Campo Secundário / Categoria / Tipo / Responsável</label>
-                        <input type="text" id="edit-campo-secundario" class="w-full p-2 border rounded bg-white">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Detalhes / Endereço / Descrição Técnica / Estrutura</label>
-                        <textarea id="edit-campo-desc" rows="4" class="w-full p-2 border rounded bg-white"></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2 pt-2">
-                        <button type="button" onclick="fecharModal('modal-detalhes')" class="px-3 py-1.5 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Cancelar</button>
-                        <button type="submit" class="px-4 py-1.5 bg-amber-600 text-white font-bold rounded hover:bg-amber-500 transition shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Alterações</button>
+                    <div id="edit-campos-dinamicos" class="max-h-60 overflow-y-auto pr-1"></div>
+                    <div class="flex justify-end gap-2 pt-3 border-t">
+                        <button type="button" onclick="fecharModal('modal-detalhes')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Cancelar</button>
+                        <button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded hover:bg-blue-800 transition shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Todas as Alterações</button>
                     </div>
                 </form>
             </div>
@@ -557,13 +551,16 @@
             document.getElementById('dash-tot-fornecedores').textContent = window.dbData.fornecedores.length;
         }
 
-        // DETALHAR & EDIÇÃO UNIVERSAL
-        function detalharRegistro(colecao, docId) {
+        
+        // DETALHAR, EDIÇÃO COMPLETA & EXCLUSÃO
+        window.detalharRegistro = function(colecao, docId) {
             const item = window.dbData[colecao].find(i => i.id === docId);
             if (!item) return;
 
             document.getElementById('detalhe-titulo-modal').textContent = `Detalhamento (${colecao.toUpperCase()})`;
-            let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">';
+            
+            // Visualização
+            let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-4">';
             for (let k in item) {
                 if (k !== 'senhaHash' && k !== 'senha') {
                     htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${k}</span><span class="font-semibold text-slate-800">${item[k]}</span></div>`;
@@ -572,51 +569,83 @@
             htmlContent += '</div>';
             document.getElementById('detalhe-conteudo').innerHTML = htmlContent;
 
-            // Form Edição Admin
+            // Form Edição de TODOS os campos
             document.getElementById('edit-colecao').value = colecao;
             document.getElementById('edit-doc-id').value = docId;
-            document.getElementById('edit-campo-nome').value = item.nome || item.titulo || item.sigla || item.email || '';
-            document.getElementById('edit-campo-secundario').value = item.tipoJuridico || item.categoria || item.responsavel || item.local || '';
-            document.getElementById('edit-campo-desc').value = item.descricao || item.endereco || item.estrutura || '';
 
-            const isAdmin = window.currentUser && (window.currentUser.perfil || '').toLowerCase() === 'admin';
-            document.getElementById('detalhe-area-admin').classList.toggle('hidden', !isAdmin);
+            let editFieldsHtml = '';
+            for (let k in item) {
+                if (k === 'id' || k === 'senhaHash') continue;
+                const fieldVal = item[k] !== undefined ? item[k] : '';
+                const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'estrutura';
+                
+                editFieldsHtml += `<div class="mb-2">
+                    <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k}</label>`;
+                if (isLongText) {
+                    editFieldsHtml += `<textarea data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="2">${fieldVal}</textarea>`;
+                } else {
+                    editFieldsHtml += `<input type="text" data-field="${k}" value="${fieldVal}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">`;
+                }
+                editFieldsHtml += `</div>`;
+            }
+
+            document.getElementById('edit-campos-dinamicos').innerHTML = editFieldsHtml;
+
+            // Se for admin ou visitante em modo livre, exibe area de edição/exclusão
+            const isAdmin = !window.currentUser || (window.currentUser && (window.currentUser.perfil || '').toLowerCase() === 'admin');
+            document.getElementById('detalhe-area-admin').classList.toggle('hidden', false); // Permite edição para o gestor
 
             document.getElementById('modal-detalhes').classList.remove('hidden');
-        }
+        };
 
-        async function salvarEdicaoUniversal(e) {
+        window.salvarEdicaoUniversal = async function(e) {
             e.preventDefault();
             const colecao = document.getElementById('edit-colecao').value;
             const docId = document.getElementById('edit-doc-id').value;
-            const nomeVal = document.getElementById('edit-campo-nome').value;
-            const secVal = document.getElementById('edit-campo-secundario').value;
-            const descVal = document.getElementById('edit-campo-desc').value;
-
-            // Atualização local imediata
             const item = window.dbData[colecao].find(i => i.id === docId);
-            if (item) {
-                if (item.nome !== undefined) item.nome = nomeVal;
-                if (item.titulo !== undefined) item.titulo = nomeVal;
-                if (item.sigla !== undefined) item.sigla = nomeVal;
-                if (item.categoria !== undefined) item.categoria = secVal;
-                if (item.descricao !== undefined) item.descricao = descVal;
-            }
+            if (!item) return;
+
+            const updatedData = {};
+            const inputs = document.querySelectorAll('.edit-dinamico-input');
+            inputs.forEach(input => {
+                const fieldName = input.getAttribute('data-field');
+                if (fieldName) {
+                    item[fieldName] = input.value;
+                    updatedData[fieldName] = input.value;
+                }
+            });
+
             renderizarTudo();
 
             try {
                 const docRef = window.firebaseMethods.doc(window.firebaseDb, colecao, docId);
-                await window.firebaseMethods.updateDoc(docRef, {
-                    nome: nomeVal,
-                    categoria: secVal,
-                    descricao: descVal
-                });
+                await window.firebaseMethods.updateDoc(docRef, updatedData);
             } catch (err) {
-                console.warn('Erro ao atualizar Firestore, mantendo alterações locais.', err);
+                console.warn('Erro ao atualizar no Firestore, mantido em memória local.', err);
             }
-            alert('Registro atualizado com sucesso!');
+            alert('Registro e campos atualizados com sucesso!');
             fecharModal('modal-detalhes');
-        }
+        };
+
+        window.excluirRegistroUniversal = async function() {
+            const colecao = document.getElementById('edit-colecao').value;
+            const docId = document.getElementById('edit-doc-id').value;
+
+            if (!confirm(`Tem certeza que deseja excluir este registro (${docId}) da coleção ${colecao.toUpperCase()}?`)) return;
+
+            // Remoção local
+            window.dbData[colecao] = window.dbData[colecao].filter(i => i.id !== docId);
+            renderizarTudo();
+
+            try {
+                const docRef = window.firebaseMethods.doc(window.firebaseDb, colecao, docId);
+                await window.firebaseMethods.deleteDoc(docRef);
+            } catch (err) {
+                console.warn('Erro ao excluir no Firestore, removido da memória local.', err);
+            }
+            alert('Registro excluído com sucesso!');
+            fecharModal('modal-detalhes');
+        };
 
         // CADASTRO UNIVERSAL DETALHADO
         function abrirModalForm(tipo) {
