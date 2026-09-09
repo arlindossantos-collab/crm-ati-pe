@@ -51,7 +51,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v11.0 FULL</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v12.0 FULL</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -100,7 +100,7 @@
         <!-- Status da Sessão -->
         <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
             <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Visitante (Leitura Restrita)</span></span>
-            <span class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold">Cloud Firestore Online</span>
+            <span class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold">Cloud Firestore Sync Ativo</span>
         </div>
 
         <!-- Navegação por Abas -->
@@ -137,19 +137,19 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <p class="text-xs font-semibold text-slate-500 uppercase">Demandas Ativas</p>
-                    <h3 id="dash-tot-demandas" class="text-3xl font-bold text-blue-900 mt-1">1</h3>
+                    <h3 id="dash-tot-demandas" class="text-3xl font-bold text-blue-900 mt-1">0</h3>
                 </div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <p class="text-xs font-semibold text-slate-500 uppercase">Eventos Programados</p>
-                    <h3 id="dash-tot-eventos" class="text-3xl font-bold text-amber-600 mt-1">1</h3>
+                    <h3 id="dash-tot-eventos" class="text-3xl font-bold text-amber-600 mt-1">0</h3>
                 </div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <p class="text-xs font-semibold text-slate-500 uppercase">Órgãos Cadastrados</p>
-                    <h3 id="dash-tot-orgaos" class="text-3xl font-bold text-indigo-600 mt-1">3</h3>
+                    <h3 id="dash-tot-orgaos" class="text-3xl font-bold text-indigo-600 mt-1">0</h3>
                 </div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <p class="text-xs font-semibold text-slate-500 uppercase">Fornecedores TIC</p>
-                    <h3 id="dash-tot-fornecedores" class="text-3xl font-bold text-emerald-600 mt-1">1</h3>
+                    <h3 id="dash-tot-fornecedores" class="text-3xl font-bold text-emerald-600 mt-1">0</h3>
                 </div>
             </div>
 
@@ -169,7 +169,7 @@
         <div id="aba-demandas" class="hidden space-y-4">
             <div class="flex justify-between items-center">
                 <h3 class="text-base font-bold text-slate-800">Solicitações de Governo Digital</h3>
-                <button onclick="abrirModalNovaDemanda()" id="btn-nova-demanda" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                <button onclick="abrirModalForm('demanda')" id="btn-nova-demanda" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-plus"></i> Nova Demanda
                 </button>
             </div>
@@ -185,51 +185,34 @@
                             <th class="p-4 text-center">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-demandas" class="divide-y divide-slate-100 text-sm">
-                        <tr class="hover:bg-slate-50 cursor-pointer" onclick="verDetalheDemanda('Migração do Sistema de Correios para SOGo.PE', 'SEFAZ', 'Infraestrutura / E-mail', 'Alta', 'Em Andamento', 'Migração das 120.000 contas do Estado para o novo ambiente SOGo.PE.')">
-                            <td class="p-4 font-bold text-blue-900">SEFAZ</td>
-                            <td class="p-4 font-medium text-slate-900">Migração do Sistema de Correios para SOGo.PE</td>
-                            <td class="p-4 text-xs text-slate-500">Infraestrutura / E-mail</td>
-                            <td class="p-4 text-xs font-bold text-red-600">Alta</td>
-                            <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">Em Andamento</span></td>
-                            <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
-                        </tr>
-                    </tbody>
+                    <tbody id="tabela-demandas" class="divide-y divide-slate-100 text-sm"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ABA EVENTOS -->
+        <!-- ABA EVENTOS COM FILTRO DE PASSADOS E FUTUROS -->
         <div id="aba-eventos" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-800">Agenda Institucional</h3>
-                <button onclick="abrirModalEvento()" id="btn-novo-evento" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-calendar-plus"></i> Criar Evento
-                </button>
-            </div>
-            <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                <div onclick="verDetalheEvento('GOV IN PLAY 2026', '24/10/2026 14:00', 'Auditório Governo Digital - ATI', 'Encontro de gestores de TIC do Estado de Pernambuco para alinhamento estratégico de transformação digital.')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between cursor-pointer hover:border-amber-400 transition">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded">Agendado</span>
-                            <span class="text-xs text-slate-400 font-semibold"><i class="fa-regular fa-clock mr-1"></i>24/10/2026 14:00</span>
-                        </div>
-                        <h4 class="font-bold text-slate-800 text-base">GOV IN PLAY 2026</h4>
-                        <p class="text-xs text-slate-500 mt-1 line-clamp-2">Encontro de gestores de TIC do Estado de Pernambuco.</p>
-                    </div>
-                    <div class="border-t pt-3 mt-3 flex justify-between items-center">
-                        <span class="text-xs text-indigo-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>Auditório ATI</span>
-                        <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhes</span>
-                    </div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 class="text-base font-bold text-slate-800">Agenda Institucional e Histórico</h3>
+                <div class="flex items-center gap-2">
+                    <select id="filtro-eventos" onchange="renderEventos()" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="todos">Todos os Eventos</option>
+                        <option value="futuros" selected>Apenas Próximos / Futuros</option>
+                        <option value="passados">Apenas Realizados / Passados</option>
+                    </select>
+                    <button onclick="abrirModalForm('evento')" id="btn-novo-evento" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-calendar-plus"></i> Criar Evento
+                    </button>
                 </div>
             </div>
+            <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
         <!-- ABA ÓRGÃOS E SECRETARIAS -->
         <div id="aba-orgaos" class="hidden space-y-4">
             <div class="flex justify-between items-center">
                 <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos e Secretarias</h3>
-                <button onclick="abrirModalNovoOrgao()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                <button onclick="abrirModalForm('orgao')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria
                 </button>
             </div>
@@ -239,30 +222,12 @@
                         <tr>
                             <th class="p-4">Sigla</th>
                             <th class="p-4">Nome do Órgão / Secretaria</th>
-                            <th class="p-4">Tipo</th>
                             <th class="p-4">Responsável TIC</th>
+                            <th class="p-4">E-mail Contato</th>
+                            <th class="p-4 text-center">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-orgaos" class="divide-y divide-slate-100 text-sm">
-                        <tr>
-                            <td class="p-4 font-bold text-indigo-900">ATI</td>
-                            <td class="p-4 text-slate-800 font-medium">Agência Estadual de Tecnologia da Informação</td>
-                            <td class="p-4 text-xs"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">Autarquia</span></td>
-                            <td class="p-4 text-xs text-slate-600">Arlindo Santos</td>
-                        </tr>
-                        <tr>
-                            <td class="p-4 font-bold text-indigo-900">SEFAZ</td>
-                            <td class="p-4 text-slate-800 font-medium">Secretaria da Fazenda de Pernambuco</td>
-                            <td class="p-4 text-xs"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Secretaria</span></td>
-                            <td class="p-4 text-xs text-slate-600">Gestão de TI SEFAZ</td>
-                        </tr>
-                        <tr>
-                            <td class="p-4 font-bold text-indigo-900">SEPLAG</td>
-                            <td class="p-4 text-slate-800 font-medium">Secretaria de Planejamento e Gestão</td>
-                            <td class="p-4 text-xs"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Secretaria</span></td>
-                            <td class="p-4 text-xs text-slate-600">Gestão de TI SEPLAG</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="tabela-orgaos" class="divide-y divide-slate-100 text-sm"></tbody>
                 </table>
             </div>
         </div>
@@ -271,20 +236,14 @@
         <div id="aba-fornecedores" class="hidden space-y-4">
             <div class="flex justify-between items-center">
                 <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC</h3>
-                <button onclick="abrirModalFornecedor()" id="btn-novo-fornecedor" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                <button onclick="abrirModalForm('fornecedor')" id="btn-novo-fornecedor" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-plus"></i> Novo Fornecedor
                 </button>
             </div>
-            <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div onclick="verDetalheFornecedor('Tech Cloud Solutions PE', '12.345.678/0001-90', 'Infraestrutura / Cloud', 'ativo')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-emerald-500 transition">
-                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">Infraestrutura / Cloud</span>
-                    <h4 class="font-bold text-slate-800 mt-2">Tech Cloud Solutions PE</h4>
-                    <p class="text-xs text-slate-400">CNPJ: 12.345.678/0001-90</p>
-                </div>
-            </div>
+            <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
 
-        <!-- ABA USUÁRIOS COMPLETA -->
+        <!-- ABA USUÁRIOS (SINCRO COM FIRESTORE) -->
         <div id="aba-usuarios" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários</h3>
@@ -292,7 +251,7 @@
                     <button onclick="exportarUsuariosCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-file-export"></i> Exportar Usuários (.csv)
                     </button>
-                    <button onclick="abrirModalNovoUsuario()" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button onclick="abrirModalForm('usuario')" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-user-plus"></i> Novo Usuário
                     </button>
                 </div>
@@ -305,118 +264,73 @@
                             <th class="p-4">E-mail Institucional</th>
                             <th class="p-4">Órgão / Secretaria</th>
                             <th class="p-4">Perfil</th>
+                            <th class="p-4 text-center">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-usuarios" class="divide-y divide-slate-100 text-sm">
-                        <tr>
-                            <td class="p-4 font-bold text-slate-800">Arlindo Santos</td>
-                            <td class="p-4 text-slate-600">arlindo.santos@ati.pe.gov.br</td>
-                            <td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">ATI</span></td>
-                            <td class="p-4"><span class="bg-amber-100 text-amber-900 text-xs font-bold px-2 py-0.5 rounded">ADMINISTRADOR</span></td>
-                        </tr>
-                    </tbody>
+                    <tbody id="tabela-usuarios" class="divide-y divide-slate-100 text-sm"></tbody>
                 </table>
             </div>
         </div>
 
     </main>
 
-    <!-- MODAL DETALHAR / EDITAR (RESTRIÇÃO ADMIN) -->
+    <!-- MODAL UNIVERSAL DETALHAR & EDITAR (APENAS ADMIN) -->
     <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 id="detalhe-titulo-modal" class="text-base font-bold text-slate-900">Detalhamento do Registro</h3>
                 <button onclick="fecharModal('modal-detalhes')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div id="detalhe-conteudo" class="space-y-3 text-sm text-slate-700"></div>
+            <div id="detalhe-conteudo" class="space-y-3 text-sm text-slate-700 mb-4"></div>
             
-            <div id="detalhe-area-admin" class="hidden border-t pt-4 mt-4 bg-amber-50 -mx-6 -mb-6 p-6 rounded-b-2xl border-amber-200">
-                <p class="text-xs font-bold text-amber-900 mb-2"><i class="fa-solid fa-user-gear mr-1"></i> Área de Edição (Apenas Administradores)</p>
-                <div class="space-y-2 text-xs">
-                    <input type="text" id="edit-campo-1" placeholder="Título / Nome" class="w-full p-2 border rounded bg-white">
-                    <textarea id="edit-campo-2" rows="2" placeholder="Descrição / Detalhes" class="w-full p-2 border rounded bg-white"></textarea>
-                    <button onclick="salvarEdicaoAdmin()" class="w-full py-2 bg-amber-600 text-white font-bold rounded hover:bg-amber-500 transition">Salvar Alterações</button>
-                </div>
+            <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-amber-50 -mx-6 -mb-6 p-6 rounded-b-2xl border-amber-200">
+                <p class="text-xs font-bold text-amber-900 mb-3 flex items-center gap-1.5"><i class="fa-solid fa-user-gear"></i> Painel de Edição do Administrador</p>
+                <form id="form-edicao-admin" onsubmit="salvarEdicaoUniversal(event)" class="space-y-2.5 text-xs">
+                    <input type="hidden" id="edit-colecao">
+                    <input type="hidden" id="edit-doc-id">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Campo Principal / Nome / Título</label>
+                        <input type="text" id="edit-campo-nome" required class="w-full p-2 border rounded bg-white font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Campo Secundário / Sigla / Órgão / Categoria</label>
+                        <input type="text" id="edit-campo-secundario" class="w-full p-2 border rounded bg-white">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Detalhes / Descrição Completa</label>
+                        <textarea id="edit-campo-desc" rows="3" class="w-full p-2 border rounded bg-white"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" onclick="fecharModal('modal-detalhes')" class="px-3 py-1.5 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Cancelar</button>
+                        <button type="submit" class="px-4 py-1.5 bg-amber-600 text-white font-bold rounded hover:bg-amber-500 transition shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Alterações</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- MODAL NOVO ÓRGÃO/SECRETARIA -->
-    <div id="modal-novo-orgao" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+    <!-- MODAL CRIAÇÃO / CADASTRO UNIVERSAL -->
+    <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="text-base font-bold text-slate-900">Cadastrar Órgão / Secretaria</h3>
-                <button onclick="fecharModal('modal-novo-orgao')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 id="form-univ-titulo" class="text-base font-bold text-slate-900">Novo Cadastro</h3>
+                <button onclick="fecharModal('modal-form-universal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form onsubmit="salvarNovoOrgao(event)">
-                <div class="space-y-3 text-sm">
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Sigla do Órgão</label>
-                        <input type="text" id="orgao-sigla" required placeholder="Ex: SDS, SES, SEE" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 uppercase">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Nome Completo</label>
-                        <input type="text" id="orgao-nome" required placeholder="Ex: Secretaria de Defesa Social" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600">
-                    </div>
-                </div>
-                <button type="submit" class="w-full mt-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-500 transition">Salvar no Banco</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL NOVO USUÁRIO -->
-    <div id="modal-novo-usuario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="text-base font-bold text-slate-900">Cadastrar Usuário</h3>
-                <button onclick="fecharModal('modal-novo-usuario')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form onsubmit="salvarNovoUsuarioUnificado(event)">
-                <div class="space-y-3 text-sm">
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Nome Completo</label>
-                        <input type="text" id="usr-nome" required class="w-full p-2.5 border rounded-lg">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label>
-                        <input type="email" id="usr-email" required class="w-full p-2.5 border rounded-lg">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Órgão / Secretaria Vinculada</label>
-                        <select id="usr-orgao" class="w-full p-2.5 border rounded-lg">
-                            <option value="ATI">ATI - Agência Estadual de TI</option>
-                            <option value="SEFAZ">SEFAZ - Secretaria da Fazenda</option>
-                            <option value="SEPLAG">SEPLAG - Planejamento e Gestão</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Perfil de Acesso</label>
-                        <select id="usr-perfil" class="w-full p-2.5 border rounded-lg">
-                            <option value="comum">Usuário Comum</option>
-                            <option value="admin">Administrador</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-700 mb-1">Senha</label>
-                        <input type="password" id="usr-senha" required minlength="6" class="w-full p-2.5 border rounded-lg">
-                    </div>
-                </div>
-                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar Usuário</button>
+            <form id="form-univ-body" onsubmit="salvarCadastroUniversal(event)" class="space-y-3 text-sm">
+                <input type="hidden" id="form-univ-tipo">
+                <div id="form-univ-campos"></div>
+                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar no Firestore</button>
             </form>
         </div>
     </div>
 
     <script>
         window.currentUser = null;
+        window.dbData = { demandas: [], eventos: [], orgaos: [], fornecedores: [], usuarios: [] };
         let abaAtual = 'dashboard';
 
         function abrirModalLogin() { document.getElementById('modal-login').classList.remove('hidden'); }
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function abrirModalNovoOrgao() { document.getElementById('modal-novo-orgao').classList.remove('hidden'); }
-        function abrirModalNovoUsuario() { document.getElementById('modal-novo-usuario').classList.remove('hidden'); }
-        function abrirModalNovaDemanda() { alert('Formulário de Nova Demanda ativado.'); }
-        function abrirModalEvento() { alert('Formulário de Criar Evento ativado.'); }
-        function abrirModalFornecedor() { alert('Formulário de Novo Fornecedor ativado.'); }
 
         function mudarAba(aba) {
             abaAtual = aba;
@@ -429,52 +343,284 @@
             if (aba === 'dashboard') renderCharts();
         }
 
-        function verDetalheDemanda(titulo, orgao, cat, prio, status, desc) {
-            document.getElementById('detalhe-titulo-modal').textContent = "Detalhamento da Demanda";
-            document.getElementById('detalhe-conteudo').innerHTML = `
-                <p><strong>Título:</strong> ${titulo}</p>
-                <p><strong>Órgão:</strong> ${orgao}</p>
-                <p><strong>Categoria:</strong> ${cat}</p>
-                <p><strong>Prioridade:</strong> ${prio}</p>
-                <p><strong>Status:</strong> ${status}</p>
-                <p class="mt-2 text-xs bg-slate-100 p-2 rounded"><strong>Descrição:</strong> ${desc}</p>
-            `;
-            verificarAcessoAdmin();
-            document.getElementById('modal-detalhes').classList.remove('hidden');
+        // ESCUTADORES EM TEMPO REAL NO FIRESTORE
+        function iniciarSnapshotFirestore() {
+            const colecoes = ['demandas', 'eventos', 'orgaos', 'fornecedores', 'usuarios'];
+            colecoes.forEach(col => {
+                window.firebaseMethods.onSnapshot(window.firebaseMethods.collection(window.firebaseDb, col), snap => {
+                    window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    renderizarTudo();
+                });
+            });
         }
 
-        function verDetalheEvento(titulo, data, local, desc) {
-            document.getElementById('detalhe-titulo-modal').textContent = "Detalhamento do Evento";
-            document.getElementById('detalhe-conteudo').innerHTML = `
-                <p><strong>Evento:</strong> ${titulo}</p>
-                <p><strong>Data/Hora:</strong> ${data}</p>
-                <p><strong>Local:</strong> ${local}</p>
-                <p class="mt-2 text-xs bg-slate-100 p-2 rounded"><strong>Público/Descrição:</strong> ${desc}</p>
-            `;
-            verificarAcessoAdmin();
-            document.getElementById('modal-detalhes').classList.remove('hidden');
+        function renderizarTudo() {
+            renderUsuarios();
+            renderOrgaos();
+            renderDemandas();
+            renderEventos();
+            renderFornecedores();
+            renderDashboardKPIs();
+            preencherSelectOrgaos();
         }
 
-        function verDetalheFornecedor(nome, cnpj, cat, status) {
-            document.getElementById('detalhe-titulo-modal').textContent = "Detalhamento do Fornecedor";
-            document.getElementById('detalhe-conteudo').innerHTML = `
-                <p><strong>Empresa:</strong> ${nome}</p>
-                <p><strong>CNPJ:</strong> ${cnpj}</p>
-                <p><strong>Atuação:</strong> ${cat}</p>
-                <p><strong>Status Contratual:</strong> Ativo</p>
-            `;
-            verificarAcessoAdmin();
-            document.getElementById('modal-detalhes').classList.remove('hidden');
+        // PREENCHER SELECT DE ÓRGÃOS DINAMICAMENTE
+        function preencherSelectOrgaos() {
+            const selects = document.querySelectorAll('.select-orgaos-dinamico');
+            selects.forEach(select => {
+                const valAtual = select.value;
+                select.innerHTML = '<option value="">Selecione o Órgão / Secretaria</option>';
+                window.dbData.orgaos.forEach(o => {
+                    const opt = document.createElement('option');
+                    opt.value = o.sigla || o.id;
+                    opt.textContent = `${o.sigla || o.id} - ${o.nome || ''}`;
+                    select.appendChild(opt);
+                });
+                if (valAtual) select.value = valAtual;
+            });
         }
 
-        function verificarAcessoAdmin() {
+        // RENDERIZADORES DE TABELAS E GRIDS
+        function renderUsuarios() {
+            const tbody = document.getElementById('tabela-usuarios');
+            if (!tbody) return;
+            tbody.innerHTML = window.dbData.usuarios.map(u => `
+                <tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('usuarios', '${u.id}')">
+                    <td class="p-4 font-bold text-slate-800">${u.nome || u.email}</td>
+                    <td class="p-4 text-slate-600">${u.email || u.id}</td>
+                    <td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${u.subgrupoId || u.orgao || 'GERAL'}</span></td>
+                    <td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'amber' : 'slate'}-100 text-${u.perfil === 'admin' ? 'amber-900' : 'slate-700'} text-xs font-bold px-2 py-0.5 rounded uppercase">${u.perfil || 'comum'}</span></td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
+        }
+
+        function renderOrgaos() {
+            const tbody = document.getElementById('tabela-orgaos');
+            if (!tbody) return;
+            tbody.innerHTML = window.dbData.orgaos.map(o => `
+                <tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('orgaos', '${o.id}')">
+                    <td class="p-4 font-bold text-indigo-900">${o.sigla || o.id}</td>
+                    <td class="p-4 text-slate-800 font-medium">${o.nome || '-'}</td>
+                    <td class="p-4 text-xs text-slate-600">${o.responsavel || '-'}</td>
+                    <td class="p-4 text-xs text-slate-600">${o.email || '-'}</td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
+        }
+
+        function renderDemandas() {
+            const tbody = document.getElementById('tabela-demandas');
+            if (!tbody) return;
+            tbody.innerHTML = window.dbData.demandas.map(d => `
+                <tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('demandas', '${d.id}')">
+                    <td class="p-4 font-bold text-blue-900">${d.orgao || 'Geral'}</td>
+                    <td class="p-4 font-medium text-slate-900">${d.titulo || '-'}</td>
+                    <td class="p-4 text-xs text-slate-500">${d.categoria || '-'}</td>
+                    <td class="p-4 text-xs font-bold text-${d.prioridade === 'Alta' ? 'red' : 'amber'}-600">${d.prioridade || 'Média'}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">${d.status || 'Pendente'}</span></td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma demanda registrada.</td></tr>';
+        }
+
+        function renderEventos() {
+            const grid = document.getElementById('grid-eventos');
+            if (!grid) return;
+            const filtro = document.getElementById('filtro-eventos')?.value || 'todos';
+            const agora = new Date().toISOString();
+
+            let lista = window.dbData.eventos;
+            if (filtro === 'futuros') lista = lista.filter(e => e.data >= agora);
+            if (filtro === 'passados') lista = lista.filter(e => e.data < agora);
+
+            grid.innerHTML = lista.map(e => {
+                const ePassado = e.data < agora;
+                return `
+                <div onclick="detalharRegistro('eventos', '${e.id}')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between cursor-pointer hover:border-amber-400 transition">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-${ePassado ? 'slate' : 'amber'}-100 text-${ePassado ? 'slate' : 'amber'}-800 text-xs font-bold px-2 py-0.5 rounded">${ePassado ? 'Realizado / Passado' : 'Próximo Evento'}</span>
+                            <span class="text-xs text-slate-400 font-semibold"><i class="fa-regular fa-clock mr-1"></i>${e.data ? new Date(e.data).toLocaleString('pt-BR') : '-'}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base">${e.titulo || '-'}</h4>
+                        <p class="text-xs text-slate-500 mt-1 line-clamp-2">${e.descricao || 'Sem descrição.'}</p>
+                    </div>
+                    <div class="border-t pt-3 mt-3 flex justify-between items-center">
+                        <span class="text-xs text-indigo-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>${e.local || 'Local não informado'}</span>
+                        <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>
+                    </div>
+                </div>
+            `}).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento localizado com este filtro.</p>';
+        }
+
+        function renderFornecedores() {
+            const grid = document.getElementById('grid-fornecedores');
+            if (!grid) return;
+            grid.innerHTML = window.dbData.fornecedores.map(f => `
+                <div onclick="detalharRegistro('fornecedores', '${f.id}')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-emerald-500 transition">
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">${f.categoria || 'Geral'}</span>
+                    <h4 class="font-bold text-slate-800 mt-2">${f.nome || f.razaoSocial || '-'}</h4>
+                    <p class="text-xs text-slate-400">CNPJ: ${f.cnpj || '-'}</p>
+                    <div class="mt-3 border-t pt-2 text-right"><span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span></div>
+                </div>
+            `).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor cadastrado.</p>';
+        }
+
+        function renderDashboardKPIs() {
+            document.getElementById('dash-tot-demandas').textContent = window.dbData.demandas.length;
+            document.getElementById('dash-tot-eventos').textContent = window.dbData.eventos.length;
+            document.getElementById('dash-tot-orgaos').textContent = window.dbData.orgaos.length;
+            document.getElementById('dash-tot-fornecedores').textContent = window.dbData.fornecedores.length;
+        }
+
+        // DETALHAR & EDIÇÃO UNIVERSAL (APENAS ADMIN)
+        function detalharRegistro(colecao, docId) {
+            const item = window.dbData[colecao].find(i => i.id === docId);
+            if (!item) return;
+
+            document.getElementById('detalhe-titulo-modal').textContent = `Detalhamento (${colecao.toUpperCase()})`;
+            let htmlContent = '<div class="space-y-1.5 text-xs sm:text-sm">';
+            for (let k in item) {
+                if (k !== 'senhaHash' && k !== 'senha') {
+                    htmlContent += `<p><strong class="capitalize">${k}:</strong> ${item[k]}</p>`;
+                }
+            }
+            htmlContent += '</div>';
+            document.getElementById('detalhe-conteudo').innerHTML = htmlContent;
+
+            // Configurar Form de Edição Admin
+            document.getElementById('edit-colecao').value = colecao;
+            document.getElementById('edit-doc-id').value = docId;
+            document.getElementById('edit-campo-nome').value = item.nome || item.titulo || item.sigla || item.email || '';
+            document.getElementById('edit-campo-secundario').value = item.orgao || item.categoria || item.responsavel || item.subgrupoId || '';
+            document.getElementById('edit-campo-desc').value = item.descricao || item.detalhes || '';
+
             const isAdmin = window.currentUser && (window.currentUser.perfil || '').toLowerCase() === 'admin';
             document.getElementById('detalhe-area-admin').classList.toggle('hidden', !isAdmin);
+
+            document.getElementById('modal-detalhes').classList.remove('hidden');
         }
 
-        function salvarEdicaoAdmin() {
-            alert('Edição salva com sucesso pelo Administrador!');
-            fecharModal('modal-detalhes');
+        async function salvarEdicaoUniversal(e) {
+            e.preventDefault();
+            const colecao = document.getElementById('edit-colecao').value;
+            const docId = document.getElementById('edit-doc-id').value;
+            const valNome = document.getElementById('edit-campo-nome').value;
+            const valSec = document.getElementById('edit-campo-secundario').value;
+            const valDesc = document.getElementById('edit-campo-desc').value;
+
+            try {
+                const docRef = window.firebaseMethods.doc(window.firebaseDb, colecao, docId);
+                const docSnap = await window.firebaseMethods.getDoc(docRef);
+                const currentData = docSnap.data() || {};
+
+                if (currentData.nome) currentData.nome = valNome;
+                if (currentData.titulo) currentData.titulo = valNome;
+                if (currentData.descricao !== undefined) currentData.descricao = valDesc;
+
+                await window.firebaseMethods.updateDoc(docRef, currentData);
+                alert('Alterações salvas com sucesso no Firestore!');
+                fecharModal('modal-detalhes');
+            } catch (err) {
+                alert('Erro ao editar: ' + err.message);
+            }
+        }
+
+        // CADASTRO UNIVERSAL DINÂMICO
+        function abrirModalForm(tipo) {
+            document.getElementById('form-univ-tipo').value = tipo;
+            const container = document.getElementById('form-univ-campos');
+            document.getElementById('form-univ-titulo').textContent = `Novo Cadastro: ${tipo.toUpperCase()}`;
+
+            if (tipo === 'orgao') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Sigla do Órgão</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded uppercase"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Responsável TIC</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">E-mail Contato</label><input type="email" id="univ-c4" class="w-full p-2 border rounded"></div>
+                `;
+            } else if (tipo === 'usuario') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label><input type="email" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Órgão / Secretaria</label><select id="univ-c3" required class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Perfil de Acesso</label><select id="univ-c4" class="w-full p-2 border rounded"><option value="comum">Usuário Comum</option><option value="admin">Administrador</option></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Senha</label><input type="password" id="univ-c5" required minlength="6" class="w-full p-2 border rounded"></div>
+                `;
+                preencherSelectOrgaos();
+            } else if (tipo === 'evento') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Título do Evento</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Data e Horário</label><input type="datetime-local" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Local</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Descrição</label><textarea id="univ-c4" rows="2" class="w-full p-2 border rounded"></textarea></div>
+                `;
+            } else if (tipo === 'demanda') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Título da Demanda</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Órgão Solicitante</label><select id="univ-c2" required class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Categoria</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
+                `;
+                preencherSelectOrgaos();
+            } else if (tipo === 'fornecedor') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Razão Social / Nome</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">CNPJ</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Categoria</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
+                `;
+            }
+            document.getElementById('modal-form-universal').classList.remove('hidden');
+        }
+
+        async function salvarCadastroUniversal(e) {
+            e.preventDefault();
+            const tipo = document.getElementById('form-univ-tipo').value;
+
+            try {
+                if (tipo === 'orgao') {
+                    const sigla = document.getElementById('univ-c1').value.toUpperCase();
+                    await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "orgaos", sigla), {
+                        sigla, nome: document.getElementById('univ-c2').value,
+                        responsavel: document.getElementById('univ-c3').value,
+                        email: document.getElementById('univ-c4').value
+                    });
+                } else if (tipo === 'usuario') {
+                    const email = document.getElementById('univ-c2').value.toLowerCase();
+                    const senha = document.getElementById('univ-c5').value;
+                    const senhaHash = await hashSHA256(senha);
+                    await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "usuarios", email), {
+                        nome: document.getElementById('univ-c1').value, email,
+                        subgrupoId: document.getElementById('univ-c3').value,
+                        perfil: document.getElementById('univ-c4').value, senhaHash, ativo: true
+                    });
+                } else if (tipo === 'evento') {
+                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "eventos"), {
+                        titulo: document.getElementById('univ-c1').value,
+                        data: document.getElementById('univ-c2').value,
+                        local: document.getElementById('univ-c3').value,
+                        descricao: document.getElementById('univ-c4').value
+                    });
+                } else if (tipo === 'demanda') {
+                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "demandas"), {
+                        titulo: document.getElementById('univ-c1').value,
+                        orgao: document.getElementById('univ-c2').value,
+                        categoria: document.getElementById('univ-c3').value,
+                        prioridade: 'Alta', status: 'Pendente'
+                    });
+                } else if (tipo === 'fornecedor') {
+                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "fornecedores"), {
+                        nome: document.getElementById('univ-c1').value,
+                        cnpj: document.getElementById('univ-c2').value,
+                        categoria: document.getElementById('univ-c3').value
+                    });
+                }
+
+                alert(`Cadastro salvo na coleção de ${tipo}s no Firestore!`);
+                fecharModal('modal-form-universal');
+            } catch (err) {
+                alert('Erro ao salvar no Firestore: ' + err.message);
+            }
         }
 
         async function hashSHA256(str) {
@@ -493,42 +639,27 @@
                 const docRef = window.firebaseMethods.doc(window.firebaseDb, "usuarios", emailInput);
                 const docSnap = await window.firebaseMethods.getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    userDocData = docSnap.data();
-                } else {
-                    const q = window.firebaseMethods.query(
-                        window.firebaseMethods.collection(window.firebaseDb, "usuarios"),
-                        window.firebaseMethods.where("email", "==", emailInput)
-                    );
+                if (docSnap.exists()) userDocData = docSnap.data();
+                else {
+                    const q = window.firebaseMethods.query(window.firebaseMethods.collection(window.firebaseDb, "usuarios"), window.firebaseMethods.where("email", "==", emailInput));
                     const querySnap = await window.firebaseMethods.getDocs(q);
                     if (!querySnap.empty) userDocData = querySnap.docs[0].data();
                 }
 
-                if (!userDocData) {
-                    alert(`Falha de Login: Usuário não localizado.`);
-                    return;
-                }
+                if (!userDocData) { alert(`Usuário não encontrado na base.`); return; }
 
                 const hashNoBanco = userDocData.senhaHash || userDocData.senha_hash;
                 const textoPuroNoBanco = userDocData.senha;
-                const senhaValida = (hashNoBanco === senhaHash) || (textoPuroNoBanco === senhaInput) || (hashNoBanco === senhaInput);
-
-                if (senhaValida) {
+                if ((hashNoBanco === senhaHash) || (textoPuroNoBanco === senhaInput) || (hashNoBanco === senhaInput)) {
                     window.currentUser = userDocData;
                     document.getElementById('user-name-display').textContent = userDocData.nome || userDocData.email;
                     document.getElementById('user-role-display').textContent = `${(userDocData.perfil || 'USUÁRIO').toUpperCase()}`;
-
                     document.getElementById('btn-login').classList.add('hidden');
                     document.getElementById('user-logged').classList.remove('hidden');
-
                     fecharModal('modal-login');
                     alert(`Bem-vindo, ${userDocData.nome || userDocData.email}!`);
-                } else {
-                    alert("Senha incorreta.");
-                }
-            } catch (err) {
-                alert("Erro ao autenticar: " + err.message);
-            }
+                } else alert("Senha incorreta.");
+            } catch (err) { alert("Erro ao autenticar: " + err.message); }
         }
 
         function fazerLogout() {
@@ -538,55 +669,21 @@
             mudarAba('dashboard');
         }
 
-        function salvarNovoOrgao(e) {
-            e.preventDefault();
-            const sigla = document.getElementById('orgao-sigla').value.toUpperCase();
-            const nome = document.getElementById('orgao-nome').value;
-
-            const select = document.getElementById('usr-orgao');
-            const opt = document.createElement('option');
-            opt.value = sigla;
-            opt.textContent = `${sigla} - ${nome}`;
-            select.appendChild(opt);
-
-            alert(`Órgão ${sigla} cadastrado e vinculado ao módulo de Usuários!`);
-            fecharModal('modal-novo-orgao');
-        }
-
-        async function salvarNovoUsuarioUnificado(e) {
-            e.preventDefault();
-            const nome = document.getElementById('usr-nome').value;
-            const email = document.getElementById('usr-email').value.toLowerCase();
-            const orgao = document.getElementById('usr-orgao').value;
-            const perfil = document.getElementById('usr-perfil').value;
-            const senha = document.getElementById('usr-senha').value;
-            const senhaHash = await hashSHA256(senha);
-
-            try {
-                await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "usuarios", email), {
-                    nome, email, subgrupoId: orgao, perfil, senhaHash, ativo: true
-                });
-                alert('Usuário salvo na base com sucesso!');
-                fecharModal('modal-novo-usuario');
-            } catch (err) {
-                alert('Erro ao salvar usuário: ' + err.message);
-            }
-        }
-
         function exportarUsuariosCSV() {
-            const csv = "Nome;Email;Orgao;Perfil\nArlindo Santos;arlindo.santos@ati.pe.gov.br;ATI;Admin\n";
+            let csv = "Nome;Email;Orgao;Perfil\n";
+            window.dbData.usuarios.forEach(u => {
+                csv += `${u.nome || ''};${u.email || u.id};${u.subgrupoId || ''};${u.perfil || ''}\n`;
+            });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "usuarios_prgd_v11.csv");
+            link.setAttribute("download", "usuarios_prgd_v12.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        function exportarRelatorioCSV() {
-            exportarUsuariosCSV();
-        }
+        function exportarRelatorioCSV() { exportarUsuariosCSV(); }
 
         function renderCharts() {
             const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
@@ -613,11 +710,13 @@
             }
         }
 
-        window.onload = () => { renderCharts(); };
+        window.onload = () => {
+            iniciarSnapshotFirestore();
+        };
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v11.0 FULL</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v12.0 FULL</span>
     </footer>
 </body>
 </html>
