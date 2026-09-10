@@ -242,7 +242,7 @@
                     <button onclick="abrirModalImportacao('orgaos')" class="btn-admin-only bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
                     </button>
-                    <button onclick="abrirModalForm('orgao')" class="btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button onclick="abrirModalForm('orgao')" class="btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria
                     </button>
                 </div>
@@ -291,7 +291,7 @@
                     <button onclick="exportarUsuariosCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-file-export"></i> Exportar Usuários (.csv)
                     </button>
-                    <button onclick="abrirModalForm('usuario')" class="btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button onclick="abrirModalForm('usuario')" class="btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-user-plus"></i> Novo Usuário
                     </button>
                 </div>
@@ -734,7 +734,7 @@
                                     '<span class="text-slate-400 text-[10px] font-semibold"><i class="fa-regular fa-calendar-alt mr-1"></i>' + new Date(h.data).toLocaleString('pt-BR') + '</span>' +
                                 '</div>' +
                                 '<p class="text-slate-700 font-medium">' + (h.descricao || 'Sem observações.') + '</p>' +
-                            '</div>' +
+                            '</div>'
                         ).join('') +
                     '</div>' +
                     (isAdmin ? 
@@ -1139,15 +1139,14 @@
             } else if (tipo === 'usuario') {
                 const email = document.getElementById('univ-c2').value.toLowerCase();
                 const senha = document.getElementById('univ-c5').value;
-                const senhaHash = await hashSHA256(senha);
-
+                
                 const checkedBoxes = document.querySelectorAll('.novo-checkbox-modulo:checked');
                 const modulosPermitidos = Array.from(checkedBoxes).map(cb => cb.value);
 
                 novoObj = {
                     id: email, nome: document.getElementById('univ-c1').value, email,
                     subgrupoId: document.getElementById('univ-c3').value,
-                    perfil: document.getElementById('univ-c4').value, senhaHash, senha, ativo: true,
+                    perfil: document.getElementById('univ-c4').value, senha, ativo: true,
                     modulosPermitidos
                 };
                 window.dbData.usuarios.push(novoObj);
@@ -1256,7 +1255,6 @@
                     } else if (colecao === 'usuarios' && cols.length >= 2) {
                         const email = (cols[1] || '').toLowerCase();
                         const senha = cols[4] || '123456';
-                        const senhaHash = await hashSHA256(senha);
                         const obj = {
                             id: email,
                             nome: cols[0] || email,
@@ -1264,7 +1262,6 @@
                             subgrupoId: cols[2] || 'ATI',
                             perfil: (cols[3] || 'comum').toLowerCase(),
                             senha: senha,
-                            senhaHash: senhaHash,
                             modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores']
                         };
                         window.dbData.usuarios.push(obj);
@@ -1283,20 +1280,10 @@
             reader.readAsText(file, 'UTF-8');
         };
 
-        async function hashSHA256(str) {
-            try {
-                const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-            } catch(e) {
-                return str; // Fallback se o ambiente restrito bloquear crypto
-            }
-        }
-
         window.fazerLoginLocal = async function(e) {
             e.preventDefault();
             const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
             const senhaInput = document.getElementById('login-senha').value;
-            const senhaHash = await hashSHA256(senhaInput);
 
             let userFound = window.dbData.usuarios.find(u => (u.email || u.id) === emailInput);
 
@@ -1306,7 +1293,6 @@
                     const docSnap = await window.firebaseMethods.getDoc(docRef);
                     if (docSnap.exists()) {
                         userFound = docSnap.data();
-                        // Garante que o usuário do Firebase seja indexado na memória local
                         if (!window.dbData.usuarios.some(u => (u.email || u.id) === emailInput)) {
                             window.dbData.usuarios.push(userFound);
                         }
@@ -1319,10 +1305,9 @@
                 return; 
             }
 
-            const hashNoBanco = userFound.senhaHash || userFound.senha_hash;
-            const textoPuroNoBanco = userFound.senha;
+            const senhaNoBanco = userFound.senha || userFound.senhaHash;
 
-            if ((hashNoBanco === senhaHash) || (textoPuroNoBanco === senhaInput) || (hashNoBanco === senhaInput) || (senhaInput === '123' && emailInput === 'arlindo.santos@ati.pe.gov.br')) {
+            if ((senhaNoBanco === senhaInput) || (senhaInput === '123' && emailInput === 'arlindo.santos@ati.pe.gov.br')) {
                 window.currentUser = userFound;
                 document.getElementById('user-name-display').textContent = userFound.nome || userFound.email;
                 document.getElementById('user-role-display').textContent = (userFound.perfil || 'COMUM').toUpperCase();
