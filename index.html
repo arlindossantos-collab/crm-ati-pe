@@ -1,1368 +1,272 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRGD - Plataforma de Relacionamento do Governo Digital | ATI-PE</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js para Dashboard Gerencial -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Firebase SDK v10 (Modular) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema - Autenticação</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
-            authDomain: "prgd-ati-pe.firebaseapp.com",
-            projectId: "prgd-ati-pe",
-            storageBucket: "prgd-ati-pe.firebasestorage.app",
-            messagingSenderId: "798768232646",
-            appId: "1:798768232646:web:31b80951f237b4af17bfc7",
-            measurementId: "G-MWES9XN421"
-        };
+    body {
+      background-color: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
 
-        window.firebaseDb = db;
-        window.firebaseMethods = { 
-            collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot 
-        };
-    </script>
-    <style>
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
-        .tab-active { background-color: #ffffff; color: #1e3a8a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .tab-inactive { color: #64748b; font-weight: 500; }
-        .tab-inactive:hover { color: #0f172a; }
-    </style>
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      color: #666;
+      cursor: pointer;
+      transition: color 0.3s, border-bottom 0.3s;
+    }
+
+    .tab-btn.active {
+      color: #007bff;
+      border-bottom: 3px solid #007bff;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      display: none;
+      text-align: center;
+    }
+
+    .message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .message.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .form-section {
+      display: none;
+    }
+
+    .form-section.active {
+      display: block;
+    }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+<body>
 
-    <!-- Modal Login Obrigatório -->
-    <div id="modal-login" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200">
-            <div class="text-center mb-6">
-                <div class="inline-block bg-blue-900 text-white font-black text-2xl px-4 py-2 rounded-xl mb-3 shadow">PRGD</div>
-                <h3 class="text-lg font-bold text-slate-900">Acesso Restrito PRGD</h3>
-                <p class="text-xs text-slate-500 mt-1">Informe suas credenciais cadastradas na base para acessar o sistema.</p>
-            </div>
-            <form id="form-login" onsubmit="fazerLoginLocal(event)">
-                <div class="space-y-4 text-sm">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">E-mail Institucional</label>
-                        <input type="email" id="login-email" required placeholder="nome@orgao.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Senha</label>
-                        <input type="password" id="login-senha" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
-                    </div>
-                </div>
-                <button type="submit" class="w-full mt-6 py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-right-to-bracket"></i> Autenticar e Entrar
-                </button>
-            </form>
-        </div>
+  <div class="container">
+    <!-- Abas de Navegação -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
+      <button class="tab-btn" onclick="switchTab('change-password')">Alterar Senha</button>
     </div>
 
-    <!-- Header Navbar -->
-    <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white text-blue-900 px-3 py-1.5 rounded-lg font-bold text-xl tracking-wider">PRGD</div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v17.0 STABLE</span>
-                    </div>
-                    <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
-                </div>
-            </div>
-            <div id="auth-actions">
-                <div id="user-logged" class="flex items-center gap-3">
-                    <div class="text-right">
-                        <p id="user-name-display" class="text-xs font-bold text-white"></p>
-                        <p id="user-role-display" class="text-[10px] text-blue-200 uppercase tracking-wider font-bold"></p>
-                    </div>
-                    <button onclick="fazerLogout()" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1">
-                        <i class="fa-solid fa-right-from-bracket"></i> Sair
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- Área de Feedback -->
+    <div id="feedback-msg" class="message"></div>
 
-    <!-- Main Container (Visível apenas após login) -->
-    <main id="main-content" class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full hidden">
+    <!-- Formulário de Login -->
+    <form id="login-form" class="form-section active" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" required placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Senha</label>
+        <input type="password" id="login-password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn">Entrar no Sistema</button>
+    </form>
 
-        <!-- Status da Sessão -->
-        <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
-            <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Autenticado</span></span>
-            <span id="badge-perfil-acesso" class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold uppercase"></span>
-        </div>
+    <!-- Formulário de Alteração de Senha -->
+    <form id="password-form" class="form-section" onsubmit="handleChangePassword(event)">
+      <div class="form-group">
+        <label for="current-password">Senha Atual</label>
+        <input type="password" id="current-password" required placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label for="new-password">Nova Senha</label>
+        <input type="password" id="new-password" required placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label for="confirm-password">Confirmar Nova Senha</label>
+        <input type="password" id="confirm-password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn">Atualizar Senha</button>
+    </form>
+  </div>
 
-        <!-- Navegação por Abas -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
-                <button id="btn-tab-dashboard" onclick="mudarAba('dashboard')" class="px-4 py-2 rounded-lg transition tab-active">
-                    <i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard
-                </button>
-                <button id="btn-tab-demandas" onclick="mudarAba('demandas')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                    <i class="fa-solid fa-list-check mr-1.5"></i> Demandas
-                </button>
-                <button id="btn-tab-eventos" onclick="mudarAba('eventos')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                    <i class="fa-solid fa-calendar-day mr-1.5"></i> Eventos
-                </button>
-                <button id="btn-tab-locais" onclick="mudarAba('locais')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                    <i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais de Eventos
-                </button>
-                <button id="btn-tab-orgaos" onclick="mudarAba('orgaos')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                    <i class="fa-solid fa-sitemap mr-1.5"></i> Órgãos / Secretarias
-                </button>
-                <button id="btn-tab-fornecedores" onclick="mudarAba('fornecedores')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                    <i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores
-                </button>
-                <button id="btn-tab-usuarios" onclick="mudarAba('usuarios')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                    <i class="fa-solid fa-users-gear mr-1.5"></i> Usuários
-                </button>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="exportarRelatorioCSV()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-file-csv"></i> Exportar Dados
-                </button>
-            </div>
-        </div>
+  <script>
+    // Alternar entre as abas (Login / Alterar Senha)
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.form-section').forEach(sec => sec.classList.remove('active'));
+      hideMessage();
 
-        <!-- ABA DASHBOARD -->
-        <div id="aba-dashboard" class="block space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Demandas Ativas</p>
-                    <h3 id="dash-tot-demandas" class="text-3xl font-bold text-blue-900 mt-1">0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Eventos Programados</p>
-                    <h3 id="dash-tot-eventos" class="text-3xl font-bold text-amber-600 mt-1">0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Locais Auditórios</p>
-                    <h3 id="dash-tot-locais" class="text-3xl font-bold text-purple-600 mt-1">0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Órgãos Cadastrados</p>
-                    <h3 id="dash-tot-orgaos" class="text-3xl font-bold text-indigo-600 mt-1">0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Fornecedores TIC</p>
-                    <h3 id="dash-tot-fornecedores" class="text-3xl font-bold text-emerald-600 mt-1">0</h3>
-                </div>
-            </div>
+      if (tab === 'login') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('login-form').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('password-form').classList.add('active');
+      }
+    }
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                    <h4 class="text-sm font-bold text-slate-700 mb-4"><i class="fa-solid fa-chart-bar text-blue-800 mr-2"></i>Demandas por Categoria</h4>
-                    <canvas id="chartCategorias" class="max-h-64"></canvas>
-                </div>
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                    <h4 class="text-sm font-bold text-slate-700 mb-4"><i class="fa-solid fa-chart-pie text-emerald-600 mr-2"></i>Status das Solicitações</h4>
-                    <canvas id="chartStatus" class="max-h-64"></canvas>
-                </div>
-            </div>
-        </div>
+    // Exibir mensagens de erro ou sucesso
+    function showMessage(text, isSuccess = false) {
+      const msgBox = document.getElementById('feedback-msg');
+      msgBox.innerText = text;
+      msgBox.className = `message ${isSuccess ? 'success' : 'error'}`;
+      msgBox.style.display = 'block';
+    }
 
-        <!-- ABA DEMANDAS -->
-        <div id="aba-demandas" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-800">Solicitações de Governo Digital</h3>
-                <button onclick="abrirModalForm('demanda')" id="btn-nova-demanda" class="btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-plus"></i> Nova Demanda
-                </button>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[700px]">
-                    <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
-                        <tr>
-                            <th class="p-4">Órgão Solicitante</th>
-                            <th class="p-4">Título da Demanda</th>
-                            <th class="p-4">Categoria</th>
-                            <th class="p-4">Prioridade</th>
-                            <th class="p-4">Status</th>
-                            <th class="p-4 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-demandas" class="divide-y divide-slate-100 text-sm"></tbody>
-                </table>
-            </div>
-        </div>
+    function hideMessage() {
+      const msgBox = document.getElementById('feedback-msg');
+      msgBox.style.display = 'none';
+    }
 
-        <!-- ABA EVENTOS -->
-        <div id="aba-eventos" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h3 class="text-base font-bold text-slate-800">Agenda Institucional e Eventos Exclusivos</h3>
-                <div class="flex items-center gap-2">
-                    <select id="filtro-eventos" onchange="renderEventos()" class="p-2 border rounded-lg text-xs bg-white font-medium">
-                        <option value="todos">Todos os Eventos Permitidos</option>
-                        <option value="futuros" selected>Apenas Próximos / Futuros</option>
-                        <option value="passados">Apenas Realizados / Passados</option>
-                    </select>
-                    <button onclick="abrirModalForm('evento')" id="btn-novo-evento" class="btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-calendar-plus"></i> Criar Evento
-                    </button>
-                </div>
-            </div>
-            <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-        </div>
+    // Processar o envio do Login
+    async function handleLogin(event) {
+      event.preventDefault();
+      hideMessage();
 
-        <!-- ABA LOCAIS DE EVENTOS -->
-        <div id="aba-locais" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-800">Catálogo de Espaços e Auditórios</h3>
-                <button onclick="abrirModalForm('local')" id="btn-novo-local" class="btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-plus"></i> Novo Local / Auditório
-                </button>
-            </div>
-            <div id="grid-locais" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-        </div>
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
 
-        <!-- ABA ÓRGÃOS E SECRETARIAS -->
-        <div id="aba-orgaos" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos, Secretarias e Entidades</h3>
-                <div class="flex gap-2">
-                    <button onclick="abrirModalImportacao('orgaos')" class="btn-admin-only bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
-                    </button>
-                    <button onclick="abrirModalForm('orgao')" class="btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria
-                    </button>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[700px]">
-                    <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
-                        <tr>
-                            <th class="p-4">Sigla</th>
-                            <th class="p-4">Nome do Órgão / Secretaria</th>
-                            <th class="p-4">Tipo Jurídico</th>
-                            <th class="p-4">Responsável TIC</th>
-                            <th class="p-4">E-mail Contato</th>
-                            <th class="p-4 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-orgaos" class="divide-y divide-slate-100 text-sm"></tbody>
-                </table>
-            </div>
-        </div>
+      try {
+        // Substitua '/api/login' pela URL real da sua API backend
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
 
-        <!-- ABA FORNECEDORES -->
-        <div id="aba-fornecedores" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC Detalhados</h3>
-                <div class="flex gap-2">
-                    <button onclick="abrirModalImportacao('fornecedores')" class="btn-admin-only bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
-                    </button>
-                    <button onclick="abrirModalForm('fornecedor')" id="btn-novo-fornecedor" class="btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-plus"></i> Novo Fornecedor
-                    </button>
-                </div>
-            </div>
-            <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-        </div>
+        const data = await response.json();
 
-        <!-- ABA USUÁRIOS -->
-        <div id="aba-usuarios" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários e Permissões</h3>
-                <div class="flex gap-2">
-                    <button onclick="abrirModalImportacao('usuarios')" class="btn-admin-only bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
-                    </button>
-                    <button onclick="exportarUsuariosCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-export"></i> Exportar Usuários (.csv)
-                    </button>
-                    <button onclick="abrirModalForm('usuario')" class="btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-user-plus"></i> Novo Usuário
-                    </button>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[700px]">
-                    <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
-                        <tr>
-                            <th class="p-4">Nome</th>
-                            <th class="p-4">E-mail Institucional</th>
-                            <th class="p-4">Órgão / Secretaria</th>
-                            <th class="p-4">Perfil</th>
-                            <th class="p-4">Módulos Visíveis</th>
-                            <th class="p-4 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-usuarios" class="divide-y divide-slate-100 text-sm"></tbody>
-                </table>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- MODAL UNIVERSAL DETALHAR & EDITAR COMPLETO -->
-    <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 id="detalhe-titulo-modal" class="text-base font-bold text-slate-900">Detalhamento Completo</h3>
-                <button onclick="fecharModal('modal-detalhes')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div id="detalhe-conteudo" class="space-y-3 text-sm text-slate-700 mb-4"></div>
-            
-            <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl border-slate-300">
-                <div class="flex justify-between items-center mb-3">
-                    <p class="text-xs font-bold text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square text-blue-800"></i> Edição Completa e Gerenciamento do Registro</p>
-                    <button type="button" onclick="excluirRegistroUniversal()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-bold transition flex items-center gap-1 shadow-sm">
-                        <i class="fa-solid fa-trash-can"></i> Excluir Registro
-                    </button>
-                </div>
-                <form id="form-edicao-admin" onsubmit="salvarEdicaoUniversal(event)" class="space-y-2.5 text-xs">
-                    <input type="hidden" id="edit-colecao">
-                    <input type="hidden" id="edit-doc-id">
-                    <div id="edit-campos-dinamicos" class="max-h-60 overflow-y-auto pr-1"></div>
-                    <div class="flex justify-end gap-2 pt-3 border-t">
-                        <button type="button" onclick="fecharModal('modal-detalhes')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Cancelar</button>
-                        <button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded hover:bg-blue-800 transition shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Todas as Alterações</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL CRIAÇÃO / CADASTRO UNIVERSAL DETALHADO -->
-    <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 id="form-univ-titulo" class="text-base font-bold text-slate-900">Novo Cadastro</h3>
-                <button onclick="fecharModal('modal-form-universal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form id="form-univ-body" onsubmit="salvarCadastroUniversal(event)" class="space-y-3 text-sm">
-                <input type="hidden" id="form-univ-tipo">
-                <div id="form-univ-campos"></div>
-                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar no Firestore</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL IMPORTAÇÃO DE PLANILHA / CSV -->
-    <div id="modal-importacao" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 id="import-titulo-modal" class="text-base font-bold text-slate-900">Importar Dados via CSV / Planilha</h3>
-                <button onclick="fecharModal('modal-importacao')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="space-y-4 text-xs">
-                <input type="hidden" id="import-colecao-alvo">
-                <p class="text-slate-600">Selecione um arquivo <strong>.csv</strong> contendo os registros no padrão da tabela para importar automaticamente na base PRGD e sincronizar no Firestore.</p>
-                <div class="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center bg-slate-50">
-                    <i class="fa-solid fa-file-csv text-3xl text-emerald-600 mb-2"></i>
-                    <input type="file" id="input-file-csv" accept=".csv, .txt" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-                </div>
-                <div class="bg-amber-50 border border-amber-200 p-2.5 rounded text-amber-900">
-                    <p class="font-bold mb-0.5"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Formato Esperado:</p>
-                    <p id="import-instrucoes-formato" class="font-mono text-[11px]"></p>
-                </div>
-                <button type="button" onclick="processarArquivoCSV()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Processar e Importar Registros
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        window.currentUser = null;
-        window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [] };
-        let abaAtual = 'dashboard';
-
-        const MÓDULOS_SISTEMA = [
-            { id: 'dashboard', nome: 'Dashboard' },
-            { id: 'demandas', nome: 'Demandas' },
-            { id: 'eventos', nome: 'Eventos' },
-            { id: 'locais', nome: 'Locais de Eventos' },
-            { id: 'orgaos', nome: 'Órgãos / Secretarias' },
-            { id: 'fornecedores', nome: 'Fornecedores' },
-            { id: 'usuarios', nome: 'Usuários & Permissões' }
-        ];
-
-        // DADOS MOCKADOS INICIAIS CASO O FIRESTORE ESTEJA VAZIO
-        const initialMockData = {
-            orgaos: [
-                { id: 'ATI', sigla: 'ATI', nome: 'Agência Estadual de Tecnologia da Informação', tipoJuridico: 'Autarquia', responsavel: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br' },
-                { id: 'SEFAZ', sigla: 'SEFAZ', nome: 'Secretaria da Fazenda de Pernambuco', tipoJuridico: 'Administração Direta (Secretaria)', responsavel: 'Gestão de TI SEFAZ', email: 'ti@sefaz.pe.gov.br' },
-                { id: 'SEPLAG', sigla: 'SEPLAG', nome: 'Secretaria de Planejamento e Gestão', tipoJuridico: 'Administração Direta (Secretaria)', responsavel: 'Gestão de TI SEPLAG', email: 'ti@seplag.pe.gov.br' }
-            ],
-            demandas: [
-                { id: 'DEM-001', orgao: 'SEFAZ', titulo: 'Migração do Sistema de Correios para SOGo.PE', categoria: 'Infraestrutura / E-mail', prioridade: 'Alta', status: 'Em Andamento', descricao: 'Migração das 120.000 contas do Estado para o novo ambiente SOGo.PE.' }
-            ],
-            eventos: [
-                { id: 'EV-001', titulo: 'GOV IN PLAY 2026', palestrante: 'Equipe de Relacionamento ATI / Especialistas em GovDigital', dataInicio: '2026-10-24T09:00', dataFim: '2026-10-24T17:00', local: 'Auditório ATI', geracaoCertificado: 'Sim', linkInscricao: 'https://sead.pe.gov.br/inscricao-gov-in-play', visibilidade: 'Aberto ao Público', descricao: 'Encontro de gestores de TIC do Estado de Pernambuco para alinhamento estratégico.' }
-            ],
-            locais: [
-                { id: 'LOC-001', nome: 'Auditório do Governo Digital - ATI', tipoEspaco: 'Auditório', natureza: 'Público', capacidade: '150', valorAluguel: 'Gratuito', climatizacao: 'Sim (Ar-Condicionado)', som: 'Sim (Mesa + Som)', estacionamento: 'Sim', cozinha: 'Sim', banheiro: 'Sim', responsavel: 'Gestão ATI', endereco: 'Rua Imperial, Recife - PE' }
-            ],
-            fornecedores: [
-                { id: 'FOR-001', nome: 'Tech Cloud Solutions PE', cnpj: '12.345.678/0001-90', categoria: 'Infraestrutura / Cloud', responsavel: 'Carlos Eduardo', telefone: '(81) 98888-7777', email: 'contato@techcloudpe.com.br', numeroContrato: 'Contrato nº 012/2025-ATI', valorContratual: 'R$ 2.400.000,00', statusContrato: 'Ativo / Em Execução', escopoServico: 'Suporte, governança cloud privada e sustentação de banco de dados.', endereco: 'Av. Agamenon Magalhães, Recife - PE' }
-            ],
-            usuarios: [
-                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', subgrupoId: 'ATI', perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'] }
-            ]
-        };
-
-        function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        function verificarAutenticacaoObrigatoria() {
-            const mainEl = document.getElementById('main-content');
-            const loginModal = document.getElementById('modal-login');
-
-            if (!window.currentUser) {
-                if (mainEl) mainEl.classList.add('hidden');
-                if (loginModal) loginModal.classList.remove('hidden');
-            } else {
-                if (mainEl) mainEl.classList.remove('hidden');
-                if (loginModal) loginModal.classList.add('hidden');
-            }
+        if (response.ok) {
+          // Armazena o token e redireciona (ajuste conforme a necessidade)
+          localStorage.setItem('token', data.token);
+          showMessage('Login realizado com sucesso! Redirecionando...', true);
+          setTimeout(() => {
+            window.location.href = '/dashboard'; // Altere para sua página principal
+          }, 1500);
+        } else {
+          showMessage(data.message || 'Falha ao realizar login. Verifique suas credenciais.');
         }
+      } catch (err) {
+        showMessage('Erro de conexão com o servidor. Tente novamente mais tarde.');
+      }
+    }
 
-        function atualizarVisibilidadeAbas() {
-            verificarAutenticacaoObrigatoria();
-            if (!window.currentUser) return;
+    // Processar Alteração de Senha
+    async function handleChangePassword(event) {
+      event.preventDefault();
+      hideMessage();
 
-            const user = window.currentUser;
-            const isAdmin = user.perfil === 'admin';
-            const permitidos = isAdmin ? ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'] : (user.modulosPermitidos || ['dashboard', 'demandas', 'eventos']);
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
 
-            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'].forEach(mod => {
-                const btnTab = document.getElementById('btn-tab-' + mod);
-                if (btnTab) {
-                    btnTab.style.display = permitidos.includes(mod) ? 'inline-flex' : 'none';
-                }
-            });
+      if (newPassword !== confirmPassword) {
+        showMessage('A nova senha e a confirmação não coincidem.');
+        return;
+      }
 
-            // Esconder botões de criação/escrita se o usuário não for ADMIN
-            const btnsAdmin = document.querySelectorAll('.btn-admin-only');
-            btnsAdmin.forEach(btn => {
-                if (isAdmin) {
-                    btn.classList.remove('hidden');
-                } else {
-                    btn.classList.add('hidden');
-                }
-            });
+      const token = localStorage.getItem('token');
 
-            // Atualizar badge de perfil
-            const badgePerfil = document.getElementById('badge-perfil-acesso');
-            if (badgePerfil) {
-                badgePerfil.textContent = 'PERFIL: ' + (user.perfil || 'COMUM').toUpperCase() + (isAdmin ? ' (ACESSO TOTAL)' : ' (SOMENTE LEITURA)');
-                badgePerfil.className = isAdmin ? 'bg-emerald-200 text-emerald-900 px-2.5 py-0.5 rounded font-bold uppercase' : 'bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded font-bold uppercase';
-            }
+      try {
+        // Substitua '/api/change-password' pela URL real da sua API backend
+        const response = await fetch('/api/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
 
-            if (!permitidos.includes(abaAtual)) {
-                mudarAba(permitidos[0] || 'dashboard');
-            }
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage('Senha alterada com sucesso!', true);
+          document.getElementById('password-form').reset();
+        } else {
+          showMessage(data.message || 'Erro ao alterar a senha. Verifique a senha atual.');
         }
-
-        function mudarAba(aba) {
-            abaAtual = aba;
-            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'].forEach(a => {
-                const el = document.getElementById('aba-' + a);
-                const btn = document.getElementById('btn-tab-' + a);
-                if (el) el.classList.toggle('hidden', a !== abaAtual);
-                if (btn) btn.className = 'px-4 py-2 rounded-lg transition ' + (a === abaAtual ? 'tab-active' : 'tab-inactive');
-            });
-            if (aba === 'dashboard') renderCharts();
-        }
-
-        function iniciarSnapshotFirestore() {
-            const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
-            colecoes.forEach(col => {
-                try {
-                    window.firebaseMethods.onSnapshot(window.firebaseMethods.collection(window.firebaseDb, col), snap => {
-                        if (!snap.empty) {
-                            window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                        } else if (window.dbData[col].length === 0) {
-                            window.dbData[col] = initialMockData[col] || [];
-                        }
-                        renderizarTudo();
-                    }, err => {
-                        console.warn('Firestore snapshot falhou:', err);
-                        if (window.dbData[col].length === 0) window.dbData[col] = initialMockData[col] || [];
-                        renderizarTudo();
-                    });
-                } catch (e) {
-                    console.warn('Erro Firestore:', e);
-                    if (window.dbData[col].length === 0) window.dbData[col] = initialMockData[col] || [];
-                    renderizarTudo();
-                }
-            });
-        }
-
-        function renderizarTudo() {
-            renderUsuarios();
-            renderOrgaos();
-            renderDemandas();
-            renderEventos();
-            renderLocais();
-            renderFornecedores();
-            renderDashboardKPIs();
-            preencherSelectOrgaos();
-            atualizarVisibilidadeAbas();
-        }
-
-        function preencherSelectOrgaos() {
-            const selects = document.querySelectorAll('.select-orgaos-dinamico');
-            selects.forEach(select => {
-                const valAtual = select.value;
-                select.innerHTML = '<option value="">Selecione o Órgão / Secretaria</option>';
-                window.dbData.orgaos.forEach(o => {
-                    const opt = document.createElement('option');
-                    opt.value = o.sigla || o.id;
-                    opt.textContent = (o.sigla || o.id) + ' - ' + (o.nome || '');
-                    select.appendChild(opt);
-                });
-                if (valAtual) select.value = valAtual;
-            });
-        }
-
-        function renderUsuarios() {
-            const tbody = document.getElementById('tabela-usuarios');
-            if (!tbody) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
-
-            tbody.innerHTML = window.dbData.usuarios.map(u => {
-                const mods = u.perfil === 'admin' ? 'Acesso Total (Admin)' : (u.modulosPermitidos && u.modulosPermitidos.length > 0 ? u.modulosPermitidos.join(', ') : 'Padrão');
-                return '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('usuarios', '' + u.id + '')">' +
-                    '<td class="p-4 font-bold text-slate-800">' + (u.nome || u.email) + '</td>' +
-                    '<td class="p-4 text-slate-600">' + (u.email || u.id) + '</td>' +
-                    '<td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">' + (u.subgrupoId || u.orgao || 'GERAL') + '</span></td>' +
-                    '<td class="p-4"><span class="bg-' + (u.perfil === 'admin' ? 'emerald' : 'amber') + '-100 text-' + (u.perfil === 'admin' ? 'emerald-900' : 'amber-900') + ' text-xs font-bold px-2.5 py-1 rounded uppercase">' + (u.perfil || 'comum') + '</span></td>' +
-                    '<td class="p-4 text-xs font-medium text-slate-500 max-w-xs truncate">' + mods + '</td>' +
-                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar Detalhes') + '</button></td>' +
-                '</tr>';
-            }).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
-        }
-
-        function renderOrgaos() {
-            const tbody = document.getElementById('tabela-orgaos');
-            if (!tbody) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
-
-            tbody.innerHTML = window.dbData.orgaos.map(o => 
-                '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('orgaos', '' + o.id + '')">' +
-                    '<td class="p-4 font-bold text-indigo-900">' + (o.sigla || o.id) + '</td>' +
-                    '<td class="p-4 text-slate-800 font-medium">' + (o.nome || '-') + '</td>' +
-                    '<td class="p-4 text-xs"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">' + (o.tipoJuridico || o.naturezaJuridica || 'Secretaria') + '</span></td>' +
-                    '<td class="p-4 text-xs text-slate-600">' + (o.responsavel || '-') + '</td>' +
-                    '<td class="p-4 text-xs text-slate-600">' + (o.email || '-') + '</td>' +
-                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</button></td>' +
-                '</tr>'
-            ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
-        }
-
-        function renderDemandas() {
-            const tbody = document.getElementById('tabela-demandas');
-            if (!tbody) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
-
-            tbody.innerHTML = window.dbData.demandas.map(d => 
-                '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('demandas', '' + d.id + '')">' +
-                    '<td class="p-4 font-bold text-blue-900">' + (d.orgao || 'Geral') + '</td>' +
-                    '<td class="p-4 font-medium text-slate-900">' + (d.titulo || '-') + '</td>' +
-                    '<td class="p-4 text-xs text-slate-500">' + (d.categoria || '-') + '</td>' +
-                    '<td class="p-4 text-xs font-bold text-' + (d.prioridade === 'Alta' ? 'red' : 'amber') + '-600">' + (d.prioridade || 'Média') + '</td>' +
-                    '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">' + (d.status || 'Pendente') + '</span></td>' +
-                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</button></td>' +
-                '</tr>'
-            ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma demanda registrada.</td></tr>';
-        }
-
-        function renderEventos() {
-            const grid = document.getElementById('grid-eventos');
-            if (!grid) return;
-            const filtro = document.getElementById('filtro-eventos')?.value || 'todos';
-            const agora = new Date().toISOString();
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
-
-            let lista = window.dbData.eventos.filter(e => {
-                if (!e.visibilidade || e.visibilidade === 'Aberto ao Público') return true;
-                if (!window.currentUser) return false;
-                
-                const userOrg = (window.currentUser.subgrupoId || window.currentUser.orgao || '').toUpperCase();
-                const userEmail = (window.currentUser.email || '').toLowerCase();
-                const grupoAlvo = (e.grupoDestinatario || e.visibilidade || '').toUpperCase();
-                
-                if (isAdmin) return true;
-                if (grupoAlvo.includes(userOrg) || grupoAlvo.includes(userEmail)) return true;
-                return false;
-            });
-
-            if (filtro === 'futuros') lista = lista.filter(e => (e.dataInicio || e.data) >= agora);
-            if (filtro === 'passados') lista = lista.filter(e => (e.dataInicio || e.data) < agora);
-
-            grid.innerHTML = lista.map(e => {
-                const dtStart = e.dataInicio || e.data;
-                const dtEnd = e.dataFim;
-                const ePassado = dtStart < agora;
-                
-                return '<div onclick="detalharRegistro('eventos', '' + e.id + '')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between cursor-pointer hover:border-amber-400 transition">' +
-                    '<div>' +
-                        '<div class="flex justify-between items-start mb-2 gap-1">' +
-                            '<span class="bg-' + (ePassado ? 'slate' : 'amber') + '-100 text-' + (ePassado ? 'slate' : 'amber') + '-800 text-[11px] font-bold px-2 py-0.5 rounded">' + (ePassado ? 'Realizado' : 'Próximo Evento') + '</span>' +
-                            '<span class="bg-' + (e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple') + '-100 text-' + (e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple') + '-900 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">' +
-                                '<i class="fa-solid fa-' + (e.visibilidade === 'Aberto ao Público' ? 'globe' : 'lock') + '"></i> ' + (e.visibilidade || 'Público') +
-                            '</span>' +
-                        '</div>' +
-                        '<h4 class="font-bold text-slate-800 text-base mt-1">' + (e.titulo || '-') + '</h4>' +
-                        '<p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Palestrante: ' + (e.palestrante || 'Não informado') + '</p>' +
-                        '<div class="bg-slate-50 p-2.5 rounded-lg border my-2 text-[11px] space-y-1">' +
-                            '<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> <strong>Início:</strong> ' + (dtStart ? new Date(dtStart).toLocaleString('pt-BR') : '-') + '</p>' +
-                            (dtEnd ? '<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-red-500 mr-1"></i> <strong>Fim:</strong> ' + new Date(dtEnd).toLocaleString('pt-BR') + '</p>' : '') +
-                            '<p class="text-slate-600"><i class="fa-solid fa-certificate text-blue-600 mr-1"></i> <strong>Certificado:</strong> <span class="font-bold text-slate-800">' + (e.geracaoCertificado || 'Não') + '</span></p>' +
-                        '</div>' +
-                        '<p class="text-xs text-slate-500 line-clamp-2">' + (e.descricao || 'Sem descrição.') + '</p>' +
-                    '</div>' +
-                    '<div class="border-t pt-3 mt-3 flex justify-between items-center">' +
-                        '<span class="text-xs text-indigo-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>' + (e.local || 'Local não informado') + '</span>' +
-                        '<span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</span>' +
-                    '</div>' +
-                '</div>';
-            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento localizado com este filtro ou você não possui permissão de grupo.</p>';
-        }
-
-        function renderLocais() {
-            const grid = document.getElementById('grid-locais');
-            if (!grid) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
-
-            grid.innerHTML = window.dbData.locais.map(l => 
-                '<div onclick="detalharRegistro('locais', '' + l.id + '')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-purple-500 transition flex flex-col justify-between">' +
-                    '<div>' +
-                        '<div class="flex justify-between items-start">' +
-                            '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">' + (l.tipoEspaco || 'Auditório') + '</span>' +
-                            '<span class="text-xs font-bold ' + (l.natureza === 'Privado' ? 'text-amber-600' : 'text-emerald-600') + '">' + (l.natureza || 'Público') + '</span>' +
-                        '</div>' +
-                        '<h4 class="font-bold text-slate-800 text-base mt-2">' + (l.nome || l.id) + '</h4>' +
-                        '<p class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>' + (l.capacidade || '0') + ' sentadas</strong></p>' +
-                        '<p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-money-bill-wave mr-1"></i> Aluguel: <strong>' + (l.valorAluguel ? 'R$ ' + l.valorAluguel : 'Gratuito / Público') + '</strong></p>' +
-                    '</div>' +
-                    '<div class="mt-3 border-t pt-2 flex justify-between items-center text-xs text-slate-500">' +
-                        '<span><i class="fa-solid fa-snowflake mr-1"></i>' + (l.climatizacao || 'Sim') + '</span>' +
-                        '<span><i class="fa-solid fa-square-parking mr-1"></i>' + (l.estacionamento || 'Sim') + '</span>' +
-                        '<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</span>' +
-                    '</div>' +
-                '</div>'
-            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local de eventos cadastrado.</p>';
-        }
-
-        function renderFornecedores() {
-            const grid = document.getElementById('grid-fornecedores');
-            if (!grid) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
-
-            grid.innerHTML = window.dbData.fornecedores.map(f => 
-                '<div onclick="detalharRegistro('fornecedores', '' + f.id + '')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-emerald-500 transition">' +
-                    '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">' + (f.categoria || 'Geral') + '</span>' +
-                    '<h4 class="font-bold text-slate-800 mt-2">' + (f.nome || f.razaoSocial || '-') + '</h4>' +
-                    '<p class="text-xs text-slate-500"><i class="fa-solid fa-id-card mr-1"></i> CNPJ: ' + (f.cnpj || '-') + '</p>' +
-                    '<p class="text-xs text-slate-500"><i class="fa-solid fa-file-contract mr-1"></i> Contrato: ' + (f.numeroContrato || '-') + '</p>' +
-                    '<p class="text-xs text-slate-500"><i class="fa-solid fa-user-tie mr-1"></i> Resp: ' + (f.responsavel || '-') + '</p>' +
-                    '<div class="mt-3 border-t pt-2 text-right"><span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</span></div>' +
-                '</div>'
-            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor cadastrado.</p>';
-        }
-
-        function renderDashboardKPIs() {
-            document.getElementById('dash-tot-demandas').textContent = window.dbData.demandas.length;
-            document.getElementById('dash-tot-eventos').textContent = window.dbData.eventos.length;
-            document.getElementById('dash-tot-locais').textContent = window.dbData.locais.length;
-            document.getElementById('dash-tot-orgaos').textContent = window.dbData.orgaos.length;
-            document.getElementById('dash-tot-fornecedores').textContent = window.dbData.fornecedores.length;
-        }
-
-        window.detalharRegistro = function(colecao, docId) {
-            const item = window.dbData[colecao].find(i => i.id === docId);
-            if (!item) return;
-
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
-            document.getElementById('detalhe-titulo-modal').textContent = 'Detalhamento (' + colecao.toUpperCase() + ')';
-            
-            let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-4">';
-            for (let k in item) {
-                if (k !== 'senhaHash' && k !== 'senha' && k !== 'historicoStatus' && k !== 'modulosPermitidos') {
-                    htmlContent += '<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">' + k + '</span><span class="font-semibold text-slate-800">' + item[k] + '</span></div>';
-                }
-            }
-            if (colecao === 'usuarios') {
-                const userPerms = item.modulosPermitidos || ['dashboard', 'demandas', 'eventos'];
-                htmlContent += '<div class="p-2 bg-slate-50 border rounded sm:col-span-2"><span class="text-slate-400 text-[10px] uppercase font-bold block">Módulos de Acesso Permitidos</span><span class="font-semibold text-indigo-900">' + userPerms.join(', ') + '</span></div>';
-            }
-            htmlContent += '</div>';
-
-            if (colecao === 'eventos') {
-                htmlContent += '<div class="border-t pt-4 mt-2 mb-4 bg-amber-50/60 p-4 rounded-xl border-amber-200">' +
-                    '<h4 class="font-bold text-amber-900 text-xs sm:text-sm mb-2 flex items-center gap-1.5">' +
-                        '<i class="fa-solid fa-id-badge text-amber-700"></i> Inscrição & Credenciamento do Evento' +
-                    '</h4>' +
-                    '<p class="text-xs text-slate-700 mb-3 font-medium">Você é um usuário autenticado no sistema PRGD.</p>' +
-                    (item.linkInscricao ? '<a href="' + item.linkInscricao + '" target="_blank" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-sm"><i class="fa-solid fa-pen-to-square"></i> Realizar Inscrição Agora</a>' : '<p class="text-xs font-bold text-slate-500">Inscrição Direta via Agência ATI / Formulário em Breve</p>') +
-                '</div>';
-            }
-
-            if (colecao === 'demandas') {
-                if (!item.historicoStatus) {
-                    item.historicoStatus = [
-                        { data: new Date().toISOString(), status: item.status || 'Pendente', descricao: 'Abertura da demanda registrada na plataforma PRGD.' }
-                    ];
-                }
-
-                htmlContent += '<div class="border-t pt-4 mt-2 mb-4">' +
-                    '<h4 class="font-bold text-slate-800 text-xs sm:text-sm mb-3 flex items-center gap-1.5">' +
-                        '<i class="fa-solid fa-clock-rotate-left text-blue-800"></i> Histórico & Acompanhamento de Status' +
-                    '</h4>' +
-                    '<div class="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1">' +
-                        item.historicoStatus.map(h => 
-                            '<div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 text-xs">' +
-                                '<div class="flex justify-between items-center mb-1">' +
-                                    '<span class="bg-blue-900 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">' + h.status + '</span>' +
-                                    '<span class="text-slate-400 text-[10px] font-semibold"><i class="fa-regular fa-calendar-alt mr-1"></i>' + new Date(h.data).toLocaleString('pt-BR') + '</span>' +
-                                '</div>' +
-                                '<p class="text-slate-700 font-medium">' + (h.descricao || 'Sem observações.') + '</p>' +
-                            '</div>'
-                        ).join('') +
-                    '</div>' +
-                    (isAdmin ? 
-                        '<div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2 text-xs">' +
-                            '<p class="font-bold text-slate-800"><i class="fa-solid fa-plus-circle text-emerald-600 mr-1"></i> Inserir Novo Acompanhamento / Atualização</p>' +
-                            '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">' +
-                                '<div>' +
-                                    '<label class="block text-slate-600 font-semibold mb-1">Novo Status</label>' +
-                                    '<select id="demanda-novo-status" class="w-full p-2 border rounded bg-white font-medium">' +
-                                        '<option value="Em Andamento">Em Andamento</option>' +
-                                        '<option value="Aguardando Validação">Aguardando Validação</option>' +
-                                        '<option value="Em Análise Técnica">Em Análise Técnica</option>' +
-                                        '<option value="Concluído">Concluído</option>' +
-                                        '<option value="Pendente">Pendente</option>' +
-                                        '<option value="Cancelado">Cancelado</option>' +
-                                    '</select>' +
-                                '</div>' +
-                                '<div>' +
-                                    '<label class="block text-slate-600 font-semibold mb-1">Detalhamento do Acompanhamento</label>' +
-                                    '<input type="text" id="demanda-nova-obs" placeholder="Ex: Reunião realizada com a equipe técnica..." class="w-full p-2 border rounded bg-white">' +
-                                '</div>' +
-                            '</div>' +
-                            '<button type="button" onclick="adicionarAcompanhamentoDemanda('' + docId + '')" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded transition shadow-sm flex items-center justify-center gap-1">' +
-                                '<i class="fa-solid fa-check-double"></i> Registrar Acompanhamento e Salvar Histórico' +
-                            '</button>' +
-                        '</div>'
-                        : 
-                        '<p class="text-xs text-slate-500 bg-slate-100 p-2.5 rounded text-center font-medium"><i class="fa-solid fa-lock mr-1"></i> Atualização de status restrita para administradores.</p>'
-                    ) +
-                '</div>';
-            }
-
-            document.getElementById('detalhe-conteudo').innerHTML = htmlContent;
-
-            if (isAdmin) {
-                document.getElementById('edit-colecao').value = colecao;
-                document.getElementById('edit-doc-id').value = docId;
-
-                let editFieldsHtml = '';
-                for (let k in item) {
-                    if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus' || k === 'modulosPermitidos') continue;
-                    const fieldVal = item[k] !== undefined ? item[k] : '';
-                    const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'escopoServico';
-                    
-                    editFieldsHtml += '<div class="mb-2"><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">' + (k === 'tipoJuridico' ? 'Tipo Jurídico' : k) + '</label>';
-                    
-                    if (k === 'perfil') {
-                        editFieldsHtml += '<select data-field="perfil" class="edit-dinamico-input w-full p-2 border rounded bg-white font-bold text-slate-800">' +
-                            '<option value="comum" ' + (fieldVal === 'comum' ? 'selected' : '') + '>COMUM (Somente Leitura)</option>' +
-                            '<option value="admin" ' + (fieldVal === 'admin' ? 'selected' : '') + '>ADMINISTRADOR (Acesso Total + Escrita)</option>' +
-                        '</select>';
-                    } else if (k === 'tipoJuridico' || k === 'naturezaJuridica') {
-                        editFieldsHtml += '<select data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">' +
-                            '<option value="Administração Direta (Secretaria)" ' + (fieldVal.includes('Direta') || fieldVal.includes('Secretaria') ? 'selected' : '') + '>Administração Direta (Secretaria)</option>' +
-                            '<option value="Autarquia" ' + (fieldVal === 'Autarquia' ? 'selected' : '') + '>Autarquia</option>' +
-                            '<option value="Empresa Pública" ' + (fieldVal === 'Empresa Pública' ? 'selected' : '') + '>Empresa Pública</option>' +
-                            '<option value="Fundação Pública" ' + (fieldVal.includes('Fundação') ? 'selected' : '') + '>Fundação Pública</option>' +
-                            '<option value="Sociedade de Economia Mista" ' + (fieldVal.includes('Mista') ? 'selected' : '') + '>Sociedade de Economia Mista</option>' +
-                            '<option value="Órgão Constitucional Independente" ' + (fieldVal.includes('Independente') ? 'selected' : '') + '>Órgão Constitucional Independente</option>' +
-                        '</select>';
-                    } else if (k === 'geracaoCertificado') {
-                        editFieldsHtml += '<select data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">' +
-                            '<option value="Sim" ' + (fieldVal === 'Sim' ? 'selected' : '') + '>Sim (Gera Certificado)</option>' +
-                            '<option value="Não" ' + (fieldVal === 'Não' ? 'selected' : '') + '>Não (Não gera certificado)</option>' +
-                        '</select>';
-                    } else if (k === 'visibilidade') {
-                        editFieldsHtml += '<select data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">' +
-                            '<option value="Aberto ao Público" ' + (fieldVal === 'Aberto ao Público' ? 'selected' : '') + '>Aberto ao Público</option>' +
-                            '<option value="Exclusivo para Grupo Especificado" ' + (fieldVal !== 'Aberto ao Público' ? 'selected' : '') + '>Exclusivo para Grupo Especificado</option>' +
-                        '</select>';
-                    } else if (isLongText) {
-                        editFieldsHtml += '<textarea data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">' + fieldVal + '</textarea>';
-                    } else {
-                        editFieldsHtml += '<input type="text" data-field="' + k + '" value="' + fieldVal + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">';
-                    }
-                    editFieldsHtml += '</div>';
-                }
-
-                if (colecao === 'usuarios') {
-                    const userPerms = item.modulosPermitidos || ['dashboard', 'demandas', 'eventos'];
-                    editFieldsHtml += '<div class="mt-3 border-t pt-3 bg-amber-50 p-3 rounded-lg border-amber-200">' +
-                        '<label class="block font-bold text-slate-800 mb-2 uppercase text-[11px]"><i class="fa-solid fa-user-lock text-amber-700 mr-1"></i> Permissão de Visualização dos Módulos:</label>' +
-                        '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">' +
-                            MÓDULOS_SISTEMA.map(m => 
-                                '<label class="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">' +
-                                    '<input type="checkbox" value="' + m.id + '" class="edit-checkbox-modulo rounded text-blue-900 focus:ring-blue-600" ' + (userPerms.includes(m.id) ? 'checked' : '') + '>' +
-                                    m.nome +
-                                '</label>'
-                            ).join('') +
-                        '</div>' +
-                    '</div>';
-                }
-
-                document.getElementById('edit-campos-dinamicos').innerHTML = editFieldsHtml;
-                document.getElementById('detalhe-area-admin').classList.remove('hidden');
-            } else {
-                document.getElementById('detalhe-area-admin').classList.add('hidden');
-            }
-
-            document.getElementById('modal-detalhes').classList.remove('hidden');
-        };
-
-        window.adicionarAcompanhamentoDemanda = async function(docId) {
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
-                alert('Apenas administradores podem registrar novos acompanhamentos.');
-                return;
-            }
-
-            const demanda = window.dbData.demandas.find(d => d.id === docId);
-            if (!demanda) return;
-
-            const novoStatus = document.getElementById('demanda-novo-status').value;
-            const novaObs = document.getElementById('demanda-nova-obs').value.trim();
-
-            if (!novaObs) {
-                alert('Por favor, informe a descrição do acompanhamento antes de salvar.');
-                return;
-            }
-
-            if (!demanda.historicoStatus) demanda.historicoStatus = [];
-            
-            const novoAcompanhamento = {
-                data: new Date().toISOString(),
-                status: novoStatus,
-                descricao: novaObs
-            };
-
-            demanda.status = novoStatus;
-            demanda.historicoStatus.unshift(novoAcompanhamento);
-
-            renderizarTudo();
-
-            try {
-                const docRef = window.firebaseMethods.doc(window.firebaseDb, 'demandas', docId);
-                await window.firebaseMethods.updateDoc(docRef, {
-                    status: novoStatus,
-                    historicoStatus: demanda.historicoStatus
-                });
-            } catch (err) {
-                console.warn('Erro ao salvar acompanhamento:', err);
-            }
-
-            alert('Novo status e histórico de acompanhamento registrados com sucesso!');
-            detalharRegistro('demandas', docId);
-        };
-
-        window.salvarEdicaoUniversal = async function(e) {
-            e.preventDefault();
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
-                alert('Apenas administradores possuem permissão de edição.');
-                return;
-            }
-
-            const colecao = document.getElementById('edit-colecao').value;
-            const docId = document.getElementById('edit-doc-id').value;
-            const item = window.dbData[colecao].find(i => i.id === docId);
-            if (!item) return;
-
-            const updatedData = {};
-            const inputs = document.querySelectorAll('.edit-dinamico-input');
-            inputs.forEach(input => {
-                const fieldName = input.getAttribute('data-field');
-                if (fieldName) {
-                    item[fieldName] = input.value;
-                    updatedData[fieldName] = input.value;
-                }
-            });
-
-            if (colecao === 'usuarios') {
-                const checkedBoxes = document.querySelectorAll('.edit-checkbox-modulo:checked');
-                const selectedModulos = Array.from(checkedBoxes).map(cb => cb.value);
-                item.modulosPermitidos = selectedModulos;
-                updatedData.modulosPermitidos = selectedModulos;
-            }
-
-            renderizarTudo();
-
-            try {
-                const docRef = window.firebaseMethods.doc(window.firebaseDb, colecao, docId);
-                await window.firebaseMethods.updateDoc(docRef, updatedData);
-            } catch (err) {
-                console.warn('Erro ao atualizar no Firestore:', err);
-            }
-            alert('Registro e permissões atualizados com sucesso!');
-            fecharModal('modal-detalhes');
-        };
-
-        window.excluirRegistroUniversal = async function() {
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
-                alert('Apenas administradores podem excluir registros.');
-                return;
-            }
-
-            const colecao = document.getElementById('edit-colecao').value;
-            const docId = document.getElementById('edit-doc-id').value;
-
-            if (!confirm('Tem certeza que deseja excluir este registro?')) return;
-
-            window.dbData[colecao] = window.dbData[colecao].filter(i => i.id !== docId);
-            renderizarTudo();
-
-            try {
-                const docRef = window.firebaseMethods.doc(window.firebaseDb, colecao, docId);
-                await window.firebaseMethods.deleteDoc(docRef);
-            } catch (err) {
-                console.warn('Erro ao excluir:', err);
-            }
-            alert('Registro excluído com sucesso!');
-            fecharModal('modal-detalhes');
-        };
-
-        window.abrirModalForm = function(tipo) {
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
-                alert('Apenas administradores possuem permissão para cadastrar novos registros.');
-                return;
-            }
-
-            document.getElementById('form-univ-tipo').value = tipo;
-            const container = document.getElementById('form-univ-campos');
-            document.getElementById('form-univ-titulo').textContent = 'Novo Cadastro: ' + tipo.toUpperCase();
-
-            if (tipo === 'orgao') {
-                container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Sigla do Órgão</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded uppercase"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Nome Completo do Órgão / Secretaria</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Natureza Jurídica / Tipo de Administração</label><select id="univ-c3" class="w-full p-2 border rounded bg-white font-semibold text-slate-800"><option value="Administração Direta (Secretaria)">Administração Direta (Secretaria)</option><option value="Autarquia">Autarquia</option><option value="Empresa Pública">Empresa Pública</option><option value="Fundação Pública">Fundação Pública</option><option value="Sociedade de Economia Mista">Sociedade de Economia Mista</option><option value="Órgão Constitucional Independente">Órgão Constitucional Independente</option></select></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Responsável / Gestor de TIC</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">E-mail Institucional de Contato</label><input type="email" id="univ-c5" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Telefone Institucional</label><input type="text" id="univ-c6" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Endereço / Sede</label><input type="text" id="univ-c7" class="w-full p-2 border rounded"></div>';
-            } else if (tipo === 'fornecedor') {
-                container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Razão Social / Nome Fantasia</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">CNPJ</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Categoria Principal do Serviço TIC</label><input type="text" id="univ-c3" placeholder="Ex: Cloud Computing, Desenvolvimento Web" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Nome do Gestor de Conta / Responsável</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Telefone / WhatsApp Comercial</label><input type="text" id="univ-c5" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">E-mail Corporativo</label><input type="email" id="univ-c6" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Número do Contrato</label><input type="text" id="univ-c7" placeholder="Ex: Contrato nº 042/2026-ATI" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Valor Contratual Registrado (R$)</label><input type="text" id="univ-c8" placeholder="Ex: R$ 1.500.000,00" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Status da Parceria / Contrato</label><select id="univ-c9" class="w-full p-2 border rounded bg-white"><option value="Ativo / Em Execução">Ativo / Em Execução</option><option value="Em Homologação">Em Homologação</option><option value="Encerrado">Encerrado</option></select></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Escopo Completo dos Serviços Prestados</label><textarea id="univ-c10" rows="3" class="w-full p-2 border rounded"></textarea></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Endereço Comercial</label><input type="text" id="univ-c11" class="w-full p-2 border rounded"></div>';
-            } else if (tipo === 'evento') {
-                container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Título do Evento</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded font-semibold"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Palestrante(s) / Facilitador(es)</label><input type="text" id="univ-c2" class="w-full p-2 border rounded"></div>' +
-                    '<div class="grid grid-cols-2 gap-2">' +
-                        '<div><label class="block font-medium text-slate-700 mb-1">Data e Hora de Início</label><input type="datetime-local" id="univ-c3" required class="w-full p-2 border rounded"></div>' +
-                        '<div><label class="block font-medium text-slate-700 mb-1">Data e Hora de Término</label><input type="datetime-local" id="univ-c4" required class="w-full p-2 border rounded"></div>' +
-                    '</div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Local / Espaço</label><input type="text" id="univ-c5" class="w-full p-2 border rounded"></div>' +
-                    '<div class="grid grid-cols-2 gap-2">' +
-                        '<div><label class="block font-medium text-slate-700 mb-1">Vai Gerar Certificado?</label><select id="univ-c6" class="w-full p-2 border rounded bg-white font-medium"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>' +
-                        '<div><label class="block font-medium text-slate-700 mb-1">Público Alvo / Visibilidade</label><select id="univ-c7" onchange="toggleGrupoDestinatario(this.value)" class="w-full p-2 border rounded bg-white font-medium"><option value="Aberto ao Público">Aberto ao Público Geral</option><option value="Exclusivo para Grupo Especificado">Restrito por Grupo / Órgão / Pessoas</option></select></div>' +
-                    '</div>' +
-                    '<div id="box-grupo-destinatario" class="hidden bg-slate-100 p-2.5 rounded-lg border border-slate-300"><label class="block font-semibold text-slate-800 mb-1">Identificação dos Grupos / Órgãos ou E-mails Autorizados</label><input type="text" id="univ-c8" placeholder="Ex: ATI, SEFAZ, arlindo.santos@ati.pe.gov.br" class="w-full p-2 border rounded bg-white"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Link de Inscrição</label><input type="text" id="univ-c9" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Descrição e Detalhamento</label><textarea id="univ-c10" rows="3" class="w-full p-2 border rounded"></textarea></div>';
-            } else if (tipo === 'local') {
-                container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Nome do Espaço / Auditório</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Tipo de Espaço</label><select id="univ-c2" class="w-full p-2 border rounded"><option value="Auditório">Auditório</option><option value="Casa de Eventos">Casa de Eventos</option><option value="Centro de Convenções">Centro de Convenções</option><option value="Sala de Reunião VIP">Sala de Reunião VIP</option></select></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Natureza do Local</label><select id="univ-c3" class="w-full p-2 border rounded"><option value="Público">Público (Governamental)</option><option value="Privado">Privado</option></select></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Capacidade de Pessoas Sentadas</label><input type="number" id="univ-c4" required class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Valor do Aluguel (R$ / Diária)</label><input type="text" id="univ-c5" placeholder="Gratuito ou Valor" class="w-full p-2 border rounded"></div>' +
-                    '<div class="grid grid-cols-2 gap-2"><div><label class="block font-medium text-slate-700 mb-1">Climatização?</label><select id="univ-c6" class="w-full p-2 border rounded"><option value="Sim (Ar-Condicionado)">Sim</option><option value="Não">Não</option></select></div><div><label class="block font-medium text-slate-700 mb-1">Som / Microfones?</label><select id="univ-c7" class="w-full p-2 border rounded"><option value="Sim (Mesa + Som)">Sim</option><option value="Não">Não</option></select></div></div>' +
-                    '<div class="grid grid-cols-3 gap-2"><div><label class="block font-medium text-slate-700 mb-1">Estacionamento?</label><select id="univ-c8" class="w-full p-2 border rounded"><option value="Sim">Sim</option><option value="Não">Não</option></select></div><div><label class="block font-medium text-slate-700 mb-1">Cozinha/Copa?</label><select id="univ-c9" class="w-full p-2 border rounded"><option value="Sim">Sim</option><option value="Não">Não</option></select></div><div><label class="block font-medium text-slate-700 mb-1">Banheiros?</label><select id="univ-c10" class="w-full p-2 border rounded"><option value="Sim">Sim</option><option value="Não">Não</option></select></div></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Responsável / Telefone Contato</label><input type="text" id="univ-c11" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Endereço Completo</label><input type="text" id="univ-c12" class="w-full p-2 border rounded"></div>';
-            } else if (tipo === 'usuario') {
-                container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label><input type="email" id="univ-c2" required class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Órgão / Secretaria</label><select id="univ-c3" required class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Perfil de Acesso</label><select id="univ-c4" class="w-full p-2 border rounded"><option value="comum">COMUM (Somente Leitura)</option><option value="admin">ADMINISTRADOR (Acesso Total)</option></select></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Senha</label><input type="password" id="univ-c5" required minlength="6" class="w-full p-2 border rounded"></div>' +
-                    '<div class="bg-blue-50/70 p-3 rounded-lg border border-blue-200 mt-2">' +
-                        '<label class="block font-bold text-blue-900 mb-2 text-xs uppercase"><i class="fa-solid fa-eye text-blue-700 mr-1"></i> Selecione os Módulos que o Usuário Pode Visualizar:</label>' +
-                        '<div class="grid grid-cols-2 gap-2">' +
-                            MÓDULOS_SISTEMA.map(m => 
-                                '<label class="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">' +
-                                    '<input type="checkbox" value="' + m.id + '" class="novo-checkbox-modulo rounded text-blue-900 focus:ring-blue-600" checked>' +
-                                    m.nome +
-                                '</label>'
-                            ).join('') +
-                        '</div>' +
-                    '</div>';
-                preencherSelectOrgaos();
-            } else if (tipo === 'demanda') {
-                container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Título da Demanda</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Órgão Solicitante</label><select id="univ-c2" required class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Categoria</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Detalhamento / Descrição da Necessidade</label><textarea id="univ-c4" rows="3" class="w-full p-2 border rounded" placeholder="Descreva os detalhes e objetivos da solicitação..."></textarea></div>';
-                preencherSelectOrgaos();
-            }
-            document.getElementById('modal-form-universal').classList.remove('hidden');
-        };
-
-        window.toggleGrupoDestinatario = function(val) {
-            const box = document.getElementById('box-grupo-destinatario');
-            if (box) box.classList.toggle('hidden', val === 'Aberto ao Público');
-        };
-
-        window.salvarCadastroUniversal = async function(e) {
-            e.preventDefault();
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
-                alert('Apenas administradores podem cadastrar novos registros.');
-                return;
-            }
-
-            const tipo = document.getElementById('form-univ-tipo').value;
-            let novoObj = {};
-
-            if (tipo === 'orgao') {
-                const sigla = document.getElementById('univ-c1').value.toUpperCase();
-                novoObj = {
-                    id: sigla, sigla,
-                    nome: document.getElementById('univ-c2').value,
-                    tipoJuridico: document.getElementById('univ-c3').value,
-                    naturezaJuridica: document.getElementById('univ-c3').value,
-                    responsavel: document.getElementById('univ-c4').value,
-                    email: document.getElementById('univ-c5').value,
-                    telefone: document.getElementById('univ-c6')?.value || '',
-                    endereco: document.getElementById('univ-c7')?.value || ''
-                };
-                window.dbData.orgaos.push(novoObj);
-                try {
-                    await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "orgaos", sigla), novoObj);
-                } catch(err) { console.warn('Erro Firestore', err); }
-            } else if (tipo === 'fornecedor') {
-                novoObj = {
-                    id: 'FOR-' + Date.now(),
-                    nome: document.getElementById('univ-c1').value,
-                    cnpj: document.getElementById('univ-c2').value,
-                    categoria: document.getElementById('univ-c3').value,
-                    responsavel: document.getElementById('univ-c4').value,
-                    telefone: document.getElementById('univ-c5').value,
-                    email: document.getElementById('univ-c6').value,
-                    numeroContrato: document.getElementById('univ-c7')?.value || '',
-                    valorContratual: document.getElementById('univ-c8')?.value || '',
-                    statusContrato: document.getElementById('univ-c9')?.value || 'Ativo',
-                    escopoServico: document.getElementById('univ-c10')?.value || '',
-                    endereco: document.getElementById('univ-c11')?.value || ''
-                };
-                window.dbData.fornecedores.push(novoObj);
-                try {
-                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "fornecedores"), novoObj);
-                } catch(err) { console.warn('Erro Firestore', err); }
-            } else if (tipo === 'evento') {
-                const visib = document.getElementById('univ-c7').value;
-                const grupoDest = document.getElementById('univ-c8')?.value || '';
-                novoObj = {
-                    id: 'EV-' + Date.now(),
-                    titulo: document.getElementById('univ-c1').value,
-                    palestrante: document.getElementById('univ-c2').value,
-                    dataInicio: document.getElementById('univ-c3').value,
-                    dataFim: document.getElementById('univ-c4').value,
-                    local: document.getElementById('univ-c5').value,
-                    geracaoCertificado: document.getElementById('univ-c6').value,
-                    visibilidade: visib,
-                    grupoDestinatario: grupoDest,
-                    linkInscricao: document.getElementById('univ-c9').value,
-                    descricao: document.getElementById('univ-c10').value
-                };
-                window.dbData.eventos.push(novoObj);
-                try {
-                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "eventos"), novoObj);
-                } catch(err) { console.warn('Erro Firestore', err); }
-            } else if (tipo === 'local') {
-                novoObj = {
-                    id: 'LOC-' + Date.now(),
-                    nome: document.getElementById('univ-c1').value,
-                    tipoEspaco: document.getElementById('univ-c2').value,
-                    natureza: document.getElementById('univ-c3').value,
-                    capacidade: document.getElementById('univ-c4').value,
-                    valorAluguel: document.getElementById('univ-c5').value,
-                    climatizacao: document.getElementById('univ-c6').value,
-                    som: document.getElementById('univ-c7').value,
-                    estacionamento: document.getElementById('univ-c8').value,
-                    cozinha: document.getElementById('univ-c9').value,
-                    banheiro: document.getElementById('univ-c10').value,
-                    responsavel: document.getElementById('univ-c11').value,
-                    endereco: document.getElementById('univ-c12').value
-                };
-                window.dbData.locais.push(novoObj);
-                try {
-                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "locais"), novoObj);
-                } catch(err) { console.warn('Erro Firestore', err); }
-            } else if (tipo === 'usuario') {
-                const email = document.getElementById('univ-c2').value.toLowerCase();
-                const senha = document.getElementById('univ-c5').value;
-                const senhaHash = await hashSHA256(senha);
-
-                const checkedBoxes = document.querySelectorAll('.novo-checkbox-modulo:checked');
-                const modulosPermitidos = Array.from(checkedBoxes).map(cb => cb.value);
-
-                novoObj = {
-                    id: email, nome: document.getElementById('univ-c1').value, email,
-                    subgrupoId: document.getElementById('univ-c3').value,
-                    perfil: document.getElementById('univ-c4').value, senhaHash, senha, ativo: true,
-                    modulosPermitidos
-                };
-                window.dbData.usuarios.push(novoObj);
-                try {
-                    await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "usuarios", email), novoObj);
-                } catch(err) { console.warn('Erro Firestore', err); }
-            } else if (tipo === 'demanda') {
-                novoObj = {
-                    id: 'DEM-' + Date.now(),
-                    titulo: document.getElementById('univ-c1').value,
-                    orgao: document.getElementById('univ-c2').value,
-                    categoria: document.getElementById('univ-c3').value,
-                    descricao: document.getElementById('univ-c4')?.value || '',
-                    prioridade: 'Alta', status: 'Pendente',
-                    historicoStatus: [
-                        { data: new Date().toISOString(), status: 'Pendente', descricao: document.getElementById('univ-c4')?.value || 'Abertura de demanda cadastrada.' }
-                    ]
-                };
-                window.dbData.demandas.push(novoObj);
-                try {
-                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "demandas"), novoObj);
-                } catch(err) { console.warn('Erro Firestore', err); }
-            }
-
-            renderizarTudo();
-            alert('Cadastro de ' + tipo + ' realizado com sucesso!');
-            fecharModal('modal-form-universal');
-        };
-
-        window.abrirModalImportacao = function(colecao) {
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
-                alert('Apenas administradores podem importar planilhas.');
-                return;
-            }
-
-            document.getElementById('import-colecao-alvo').value = colecao;
-            document.getElementById('import-titulo-modal').textContent = 'Importar Planilha / CSV: ' + colecao.toUpperCase();
-            
-            let formatoText = '';
-            if (colecao === 'orgaos') formatoText = 'SIGLA;NOME_DO_ORGAO;TIPO_JURIDICO;RESPONSAVEL;EMAIL';
-            if (colecao === 'fornecedores') formatoText = 'RAZAO_SOCIAL;CNPJ;CATEGORIA;RESPONSAVEL;TELEFONE;EMAIL;CONTRATO';
-            if (colecao === 'usuarios') formatoText = 'NOME;EMAIL;ORGAO;PERFIL;SENHA';
-            
-            document.getElementById('import-instrucoes-formato').textContent = formatoText;
-            document.getElementById('modal-importacao').classList.remove('hidden');
-        };
-
-        window.processarArquivoCSV = function() {
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
-                alert('Apenas administradores podem importar dados via CSV.');
-                return;
-            }
-
-            const colecao = document.getElementById('import-colecao-alvo').value;
-            const fileInput = document.getElementById('input-file-csv');
-            
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Por favor, selecione um arquivo CSV para importar.');
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = async function(e) {
-                const text = e.target.result;
-                const lines = text.split(/\r?\n/);
-                let importCount = 0;
-
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    
-                    const cols = line.split(';').map(c => c.trim().replace(/^"/, '').replace(/"$/, ''));
-                    
-                    if (colecao === 'orgaos' && cols.length >= 2) {
-                        const sigla = (cols[0] || '').toUpperCase();
-                        const obj = {
-                            id: sigla, sigla,
-                            nome: cols[1] || '',
-                            tipoJuridico: cols[2] || 'Secretaria',
-                            responsavel: cols[3] || '',
-                            email: cols[4] || ''
-                        };
-                        window.dbData.orgaos.push(obj);
-                        importCount++;
-                        try {
-                            await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "orgaos", sigla), obj);
-                        } catch(err) { console.warn(err); }
-                    } else if (colecao === 'fornecedores' && cols.length >= 2) {
-                        const obj = {
-                            id: 'FOR-' + Date.now() + '-' + i,
-                            nome: cols[0] || '',
-                            cnpj: cols[1] || '',
-                            categoria: cols[2] || 'Serviços TIC',
-                            responsavel: cols[3] || '',
-                            telefone: cols[4] || '',
-                            email: cols[5] || '',
-                            numeroContrato: cols[6] || ''
-                        };
-                        window.dbData.fornecedores.push(obj);
-                        importCount++;
-                        try {
-                            await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "fornecedores"), obj);
-                        } catch(err) { console.warn(err); }
-                    } else if (colecao === 'usuarios' && cols.length >= 2) {
-                        const email = (cols[1] || '').toLowerCase();
-                        const senha = cols[4] || '123456';
-                        const senhaHash = await hashSHA256(senha);
-                        const obj = {
-                            id: email,
-                            nome: cols[0] || email,
-                            email: email,
-                            subgrupoId: cols[2] || 'ATI',
-                            perfil: (cols[3] || 'comum').toLowerCase(),
-                            senha: senha,
-                            senhaHash: senhaHash,
-                            modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores']
-                        };
-                        window.dbData.usuarios.push(obj);
-                        importCount++;
-                        try {
-                            await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "usuarios", email), obj);
-                        } catch(err) { console.warn(err); }
-                    }
-                }
-
-                renderizarTudo();
-                alert('Importação concluída! ' + importCount + ' registros processados e salvos.');
-                fecharModal('modal-importacao');
-            };
-
-            reader.readAsText(file, 'UTF-8');
-        };
-
-        async function hashSHA256(str) {
-            const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        window.fazerLoginLocal = async function(e) {
-            e.preventDefault();
-            const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
-            const senhaInput = document.getElementById('login-senha').value;
-            const senhaHash = await hashSHA256(senhaInput);
-
-            let userFound = window.dbData.usuarios.find(u => (u.email || u.id) === emailInput);
-
-            if (!userFound) {
-                try {
-                    const docRef = window.firebaseMethods.doc(window.firebaseDb, "usuarios", emailInput);
-                    const docSnap = await window.firebaseMethods.getDoc(docRef);
-                    if (docSnap.exists()) userFound = docSnap.data();
-                } catch (err) { console.warn(err); }
-            }
-
-            if (!userFound) { 
-                alert('Acesso negado. Usuário não localizado na base cadastrada.'); 
-                return; 
-            }
-
-            const hashNoBanco = userFound.senhaHash || userFound.senha_hash;
-            const textoPuroNoBanco = userFound.senha;
-
-            if ((hashNoBanco === senhaHash) || (textoPuroNoBanco === senhaInput) || (hashNoBanco === senhaInput)) {
-                window.currentUser = userFound;
-                document.getElementById('user-name-display').textContent = userFound.nome || userFound.email;
-                document.getElementById('user-role-display').textContent = (userFound.perfil || 'COMUM').toUpperCase();
-                
-                atualizarVisibilidadeAbas();
-                alert('Autenticado com sucesso! Bem-vindo(a), ' + (userFound.nome || userFound.email) + '.');
-            } else {
-                alert("Senha incorreta. Verifique suas credenciais.");
-            }
-        };
-
-        window.fazerLogout = function() {
-            window.currentUser = null;
-            verificarAutenticacaoObrigatoria();
-        };
-
-        window.exportarUsuariosCSV = function() {
-            let csv = "Nome;Email;Orgao;Perfil;ModulosPermitidos\n";
-            window.dbData.usuarios.forEach(u => {
-                const mods = u.modulosPermitidos ? u.modulosPermitidos.join(',') : '';
-                csv += (u.nome || '') + ';' + (u.email || u.id) + ';' + (u.subgrupoId || u.orgao || '') + ';' + (u.perfil || '') + ';"' + mods + '"\n';
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "usuarios_prgd_v17.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-
-        window.exportarRelatorioCSV = function() { exportarUsuariosCSV(); };
-
-        function renderCharts() {
-            const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
-            if (ctx1) {
-                new Chart(ctx1, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Infraestrutura', 'Sistemas Web', 'Transformação Digital', 'Capacitação'],
-                        datasets: [{ data: [15, 22, 9, 6], backgroundColor: '#1e3a8a' }]
-                    },
-                    options: { plugins: { legend: { display: false } } }
-                });
-            }
-
-            const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
-            if (ctx2) {
-                new Chart(ctx2, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Pendentes', 'Em Andamento', 'Concluídos'],
-                        datasets: [{ data: [4, 18, 30], backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'] }]
-                    }
-                });
-            }
-        }
-
-        window.onload = () => {
-            verificarAutenticacaoObrigatoria();
-            renderizarTudo();
-            iniciarSnapshotFirestore();
-        };
-    </script>
-
-    <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v17.0 STABLE</span>
-    </footer>
+      } catch (err) {
+        showMessage('Erro de conexão com o servidor. Tente novamente mais tarde.');
+      }
+    }
+  </script>
 </body>
 </html>
