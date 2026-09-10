@@ -41,7 +41,7 @@
       padding: 10px;
       background: none;
       border: none;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
       color: #666;
       cursor: pointer;
@@ -94,6 +94,20 @@
       background-color: #0056b3;
     }
 
+    .forgot-link {
+      display: block;
+      margin-top: 10px;
+      text-align: right;
+      font-size: 13px;
+      color: #007bff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
     .message {
       margin-top: 15px;
       padding: 10px;
@@ -133,7 +147,6 @@
     }
   </style>
 
-  <!-- Firebase SDK Compatível -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
@@ -158,6 +171,7 @@
         <input type="password" id="login-password" required placeholder="••••••••">
       </div>
       <button type="submit" class="btn">Entrar no Sistema</button>
+      <a class="forgot-link" onclick="handleResetPassword()">Esqueceu a senha?</a>
     </form>
 
     <!-- Formulário de Alteração de Senha -->
@@ -178,12 +192,11 @@
     </form>
 
     <div class="footer-version">
-      Versão <span id="app-version">1.0.4</span>
+      Versão <span id="app-version">1.0.5</span>
     </div>
   </div>
 
   <script>
-    // Configurações do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
       authDomain: "prgd-ati-pe.firebaseapp.com",
@@ -202,7 +215,7 @@
       }
       auth = firebase.auth();
     } catch (e) {
-      console.error("Erro ao inicializar o Firebase:", e);
+      console.error("Erro ao inicializar Firebase:", e);
     }
 
     function switchTab(tab) {
@@ -235,11 +248,6 @@
       event.preventDefault();
       hideMessage();
 
-      if (!auth) {
-        showMessage('Erro de conexão com o Firebase.');
-        return;
-      }
-
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
 
@@ -251,13 +259,10 @@
 
         localStorage.setItem('userEmail', user.email);
         setTimeout(() => {
-          window.location.href = '/dashboard'; // Altere para a página principal
+          window.location.href = '/dashboard';
         }, 1000);
 
       } catch (error) {
-        console.error("Erro do Firebase Auth:", error.code, error.message);
-
-        // Tratamento para invalid-credential e invalid-login-credentials
         if (
           error.code === 'auth/invalid-login-credentials' ||
           error.code === 'auth/invalid-credential' ||
@@ -265,12 +270,29 @@
           error.code === 'auth/wrong-password'
         ) {
           showMessage('Usuário inexistente ou senha incorreta.');
-        } else if (error.code === 'auth/invalid-email') {
-          showMessage('Formato de e-mail inválido.');
-        } else if (error.code === 'auth/network-request-failed') {
-          showMessage('Falha de rede ao conectar ao servidor do Firebase.');
         } else {
           showMessage('Erro ao autenticar: ' + error.message);
+        }
+      }
+    }
+
+    async function handleResetPassword() {
+      hideMessage();
+      const email = document.getElementById('login-email').value;
+
+      if (!email) {
+        showMessage('Preencha o campo de E-mail para enviar a redefinição de senha.');
+        return;
+      }
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        showMessage('E-mail de redefinição de senha enviado com sucesso!', true);
+      } catch (error) {
+        if (error.code === 'auth/user-not-found') {
+          showMessage('Este e-mail não está cadastrado no sistema.');
+        } else {
+          showMessage('Erro ao enviar e-mail: ' + error.message);
         }
       }
     }
@@ -278,11 +300,6 @@
     async function handleChangePassword(event) {
       event.preventDefault();
       hideMessage();
-
-      if (!auth) {
-        showMessage('Erro de conexão com o Firebase.');
-        return;
-      }
 
       const currentPassword = document.getElementById('current-password').value;
       const newPassword = document.getElementById('new-password').value;
@@ -309,17 +326,14 @@
         document.getElementById('password-form').reset();
 
       } catch (error) {
-        console.error("Erro ao alterar senha:", error);
         if (
           error.code === 'auth/invalid-login-credentials' ||
           error.code === 'auth/invalid-credential' ||
           error.code === 'auth/wrong-password'
         ) {
           showMessage('A senha atual informada está incorreta.');
-        } else if (error.code === 'auth/weak-password') {
-          showMessage('A nova senha deve ter no mínimo 6 caracteres.');
         } else {
-          showMessage('Erro ao atualizar senha no banco.');
+          showMessage('Erro ao atualizar senha.');
         }
       }
     }
