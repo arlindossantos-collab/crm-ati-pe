@@ -27,6 +27,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 400px;
+      position: relative;
     }
 
     .tabs {
@@ -121,9 +122,19 @@
     .form-section.active {
       display: block;
     }
+
+    /* Estilo do Rodapé com a Versão do Sistema */
+    .footer-version {
+      margin-top: 25px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+    }
   </style>
 
-  <!-- Firebase SDK (v9+ Compatibility Mode) -->
+  <!-- Firebase SDK Compatível -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
@@ -166,12 +177,17 @@
       </div>
       <button type="submit" class="btn">Atualizar Senha</button>
     </form>
+
+    <!-- Rodapé com indicador de versão -->
+    <div class="footer-version">
+      Versão <span id="app-version">1.0.2</span>
+    </div>
   </div>
 
   <script>
     // -------------------------------------------------------------
-    // CONFIGURAÇÃO DO SEU PROJETO FIREBASE
-    // Cole aqui as credenciais do seu console Firebase:
+    // ATENÇÃO: Substiua os valores abaixo pelas chaves reais do seu Firebase Console
+    // (Console Firebase > Configurações do Projeto > Geral > Seus Aplicativos)
     // -------------------------------------------------------------
     const firebaseConfig = {
       apiKey: "SUA_API_KEY",
@@ -182,13 +198,22 @@
       appId: "SEU_APP_ID"
     };
 
-    // Inicializa o Firebase
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    const auth = firebase.auth();
+    let auth = null;
 
-    // Controle de Abas
+    // Inicialização Segura do Firebase
+    try {
+      if (firebaseConfig.apiKey !== "SUA_API_KEY") {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        auth = firebase.auth();
+      } else {
+        console.warn("Aviso: Chaves do Firebase não configuradas no script.");
+      }
+    } catch (e) {
+      console.error("Erro ao inicializar Firebase:", e);
+    }
+
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.form-section').forEach(sec => sec.classList.remove('active'));
@@ -215,10 +240,15 @@
       msgBox.style.display = 'none';
     }
 
-    // Login com Firebase Auth
+    // Processamento do Login
     async function handleLogin(event) {
       event.preventDefault();
       hideMessage();
+
+      if (!auth) {
+        showMessage('Configuração do banco de usuários pendente. Insira as chaves reais do Firebase em firebaseConfig.');
+        return;
+      }
 
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
@@ -229,15 +259,16 @@
 
         showMessage('Login realizado com sucesso! Entrando...', true);
 
-        // Redireciona para o painel principal do sistema
+        // Armazena credenciais e redireciona
+        localStorage.setItem('userEmail', user.email);
         setTimeout(() => {
-          window.location.href = '/dashboard'; // Altere para a URL/arquivo do seu painel
+          window.location.href = '/dashboard'; // Altere para o caminho real da tela pós-login
         }, 1000);
 
       } catch (error) {
-        console.error("Erro Firebase Login:", error.code, error.message);
-        
-        // Tratamento dos erros de validação local
+        console.error("Erro do Firebase Auth:", error.code, error.message);
+
+        // Mapeamento preciso de erros de credenciais
         if (
           error.code === 'auth/user-not-found' || 
           error.code === 'auth/wrong-password' || 
@@ -246,16 +277,23 @@
           showMessage('Usuário inexistente ou senha inválida.');
         } else if (error.code === 'auth/invalid-email') {
           showMessage('Formato de e-mail inválido.');
+        } else if (error.code === 'auth/network-request-failed') {
+          showMessage('Falha na conexão de rede com o banco de usuários.');
         } else {
-          showMessage('Erro ao conectar com o banco de usuários. Tente novamente.');
+          showMessage('Erro ao autenticar: ' + (error.message || 'Verifique seus dados.'));
         }
       }
     }
 
-    // Alteração de Senha no Firebase Auth
+    // Processamento da Alteração de Senha
     async function handleChangePassword(event) {
       event.preventDefault();
       hideMessage();
+
+      if (!auth) {
+        showMessage('Configuração do banco de usuários pendente.');
+        return;
+      }
 
       const currentPassword = document.getElementById('current-password').value;
       const newPassword = document.getElementById('new-password').value;
@@ -269,29 +307,26 @@
       const user = auth.currentUser;
 
       if (!user) {
-        showMessage('Você precisa estar logado para alterar a senha.');
+        showMessage('Você precisa estar logado na sessão atual para alterar a senha.');
         return;
       }
 
       try {
-        // Reautentica o usuário para garantir a segurança antes de trocar a senha
         const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPassword);
         await user.reauthenticateWithCredential(credential);
-
-        // Atualiza para a nova senha
         await user.updatePassword(newPassword);
 
         showMessage('Senha alterada com sucesso!', true);
         document.getElementById('password-form').reset();
 
       } catch (error) {
-        console.error("Erro ao alterar senha:", error);
+        console.error("Erro Alterar Senha:", error);
         if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-          showMessage('A senha atual fornecida está incorreta.');
+          showMessage('A senha atual informada está incorreta.');
         } else if (error.code === 'auth/weak-password') {
-          showMessage('A nova senha deve ter pelo menos 6 caracteres.');
+          showMessage('A nova senha deve possuir pelo menos 6 caracteres.');
         } else {
-          showMessage('Erro ao atualizar senha. Tente novamente.');
+          showMessage('Erro ao atualizar a senha no banco.');
         }
       }
     }
