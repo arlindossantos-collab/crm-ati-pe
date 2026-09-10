@@ -80,7 +80,7 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
             </form>
             
-            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 18.0 · ATI-PE</p>
+            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 19.0 · ATI-PE</p>
         </div>
     </div>
 
@@ -95,7 +95,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.0</span>
+                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.0</span>
                         </div>
                         <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                     </div>
@@ -301,6 +301,7 @@
                         <button onclick="exportarUsuariosCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-file-export"></i> Exportar Usuários (.csv)
                         </button>
+                        <button onclick="sincronizarBaseUsuarios()" class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-arrows-rotate"></i> Sincronizar Firebase</button>
                         <button onclick="abrirModalForm('usuario')" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-user-plus"></i> Novo Usuário
                         </button>
@@ -394,16 +395,16 @@
         </div>
 
         <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.0 SECURE</span>
+            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.0 FIREBASE SYNC</span>
         </footer>
     </div>
 
     <script>
-        // PRGD v17.0 — sessão segura, listeners controlados, validação institucional,
-        // dashboard dinâmico e tratamento mais seguro de conteúdo vindo do Firestore.
+        // PRGD v19.0 — Firebase como fonte única da base de usuários,
+        // CRUD de usuários sincronizado com Firestore, limpeza de legados e auditoria.
         const DOMINIO_EMAIL_RE = /^[a-z0-9._%+\-]+@[a-z0-9.-]+\.pe\.gov\.br$/i;
         const ADMIN_PERFIL = 'admin';
-        const CAMPOS_SISTEMA = ['uid','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid'];
+        const CAMPOS_SISTEMA = ['uid','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','authProvisionamentoPendente'];
         let snapshotUnsubscribers = [];
         let chartCategoriasInstance = null;
         let chartStatusInstance = null;
@@ -453,6 +454,7 @@
 
         window.currentUser = null;
         window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [] };
+        let sincronizandoUsuarios = false;
         let abaAtual = 'dashboard';
 
         const MODULOS_TODOS = ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
@@ -537,7 +539,7 @@
 
         function atualizarVisibilidadeAbas() {
             const user = window.currentUser;
-            const permitidos = user ? (user.perfil === 'admin' ? MODULOS_TODOS : (user.modulosPermitidos || MODULOS_TODOS)) : MODULOS_TODOS;
+            const permitidos = user ? (user.perfil === 'admin' ? MODULOS_TODOS : (Array.isArray(user.modulosPermitidos) ? user.modulosPermitidos : ['dashboard'])) : [];
 
             MODULOS_TODOS.forEach(mod => {
                 const btnTab = document.getElementById('btn-tab-' + mod);
@@ -715,7 +717,7 @@
                     <td class="p-4 font-bold text-slate-800">${escapeHtml(u.nome || u.email)}</td>
                     <td class="p-4 text-slate-600">${escapeHtml(u.email || u.id)}</td>
                     <td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${escapeHtml(u.subgrupoId || u.orgao || 'GERAL')}</span></td>
-                    <td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'amber' : 'slate'}-100 text-${u.perfil === 'admin' ? 'amber-900' : 'slate-700'} text-xs font-bold px-2 py-0.5 rounded uppercase">${escapeHtml(u.perfil || 'comum')}</span></td>
+                    <td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'amber' : 'slate'}-100 text-${u.perfil === 'admin' ? 'amber-900' : 'slate-700'} text-xs font-bold px-2 py-0.5 rounded uppercase">${escapeHtml(u.perfil || 'comum')}</span><span class="ml-1 ${u.ativo === false ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'} text-[10px] font-bold px-2 py-0.5 rounded uppercase">${u.ativo === false ? 'Inativo' : 'Ativo'}</span></td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
                 </tr>`
             ).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
@@ -928,7 +930,23 @@
             document.getElementById('edit-doc-id').value = docId;
 
             let editFieldsHtml = '';
-            for (let k in item) {
+            if (colecao === 'usuarios') {
+                editFieldsHtml = `
+                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-[11px] text-blue-900 mb-3">
+                        <strong>Identidade Firebase:</strong> o UID é a chave permanente da conta. O e-mail não pode ser alterado por este formulário, pois é a identidade do Firebase Authentication. Para alteração de senha, use o envio de redefinição abaixo.
+                    </div>
+                    <div><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px]">Nome completo</label><input type="text" data-field="nome" value="${escapeHtml(item.nome || '')}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium"></div>
+                    <div><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px]">E-mail institucional</label><input type="email" value="${escapeHtml(item.email || '')}" disabled class="w-full p-2 border rounded bg-slate-100 text-slate-500"></div>
+                    <div><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px]">Órgão / Secretaria</label><select data-field="subgrupoId" class="edit-dinamico-input select-orgaos-dinamico w-full p-2 border rounded bg-white font-medium"></select></div>
+                    <div><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px]">Perfil</label><select data-field="perfil" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium"><option value="comum" ${item.perfil === 'comum' ? 'selected' : ''}>Comum</option><option value="admin" ${item.perfil === 'admin' ? 'selected' : ''}>Administrador</option></select></div>
+                    <div><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px]">Situação</label><select data-field="ativo" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium"><option value="true" ${item.ativo !== false ? 'selected' : ''}>Ativo</option><option value="false" ${item.ativo === false ? 'selected' : ''}>Inativo</option></select></div>
+                    <div class="pt-2"><label class="block font-semibold text-slate-700 mb-1.5 uppercase text-[10px]">Módulos permitidos</label><div class="grid grid-cols-2 gap-1.5 p-2 border rounded bg-white">${MODULOS_TODOS.map(m => `<label class="inline-flex items-center text-xs"><input type="checkbox" value="${m}" class="edit-modulo-cb mr-1.5" ${Array.isArray(item.modulosPermitidos) && item.modulosPermitidos.includes(m) ? 'checked' : ''}> ${m.toUpperCase()}</label>`).join('')}</div></div>
+                    <div class="pt-3 border-t flex flex-wrap gap-2">
+                        <button type="button" onclick="enviarRedefinicaoSenhaUsuario('${escapeHtml(item.email || '')}')" class="px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-bold"><i class="fa-solid fa-key mr-1"></i> Enviar redefinição de senha</button>
+                        <button type="button" onclick="alternarAtivoUsuario('${escapeHtml(docId)}')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold"><i class="fa-solid fa-power-off mr-1"></i> ${item.ativo === false ? 'Ativar usuário' : 'Desativar usuário'}</button>
+                    </div>`;
+            } else {
+                for (let k in item) {
                 if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus') continue;
                 const fieldVal = item[k] !== undefined ? item[k] : '';
                 const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'escopoServico';
@@ -950,7 +968,8 @@
                 } else {
                     editFieldsHtml += `<input type="text" data-field="${escapeHtml(k)}" value="${escapeHtml(fieldVal)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">`;
                 }
-                editFieldsHtml += `</div>`;
+                    editFieldsHtml += `</div>`;
+                }
             }
 
             document.getElementById('edit-campos-dinamicos').innerHTML = editFieldsHtml;
@@ -1015,8 +1034,18 @@
             const inputs = document.querySelectorAll('.edit-dinamico-input');
             inputs.forEach(input => {
                 const fieldName = input.getAttribute('data-field');
-                if (fieldName && !CAMPOS_SISTEMA.includes(fieldName)) updatedData[fieldName] = input.value;
+                if (!fieldName || CAMPOS_SISTEMA.includes(fieldName)) return;
+                if (fieldName === 'ativo') updatedData[fieldName] = input.value === 'true';
+                else updatedData[fieldName] = input.value;
             });
+
+            if (colecao === 'usuarios') {
+                const emailAtual = window.dbData.usuarios.find(u => u.id === docId)?.email;
+                if (!emailAtual) throw new Error('Usuário não localizado na base Firebase.');
+                if (docId === window.currentUser.uid && updatedData.perfil && updatedData.perfil !== 'admin') {
+                    throw new Error('A conta administrativa atual não pode remover o próprio perfil de administrador.');
+                }
+            }
 
             const cbs = document.querySelectorAll('.edit-modulo-cb');
             if (cbs.length > 0) {
@@ -1040,6 +1069,17 @@
             const docId = document.getElementById('edit-doc-id').value;
 
             try { exigirPermissao(colecao); if (window.currentUser?.perfil !== ADMIN_PERFIL) throw new Error('A exclusão de registros é restrita ao administrador.'); } catch (err) { alert(err.message); return; }
+            if (colecao === 'usuarios') {
+                if (docId === window.currentUser?.uid) { alert('Você não pode excluir sua própria conta.'); return; }
+                if (!confirm('Deseja desativar este usuário? A conta do Firebase Authentication será preservada e o acesso ao PRGD será bloqueado.')) return;
+                try {
+                    await db.collection('usuarios').doc(docId).update({ ativo:false, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(), atualizadoPorUid: window.currentUser.uid });
+                    await registrarAuditoria('DEACTIVATE', 'usuarios', docId);
+                    alert('Usuário desativado com sucesso.');
+                    fecharModal('modal-detalhes');
+                } catch (err) { alert('Erro ao desativar usuário: ' + err.message); }
+                return;
+            }
             if (!confirm('Tem certeza que deseja excluir este registro? Esta ação não poderá ser desfeita.')) return;
 
             try {
@@ -1103,7 +1143,7 @@
                 container.innerHTML = `
                     <div><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label><input type="email" id="univ-c2" required class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Senha do Usuário</label><input type="password" id="univ-pass" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Senha inicial</label><input type="password" id="univ-pass" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full p-2 border rounded"><p class="text-[10px] text-slate-400 mt-1">A senha é criada no Firebase Authentication. Nunca é gravada no Firestore.</p></div>
                     <div><label class="block font-medium text-slate-700 mb-1">Órgão / Secretaria Vinculada</label><select id="univ-c3" required class="w-full p-2 border rounded select-orgaos-dinamico bg-white font-medium text-slate-800"></select></div>
                     <div><label class="block font-medium text-slate-700 mb-1">Perfil de Acesso</label><select id="univ-c4" class="w-full p-2 border rounded bg-white"><option value="comum">Comum</option><option value="admin">Admin</option></select></div>
                     
@@ -1252,6 +1292,71 @@
                 fecharModal('modal-form-universal');
             } catch (err) {
                 alert('Erro ao realizar o cadastro: ' + err.message);
+            }
+        }
+
+        async function enviarRedefinicaoSenhaUsuario(email) {
+            try {
+                exigirEmailInstitucional(email);
+                await auth.sendPasswordResetEmail(email);
+                await registrarAuditoria('PASSWORD_RESET_REQUEST', 'usuarios', window.currentUser?.uid, { email });
+                alert('E-mail de redefinição enviado para ' + email + '.');
+            } catch (err) {
+                alert('Não foi possível enviar a redefinição: ' + (err.message || 'erro desconhecido'));
+            }
+        }
+
+        async function alternarAtivoUsuario(docId) {
+            if (window.currentUser?.perfil !== ADMIN_PERFIL) { alert('Operação restrita ao administrador.'); return; }
+            if (docId === window.currentUser.uid) { alert('Não é permitido desativar a própria conta.'); return; }
+            const user = window.dbData.usuarios.find(u => u.id === docId);
+            if (!user) return;
+            const novoAtivo = user.ativo === false;
+            try {
+                await db.collection('usuarios').doc(docId).update({ ativo: novoAtivo, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(), atualizadoPorUid: window.currentUser.uid });
+                await registrarAuditoria(novoAtivo ? 'ACTIVATE' : 'DEACTIVATE', 'usuarios', docId);
+                alert(novoAtivo ? 'Usuário ativado.' : 'Usuário desativado.');
+                detalharRegistro('usuarios', docId);
+            } catch (err) { alert('Erro ao alterar situação: ' + err.message); }
+        }
+
+        async function sincronizarBaseUsuarios() {
+            if (window.currentUser?.perfil !== ADMIN_PERFIL) { alert('Sincronização restrita ao administrador.'); return; }
+            if (sincronizandoUsuarios) return;
+            if (!confirm('A base de usuários do PRGD passará a considerar exclusivamente os documentos em usuarios/{UID}. Documentos legados LEGACY_* serão removidos. Deseja continuar?')) return;
+            sincronizandoUsuarios = true;
+            try {
+                const snap = await db.collection('usuarios').get();
+                const docs = snap.docs;
+                const batch = db.batch();
+                let removidos = 0;
+                const porEmail = {};
+                docs.forEach(d => {
+                    const data = d.data() || {};
+                    if (data.email) porEmail[String(data.email).toLowerCase()] = { id:d.id, data, ref:d.ref };
+                });
+                docs.forEach(d => {
+                    const data = d.data() || {};
+                    const id = d.id;
+                    const emailId = id.includes('@') ? id.toLowerCase() : '';
+                    const email = String(data.email || '').toLowerCase();
+                    // Remove somente legados comprovadamente duplicados: LEGACY_*
+                    // ou documento cujo ID é o e-mail quando já existe usuarios/{UID}
+                    // com o mesmo e-mail. Não remove perfis sem correspondência.
+                    if (id.startsWith('LEGACY_')) {
+                        batch.delete(d.ref); removidos++;
+                    } else if (emailId && email && emailId === email) {
+                        const correspondente = docs.find(x => x.id !== id && x.id === String(data.uid || ''));
+                        if (correspondente) { batch.delete(d.ref); removidos++; }
+                    }
+                });
+                if (removidos) await batch.commit();
+                await registrarAuditoria('USER_BASE_SYNC', 'usuarios', null, { totalDocumentos: docs.length, legadosRemovidos: removidos });
+                alert(`Sincronização concluída. ${docs.length} documentos analisados e ${removidos} registros legados/duplicados removidos. A lista exibida agora vem diretamente do Firestore.`);
+            } catch (err) {
+                alert('Erro na sincronização da base de usuários: ' + err.message);
+            } finally {
+                sincronizandoUsuarios = false;
             }
         }
 

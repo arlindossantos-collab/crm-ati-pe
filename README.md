@@ -1,50 +1,54 @@
-# PRGD v18.0 — Segurança Firebase / Firestore
+# PRGD v19.0 — Firebase como fonte única da base de usuários
 
-## Arquivos
+## Objetivo
 
-- `index_PRGD_v18.0.html` — aplicação web atualizada.
-- `firestore.rules` — regras de segurança recomendadas para publicação no Firestore.
+A v19.0 elimina a ideia de uma base local de usuários no HTML. A coleção Firestore `usuarios` é a fonte de dados do cadastro do PRGD e cada documento deve usar o UID do Firebase Authentication como ID:
 
-## Mudanças principais
+`usuarios/{UID}`
 
-1. Perfis passam a ser vinculados ao UID do Firebase Authentication:
-   `usuarios/{uid}`.
-2. Usuários antigos em `usuarios/{email}` podem ser migrados automaticamente no primeiro login.
-3. Não existe mais acesso completo por padrão quando o documento do usuário não existe.
-4. O perfil `admin` vem exclusivamente do Firestore; não há e-mail de administrador fixo no código.
-5. Usuários comuns não podem criar, editar ou excluir perfis de usuários.
-6. Exclusão de registros é restrita ao administrador.
-7. Permissões de módulos são verificadas no frontend e, principalmente, nas regras do Firestore.
-8. Registros passam a carregar metadados de autoria (`criadoPorUid`, `criadoEm`, `atualizadoPorUid`, `atualizadoEm`).
-9. Foi adicionada coleção de auditoria para registrar CREATE, UPDATE, DELETE e alterações de status.
-10. Importação de usuários via CSV não cria contas do Firebase Authentication. Ela gera registros pendentes (`LEGACY_<email>`) para evitar a falsa impressão de que a conta já pode fazer login.
-11. O dashboard continua usando dados reais do Firestore.
-12. Listeners do Firestore são encerrados ao trocar de sessão.
-13. Conteúdo exibido dinamicamente é tratado para reduzir risco de XSS.
+## O que mudou
 
-## Publicação das regras
+- Lista de usuários carregada diretamente do Firestore via `onSnapshot`.
+- Novo usuário: cria conta no Firebase Authentication e, em seguida, cria o perfil em `usuarios/{UID}`.
+- Edição de usuário: altera nome, órgão, perfil, situação e módulos diretamente no Firestore.
+- E-mail é tratado como identidade do Firebase e fica bloqueado na edição.
+- Senha de usuário não é gravada no Firestore; o administrador pode enviar e-mail de redefinição.
+- Desativação de usuário é feita por `ativo:false`, preservando a conta Authentication.
+- Botão “Sincronizar Firebase” remove somente documentos legados/duplicados identificáveis (`LEGACY_*` e documentos antigos cujo ID é o e-mail e que possuem correspondente `usuarios/{UID}`).
+- O HTML não contém uma lista fixa de usuários.
+- Auditoria registra operações administrativas.
 
-No Firebase Console:
+## Limitação importante do Firebase Web SDK
 
-1. Abra o projeto `prgd-ati-pe`.
-2. Acesse Firestore Database → Rules.
-3. Substitua as regras atuais pelo conteúdo de `firestore.rules`.
-4. Publique.
+Uma página web não pode listar todos os usuários do Firebase Authentication nem excluir/alterar a senha de outro usuário com privilégios administrativos. Por isso:
 
-## Atenção antes da publicação
+- Firestore fornece a base de perfis/permissões exibida no PRGD.
+- Criação de novas contas usa o fluxo atual com app secundário.
+- Alteração de senha de terceiros usa o fluxo oficial de redefinição por e-mail.
+- Para sincronização completa entre “usuários existentes no Firebase Authentication” e Firestore, inclusive descoberta de contas Authentication sem perfil Firestore, alteração de e-mail e exclusão definitiva, recomenda-se uma Cloud Function com Firebase Admin SDK.
 
-Faça primeiro um teste com uma conta administrativa e uma conta comum.
+## Implantação das Rules
 
-A primeira autenticação de um usuário existente no formato antigo (`usuarios/{email}`) tentará criar automaticamente `usuarios/{uid}`. Depois disso, a aplicação passa a usar o UID.
+Use o arquivo `firestore_v19.rules` no Firebase Console ou Firebase CLI. As regras negam tudo por padrão e concedem acesso por perfil/módulo.
 
-## Criação de usuários
+## Atenção ao primeiro administrador
 
-A criação de usuários pela interface continua usando um app Firebase secundário para não deslogar o administrador. Para produção, a arquitetura ideal é mover o provisionamento de contas para uma Cloud Function usando Firebase Admin SDK.
+Antes de aplicar regras que exigem `usuarios/{UID}`, garanta que a conta administrativa atual tenha um documento com seu UID e `perfil: "admin"`, `ativo: true` e `modulosPermitidos` contendo os módulos necessários.
 
-## Importação CSV de usuários
+## Estrutura mínima do perfil
 
-A importação não deve ser usada como substituta da criação da conta no Firebase Authentication. Após importar, o administrador deve provisionar as credenciais e o perfil definitivo.
-
-## Observação de segurança
-
-As regras são a camada efetiva de segurança do banco. Ocultar abas no HTML não é considerado controle de acesso.
+```json
+{
+  "uid": "UID_DO_FIREBASE_AUTH",
+  "nome": "Nome do usuário",
+  "email": "usuario@ati.pe.gov.br",
+  "subgrupoId": "ATI",
+  "perfil": "admin",
+  "ativo": true,
+  "modulosPermitidos": ["dashboard", "usuarios"],
+  "criadoEm": "timestamp",
+  "criadoPorUid": "UID_ADMIN",
+  "atualizadoEm": "timestamp",
+  "atualizadoPorUid": "UID_ADMIN"
+}
+```
