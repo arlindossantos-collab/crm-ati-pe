@@ -51,7 +51,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v15.0 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v16.0 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -105,7 +105,7 @@
 
         <!-- Navegação por Abas -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
+            <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
                 <button id="btn-tab-dashboard" onclick="mudarAba('dashboard')" class="px-4 py-2 rounded-lg transition tab-active">
                     <i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard
                 </button>
@@ -275,7 +275,7 @@
         <!-- ABA USUÁRIOS -->
         <div id="aba-usuarios" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários</h3>
+                <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários e Permissões</h3>
                 <div class="flex gap-2">
                     <button onclick="abrirModalImportacao('usuarios')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
@@ -296,6 +296,7 @@
                             <th class="p-4">E-mail Institucional</th>
                             <th class="p-4">Órgão / Secretaria</th>
                             <th class="p-4">Perfil</th>
+                            <th class="p-4">Módulos Visíveis</th>
                             <th class="p-4 text-center">Ações</th>
                         </tr>
                     </thead>
@@ -380,6 +381,16 @@
         window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [] };
         let abaAtual = 'dashboard';
 
+        const MÓDULOS_SISTEMA = [
+            { id: 'dashboard', nome: 'Dashboard' },
+            { id: 'demandas', nome: 'Demandas' },
+            { id: 'eventos', nome: 'Eventos' },
+            { id: 'locais', nome: 'Locais de Eventos' },
+            { id: 'orgaos', nome: 'Órgãos / Secretarias' },
+            { id: 'fornecedores', nome: 'Fornecedores' },
+            { id: 'usuarios', nome: 'Usuários & Permissões' }
+        ];
+
         // DADOS MOCKADOS INICIAIS CASO O FIRESTORE ESTEJA VAZIO
         const initialMockData = {
             orgaos: [
@@ -400,12 +411,29 @@
                 { id: 'FOR-001', nome: 'Tech Cloud Solutions PE', cnpj: '12.345.678/0001-90', categoria: 'Infraestrutura / Cloud', responsavel: 'Carlos Eduardo', telefone: '(81) 98888-7777', email: 'contato@techcloudpe.com.br', numeroContrato: 'Contrato nº 012/2025-ATI', valorContratual: 'R$ 2.400.000,00', statusContrato: 'Ativo / Em Execução', escopoServico: 'Suporte, governança cloud privada e sustentação de banco de dados.', endereco: 'Av. Agamenon Magalhães, Recife - PE' }
             ],
             usuarios: [
-                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', subgrupoId: 'ATI', perfil: 'admin' }
+                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', subgrupoId: 'ATI', perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'] }
             ]
         };
 
         function abrirModalLogin() { document.getElementById('modal-login').classList.remove('hidden'); }
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function atualizarVisibilidadeAbas() {
+            const user = window.currentUser;
+            const permitidos = user ? (user.perfil === 'admin' ? ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'] : (user.modulosPermitidos || ['dashboard', 'demandas', 'eventos'])) : ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores'];
+
+            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'].forEach(mod => {
+                const btnTab = document.getElementById(`btn-tab-${mod}`);
+                if (btnTab) {
+                    btnTab.style.display = permitidos.includes(mod) ? 'inline-flex' : 'none';
+                }
+            });
+
+            // Se a aba atual não for permitida, muda para a primeira permitida
+            if (!permitidos.includes(abaAtual)) {
+                mudarAba(permitidos[0] || 'dashboard');
+            }
+        }
 
         function mudarAba(aba) {
             abaAtual = aba;
@@ -452,6 +480,7 @@
             renderFornecedores();
             renderDashboardKPIs();
             preencherSelectOrgaos();
+            atualizarVisibilidadeAbas();
         }
 
         function preencherSelectOrgaos() {
@@ -472,15 +501,18 @@
         function renderUsuarios() {
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
-            tbody.innerHTML = window.dbData.usuarios.map(u => `
+            tbody.innerHTML = window.dbData.usuarios.map(u => {
+                const mods = u.perfil === 'admin' ? 'Acesso Total (Admin)' : (u.modulosPermitidos && u.modulosPermitidos.length > 0 ? u.modulosPermitidos.join(', ') : 'Padrão');
+                return `
                 <tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('usuarios', '${u.id}')">
                     <td class="p-4 font-bold text-slate-800">${u.nome || u.email}</td>
                     <td class="p-4 text-slate-600">${u.email || u.id}</td>
                     <td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${u.subgrupoId || u.orgao || 'GERAL'}</span></td>
                     <td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'amber' : 'slate'}-100 text-${u.perfil === 'admin' ? 'amber-900' : 'slate-700'} text-xs font-bold px-2 py-0.5 rounded uppercase">${u.perfil || 'comum'}</span></td>
-                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
+                    <td class="p-4 text-xs font-medium text-slate-500 max-w-xs truncate">${mods}</td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar Permissões</button></td>
                 </tr>
-            `).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
+            `}).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
         }
 
         function renderOrgaos() {
@@ -522,7 +554,7 @@
             // Lógica de Permissão de Visibilidade por Grupo / Órgão / Pessoa
             let lista = window.dbData.eventos.filter(e => {
                 if (!e.visibilidade || e.visibilidade === 'Aberto ao Público') return true;
-                if (!window.currentUser) return false; // Se for visitante, não vê eventos com restrição de grupo
+                if (!window.currentUser) return false;
                 
                 const userOrg = (window.currentUser.subgrupoId || window.currentUser.orgao || '').toUpperCase();
                 const userEmail = (window.currentUser.email || '').toLowerCase();
@@ -623,13 +655,17 @@
             // Visualização de Campos
             let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-4">';
             for (let k in item) {
-                if (k !== 'senhaHash' && k !== 'senha' && k !== 'historicoStatus') {
+                if (k !== 'senhaHash' && k !== 'senha' && k !== 'historicoStatus' && k !== 'modulosPermitidos') {
                     htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${k}</span><span class="font-semibold text-slate-800">${item[k]}</span></div>`;
                 }
             }
+            if (colecao === 'usuarios') {
+                const userPerms = item.modulosPermitidos || ['dashboard', 'demandas', 'eventos'];
+                htmlContent += `<div class="p-2 bg-slate-50 border rounded sm:col-span-2"><span class="text-slate-400 text-[10px] uppercase font-bold block">Módulos de Acesso Permitidos</span><span class="font-semibold text-indigo-900">${userPerms.join(', ')}</span></div>`;
+            }
             htmlContent += '</div>';
 
-            // Módulo Especial para Eventos (Inscrição de Pessoas Autorizadas)
+            // Módulo Especial para Eventos
             if (colecao === 'eventos') {
                 const isUserAutorizado = window.currentUser || window.dbData.usuarios.length > 0;
                 
@@ -650,7 +686,7 @@
                 `;
             }
 
-            // Módulo Especial de Acompanhamento e Histórico de Status para Demandas
+            // Módulo Especial de Acompanhamento para Demandas
             if (colecao === 'demandas') {
                 if (!item.historicoStatus) {
                     item.historicoStatus = [
@@ -710,9 +746,9 @@
 
             let editFieldsHtml = '';
             for (let k in item) {
-                if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus') continue;
+                if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus' || k === 'modulosPermitidos') continue;
                 const fieldVal = item[k] !== undefined ? item[k] : '';
-                const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'estrutura' || k === 'escopoServico';
+                const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'escopoServico';
                 
                 editFieldsHtml += `<div class="mb-2">
                     <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k === 'tipoJuridico' ? 'Tipo Jurídico / Natureza Jurídica' : k}</label>`;
@@ -744,11 +780,26 @@
                 editFieldsHtml += `</div>`;
             }
 
+            // Edição de Módulos de Permissão para Usuários
+            if (colecao === 'usuarios') {
+                const userPerms = item.modulosPermitidos || ['dashboard', 'demandas', 'eventos'];
+                editFieldsHtml += `
+                <div class="mt-3 border-t pt-3 bg-amber-50 p-3 rounded-lg border-amber-200">
+                    <label class="block font-bold text-slate-800 mb-2 uppercase text-[11px]"><i class="fa-solid fa-user-lock text-amber-700 mr-1"></i> Permissão de Visualização dos Módulos:</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        ${MÓDULOS_SISTEMA.map(m => `
+                            <label class="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">
+                                <input type="checkbox" value="${m.id}" class="edit-checkbox-modulo rounded text-blue-900 focus:ring-blue-600" ${userPerms.includes(m.id) ? 'checked' : ''}>
+                                ${m.nome}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            }
+
             document.getElementById('edit-campos-dinamicos').innerHTML = editFieldsHtml;
-
-            // Exibe área de gerenciamento
             document.getElementById('detalhe-area-admin').classList.remove('hidden');
-
             document.getElementById('modal-detalhes').classList.remove('hidden');
         };
 
@@ -808,6 +859,13 @@
                 }
             });
 
+            if (colecao === 'usuarios') {
+                const checkedBoxes = document.querySelectorAll('.edit-checkbox-modulo:checked');
+                const selectedModulos = Array.from(checkedBoxes).map(cb => cb.value);
+                item.modulosPermitidos = selectedModulos;
+                updatedData.modulosPermitidos = selectedModulos;
+            }
+
             renderizarTudo();
 
             try {
@@ -816,7 +874,7 @@
             } catch (err) {
                 console.warn('Erro ao atualizar no Firestore, mantido em memória local.', err);
             }
-            alert('Registro e campos atualizados com sucesso!');
+            alert('Registro e permissões atualizados com sucesso!');
             fecharModal('modal-detalhes');
         };
 
@@ -826,7 +884,6 @@
 
             if (!confirm(`Tem certeza que deseja excluir este registro (${docId}) da coleção ${colecao.toUpperCase()}?`)) return;
 
-            // Remoção local
             window.dbData[colecao] = window.dbData[colecao].filter(i => i.id !== docId);
             renderizarTudo();
 
@@ -942,6 +999,18 @@
                     <div><label class="block font-medium text-slate-700 mb-1">Órgão / Secretaria</label><select id="univ-c3" required class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>
                     <div><label class="block font-medium text-slate-700 mb-1">Perfil de Acesso</label><select id="univ-c4" class="w-full p-2 border rounded"><option value="comum">Usuário Comum</option><option value="admin">Administrador</option></select></div>
                     <div><label class="block font-medium text-slate-700 mb-1">Senha</label><input type="password" id="univ-c5" required minlength="6" class="w-full p-2 border rounded"></div>
+                    
+                    <div class="bg-blue-50/70 p-3 rounded-lg border border-blue-200 mt-2">
+                        <label class="block font-bold text-blue-900 mb-2 text-xs uppercase"><i class="fa-solid fa-eye text-blue-700 mr-1"></i> Selecione os Módulos que o Usuário Pode Visualizar:</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            ${MÓDULOS_SISTEMA.map(m => `
+                                <label class="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">
+                                    <input type="checkbox" value="${m.id}" class="novo-checkbox-modulo rounded text-blue-900 focus:ring-blue-600" checked>
+                                    ${m.nome}
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
                 `;
                 preencherSelectOrgaos();
             } else if (tipo === 'demanda') {
@@ -1045,10 +1114,15 @@
                 const email = document.getElementById('univ-c2').value.toLowerCase();
                 const senha = document.getElementById('univ-c5').value;
                 const senhaHash = await hashSHA256(senha);
+
+                const checkedBoxes = document.querySelectorAll('.novo-checkbox-modulo:checked');
+                const modulosPermitidos = Array.from(checkedBoxes).map(cb => cb.value);
+
                 novoObj = {
                     id: email, nome: document.getElementById('univ-c1').value, email,
                     subgrupoId: document.getElementById('univ-c3').value,
-                    perfil: document.getElementById('univ-c4').value, senhaHash, senha, ativo: true
+                    perfil: document.getElementById('univ-c4').value, senhaHash, senha, ativo: true,
+                    modulosPermitidos
                 };
                 window.dbData.usuarios.push(novoObj);
                 try {
@@ -1105,7 +1179,9 @@
 
             reader.onload = async function(e) {
                 const text = e.target.result;
-                const lines = text.split(/\r\n|\n/);
+                const lines = text.split(/
+|
+/);
                 let importCount = 0;
 
                 for (let i = 1; i < lines.length; i++) {
@@ -1155,7 +1231,8 @@
                             subgrupoId: cols[2] || 'ATI',
                             perfil: (cols[3] || 'comum').toLowerCase(),
                             senha: senha,
-                            senhaHash: senhaHash
+                            senhaHash: senhaHash,
+                            modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores']
                         };
                         window.dbData.usuarios.push(obj);
                         importCount++;
@@ -1205,7 +1282,8 @@
                 document.getElementById('btn-login').classList.add('hidden');
                 document.getElementById('user-logged').classList.remove('hidden');
                 fecharModal('modal-login');
-                alert(`Bem-vindo, ${userFound.nome || userFound.email}!`);
+                atualizarVisibilidadeAbas();
+                alert(`Bem-vindo, ${userFound.nome || userFound.email}! Suas permissões foram carregadas.`);
             } else alert("Senha incorreta.");
         };
 
@@ -1213,18 +1291,22 @@
             window.currentUser = null;
             document.getElementById('btn-login').classList.remove('hidden');
             document.getElementById('user-logged').classList.add('hidden');
+            atualizarVisibilidadeAbas();
             mudarAba('dashboard');
         };
 
         window.exportarUsuariosCSV = function() {
-            let csv = "Nome;Email;Orgao;Perfil\n";
+            let csv = "Nome;Email;Orgao;Perfil;ModulosPermitidos
+";
             window.dbData.usuarios.forEach(u => {
-                csv += `${u.nome || ''};${u.email || u.id};${u.subgrupoId || u.orgao || ''};${u.perfil || ''}\n`;
+                const mods = u.modulosPermitidos ? u.modulosPermitidos.join(',') : '';
+                csv += `${u.nome || ''};${u.email || u.id};${u.subgrupoId || u.orgao || ''};${u.perfil || ''};"${mods}"
+`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "usuarios_prgd_v15.csv");
+            link.setAttribute("download", "usuarios_prgd_v16.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1264,7 +1346,7 @@
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v15.0 STABLE</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v16.0 STABLE</span>
     </footer>
 </body>
 </html>
