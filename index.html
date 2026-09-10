@@ -167,7 +167,10 @@
   </div>
 
   <script>
-    // Alternar entre as abas (Login / Alterar Senha)
+    // Configuração do ambiente: 'true' para testar localmente, 'false' quando a API backend estiver configurada
+    const USE_MOCK_API = true; 
+    const API_BASE_URL = 'http://localhost:3000/api'; // Substitua pela URL da sua API no futuro
+
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.form-section').forEach(sec => sec.classList.remove('active'));
@@ -182,7 +185,6 @@
       }
     }
 
-    // Exibir mensagens de erro ou sucesso
     function showMessage(text, isSuccess = false) {
       const msgBox = document.getElementById('feedback-msg');
       msgBox.innerText = text;
@@ -195,7 +197,7 @@
       msgBox.style.display = 'none';
     }
 
-    // Processar o envio do Login
+    // Processamento do Login
     async function handleLogin(event) {
       event.preventDefault();
       hideMessage();
@@ -203,9 +205,16 @@
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
 
+      if (USE_MOCK_API) {
+        // Simulação local sem chamada de rede
+        localStorage.setItem('token', 'simulated-token-12345');
+        showMessage('Login realizado com sucesso! Redirecionando...', true);
+        return;
+      }
+
+      // Requisição Real para a API
       try {
-        // Substitua '/api/login' pela URL real da sua API backend
-        const response = await fetch('/api/login', {
+        const response = await fetch(`${API_BASE_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -214,12 +223,8 @@
         const data = await response.json();
 
         if (response.ok) {
-          // Armazena o token e redireciona (ajuste conforme a necessidade)
           localStorage.setItem('token', data.token);
           showMessage('Login realizado com sucesso! Redirecionando...', true);
-          setTimeout(() => {
-            window.location.href = '/dashboard'; // Altere para sua página principal
-          }, 1500);
         } else {
           showMessage(data.message || 'Falha ao realizar login. Verifique suas credenciais.');
         }
@@ -228,7 +233,7 @@
       }
     }
 
-    // Processar Alteração de Senha
+    // Processamento da Alteração de Senha
     async function handleChangePassword(event) {
       event.preventDefault();
       hideMessage();
@@ -242,11 +247,17 @@
         return;
       }
 
-      const token = localStorage.getItem('token');
+      if (USE_MOCK_API) {
+        // Simulação local sem chamada de rede
+        showMessage('Senha alterada com sucesso!', true);
+        document.getElementById('password-form').reset();
+        return;
+      }
 
+      // Requisição Real para a API
+      const token = localStorage.getItem('token');
       try {
-        // Substitua '/api/change-password' pela URL real da sua API backend
-        const response = await fetch('/api/change-password', {
+        const response = await fetch(`${API_BASE_URL}/change-password`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
