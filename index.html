@@ -80,7 +80,7 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
             </form>
             
-            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 19.0 · ATI-PE</p>
+            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 19.2 · ATI-PE</p>
         </div>
     </div>
 
@@ -95,7 +95,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.0</span>
+                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.2</span>
                         </div>
                         <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                     </div>
@@ -395,13 +395,11 @@
         </div>
 
         <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.0 FIREBASE SYNC</span>
+            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.2 FIREBASE SYNC</span>
         </footer>
     </div>
 
     <script>
-        // PRGD v19.0 — Firebase como fonte única da base de usuários,
-        // CRUD de usuários sincronizado com Firestore, limpeza de legados e auditoria.
         const DOMINIO_EMAIL_RE = /^[a-z0-9._%+\-]+@[a-z0-9.-]+\.pe\.gov\.br$/i;
         const ADMIN_PERFIL = 'admin';
         const CAMPOS_SISTEMA = ['uid','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','authProvisionamentoPendente'];
@@ -484,7 +482,6 @@
                 let docSnap = await db.collection('usuarios').doc(user.uid).get();
                 let data = null;
                 if (!docSnap.exists) {
-                    // Migração compatível com a estrutura antiga: usuarios/{email} -> usuarios/{uid}.
                     const legacySnap = await db.collection('usuarios').doc(userEmail).get();
                     if (legacySnap.exists) {
                         const legacy = legacySnap.data() || {};
@@ -660,7 +657,6 @@
             encerrarSnapshots();
             const permitidos = window.currentUser?.perfil === ADMIN_PERFIL ? MODULOS_TODOS : (window.currentUser?.modulosPermitidos || []);
             const colecoes = MODULOS_TODOS.filter(col => col !== 'dashboard' && permitidos.includes(col));
-            // Órgãos são uma dependência dos formulários de demandas e usuários.
             if ((permitidos.includes('demandas') || permitidos.includes('usuarios')) && !colecoes.includes('orgaos')) colecoes.push('orgaos');
             colecoes.forEach(col => {
                 const unsubscribe = db.collection(col).onSnapshot(snap => {
@@ -947,27 +943,27 @@
                     </div>`;
             } else {
                 for (let k in item) {
-                if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus') continue;
-                const fieldVal = item[k] !== undefined ? item[k] : '';
-                const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'escopoServico';
-                
-                editFieldsHtml += `<div class="mb-2">
-                    <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k}</label>`;
-                
-                if (k === 'modulosPermitidos' && Array.isArray(fieldVal)) {
-                    editFieldsHtml += `<div class="grid grid-cols-2 gap-1.5 p-2 border rounded bg-white">`;
-                    MODULOS_TODOS.forEach(m => {
-                        const checked = fieldVal.includes(m) ? 'checked' : '';
-                        editFieldsHtml += `<label class="inline-flex items-center text-xs"><input type="checkbox" value="${m}" class="edit-modulo-cb mr-1.5" ${checked}> ${m.toUpperCase()}</label>`;
-                    });
-                    editFieldsHtml += `</div>`;
-                } else if (isLongText) {
-                    editFieldsHtml += `<textarea data-field="${escapeHtml(k)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">${escapeHtml(fieldVal)}</textarea>`;
-                } else if (k === 'subgrupoId' || k === 'orgao') {
-                    editFieldsHtml += `<select data-field="${escapeHtml(k)}" class="edit-dinamico-input select-orgaos-dinamico w-full p-2 border rounded bg-white font-medium"></select>`;
-                } else {
-                    editFieldsHtml += `<input type="text" data-field="${escapeHtml(k)}" value="${escapeHtml(fieldVal)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">`;
-                }
+                    if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus') continue;
+                    const fieldVal = item[k] !== undefined ? item[k] : '';
+                    const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'escopoServico';
+                    
+                    editFieldsHtml += `<div class="mb-2">
+                        <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k}</label>`;
+                    
+                    if (k === 'modulosPermitidos' && Array.isArray(fieldVal)) {
+                        editFieldsHtml += `<div class="grid grid-cols-2 gap-1.5 p-2 border rounded bg-white">`;
+                        MODULOS_TODOS.forEach(m => {
+                            const checked = fieldVal.includes(m) ? 'checked' : '';
+                            editFieldsHtml += `<label class="inline-flex items-center text-xs"><input type="checkbox" value="${m}" class="edit-modulo-cb mr-1.5" ${checked}> ${m.toUpperCase()}</label>`;
+                        });
+                        editFieldsHtml += `</div>`;
+                    } else if (isLongText) {
+                        editFieldsHtml += `<textarea data-field="${escapeHtml(k)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">${escapeHtml(fieldVal)}</textarea>`;
+                    } else if (k === 'subgrupoId' || k === 'orgao') {
+                        editFieldsHtml += `<select data-field="${escapeHtml(k)}" class="edit-dinamico-input select-orgaos-dinamico w-full p-2 border rounded bg-white font-medium"></select>`;
+                    } else {
+                        editFieldsHtml += `<input type="text" data-field="${escapeHtml(k)}" value="${escapeHtml(fieldVal)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">`;
+                    }
                     editFieldsHtml += `</div>`;
                 }
             }
@@ -1050,12 +1046,14 @@
                 if (cbs.length > 0) updatedData.modulosPermitidos = Array.from(cbs).filter(cb => cb.checked).map(cb => cb.value);
 
                 // O perfil do usuário é o documento de autorização. Nunca permitir alteração do UID/e-mail
-                // pelo editor e preserve os campos de criação.
+                // pelo editor e preserve estritamente os campos de criação originais se existirem.
                 if (colecao === 'usuarios') {
                     updatedData.uid = original.uid || docId;
                     updatedData.email = original.email || '';
-                    updatedData.criadoPorUid = original.criadoPorUid || window.currentUser.uid;
+                    
+                    if (original.criadoPorUid) updatedData.criadoPorUid = original.criadoPorUid;
                     if (original.criadoEm !== undefined) updatedData.criadoEm = original.criadoEm;
+                    
                     if (!updatedData.nome || !String(updatedData.nome).trim()) throw new Error('Informe o nome do usuário.');
                     if (!updatedData.perfil) updatedData.perfil = original.perfil || 'comum';
                     if (!Array.isArray(updatedData.modulosPermitidos)) updatedData.modulosPermitidos = original.modulosPermitidos || ['dashboard'];
@@ -1072,7 +1070,6 @@
                     console.warn('Registro atualizado, mas a auditoria não pôde ser gravada:', auditErr);
                 }
 
-                // Se o próprio perfil foi alterado, atualize a sessão imediatamente.
                 if (colecao === 'usuarios' && docId === window.currentUser.uid) {
                     window.currentUser = { ...window.currentUser, ...updatedData };
                     atualizarInterfaceSessao();
@@ -1365,9 +1362,6 @@
                     const id = d.id;
                     const emailId = id.includes('@') ? id.toLowerCase() : '';
                     const email = String(data.email || '').toLowerCase();
-                    // Remove somente legados comprovadamente duplicados: LEGACY_*
-                    // ou documento cujo ID é o e-mail quando já existe usuarios/{UID}
-                    // com o mesmo e-mail. Não remove perfis sem correspondência.
                     if (id.startsWith('LEGACY_')) {
                         batch.delete(d.ref); removidos++;
                     } else if (emailId && email && emailId === email) {
