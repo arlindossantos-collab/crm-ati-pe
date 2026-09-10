@@ -126,13 +126,11 @@
 <body>
 
   <div class="container">
-    <!-- Abas de Navegação -->
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
       <button class="tab-btn" onclick="switchTab('change-password')">Alterar Senha</button>
     </div>
 
-    <!-- Área de Feedback -->
     <div id="feedback-msg" class="message"></div>
 
     <!-- Formulário de Login -->
@@ -167,9 +165,8 @@
   </div>
 
   <script>
-    // Configuração do ambiente: 'true' para testar localmente, 'false' quando a API backend estiver configurada
-    const USE_MOCK_API = true; 
-    const API_BASE_URL = 'http://localhost:3000/api'; // Substitua pela URL da sua API no futuro
+    // AJUSTE AQUI: informe o endereço base da sua API de autenticação real
+    const API_BASE_URL = '/api'; // Ou a URL do seu servidor (ex: 'https://seu-dominio.com/api')
 
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -197,7 +194,7 @@
       msgBox.style.display = 'none';
     }
 
-    // Processamento do Login
+    // Processamento do Login Real
     async function handleLogin(event) {
       event.preventDefault();
       hideMessage();
@@ -205,14 +202,6 @@
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
 
-      if (USE_MOCK_API) {
-        // Simulação local sem chamada de rede
-        localStorage.setItem('token', 'simulated-token-12345');
-        showMessage('Login realizado com sucesso! Redirecionando...', true);
-        return;
-      }
-
-      // Requisição Real para a API
       try {
         const response = await fetch(`${API_BASE_URL}/login`, {
           method: 'POST',
@@ -223,17 +212,32 @@
         const data = await response.json();
 
         if (response.ok) {
-          localStorage.setItem('token', data.token);
-          showMessage('Login realizado com sucesso! Redirecionando...', true);
+          // Armazena a sessão/token e redireciona para o sistema com as permissões do usuário
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+          }
+          if (data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+          }
+
+          showMessage('Login realizado com sucesso! Entrando...', true);
+          
+          setTimeout(() => {
+            // Redireciona para a página principal do sistema
+            window.location.href = data.redirectTo || '/dashboard';
+          }, 1000);
+        } else if (response.status === 401 || response.status === 404) {
+          // Trata especificamente erro de credenciais inválidas
+          showMessage('Usuário inexistente ou senha inválida.');
         } else {
-          showMessage(data.message || 'Falha ao realizar login. Verifique suas credenciais.');
+          showMessage(data.message || 'Falha na autenticação. Verifique suas credenciais.');
         }
       } catch (err) {
-        showMessage('Erro de conexão com o servidor. Tente novamente mais tarde.');
+        showMessage('Erro de conexão com o servidor de autenticação.');
       }
     }
 
-    // Processamento da Alteração de Senha
+    // Processamento da Alteração de Senha Real
     async function handleChangePassword(event) {
       event.preventDefault();
       hideMessage();
@@ -247,15 +251,8 @@
         return;
       }
 
-      if (USE_MOCK_API) {
-        // Simulação local sem chamada de rede
-        showMessage('Senha alterada com sucesso!', true);
-        document.getElementById('password-form').reset();
-        return;
-      }
-
-      // Requisição Real para a API
       const token = localStorage.getItem('token');
+
       try {
         const response = await fetch(`${API_BASE_URL}/change-password`, {
           method: 'POST',
@@ -275,7 +272,7 @@
           showMessage(data.message || 'Erro ao alterar a senha. Verifique a senha atual.');
         }
       } catch (err) {
-        showMessage('Erro de conexão com o servidor. Tente novamente mais tarde.');
+        showMessage('Erro de conexão com o servidor.');
       }
     }
   </script>
