@@ -1029,38 +1029,63 @@
             const colecao = document.getElementById('edit-colecao').value;
             const docId = document.getElementById('edit-doc-id').value;
             try { exigirPermissao(colecao); } catch (err) { alert(err.message); return; }
-            
-            const updatedData = {};
-            const inputs = document.querySelectorAll('.edit-dinamico-input');
-            inputs.forEach(input => {
-                const fieldName = input.getAttribute('data-field');
-                if (!fieldName || CAMPOS_SISTEMA.includes(fieldName)) return;
-                if (fieldName === 'ativo') updatedData[fieldName] = input.value === 'true';
-                else updatedData[fieldName] = input.value;
-            });
 
-            if (colecao === 'usuarios') {
-                const emailAtual = window.dbData.usuarios.find(u => u.id === docId)?.email;
-                if (!emailAtual) throw new Error('Usuário não localizado na base Firebase.');
-                if (docId === window.currentUser.uid && updatedData.perfil && updatedData.perfil !== 'admin') {
-                    throw new Error('A conta administrativa atual não pode remover o próprio perfil de administrador.');
-                }
-            }
-
-            const cbs = document.querySelectorAll('.edit-modulo-cb');
-            if (cbs.length > 0) {
-                updatedData.modulosPermitidos = Array.from(cbs).filter(cb => cb.checked).map(cb => cb.value);
-            }
+            const btn = document.querySelector('#form-edicao-admin button[type="submit"]');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Salvando...'; }
 
             try {
+                const original = (window.dbData[colecao] || []).find(x => x.id === docId);
+                if (!original) throw new Error('Registro não encontrado na base atual. Atualize a página e tente novamente.');
+
+                const updatedData = {};
+                document.querySelectorAll('.edit-dinamico-input').forEach(input => {
+                    const fieldName = input.getAttribute('data-field');
+                    if (!fieldName || CAMPOS_SISTEMA.includes(fieldName)) return;
+                    if (input.type === 'checkbox') updatedData[fieldName] = input.checked;
+                    else if (input.tagName === 'SELECT' && input.multiple) updatedData[fieldName] = Array.from(input.selectedOptions).map(o => o.value);
+                    else updatedData[fieldName] = input.value;
+                });
+
+                const cbs = document.querySelectorAll('.edit-modulo-cb');
+                if (cbs.length > 0) updatedData.modulosPermitidos = Array.from(cbs).filter(cb => cb.checked).map(cb => cb.value);
+
+                // O perfil do usuário é o documento de autorização. Nunca permitir alteração do UID/e-mail
+                // pelo editor e preserve os campos de criação.
+                if (colecao === 'usuarios') {
+                    updatedData.uid = original.uid || docId;
+                    updatedData.email = original.email || '';
+                    updatedData.criadoPorUid = original.criadoPorUid || window.currentUser.uid;
+                    if (original.criadoEm !== undefined) updatedData.criadoEm = original.criadoEm;
+                    if (!updatedData.nome || !String(updatedData.nome).trim()) throw new Error('Informe o nome do usuário.');
+                    if (!updatedData.perfil) updatedData.perfil = original.perfil || 'comum';
+                    if (!Array.isArray(updatedData.modulosPermitidos)) updatedData.modulosPermitidos = original.modulosPermitidos || ['dashboard'];
+                    updatedData.ativo = updatedData.ativo !== false && updatedData.ativo !== 'false';
+                }
+
                 updatedData.atualizadoEm = firebase.firestore.FieldValue.serverTimestamp();
                 updatedData.atualizadoPorUid = window.currentUser.uid;
+
                 await db.collection(colecao).doc(docId).update(updatedData);
-                await registrarAuditoria('UPDATE', colecao, docId, { campos: Object.keys(updatedData) });
+                try {
+                    await registrarAuditoria('UPDATE', colecao, docId, { campos: Object.keys(updatedData) });
+                } catch (auditErr) {
+                    console.warn('Registro atualizado, mas a auditoria não pôde ser gravada:', auditErr);
+                }
+
+                // Se o próprio perfil foi alterado, atualize a sessão imediatamente.
+                if (colecao === 'usuarios' && docId === window.currentUser.uid) {
+                    window.currentUser = { ...window.currentUser, ...updatedData };
+                    atualizarInterfaceSessao();
+                }
+
                 alert('Registro atualizado com sucesso!');
                 fecharModal('modal-detalhes');
             } catch (err) {
-                alert('Erro ao atualizar registro no Firestore.');
+                console.error('Erro ao atualizar registro no Firestore:', err);
+                const code = err && err.code ? ` [${err.code}]` : '';
+                alert('Erro ao atualizar registro no Firestore' + code + ': ' + (err.message || 'verifique as regras do Firestore e tente novamente.'));
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Todas as Alterações'; }
             }
         };
 
