@@ -122,6 +122,10 @@
       display: block;
     }
   </style>
+
+  <!-- Firebase SDK (v9+ Compatibility Mode) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -137,7 +141,7 @@
     <form id="login-form" class="form-section active" onsubmit="handleLogin(event)">
       <div class="form-group">
         <label for="login-email">E-mail</label>
-        <input type="email" id="login-email" required placeholder="seu@email.com">
+        <input type="email" id="login-email" required placeholder="seu.nome@ati.pe.gov.br">
       </div>
       <div class="form-group">
         <label for="login-password">Senha</label>
@@ -165,9 +169,26 @@
   </div>
 
   <script>
-    // AJUSTE AQUI: informe o endereço base da sua API de autenticação real
-    const API_BASE_URL = '/api'; // Ou a URL do seu servidor (ex: 'https://seu-dominio.com/api')
+    // -------------------------------------------------------------
+    // CONFIGURAÇÃO DO SEU PROJETO FIREBASE
+    // Cole aqui as credenciais do seu console Firebase:
+    // -------------------------------------------------------------
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_PROJETO.firebaseapp.com",
+      projectId: "SEU_PROJETO_ID",
+      storageBucket: "SEU_PROJETO.appspot.com",
+      messagingSenderId: "SEU_SENDER_ID",
+      appId: "SEU_APP_ID"
+    };
 
+    // Inicializa o Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+
+    // Controle de Abas
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.form-section').forEach(sec => sec.classList.remove('active'));
@@ -194,7 +215,7 @@
       msgBox.style.display = 'none';
     }
 
-    // Processamento do Login Real
+    // Login com Firebase Auth
     async function handleLogin(event) {
       event.preventDefault();
       hideMessage();
@@ -203,41 +224,35 @@
       const password = document.getElementById('login-password').value;
 
       try {
-        const response = await fetch(`${API_BASE_URL}/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-        const data = await response.json();
+        showMessage('Login realizado com sucesso! Entrando...', true);
 
-        if (response.ok) {
-          // Armazena a sessão/token e redireciona para o sistema com as permissões do usuário
-          if (data.token) {
-            localStorage.setItem('token', data.token);
-          }
-          if (data.user) {
-            localStorage.setItem('user', JSON.stringify(data.user));
-          }
+        // Redireciona para o painel principal do sistema
+        setTimeout(() => {
+          window.location.href = '/dashboard'; // Altere para a URL/arquivo do seu painel
+        }, 1000);
 
-          showMessage('Login realizado com sucesso! Entrando...', true);
-          
-          setTimeout(() => {
-            // Redireciona para a página principal do sistema
-            window.location.href = data.redirectTo || '/dashboard';
-          }, 1000);
-        } else if (response.status === 401 || response.status === 404) {
-          // Trata especificamente erro de credenciais inválidas
+      } catch (error) {
+        console.error("Erro Firebase Login:", error.code, error.message);
+        
+        // Tratamento dos erros de validação local
+        if (
+          error.code === 'auth/user-not-found' || 
+          error.code === 'auth/wrong-password' || 
+          error.code === 'auth/invalid-credential'
+        ) {
           showMessage('Usuário inexistente ou senha inválida.');
+        } else if (error.code === 'auth/invalid-email') {
+          showMessage('Formato de e-mail inválido.');
         } else {
-          showMessage(data.message || 'Falha na autenticação. Verifique suas credenciais.');
+          showMessage('Erro ao conectar com o banco de usuários. Tente novamente.');
         }
-      } catch (err) {
-        showMessage('Erro de conexão com o servidor de autenticação.');
       }
     }
 
-    // Processamento da Alteração de Senha Real
+    // Alteração de Senha no Firebase Auth
     async function handleChangePassword(event) {
       event.preventDefault();
       hideMessage();
@@ -251,28 +266,33 @@
         return;
       }
 
-      const token = localStorage.getItem('token');
+      const user = auth.currentUser;
+
+      if (!user) {
+        showMessage('Você precisa estar logado para alterar a senha.');
+        return;
+      }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/change-password`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ currentPassword, newPassword })
-        });
+        // Reautentica o usuário para garantir a segurança antes de trocar a senha
+        const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPassword);
+        await user.reauthenticateWithCredential(credential);
 
-        const data = await response.json();
+        // Atualiza para a nova senha
+        await user.updatePassword(newPassword);
 
-        if (response.ok) {
-          showMessage('Senha alterada com sucesso!', true);
-          document.getElementById('password-form').reset();
+        showMessage('Senha alterada com sucesso!', true);
+        document.getElementById('password-form').reset();
+
+      } catch (error) {
+        console.error("Erro ao alterar senha:", error);
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+          showMessage('A senha atual fornecida está incorreta.');
+        } else if (error.code === 'auth/weak-password') {
+          showMessage('A nova senha deve ter pelo menos 6 caracteres.');
         } else {
-          showMessage(data.message || 'Erro ao alterar a senha. Verifique a senha atual.');
+          showMessage('Erro ao atualizar senha. Tente novamente.');
         }
-      } catch (err) {
-        showMessage('Erro de conexão com o servidor.');
       }
     }
   </script>
