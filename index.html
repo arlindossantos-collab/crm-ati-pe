@@ -42,7 +42,7 @@
             <div id="auth-alert" class="hidden p-2.5 rounded-lg text-xs font-semibold mb-3 text-center"></div>
 
             <!-- Formulário de Login -->
-            <form id="form-login" onsubmit="fazerLoginLocal(event)">
+            <form id="form-login" onsubmit="fazerLogin(event)">
                 <div class="space-y-3 text-sm">
                     <div>
                         <label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label>
@@ -80,7 +80,7 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
             </form>
             
-            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 16.5.0 · ATI-PE</p>
+            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 17.0 · ATI-PE</p>
         </div>
     </div>
 
@@ -95,7 +95,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v16.5 STABLE</span>
+                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v17.0</span>
                         </div>
                         <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                     </div>
@@ -399,6 +399,35 @@
     </div>
 
     <script>
+        // PRGD v17.0 — sessão segura, listeners controlados, validação institucional,
+        // dashboard dinâmico e tratamento mais seguro de conteúdo vindo do Firestore.
+        const DOMINIO_EMAIL_RE = /^[a-z0-9._%+\-]+@[a-z0-9.-]+\.pe\.gov\.br$/i;
+        const ADMIN_PERFIL = 'admin';
+        let snapshotUnsubscribers = [];
+        let chartCategoriasInstance = null;
+        let chartStatusInstance = null;
+
+        function urlExternaSegura(value) {
+            try {
+                const u = new URL(String(value || ''), window.location.href);
+                return ['http:', 'https:'].includes(u.protocol) ? u.href : '';
+            } catch (_) { return ''; }
+        }
+
+        function emailInstitucionalValido(email) { return DOMINIO_EMAIL_RE.test(String(email || '').trim()); }
+        function exigirEmailInstitucional(email) {
+            if (!emailInstitucionalValido(email)) throw new Error('Use um e-mail institucional no domínio *.pe.gov.br.');
+        }
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        }
+        function usuarioPode(modulo) {
+            const u = window.currentUser;
+            return !!u && (u.perfil === ADMIN_PERFIL || (Array.isArray(u.modulosPermitidos) && u.modulosPermitidos.includes(modulo)));
+        }
+        function exigirPermissao(modulo) { if (!usuarioPode(modulo)) throw new Error('Você não possui permissão para esta operação.'); }
+        function encerrarSnapshots() { snapshotUnsubscribers.forEach(unsub => { try { unsub(); } catch (_) {} }); snapshotUnsubscribers = []; }
+
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
             authDomain: "prgd-ati-pe.firebaseapp.com",
@@ -421,53 +450,51 @@
 
         const MODULOS_TODOS = ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
 
-        auth.onAuthStateChanged(user => {
+        auth.onAuthStateChanged(async user => {
             const authScreen = document.getElementById('auth-screen');
             const appWrapper = document.getElementById('app-wrapper');
+            encerrarSnapshots();
+            window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [] };
 
-            if (user) {
-                authScreen.classList.add('hidden');
-                appWrapper.classList.remove('hidden');
-                appWrapper.classList.add('flex');
-
-                const userEmail = user.email.toLowerCase();
-
-                db.collection("usuarios").doc(userEmail).get().then(docSnap => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        
-                        let modulosLimpos = MODULOS_TODOS;
-                        if (Array.isArray(data.modulosPermitidos) && data.modulosPermitidos.length > 0) {
-                            modulosLimpos = data.modulosPermitidos.map(m => String(m).replace(/["']/g, '').trim());
-                        }
-
-                        window.currentUser = {
-                            ...data,
-                            modulosPermitidos: modulosLimpos
-                        };
-                    } else {
-                        // Usuário recém-criado ou sem documento no Firestore recebe acesso completo por padrão
-                        window.currentUser = {
-                            nome: user.email.split('@')[0],
-                            email: user.email,
-                            perfil: 'comum',
-                            modulosPermitidos: MODULOS_TODOS
-                        };
-                    }
-
-                    if (userEmail === 'arlindo.santos@ati.pe.gov.br') {
-                        window.currentUser.perfil = 'admin';
-                        window.currentUser.modulosPermitidos = MODULOS_TODOS;
-                    }
-
-                    atualizarInterfaceSessao();
-                    iniciarSnapshotFirestore();
-                });
-            } else {
+            if (!user) {
                 window.currentUser = null;
                 authScreen.classList.remove('hidden');
                 appWrapper.classList.add('hidden');
                 appWrapper.classList.remove('flex');
+                return;
+            }
+
+            const userEmail = (user.email || '').toLowerCase().trim();
+            if (!emailInstitucionalValido(userEmail)) {
+                exibirAlertaAuth('Acesso permitido somente para contas institucionais *.pe.gov.br.', 'erro');
+                await auth.signOut();
+                return;
+            }
+
+            try {
+                const docSnap = await db.collection('usuarios').doc(userEmail).get();
+                if (!docSnap.exists) {
+                    exibirAlertaAuth('Sua conta foi autenticada, mas ainda não possui cadastro de acesso no PRGD.', 'erro');
+                    await auth.signOut();
+                    return;
+                }
+                const data = docSnap.data() || {};
+                if (data.ativo === false) {
+                    exibirAlertaAuth('Seu acesso ao PRGD está desativado.', 'erro');
+                    await auth.signOut();
+                    return;
+                }
+                const modulos = Array.isArray(data.modulosPermitidos) ? data.modulosPermitidos.map(m => String(m).trim()).filter(Boolean) : ['dashboard'];
+                window.currentUser = { ...data, email: userEmail, modulosPermitidos: modulos };
+                atualizarInterfaceSessao();
+                authScreen.classList.add('hidden');
+                appWrapper.classList.remove('hidden');
+                appWrapper.classList.add('flex');
+                iniciarSnapshotFirestore();
+            } catch (err) {
+                console.error(err);
+                exibirAlertaAuth('Não foi possível carregar seu perfil de acesso.', 'erro');
+                await auth.signOut();
             }
         });
 
@@ -520,19 +547,17 @@
             el.classList.remove('hidden');
         }
 
-        async function fazerLoginLocal(e) {
+        async function fazerLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('login-email').value.trim();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
             const senha = document.getElementById('login-senha').value;
-
             try {
+                exigirEmailInstitucional(email);
                 await auth.signInWithEmailAndPassword(email, senha);
             } catch (error) {
-                if (error.code === 'auth/invalid-login-credentials' || error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                    exibirAlertaAuth('Usuário inexistente ou senha incorreta.', 'erro');
-                } else {
-                    exibirAlertaAuth('Erro ao autenticar: ' + error.message, 'erro');
-                }
+                if (error.message && error.message.includes('domínio')) exibirAlertaAuth(error.message, 'erro');
+                else if (['auth/invalid-login-credentials','auth/invalid-credential','auth/user-not-found','auth/wrong-password'].includes(error.code)) exibirAlertaAuth('Usuário inexistente ou senha incorreta.', 'erro');
+                else exibirAlertaAuth('Não foi possível autenticar. Verifique os dados e tente novamente.', 'erro');
             }
         }
 
@@ -542,6 +567,8 @@
             const passAtual = document.getElementById('pass-atual').value;
             const passNova = document.getElementById('pass-nova').value;
             const passConfirma = document.getElementById('pass-confirma').value;
+
+            try { exigirEmailInstitucional(email); } catch (err) { exibirAlertaAuth(err.message, 'erro'); return; }
 
             if (passNova !== passConfirma) {
                 exibirAlertaAuth('A nova senha e a confirmação não coincidem.', 'erro');
@@ -571,10 +598,11 @@
                 return;
             }
             try {
+                exigirEmailInstitucional(email);
                 await auth.sendPasswordResetEmail(email);
-                exibirAlertaAuth('E-mail de redefinição enviado com sucesso!', 'sucesso');
+                exibirAlertaAuth('Se a conta existir, as instruções de redefinição foram enviadas.', 'sucesso');
             } catch (error) {
-                exibirAlertaAuth('Erro ao enviar e-mail de redefinição.', 'erro');
+                exibirAlertaAuth(error.message && error.message.includes('domínio') ? error.message : 'Não foi possível solicitar a redefinição.', 'erro');
             }
         }
 
@@ -600,14 +628,21 @@
         function mudarAba(aba) { cambiarAba(aba); }
 
         function iniciarSnapshotFirestore() {
-            const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
+            encerrarSnapshots();
+            const permitidos = window.currentUser?.perfil === ADMIN_PERFIL ? MODULOS_TODOS : (window.currentUser?.modulosPermitidos || []);
+            const colecoes = MODULOS_TODOS.filter(col => col !== 'dashboard' && permitidos.includes(col));
+            // Órgãos são uma dependência dos formulários de demandas e usuários.
+            if ((permitidos.includes('demandas') || permitidos.includes('usuarios')) && !colecoes.includes('orgaos')) colecoes.push('orgaos');
             colecoes.forEach(col => {
-                db.collection(col).onSnapshot(snap => {
+                const unsubscribe = db.collection(col).onSnapshot(snap => {
                     window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     renderizarTudo();
                 }, err => {
                     console.error(`Erro ao carregar coleção ${col}:`, err);
+                    const status = document.getElementById('session-info');
+                    if (status) status.textContent = 'Erro de sincronização: ' + col;
                 });
+                snapshotUnsubscribers.push(unsubscribe);
             });
         }
 
@@ -650,10 +685,10 @@
             if (!tbody) return;
             tbody.innerHTML = window.dbData.usuarios.map(u => 
                 `<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('usuarios', '${u.id}')">
-                    <td class="p-4 font-bold text-slate-800">${u.nome || u.email}</td>
-                    <td class="p-4 text-slate-600">${u.email || u.id}</td>
+                    <td class="p-4 font-bold text-slate-800">${escapeHtml(u.nome || u.email)}</td>
+                    <td class="p-4 text-slate-600">${escapeHtml(u.email || u.id)}</td>
                     <td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${u.subgrupoId || u.orgao || 'GERAL'}</span></td>
-                    <td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'amber' : 'slate'}-100 text-${u.perfil === 'admin' ? 'amber-900' : 'slate-700'} text-xs font-bold px-2 py-0.5 rounded uppercase">${u.perfil || 'comum'}</span></td>
+                    <td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'amber' : 'slate'}-100 text-${u.perfil === 'admin' ? 'amber-900' : 'slate-700'} text-xs font-bold px-2 py-0.5 rounded uppercase">${escapeHtml(u.perfil || 'comum')}</span></td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
                 </tr>`
             ).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
@@ -664,11 +699,11 @@
             if (!tbody) return;
             tbody.innerHTML = window.dbData.orgaos.map(o => 
                 `<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('orgaos', '${o.id}')">
-                    <td class="p-4 font-bold text-indigo-900">${o.sigla || o.id}</td>
-                    <td class="p-4 text-slate-800 font-medium">${o.nome || '-'}</td>
-                    <td class="p-4 text-xs"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">${o.tipoJuridico || o.naturezaJuridica || 'Secretaria'}</span></td>
-                    <td class="p-4 text-xs text-slate-600">${o.responsavel || '-'}</td>
-                    <td class="p-4 text-xs text-slate-600">${o.email || '-'}</td>
+                    <td class="p-4 font-bold text-indigo-900">${escapeHtml(o.sigla || o.id)}</td>
+                    <td class="p-4 text-slate-800 font-medium">${escapeHtml(o.nome || '-')}</td>
+                    <td class="p-4 text-xs"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">${escapeHtml(o.tipoJuridico || o.naturezaJuridica || 'Secretaria')}</span></td>
+                    <td class="p-4 text-xs text-slate-600">${escapeHtml(o.responsavel || '-')}</td>
+                    <td class="p-4 text-xs text-slate-600">${escapeHtml(o.email || '-')}</td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
                 </tr>`
             ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
@@ -679,11 +714,11 @@
             if (!tbody) return;
             tbody.innerHTML = window.dbData.demandas.map(d => 
                 `<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('demandas', '${d.id}')">
-                    <td class="p-4 font-bold text-blue-900">${d.orgao || 'Geral'}</td>
-                    <td class="p-4 font-medium text-slate-900">${d.titulo || '-'}</td>
-                    <td class="p-4 text-xs text-slate-500">${d.categoria || '-'}</td>
-                    <td class="p-4 text-xs font-bold text-${d.prioridade === 'Alta' ? 'red' : 'amber'}-600">${d.prioridade || 'Média'}</td>
-                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">${d.status || 'Pendente'}</span></td>
+                    <td class="p-4 font-bold text-blue-900">${escapeHtml(d.orgao || 'Geral')}</td>
+                    <td class="p-4 font-medium text-slate-900">${escapeHtml(d.titulo || '-')}</td>
+                    <td class="p-4 text-xs text-slate-500">${escapeHtml(d.categoria || '-')}</td>
+                    <td class="p-4 text-xs font-bold text-${d.prioridade === 'Alta' ? 'red' : 'amber'}-600">${escapeHtml(d.prioridade || 'Média')}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">${escapeHtml(d.status || 'Pendente')}</span></td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
                 </tr>`
             ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma demanda registrada.</td></tr>';
@@ -715,7 +750,7 @@
                             </span>
                         </div>
                         <h4 class="font-bold text-slate-800 text-base mt-1">${e.titulo || '-'}</h4>
-                        <p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Palestrante: ${e.palestrante || 'Não informado'}</p>
+                        <p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Palestrante: ${escapeHtml(e.palestrante || 'Não informado')}</p>
                         <div class="bg-slate-50 p-2.5 rounded-lg border my-2 text-[11px] space-y-1">
                             <p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> <strong>Início:</strong> ${dtStart ? new Date(dtStart).toLocaleString('pt-BR') : '-'}</p>
                             ${dtEnd ? `<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-red-500 mr-1"></i> <strong>Fim:</strong> ${new Date(dtEnd).toLocaleString('pt-BR')}</p>` : ''}
@@ -738,16 +773,16 @@
                 `<div onclick="detalharRegistro('locais', '${l.id}')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-purple-500 transition flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-start">
-                            <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">${l.tipoEspaco || 'Auditório'}</span>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">${escapeHtml(l.tipoEspaco || 'Auditório')}</span>
                             <span class="text-xs font-bold ${l.natureza === 'Privado' ? 'text-amber-600' : 'text-emerald-600'}">${l.natureza || 'Público'}</span>
                         </div>
-                        <h4 class="font-bold text-slate-800 text-base mt-2">${l.nome || l.id}</h4>
-                        <p class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>${l.capacidade || '0'} sentadas</strong></p>
-                        <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-money-bill-wave mr-1"></i> Aluguel: <strong>${l.valorAluguel ? 'R$ ' + l.valorAluguel : 'Gratuito / Público'}</strong></p>
+                        <h4 class="font-bold text-slate-800 text-base mt-2">${escapeHtml(l.nome || l.id)}</h4>
+                        <p class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>${escapeHtml(l.capacidade || '0')} sentadas</strong></p>
+                        <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-money-bill-wave mr-1"></i> Aluguel: <strong>${escapeHtml(l.valorAluguel ? 'R$ ' + l.valorAluguel : 'Gratuito / Público')}</strong></p>
                     </div>
                     <div class="mt-3 border-t pt-2 flex justify-between items-center text-xs text-slate-500">
-                        <span><i class="fa-solid fa-snowflake mr-1"></i>${l.climatizacao || 'Sim'}</span>
-                        <span><i class="fa-solid fa-square-parking mr-1"></i>${l.estacionamento || 'Sim'}</span>
+                        <span><i class="fa-solid fa-snowflake mr-1"></i>${escapeHtml(l.climatizacao || 'Sim')}</span>
+                        <span><i class="fa-solid fa-square-parking mr-1"></i>${escapeHtml(l.estacionamento || 'Sim')}</span>
                         <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>
                     </div>
                 </div>`
@@ -759,11 +794,11 @@
             if (!grid) return;
             grid.innerHTML = window.dbData.fornecedores.map(f => 
                 `<div onclick="detalharRegistro('fornecedores', '${f.id}')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-emerald-500 transition">
-                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">${f.categoria || 'Geral'}</span>
-                    <h4 class="font-bold text-slate-800 mt-2">${f.nome || f.razaoSocial || '-'}</h4>
-                    <p class="text-xs text-slate-500"><i class="fa-solid fa-id-card mr-1"></i> CNPJ: ${f.cnpj || '-'}</p>
-                    <p class="text-xs text-slate-500"><i class="fa-solid fa-file-contract mr-1"></i> Contrato: ${f.numeroContrato || '-'}</p>
-                    <p class="text-xs text-slate-500"><i class="fa-solid fa-user-tie mr-1"></i> Resp: ${f.responsavel || '-'}</p>
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">${escapeHtml(f.categoria || 'Geral')}</span>
+                    <h4 class="font-bold text-slate-800 mt-2">${escapeHtml(f.nome || f.razaoSocial || '-')}</h4>
+                    <p class="text-xs text-slate-500"><i class="fa-solid fa-id-card mr-1"></i> CNPJ: ${escapeHtml(f.cnpj || '-')}</p>
+                    <p class="text-xs text-slate-500"><i class="fa-solid fa-file-contract mr-1"></i> Contrato: ${escapeHtml(f.numeroContrato || '-')}</p>
+                    <p class="text-xs text-slate-500"><i class="fa-solid fa-user-tie mr-1"></i> Resp: ${escapeHtml(f.responsavel || '-')}</p>
                     <div class="mt-3 border-t pt-2 text-right"><span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span></div>
                 </div>`
             ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor cadastrado.</p>';
@@ -786,7 +821,7 @@
             let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-4">';
             for (let k in item) {
                 if (k !== 'senhaHash' && k !== 'senha' && k !== 'historicoStatus') {
-                    htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${k}</span><span class="font-semibold text-slate-800">${Array.isArray(item[k]) ? item[k].join(', ') : item[k]}</span></div>`;
+                    htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${escapeHtml(k)}</span><span class="font-semibold text-slate-800">${escapeHtml(Array.isArray(item[k]) ? item[k].join(', ') : item[k])}</span></div>`;
                 }
             }
             htmlContent += '</div>';
@@ -801,7 +836,7 @@
                     </h4>
                     ${isUserAutorizado ? `
                         <p class="text-xs text-slate-700 mb-3 font-medium">Você é um usuário autenticado na plataforma PRGD.</p>
-                        ${item.linkInscricao ? `<a href="${item.linkInscricao}" target="_blank" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-sm"><i class="fa-solid fa-pen-to-square"></i> Realizar Inscrição Agora</a>` : `<p class="text-xs font-bold text-slate-500">Inscrição Direta via Agência ATI / Formulário em Breve</p>`}
+                        ${urlExternaSegura(item.linkInscricao) ? `<a href="${escapeHtml(urlExternaSegura(item.linkInscricao))}" target="_blank" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-sm"><i class="fa-solid fa-pen-to-square"></i> Realizar Inscrição Agora</a>` : `<p class="text-xs font-bold text-slate-500">Inscrição Direta via Agência ATI / Formulário em Breve</p>`}
                     ` : `
                         <div class="p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-xs font-semibold flex items-center gap-2">
                             <i class="fa-solid fa-lock"></i> O campo de inscrição é restrito exclusivamente para pessoas e servidores autorizados.
@@ -826,10 +861,10 @@
                         ${item.historicoStatus.map(h => `
                             <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 text-xs">
                                 <div class="flex justify-between items-center mb-1">
-                                    <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">${h.status}</span>
+                                    <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">${escapeHtml(h.status)}</span>
                                     <span class="text-slate-400 text-[10px] font-semibold"><i class="fa-regular fa-calendar-alt mr-1"></i>${new Date(h.data).toLocaleString('pt-BR')}</span>
                                 </div>
-                                <p class="text-slate-700 font-medium">${h.descricao || 'Sem observações.'}</p>
+                                <p class="text-slate-700 font-medium">${escapeHtml(h.descricao || 'Sem observações.')}</p>
                             </div>
                         `).join('')}
                     </div>
@@ -882,11 +917,11 @@
                     });
                     editFieldsHtml += `</div>`;
                 } else if (isLongText) {
-                    editFieldsHtml += `<textarea data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">${fieldVal}</textarea>`;
+                    editFieldsHtml += `<textarea data-field="${escapeHtml(k)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">${escapeHtml(fieldVal)}</textarea>`;
                 } else if (k === 'subgrupoId' || k === 'orgao') {
-                    editFieldsHtml += `<select data-field="${k}" class="edit-dinamico-input select-orgaos-dinamico w-full p-2 border rounded bg-white font-medium"></select>`;
+                    editFieldsHtml += `<select data-field="${escapeHtml(k)}" class="edit-dinamico-input select-orgaos-dinamico w-full p-2 border rounded bg-white font-medium"></select>`;
                 } else {
-                    editFieldsHtml += `<input type="text" data-field="${k}" value="${fieldVal}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">`;
+                    editFieldsHtml += `<input type="text" data-field="${escapeHtml(k)}" value="${escapeHtml(fieldVal)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">`;
                 }
                 editFieldsHtml += `</div>`;
             }
@@ -904,6 +939,7 @@
         };
 
         window.adicionarAcompanhamentoDemanda = async function(docId) {
+            try { exigirPermissao('demandas'); } catch (err) { alert(err.message); return; }
             const demanda = window.dbData.demandas.find(d => d.id === docId);
             if (!demanda) return;
 
@@ -942,6 +978,7 @@
             e.preventDefault();
             const colecao = document.getElementById('edit-colecao').value;
             const docId = document.getElementById('edit-doc-id').value;
+            try { exigirPermissao(colecao); } catch (err) { alert(err.message); return; }
             
             const updatedData = {};
             const inputs = document.querySelectorAll('.edit-dinamico-input');
@@ -968,6 +1005,7 @@
             const colecao = document.getElementById('edit-colecao').value;
             const docId = document.getElementById('edit-doc-id').value;
 
+            try { exigirPermissao(colecao); } catch (err) { alert(err.message); return; }
             if (!confirm('Tem certeza que deseja excluir este registro?')) return;
 
             try {
@@ -1067,6 +1105,7 @@
             let novoObj = {};
 
             try {
+                exigirPermissao(tipo === 'usuario' ? 'usuarios' : tipo === 'orgao' ? 'orgaos' : tipo === 'fornecedor' ? 'fornecedores' : tipo === 'evento' ? 'eventos' : tipo === 'local' ? 'locais' : 'demandas');
                 if (tipo === 'orgao') {
                     const sigla = document.getElementById('univ-c1').value.toUpperCase().trim();
                     novoObj = {
@@ -1111,6 +1150,7 @@
                 } else if (tipo === 'usuario') {
                     const email = document.getElementById('univ-c2').value.toLowerCase().trim();
                     const password = document.getElementById('univ-pass').value;
+                    exigirEmailInstitucional(email);
                     const cbs = document.querySelectorAll('.user-modulo-cb:checked');
                     const modulosPermitidos = Array.from(cbs).map(cb => cb.value);
 
@@ -1228,7 +1268,7 @@
         function exportarUsuariosCSV() {
             let csv = "Nome;Email;Orgao;Perfil\n";
             window.dbData.usuarios.forEach(u => {
-                csv += `${u.nome || ''};${u.email || u.id};${u.subgrupoId || u.orgao || ''};${u.perfil || ''}\n`;
+                csv += `${u.nome || ''};${escapeHtml(u.email || u.id)};${escapeHtml(u.subgrupoId || u.orgao || '')};${u.perfil || ''}\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
@@ -1249,27 +1289,18 @@
 
         function renderCharts() {
             const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
-            if (ctx1) {
-                new Chart(ctx1, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Infraestrutura', 'Sistemas Web', 'Transformação Digital', 'Capacitação'],
-                        datasets: [{ data: [15, 22, 9, 6], backgroundColor: '#1e3a8a' }]
-                    },
-                    options: { plugins: { legend: { display: false } } }
-                });
-            }
-
             const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
-            if (ctx2) {
-                new Chart(ctx2, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Pendentes', 'Em Andamento', 'Concluídos'],
-                        datasets: [{ data: [4, 18, 30], backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'] }]
-                    }
-                });
-            }
+            if (!ctx1 || !ctx2) return;
+            const categorias = {};
+            window.dbData.demandas.forEach(d => { const c = d.categoria || 'Sem categoria'; categorias[c] = (categorias[c] || 0) + 1; });
+            const catLabels = Object.keys(categorias).sort((a,b) => categorias[b]-categorias[a]).slice(0,8);
+            const catValues = catLabels.map(c => categorias[c]);
+            const statusMap = { 'Pendente': 0, 'Em Andamento': 0, 'Concluído': 0, 'Cancelado': 0 };
+            window.dbData.demandas.forEach(d => { const st = d.status || 'Pendente'; statusMap[st] = (statusMap[st] || 0) + 1; });
+            if (chartCategoriasInstance) chartCategoriasInstance.destroy();
+            if (chartStatusInstance) chartStatusInstance.destroy();
+            chartCategoriasInstance = new Chart(ctx1, { type:'bar', data:{ labels:catLabels.length ? catLabels : ['Sem dados'], datasets:[{label:'Demandas',data:catLabels.length ? catValues : [0],backgroundColor:'#1e3a8a'}] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}} });
+            chartStatusInstance = new Chart(ctx2, { type:'doughnut', data:{labels:Object.keys(statusMap),datasets:[{data:Object.values(statusMap),backgroundColor:['#f59e0b','#3b82f6','#10b981','#ef4444']}]}, options:{responsive:true,maintainAspectRatio:false} });
         }
     </script>
 </body>
