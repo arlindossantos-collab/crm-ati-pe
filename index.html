@@ -192,7 +192,7 @@
     </form>
 
     <div class="footer-version">
-      Versão <span id="app-version">1.0.5</span>
+      Versão <span id="app-version">1.0.6</span>
     </div>
   </div>
 
@@ -259,7 +259,8 @@
 
         localStorage.setItem('userEmail', user.email);
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          // CORREÇÃO GITHUB PAGES: Aponta para o arquivo .html real do painel
+          window.location.href = 'dashboard.html'; // Altere para 'painel.html' ou 'main.html' caso seu arquivo tenha outro nome no repositório
         }, 1000);
 
       } catch (error) {
