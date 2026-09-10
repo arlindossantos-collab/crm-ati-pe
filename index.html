@@ -80,7 +80,7 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
             </form>
             
-            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 16.4.0 · ATI-PE</p>
+            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 16.5.0 · ATI-PE</p>
         </div>
     </div>
 
@@ -95,7 +95,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v16.4 STABLE</span>
+                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v16.5 STABLE</span>
                         </div>
                         <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                     </div>
@@ -118,7 +118,7 @@
             <!-- Status da Sessão -->
             <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
                 <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Autenticado</span></span>
-                <span class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold">Cloud Firestore Sync Ativo</span>
+                <span class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold">Base Unificada Firestore Sync</span>
             </div>
 
             <!-- Navegação por Abas -->
@@ -394,7 +394,7 @@
         </div>
 
         <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v16.4 STABLE</span>
+            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v16.5 STABLE</span>
         </footer>
     </div>
 
@@ -437,7 +437,7 @@
                         const data = docSnap.data();
                         
                         let modulosLimpos = MODULOS_TODOS;
-                        if (Array.isArray(data.modulosPermitidos)) {
+                        if (Array.isArray(data.modulosPermitidos) && data.modulosPermitidos.length > 0) {
                             modulosLimpos = data.modulosPermitidos.map(m => String(m).replace(/["']/g, '').trim());
                         }
 
@@ -446,10 +446,11 @@
                             modulosPermitidos: modulosLimpos
                         };
                     } else {
+                        // Usuário recém-criado ou sem documento no Firestore recebe acesso completo por padrão
                         window.currentUser = {
                             nome: user.email.split('@')[0],
                             email: user.email,
-                            perfil: 'admin',
+                            perfil: 'comum',
                             modulosPermitidos: MODULOS_TODOS
                         };
                     }
@@ -605,7 +606,7 @@
                     window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     renderizarTudo();
                 }, err => {
-                    console.warn(`Snapshot em ${col} falhou`, err);
+                    console.error(`Erro ao carregar coleção ${col}:`, err);
                 });
             });
         }
@@ -694,18 +695,7 @@
             const filtro = document.getElementById('filtro-eventos')?.value || 'todos';
             const agora = new Date().toISOString();
 
-            let lista = window.dbData.eventos.filter(e => {
-                if (!e.visibilidade || e.visibilidade === 'Aberto ao Público') return true;
-                if (!window.currentUser) return false;
-                
-                const userOrg = (window.currentUser.subgrupoId || window.currentUser.orgao || '').toUpperCase();
-                const userEmail = (window.currentUser.email || '').toLowerCase();
-                const grupoAlvo = (e.grupoDestinatario || e.visibilidade || '').toUpperCase();
-                
-                if (window.currentUser.perfil === 'admin') return true;
-                if (grupoAlvo.includes(userOrg) || grupoAlvo.includes(userEmail)) return true;
-                return false;
-            });
+            let lista = window.dbData.eventos;
 
             if (filtro === 'futuros') lista = lista.filter(e => (e.dataInicio || e.data) >= agora);
             if (filtro === 'passados') lista = lista.filter(e => (e.dataInicio || e.data) < agora);
@@ -738,7 +728,7 @@
                         <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>
                     </div>
                 </div>`;
-            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento localizado com este filtro ou você não possui permissão de grupo.</p>';
+            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento localizado com este filtro.</p>';
         }
 
         function renderLocais() {
@@ -960,7 +950,6 @@
                 if (fieldName) updatedData[fieldName] = input.value;
             });
 
-            // Se for usuário e tiver a seleção de módulos
             const cbs = document.querySelectorAll('.edit-modulo-cb');
             if (cbs.length > 0) {
                 updatedData.modulosPermitidos = Array.from(cbs).filter(cb => cb.checked).map(cb => cb.value);
@@ -1088,10 +1077,6 @@
                         email: document.getElementById('univ-c5').value.trim()
                     };
                     await db.collection('orgaos').doc(sigla).set(novoObj);
-                    
-                    const idx = window.dbData.orgaos.findIndex(o => o.id === sigla || o.sigla === sigla);
-                    if (idx >= 0) window.dbData.orgaos[idx] = { id: sigla, ...novoObj };
-                    else window.dbData.orgaos.push({ id: sigla, ...novoObj });
 
                 } else if (tipo === 'fornecedor') {
                     novoObj = {
@@ -1101,8 +1086,7 @@
                         responsavel: document.getElementById('univ-c4').value,
                         numeroContrato: document.getElementById('univ-c5').value
                     };
-                    const docRef = await db.collection('fornecedores').add(novoObj);
-                    window.dbData.fornecedores.push({ id: docRef.id, ...novoObj });
+                    await db.collection('fornecedores').add(novoObj);
 
                 } else if (tipo === 'evento') {
                     novoObj = {
@@ -1114,8 +1098,7 @@
                         descricao: document.getElementById('univ-c6').value,
                         visibilidade: 'Aberto ao Público'
                     };
-                    const docRef = await db.collection('eventos').add(novoObj);
-                    window.dbData.eventos.push({ id: docRef.id, ...novoObj });
+                    await db.collection('eventos').add(novoObj);
 
                 } else if (tipo === 'local') {
                     novoObj = {
@@ -1123,8 +1106,7 @@
                         capacidade: document.getElementById('univ-c2').value,
                         natureza: document.getElementById('univ-c3').value
                     };
-                    const docRef = await db.collection('locais').add(novoObj);
-                    window.dbData.locais.push({ id: docRef.id, ...novoObj });
+                    await db.collection('locais').add(novoObj);
 
                 } else if (tipo === 'usuario') {
                     const email = document.getElementById('univ-c2').value.toLowerCase().trim();
@@ -1132,7 +1114,6 @@
                     const cbs = document.querySelectorAll('.user-modulo-cb:checked');
                     const modulosPermitidos = Array.from(cbs).map(cb => cb.value);
 
-                    // Cria conta de autenticação no Firebase
                     try {
                         const tempApp = firebase.initializeApp(firebaseConfig, 'SecondaryApp');
                         await tempApp.auth().createUserWithEmailAndPassword(email, password);
@@ -1151,7 +1132,6 @@
                         modulosPermitidos
                     };
                     await db.collection('usuarios').doc(email).set(novoObj);
-                    window.dbData.usuarios.push({ id: email, ...novoObj });
 
                 } else if (tipo === 'demanda') {
                     novoObj = {
@@ -1164,11 +1144,9 @@
                             { data: new Date().toISOString(), status: 'Pendente', descricao: document.getElementById('univ-c4').value || 'Abertura de demanda.' }
                         ]
                     };
-                    const docRef = await db.collection('demandas').add(novoObj);
-                    window.dbData.demandas.push({ id: docRef.id, ...novoObj });
+                    await db.collection('demandas').add(novoObj);
                 }
 
-                renderizarTudo();
                 alert('Cadastro realizado e sincronizado com sucesso!');
                 fecharModal('modal-form-universal');
             } catch (err) {
