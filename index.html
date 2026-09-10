@@ -80,7 +80,7 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
             </form>
             
-            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 1.1.0 · ATI-PE</p>
+            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 16.1.1 · ATI-PE</p>
         </div>
     </div>
 
@@ -144,6 +144,11 @@
                     </button>
                     <button id="btn-tab-usuarios" onclick="mudarAba('usuarios')" class="px-4 py-2 rounded-lg transition tab-inactive">
                         <i class="fa-solid fa-users-gear mr-1.5"></i> Usuários
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportarUsuariosCSV()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-csv"></i> Exportar Dados
                     </button>
                 </div>
             </div>
@@ -214,9 +219,16 @@
             <div id="aba-eventos" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <h3 class="text-base font-bold text-slate-800">Agenda Institucional e Eventos Exclusivos</h3>
-                    <button onclick="abrirModalForm('evento')" id="btn-novo-evento" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-calendar-plus"></i> Criar Evento
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <select id="filtro-eventos" onchange="renderEventos()" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                            <option value="todos">Todos os Eventos Permitidos</option>
+                            <option value="futuros" selected>Apenas Próximos / Futuros</option>
+                            <option value="passados">Apenas Realizados / Passados</option>
+                        </select>
+                        <button onclick="abrirModalForm('evento')" id="btn-novo-evento" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-calendar-plus"></i> Criar Evento
+                        </button>
+                    </div>
                 </div>
                 <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
             </div>
@@ -234,11 +246,16 @@
 
             <!-- ABA ÓRGÃOS -->
             <div id="aba-orgaos" class="hidden space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos e Secretarias</h3>
-                    <button onclick="abrirModalForm('orgao')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria
-                    </button>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos, Secretarias e Entidades</h3>
+                    <div class="flex gap-2">
+                        <button onclick="abrirModalImportacao('orgaos')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
+                        </button>
+                        <button onclick="abrirModalForm('orgao')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria
+                        </button>
+                    </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[700px]">
@@ -259,22 +276,35 @@
 
             <!-- ABA FORNECEDORES -->
             <div id="aba-fornecedores" class="hidden space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC</h3>
-                    <button onclick="abrirModalForm('fornecedor')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-plus"></i> Novo Fornecedor
-                    </button>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC Detalhados</h3>
+                    <div class="flex gap-2">
+                        <button onclick="abrirModalImportacao('fornecedores')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
+                        </button>
+                        <button onclick="abrirModalForm('fornecedor')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-plus"></i> Novo Fornecedor
+                        </button>
+                    </div>
                 </div>
                 <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
             </div>
 
             <!-- ABA USUÁRIOS -->
             <div id="aba-usuarios" class="hidden space-y-4">
-                <div class="flex justify-between items-center">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários</h3>
-                    <button onclick="abrirModalForm('usuario')" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-user-plus"></i> Novo Usuário
-                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="abrirModalImportacao('usuarios')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
+                        </button>
+                        <button onclick="exportarUsuariosCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-file-export"></i> Exportar Usuários (.csv)
+                        </button>
+                        <button onclick="abrirModalForm('usuario')" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-user-plus"></i> Novo Usuário
+                        </button>
+                    </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[700px]">
@@ -294,6 +324,35 @@
 
         </main>
 
+        <!-- MODAL UNIVERSAL DETALHAR & EDITAR COMPLETO -->
+        <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-[110]">
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4 border-b pb-3">
+                    <h3 id="detalhe-titulo-modal" class="text-base font-bold text-slate-900">Detalhamento Completo</h3>
+                    <button onclick="fecharModal('modal-detalhes')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div id="detalhe-conteudo" class="space-y-3 text-sm text-slate-700 mb-4"></div>
+                
+                <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl border-slate-300">
+                    <div class="flex justify-between items-center mb-3">
+                        <p class="text-xs font-bold text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square text-blue-800"></i> Edição Completa e Gerenciamento do Registro</p>
+                        <button type="button" onclick="excluirRegistroUniversal()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-bold transition flex items-center gap-1 shadow-sm">
+                            <i class="fa-solid fa-trash-can"></i> Excluir Registro
+                        </button>
+                    </div>
+                    <form id="form-edicao-admin" onsubmit="salvarEdicaoUniversal(event)" class="space-y-2.5 text-xs">
+                        <input type="hidden" id="edit-colecao">
+                        <input type="hidden" id="edit-doc-id">
+                        <div id="edit-campos-dinamicos" class="max-h-60 overflow-y-auto pr-1"></div>
+                        <div class="flex justify-end gap-2 pt-3 border-t">
+                            <button type="button" onclick="fecharModal('modal-detalhes')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Cancelar</button>
+                            <button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded hover:bg-blue-800 transition shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Todas as Alterações</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- MODAL CRIAÇÃO / CADASTRO UNIVERSAL DETALHADO -->
         <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-[110]">
             <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
@@ -306,6 +365,31 @@
                     <div id="form-univ-campos"></div>
                     <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar no Firestore</button>
                 </form>
+            </div>
+        </div>
+
+        <!-- MODAL IMPORTAÇÃO DE PLANILHA / CSV -->
+        <div id="modal-importacao" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-[110]">
+            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                <div class="flex justify-between items-center mb-4 border-b pb-3">
+                    <h3 id="import-titulo-modal" class="text-base font-bold text-slate-900">Importar Dados via CSV / Planilha</h3>
+                    <button onclick="fecharModal('modal-importacao')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div class="space-y-4 text-xs">
+                    <input type="hidden" id="import-colecao-alvo">
+                    <p class="text-slate-600">Selecione um arquivo <strong>.csv</strong> contendo os registros no padrão da tabela para importar automaticamente na base PRGD e sincronizar no Firestore.</p>
+                    <div class="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center bg-slate-50">
+                        <i class="fa-solid fa-file-csv text-3xl text-emerald-600 mb-2"></i>
+                        <input type="file" id="input-file-csv" accept=".csv, .txt" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 p-2.5 rounded text-amber-900">
+                        <p class="font-bold mb-0.5"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Formato Esperado:</p>
+                        <p id="import-instrucoes-formato" class="font-mono text-[11px]"></p>
+                    </div>
+                    <button type="button" onclick="processarArquivoCSV()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Processar e Importar Registros
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -353,7 +437,6 @@
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         
-                        // SANITIZAÇÃO: Remove aspas extras caso estejam no Firestore (ex: ""dashboard"" -> dashboard)
                         let modulosLimpos = MODULOS_TODOS;
                         if (Array.isArray(data.modulosPermitidos)) {
                             modulosLimpos = data.modulosPermitidos.map(m => String(m).replace(/["']/g, '').trim());
@@ -372,7 +455,7 @@
                         };
                     }
 
-                    // REGRA DE SUPER USUÁRIO FORÇADA
+                    // SUPER USUÁRIO FORÇADO PARA O SEU E-MAIL
                     if (userEmail === 'arlindo.santos@ati.pe.gov.br') {
                         window.currentUser.perfil = 'admin';
                         window.currentUser.modulosPermitidos = MODULOS_TODOS;
@@ -504,38 +587,7 @@
             document.getElementById(id).classList.add('hidden');
         }
 
-        function abrirModalForm(tipo) {
-            document.getElementById('form-univ-tipo').value = tipo;
-            const container = document.getElementById('form-univ-campos');
-            document.getElementById('form-univ-titulo').textContent = 'Novo Cadastro: ' + tipo.toUpperCase();
-
-            container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Título / Nome</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>' +
-                '<div><label class="block font-medium text-slate-700 mb-1">Descrição / Detalhes</label><textarea id="univ-c2" rows="3" class="w-full p-2 border rounded"></textarea></div>';
-
-            document.getElementById('modal-form-universal').classList.remove('hidden');
-        }
-
-        async function salvarCadastroUniversal(e) {
-            e.preventDefault();
-            const tipo = document.getElementById('form-univ-tipo').value;
-            const c1 = document.getElementById('univ-c1').value;
-            const c2 = document.getElementById('univ-c2').value;
-
-            try {
-                await db.collection(tipo + 's').add({
-                    nome: c1,
-                    titulo: c1,
-                    descricao: c2,
-                    dataCriacao: new Date().toISOString()
-                });
-                alert('Cadastro salvo com sucesso no Firestore!');
-                fecharModal('modal-form-universal');
-            } catch (err) {
-                alert('Erro ao salvar no Firestore: ' + err.message);
-            }
-        }
-
-        function mudarAba(aba) {
+        function cambiarAba(aba) {
             abaAtual = aba;
             MODULOS_TODOS.forEach(a => {
                 const el = document.getElementById('aba-' + a);
@@ -546,6 +598,8 @@
             if (aba === 'dashboard') renderCharts();
         }
 
+        function mudarAba(aba) { cambiarAba(aba); }
+
         function iniciarSnapshotFirestore() {
             const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
             colecoes.forEach(col => {
@@ -554,6 +608,8 @@
                         window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     }
                     renderizarTudo();
+                }, err => {
+                    console.warn(`Snapshot em ${col} falhou`, err);
                 });
             });
         }
@@ -566,21 +622,50 @@
             renderLocais();
             renderFornecedores();
             renderDashboardKPIs();
+            preencherSelectOrgaos();
+        }
+
+        function preencherSelectOrgaos() {
+            const selects = document.querySelectorAll('.select-orgaos-dinamico');
+            selects.forEach(select => {
+                const valAtual = select.value;
+                select.innerHTML = '<option value="">Selecione o Órgão / Secretaria</option>';
+                window.dbData.orgaos.forEach(o => {
+                    const opt = document.createElement('option');
+                    opt.value = o.sigla || o.id;
+                    opt.textContent = `${o.sigla || o.id} - ${o.nome || ''}`;
+                    select.appendChild(opt);
+                });
+                if (valAtual) select.value = valAtual;
+            });
         }
 
         function renderUsuarios() {
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
             tbody.innerHTML = window.dbData.usuarios.map(u => 
-                '<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-slate-800">' + (u.nome || u.email) + '</td><td class="p-4 text-slate-600">' + (u.email || u.id) + '</td><td class="p-4">' + (u.subgrupoId || u.orgao || 'GERAL') + '</td><td class="p-4 font-bold uppercase text-xs">' + (u.perfil || 'comum') + '</td><td class="p-4 text-center"><span class="text-xs text-emerald-600 font-bold">Ativo</span></td></tr>'
-            ).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum usuário registrado.</td></tr>';
+                `<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('usuarios', '${u.id}')">
+                    <td class="p-4 font-bold text-slate-800">${u.nome || u.email}</td>
+                    <td class="p-4 text-slate-600">${u.email || u.id}</td>
+                    <td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${u.subgrupoId || u.orgao || 'GERAL'}</span></td>
+                    <td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'amber' : 'slate'}-100 text-${u.perfil === 'admin' ? 'amber-900' : 'slate-700'} text-xs font-bold px-2 py-0.5 rounded uppercase">${u.perfil || 'comum'}</span></td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
+                </tr>`
+            ).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
         }
 
         function renderOrgaos() {
             const tbody = document.getElementById('tabela-orgaos');
             if (!tbody) return;
             tbody.innerHTML = window.dbData.orgaos.map(o => 
-                '<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-indigo-900">' + (o.sigla || o.id) + '</td><td class="p-4">' + (o.nome || '-') + '</td><td class="p-4">' + (o.tipoJuridico || '-') + '</td><td class="p-4">' + (o.responsavel || '-') + '</td><td class="p-4">' + (o.email || '-') + '</td><td class="p-4 text-center"><span class="text-xs text-emerald-600 font-bold">Ativo</span></td></tr>'
+                `<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('orgaos', '${o.id}')">
+                    <td class="p-4 font-bold text-indigo-900">${o.sigla || o.id}</td>
+                    <td class="p-4 text-slate-800 font-medium">${o.nome || '-'}</td>
+                    <td class="p-4 text-xs"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">${o.tipoJuridico || o.naturezaJuridica || 'Secretaria'}</span></td>
+                    <td class="p-4 text-xs text-slate-600">${o.responsavel || '-'}</td>
+                    <td class="p-4 text-xs text-slate-600">${o.email || '-'}</td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
+                </tr>`
             ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
         }
 
@@ -588,32 +673,515 @@
             const tbody = document.getElementById('tabela-demandas');
             if (!tbody) return;
             tbody.innerHTML = window.dbData.demandas.map(d => 
-                '<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-blue-900">' + (d.orgao || 'Geral') + '</td><td class="p-4">' + (d.titulo || '-') + '</td><td class="p-4 text-xs">' + (d.categoria || '-') + '</td><td class="p-4 text-xs font-bold">' + (d.prioridade || 'Média') + '</td><td class="p-4">' + (d.status || 'Pendente') + '</td><td class="p-4 text-center"><span class="text-xs text-emerald-600 font-bold">Ativo</span></td></tr>'
+                `<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('demandas', '${d.id}')">
+                    <td class="p-4 font-bold text-blue-900">${d.orgao || 'Geral'}</td>
+                    <td class="p-4 font-medium text-slate-900">${d.titulo || '-'}</td>
+                    <td class="p-4 text-xs text-slate-500">${d.categoria || '-'}</td>
+                    <td class="p-4 text-xs font-bold text-${d.prioridade === 'Alta' ? 'red' : 'amber'}-600">${d.prioridade || 'Média'}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">${d.status || 'Pendente'}</span></td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
+                </tr>`
             ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma demanda registrada.</td></tr>';
         }
 
         function renderEventos() {
             const grid = document.getElementById('grid-eventos');
             if (!grid) return;
-            grid.innerHTML = window.dbData.eventos.map(e => 
-                '<div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="font-bold text-slate-800">' + (e.titulo || '-') + '</h4><p class="text-xs text-slate-500 mt-1">Palestrante: ' + (e.palestrante || '-') + '</p></div>'
-            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento registrado.</p>';
+            const filtro = document.getElementById('filtro-eventos')?.value || 'todos';
+            const agora = new Date().toISOString();
+
+            let lista = window.dbData.eventos.filter(e => {
+                if (!e.visibilidade || e.visibilidade === 'Aberto ao Público') return true;
+                if (!window.currentUser) return false;
+                
+                const userOrg = (window.currentUser.subgrupoId || window.currentUser.orgao || '').toUpperCase();
+                const userEmail = (window.currentUser.email || '').toLowerCase();
+                const grupoAlvo = (e.grupoDestinatario || e.visibilidade || '').toUpperCase();
+                
+                if (window.currentUser.perfil === 'admin') return true;
+                if (grupoAlvo.includes(userOrg) || grupoAlvo.includes(userEmail)) return true;
+                return false;
+            });
+
+            if (filtro === 'futuros') lista = lista.filter(e => (e.dataInicio || e.data) >= agora);
+            if (filtro === 'passados') lista = lista.filter(e => (e.dataInicio || e.data) < agora);
+
+            grid.innerHTML = lista.map(e => {
+                const dtStart = e.dataInicio || e.data;
+                const dtEnd = e.dataFim;
+                const ePassado = dtStart < agora;
+                
+                return `
+                <div onclick="detalharRegistro('eventos', '${e.id}')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between cursor-pointer hover:border-amber-400 transition">
+                    <div>
+                        <div class="flex justify-between items-start mb-2 gap-1">
+                            <span class="bg-${ePassado ? 'slate' : 'amber'}-100 text-${ePassado ? 'slate' : 'amber'}-800 text-[11px] font-bold px-2 py-0.5 rounded">${ePassado ? 'Realizado' : 'Próximo Evento'}</span>
+                            <span class="bg-${e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple'}-100 text-${e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple'}-900 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                                <i class="fa-solid fa-${e.visibilidade === 'Aberto ao Público' ? 'globe' : 'lock'}"></i> ${e.visibilidade || 'Público'}
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mt-1">${e.titulo || '-'}</h4>
+                        <p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Palestrante: ${e.palestrante || 'Não informado'}</p>
+                        <div class="bg-slate-50 p-2.5 rounded-lg border my-2 text-[11px] space-y-1">
+                            <p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> <strong>Início:</strong> ${dtStart ? new Date(dtStart).toLocaleString('pt-BR') : '-'}</p>
+                            ${dtEnd ? `<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-red-500 mr-1"></i> <strong>Fim:</strong> ${new Date(dtEnd).toLocaleString('pt-BR')}</p>` : ''}
+                            <p class="text-slate-600"><i class="fa-solid fa-certificate text-blue-600 mr-1"></i> <strong>Certificado:</strong> <span class="font-bold text-slate-800">${e.geracaoCertificado || 'Não'}</span></p>
+                        </div>
+                        <p class="text-xs text-slate-500 line-clamp-2">${e.descricao || 'Sem descrição.'}</p>
+                    </div>
+                    <div class="border-t pt-3 mt-3 flex justify-between items-center">
+                        <span class="text-xs text-indigo-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>${e.local || 'Local não informado'}</span>
+                        <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>
+                    </div>
+                </div>`;
+            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento localizado com este filtro ou você não possui permissão de grupo.</p>';
         }
 
         function renderLocais() {
             const grid = document.getElementById('grid-locais');
             if (!grid) return;
             grid.innerHTML = window.dbData.locais.map(l => 
-                '<div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="font-bold text-slate-800">' + (l.nome || l.id) + '</h4><p class="text-xs text-slate-500 mt-1">Capacidade: ' + (l.capacidade || '0') + '</p></div>'
-            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local registrado.</p>';
+                `<div onclick="detalharRegistro('locais', '${l.id}')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-purple-500 transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">${l.tipoEspaco || 'Auditório'}</span>
+                            <span class="text-xs font-bold ${l.natureza === 'Privado' ? 'text-amber-600' : 'text-emerald-600'}">${l.natureza || 'Público'}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mt-2">${l.nome || l.id}</h4>
+                        <p class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>${l.capacidade || '0'} sentadas</strong></p>
+                        <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-money-bill-wave mr-1"></i> Aluguel: <strong>${l.valorAluguel ? 'R$ ' + l.valorAluguel : 'Gratuito / Público'}</strong></p>
+                    </div>
+                    <div class="mt-3 border-t pt-2 flex justify-between items-center text-xs text-slate-500">
+                        <span><i class="fa-solid fa-snowflake mr-1"></i>${l.climatizacao || 'Sim'}</span>
+                        <span><i class="fa-solid fa-square-parking mr-1"></i>${l.estacionamento || 'Sim'}</span>
+                        <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>
+                    </div>
+                </div>`
+            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local de eventos cadastrado.</p>';
         }
 
         function renderFornecedores() {
             const grid = document.getElementById('grid-fornecedores');
             if (!grid) return;
             grid.innerHTML = window.dbData.fornecedores.map(f => 
-                '<div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="font-bold text-slate-800">' + (f.nome || '-') + '</h4><p class="text-xs text-slate-500 mt-1">CNPJ: ' + (f.cnpj || '-') + '</p></div>'
-            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor registrado.</p>';
+                `<div onclick="detalharRegistro('fornecedores', '${f.id}')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-emerald-500 transition">
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">${f.categoria || 'Geral'}</span>
+                    <h4 class="font-bold text-slate-800 mt-2">${f.nome || f.razaoSocial || '-'}</h4>
+                    <p class="text-xs text-slate-500"><i class="fa-solid fa-id-card mr-1"></i> CNPJ: ${f.cnpj || '-'}</p>
+                    <p class="text-xs text-slate-500"><i class="fa-solid fa-file-contract mr-1"></i> Contrato: ${f.numeroContrato || '-'}</p>
+                    <p class="text-xs text-slate-500"><i class="fa-solid fa-user-tie mr-1"></i> Resp: ${f.responsavel || '-'}</p>
+                    <div class="mt-3 border-t pt-2 text-right"><span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span></div>
+                </div>`
+            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor cadastrado.</p>';
+        }
+
+        function renderDashboardKPIs() {
+            document.getElementById('dash-tot-demandas').textContent = window.dbData.demandas.length;
+            document.getElementById('dash-tot-eventos').textContent = window.dbData.eventos.length;
+            document.getElementById('dash-tot-locais').textContent = window.dbData.locais.length;
+            document.getElementById('dash-tot-orgaos').textContent = window.dbData.orgaos.length;
+            document.getElementById('dash-tot-fornecedores').textContent = window.dbData.fornecedores.length;
+        }
+
+        window.detalharRegistro = function(colecao, docId) {
+            const item = window.dbData[colecao].find(i => i.id === docId);
+            if (!item) return;
+
+            document.getElementById('detalhe-titulo-modal').textContent = `Detalhamento (${colecao.toUpperCase()})`;
+            
+            let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-4">';
+            for (let k in item) {
+                if (k !== 'senhaHash' && k !== 'senha' && k !== 'historicoStatus') {
+                    htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${k}</span><span class="font-semibold text-slate-800">${item[k]}</span></div>`;
+                }
+            }
+            htmlContent += '</div>';
+
+            if (colecao === 'eventos') {
+                const isUserAutorizado = !!window.currentUser;
+                
+                htmlContent += `
+                <div class="border-t pt-4 mt-2 mb-4 bg-amber-50/60 p-4 rounded-xl border-amber-200">
+                    <h4 class="font-bold text-amber-900 text-xs sm:text-sm mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-id-badge text-amber-700"></i> Inscrição & Credenciamento do Evento
+                    </h4>
+                    ${isUserAutorizado ? `
+                        <p class="text-xs text-slate-700 mb-3 font-medium">Você é um usuário autenticado na plataforma PRGD.</p>
+                        ${item.linkInscricao ? `<a href="${item.linkInscricao}" target="_blank" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-sm"><i class="fa-solid fa-pen-to-square"></i> Realizar Inscrição Agora</a>` : `<p class="text-xs font-bold text-slate-500">Inscrição Direta via Agência ATI / Formulário em Breve</p>`}
+                    ` : `
+                        <div class="p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-xs font-semibold flex items-center gap-2">
+                            <i class="fa-solid fa-lock"></i> O campo de inscrição é restrito exclusivamente para pessoas e servidores autorizados.
+                        </div>
+                    `}
+                </div>`;
+            }
+
+            if (colecao === 'demandas') {
+                if (!item.historicoStatus) {
+                    item.historicoStatus = [
+                        { data: new Date().toISOString(), status: item.status || 'Pendente', descricao: 'Abertura da demanda registrada na plataforma PRGD.' }
+                    ];
+                }
+
+                htmlContent += `
+                <div class="border-t pt-4 mt-2 mb-4">
+                    <h4 class="font-bold text-slate-800 text-xs sm:text-sm mb-3 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock-rotate-left text-blue-800"></i> Histórico & Acompanhamento de Status
+                    </h4>
+                    <div class="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1">
+                        ${item.historicoStatus.map(h => `
+                            <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 text-xs">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">${h.status}</span>
+                                    <span class="text-slate-400 text-[10px] font-semibold"><i class="fa-regular fa-calendar-alt mr-1"></i>${new Date(h.data).toLocaleString('pt-BR')}</span>
+                                </div>
+                                <p class="text-slate-700 font-medium">${h.descricao || 'Sem observações.'}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2 text-xs">
+                        <p class="font-bold text-slate-800"><i class="fa-solid fa-plus-circle text-emerald-600 mr-1"></i> Registrar Novo Acompanhamento</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-slate-600 font-semibold mb-1">Novo Status</label>
+                                <select id="demanda-novo-status" class="w-full p-2 border rounded bg-white font-medium">
+                                    <option value="Em Andamento">Em Andamento</option>
+                                    <option value="Aguardando Validação">Aguardando Validação</option>
+                                    <option value="Em Análise Técnica">Em Análise Técnica</option>
+                                    <option value="Concluído">Concluído</option>
+                                    <option value="Pendente">Pendente</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-600 font-semibold mb-1">Detalhamento / Evento de Acompanhamento</label>
+                                <input type="text" id="demanda-nova-obs" placeholder="Ex: Reunião realizada com a equipe técnica..." class="w-full p-2 border rounded bg-white">
+                            </div>
+                        </div>
+                        <button type="button" onclick="adicionarAcompanhamentoDemanda('${docId}')" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded transition shadow-sm flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-check-double"></i> Registrar e Salvar no Firestore
+                        </button>
+                    </div>
+                </div>`;
+            }
+
+            document.getElementById('detalhe-conteudo').innerHTML = htmlContent;
+
+            document.getElementById('edit-colecao').value = colecao;
+            document.getElementById('edit-doc-id').value = docId;
+
+            let editFieldsHtml = '';
+            for (let k in item) {
+                if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus') continue;
+                const fieldVal = item[k] !== undefined ? item[k] : '';
+                const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'escopoServico';
+                
+                editFieldsHtml += `<div class="mb-2">
+                    <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k}</label>`;
+                
+                if (isLongText) {
+                    editFieldsHtml += `<textarea data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">${fieldVal}</textarea>`;
+                } else {
+                    editFieldsHtml += `<input type="text" data-field="${k}" value="${fieldVal}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">`;
+                }
+                editFieldsHtml += `</div>`;
+            }
+
+            document.getElementById('edit-campos-dinamicos').innerHTML = editFieldsHtml;
+            document.getElementById('detalhe-area-admin').classList.remove('hidden');
+            document.getElementById('modal-detalhes').classList.remove('hidden');
+        };
+
+        window.adicionarAcompanhamentoDemanda = async function(docId) {
+            const demanda = window.dbData.demandas.find(d => d.id === docId);
+            if (!demanda) return;
+
+            const novoStatus = document.getElementById('demanda-novo-status').value;
+            const novaObs = document.getElementById('demanda-nova-obs').value.trim();
+
+            if (!novaObs) {
+                alert('Informe a descrição do acompanhamento.');
+                return;
+            }
+
+            if (!demanda.historicoStatus) demanda.historicoStatus = [];
+            
+            const novoAcompanhamento = {
+                data: new Date().toISOString(),
+                status: novoStatus,
+                descricao: novaObs
+            };
+
+            demanda.status = novoStatus;
+            demanda.historicoStatus.unshift(novoAcompanhamento);
+
+            try {
+                await db.collection('demandas').doc(docId).update({
+                    status: novoStatus,
+                    historicoStatus: demanda.historicoStatus
+                });
+                alert('Acompanhamento registrado com sucesso!');
+                detalharRegistro('demandas', docId);
+            } catch (err) {
+                alert('Erro ao salvar acompanhamento no Firestore: ' + err.message);
+            }
+        };
+
+        window.salvarEdicaoUniversal = async function(e) {
+            e.preventDefault();
+            const colecao = document.getElementById('edit-colecao').value;
+            const docId = document.getElementById('edit-doc-id').value;
+            
+            const updatedData = {};
+            const inputs = document.querySelectorAll('.edit-dinamico-input');
+            inputs.forEach(input => {
+                const fieldName = input.getAttribute('data-field');
+                if (fieldName) updatedData[fieldName] = input.value;
+            });
+
+            try {
+                await db.collection(colecao).doc(docId).update(updatedData);
+                alert('Registro atualizado com sucesso!');
+                fecharModal('modal-detalhes');
+            } catch (err) {
+                alert('Erro ao atualizar registro no Firestore.');
+            }
+        };
+
+        window.excluirRegistroUniversal = async function() {
+            const colecao = document.getElementById('edit-colecao').value;
+            const docId = document.getElementById('edit-doc-id').value;
+
+            if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+
+            try {
+                await db.collection(colecao).doc(docId).delete();
+                alert('Registro excluído com sucesso!');
+                fecharModal('modal-detalhes');
+            } catch (err) {
+                alert('Erro ao excluir registro.');
+            }
+        };
+
+        function abrirModalForm(tipo) {
+            document.getElementById('form-univ-tipo').value = tipo;
+            const container = document.getElementById('form-univ-campos');
+            document.getElementById('form-univ-titulo').textContent = `Novo Cadastro: ${tipo.toUpperCase()}`;
+
+            if (tipo === 'orgao') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Sigla do Órgão</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded uppercase"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome Completo do Órgão / Secretaria</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Natureza Jurídica / Tipo de Administração</label>
+                        <select id="univ-c3" class="w-full p-2 border rounded bg-white font-semibold text-slate-800">
+                            <option value="Administração Direta (Secretaria)">Administração Direta (Secretaria)</option>
+                            <option value="Autarquia">Autarquia</option>
+                            <option value="Empresa Pública">Empresa Pública</option>
+                            <option value="Fundação Pública">Fundação Pública</option>
+                            <option value="Sociedade de Economia Mista">Sociedade de Economia Mista</option>
+                            <option value="Órgão Constitucional Independente">Órgão Constitucional Independente</option>
+                        </select>
+                    </div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Responsável / Gestor de TIC</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">E-mail Institucional de Contato</label><input type="email" id="univ-c5" class="w-full p-2 border rounded"></div>
+                `;
+            } else if (tipo === 'fornecedor') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Razão Social / Nome Fantasia</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">CNPJ</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Categoria Principal do Serviço TIC</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome do Responsável</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Número do Contrato</label><input type="text" id="univ-c5" class="w-full p-2 border rounded"></div>
+                `;
+            } else if (tipo === 'evento') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Título do Evento</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Palestrante</label><input type="text" id="univ-c2" class="w-full p-2 border rounded"></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block font-medium text-slate-700 mb-1">Data/Hora Início</label><input type="datetime-local" id="univ-c3" required class="w-full p-2 border rounded"></div>
+                        <div><label class="block font-medium text-slate-700 mb-1">Data/Hora Fim</label><input type="datetime-local" id="univ-c4" required class="w-full p-2 border rounded"></div>
+                    </div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Local / Espaço</label><input type="text" id="univ-c5" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Descrição</label><textarea id="univ-c6" rows="2" class="w-full p-2 border rounded"></textarea></div>
+                `;
+            } else if (tipo === 'local') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome do Espaço</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Capacidade</label><input type="number" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Natureza</label><select id="univ-c3" class="w-full p-2 border rounded"><option value="Público">Público</option><option value="Privado">Privado</option></select></div>
+                `;
+            } else if (tipo === 'usuario') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label><input type="email" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Órgão / Secretaria</label><select id="univ-c3" required class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Perfil</label><select id="univ-c4" class="w-full p-2 border rounded"><option value="comum">Comum</option><option value="admin">Admin</option></select></div>
+                `;
+                preencherSelectOrgaos();
+            } else if (tipo === 'demanda') {
+                container.innerHTML = `
+                    <div><label class="block font-medium text-slate-700 mb-1">Título da Demanda</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Órgão Solicitante</label><select id="univ-c2" required class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Categoria</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Descrição</label><textarea id="univ-c4" rows="3" class="w-full p-2 border rounded"></textarea></div>
+                `;
+                preencherSelectOrgaos();
+            }
+
+            document.getElementById('modal-form-universal').classList.remove('hidden');
+        }
+
+        async function salvarCadastroUniversal(e) {
+            e.preventDefault();
+            const tipo = document.getElementById('form-univ-tipo').value;
+            let novoObj = {};
+
+            if (tipo === 'orgao') {
+                const sigla = document.getElementById('univ-c1').value.toUpperCase();
+                novoObj = {
+                    sigla, nome: document.getElementById('univ-c2').value,
+                    tipoJuridico: document.getElementById('univ-c3').value,
+                    responsavel: document.getElementById('univ-c4').value,
+                    email: document.getElementById('univ-c5').value
+                };
+                await db.collection('orgaos').doc(sigla).set(novoObj);
+            } else if (tipo === 'fornecedor') {
+                novoObj = {
+                    nome: document.getElementById('univ-c1').value,
+                    cnpj: document.getElementById('univ-c2').value,
+                    categoria: document.getElementById('univ-c3').value,
+                    responsavel: document.getElementById('univ-c4').value,
+                    numeroContrato: document.getElementById('univ-c5').value
+                };
+                await db.collection('fornecedores').add(novoObj);
+            } else if (tipo === 'evento') {
+                novoObj = {
+                    titulo: document.getElementById('univ-c1').value,
+                    palestrante: document.getElementById('univ-c2').value,
+                    dataInicio: document.getElementById('univ-c3').value,
+                    dataFim: document.getElementById('univ-c4').value,
+                    local: document.getElementById('univ-c5').value,
+                    descricao: document.getElementById('univ-c6').value,
+                    visibilidade: 'Aberto ao Público'
+                };
+                await db.collection('eventos').add(novoObj);
+            } else if (tipo === 'local') {
+                novoObj = {
+                    nome: document.getElementById('univ-c1').value,
+                    capacidade: document.getElementById('univ-c2').value,
+                    natureza: document.getElementById('univ-c3').value
+                };
+                await db.collection('locais').add(novoObj);
+            } else if (tipo === 'usuario') {
+                const email = document.getElementById('univ-c2').value.toLowerCase();
+                novoObj = {
+                    nome: document.getElementById('univ-c1').value,
+                    email,
+                    subgrupoId: document.getElementById('univ-c3').value,
+                    perfil: document.getElementById('univ-c4').value
+                };
+                await db.collection('usuarios').doc(email).set(novoObj);
+            } else if (tipo === 'demanda') {
+                novoObj = {
+                    titulo: document.getElementById('univ-c1').value,
+                    orgao: document.getElementById('univ-c2').value,
+                    categoria: document.getElementById('univ-c3').value,
+                    descricao: document.getElementById('univ-c4').value,
+                    prioridade: 'Alta', status: 'Pendente',
+                    historicoStatus: [
+                        { data: new Date().toISOString(), status: 'Pendente', descricao: document.getElementById('univ-c4').value || 'Abertura de demanda.' }
+                    ]
+                };
+                await db.collection('demandas').add(novoObj);
+            }
+
+            alert('Cadastro realizado com sucesso!');
+            fecharModal('modal-form-universal');
+        }
+
+        function abrirModalImportacao(colecao) {
+            document.getElementById('import-colecao-alvo').value = colecao;
+            document.getElementById('import-titulo-modal').textContent = `Importar Planilha / CSV: ${colecao.toUpperCase()}`;
+            
+            let formatoText = '';
+            if (colecao === 'orgaos') formatoText = 'SIGLA;NOME_DO_ORGAO;TIPO_JURIDICO;RESPONSAVEL;EMAIL';
+            if (colecao === 'fornecedores') formatoText = 'RAZAO_SOCIAL;CNPJ;CATEGORIA;RESPONSAVEL;CONTRATO';
+            if (colecao === 'usuarios') formatoText = 'NOME;EMAIL;ORGAO;PERFIL';
+            
+            document.getElementById('import-instrucoes-formato').textContent = formatoText;
+            document.getElementById('modal-importacao').classList.remove('hidden');
+        }
+
+        function processarArquivoCSV() {
+            const colecao = document.getElementById('import-colecao-alvo').value;
+            const fileInput = document.getElementById('input-file-csv');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Selecione um arquivo CSV para importar.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function(e) {
+                const lines = e.target.result.split(/\r\n|\n/);
+                let importCount = 0;
+
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    const cols = line.split(';').map(c => c.trim().replace(/^"/, '').replace(/"$/, ''));
+                    
+                    if (colecao === 'orgaos' && cols.length >= 2) {
+                        const sigla = cols[0].toUpperCase();
+                        await db.collection('orgaos').doc(sigla).set({
+                            sigla, nome: cols[1] || '',
+                            tipoJuridico: cols[2] || 'Secretaria',
+                            responsavel: cols[3] || '',
+                            email: cols[4] || ''
+                        });
+                        importCount++;
+                    } else if (colecao === 'fornecedores' && cols.length >= 2) {
+                        await db.collection('fornecedores').add({
+                            nome: cols[0] || '', cnpj: cols[1] || '',
+                            categoria: cols[2] || 'Serviços TIC',
+                            responsavel: cols[3] || '',
+                            numeroContrato: cols[4] || ''
+                        });
+                        importCount++;
+                    } else if (colecao === 'usuarios' && cols.length >= 2) {
+                        const email = cols[1].toLowerCase();
+                        await db.collection('usuarios').doc(email).set({
+                            nome: cols[0] || email, email,
+                            subgrupoId: cols[2] || 'ATI',
+                            perfil: (cols[3] || 'comum').toLowerCase()
+                        });
+                        importCount++;
+                    }
+                }
+
+                alert(`Importação concluída! ${importCount} registros salvos.`);
+                fecharModal('modal-importacao');
+            };
+
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function exportarUsuariosCSV() {
+            let csv = "Nome;Email;Orgao;Perfil\n";
+            window.dbData.usuarios.forEach(u => {
+                csv += `${u.nome || ''};${u.email || u.id};${u.subgrupoId || u.orgao || ''};${u.perfil || ''}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "usuarios_prgd.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function renderDashboardKPIs() {
