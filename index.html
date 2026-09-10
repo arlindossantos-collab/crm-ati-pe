@@ -80,7 +80,7 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
             </form>
             
-            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 17.0 · ATI-PE</p>
+            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 18.0 · ATI-PE</p>
         </div>
     </div>
 
@@ -95,7 +95,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v17.0</span>
+                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.0</span>
                         </div>
                         <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                     </div>
@@ -394,7 +394,7 @@
         </div>
 
         <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v16.5 STABLE</span>
+            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.0 SECURE</span>
         </footer>
     </div>
 
@@ -403,6 +403,7 @@
         // dashboard dinâmico e tratamento mais seguro de conteúdo vindo do Firestore.
         const DOMINIO_EMAIL_RE = /^[a-z0-9._%+\-]+@[a-z0-9.-]+\.pe\.gov\.br$/i;
         const ADMIN_PERFIL = 'admin';
+        const CAMPOS_SISTEMA = ['uid','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid'];
         let snapshotUnsubscribers = [];
         let chartCategoriasInstance = null;
         let chartStatusInstance = null;
@@ -426,6 +427,12 @@
             return !!u && (u.perfil === ADMIN_PERFIL || (Array.isArray(u.modulosPermitidos) && u.modulosPermitidos.includes(modulo)));
         }
         function exigirPermissao(modulo) { if (!usuarioPode(modulo)) throw new Error('Você não possui permissão para esta operação.'); }
+        async function registrarAuditoria(acao, colecao, docId, detalhes = {}) {
+            const u = window.currentUser;
+            if (!u?.uid) return;
+            try { await db.collection('auditoria').add({ acao, colecao, docId: docId || null, usuarioUid: u.uid, usuarioEmail: u.email || '', usuarioNome: u.nome || '', perfil: u.perfil || 'comum', detalhes, criadoEm: firebase.firestore.FieldValue.serverTimestamp() }); }
+            catch (err) { console.warn('Auditoria não registrada:', err); }
+        }
         function encerrarSnapshots() { snapshotUnsubscribers.forEach(unsub => { try { unsub(); } catch (_) {} }); snapshotUnsubscribers = []; }
 
         const firebaseConfig = {
@@ -472,20 +479,40 @@
             }
 
             try {
-                const docSnap = await db.collection('usuarios').doc(userEmail).get();
+                let docSnap = await db.collection('usuarios').doc(user.uid).get();
+                let data = null;
+                if (!docSnap.exists) {
+                    // Migração compatível com a estrutura antiga: usuarios/{email} -> usuarios/{uid}.
+                    const legacySnap = await db.collection('usuarios').doc(userEmail).get();
+                    if (legacySnap.exists) {
+                        const legacy = legacySnap.data() || {};
+                        data = {
+                            ...legacy,
+                            uid: user.uid,
+                            email: userEmail,
+                            ativo: legacy.ativo !== false,
+                            criadoEm: legacy.criadoEm || firebase.firestore.FieldValue.serverTimestamp(),
+                            criadoPorUid: legacy.criadoPorUid || user.uid,
+                            atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                            atualizadoPorUid: user.uid
+                        };
+                        await db.collection('usuarios').doc(user.uid).set(data);
+                        docSnap = await db.collection('usuarios').doc(user.uid).get();
+                    }
+                }
                 if (!docSnap.exists) {
                     exibirAlertaAuth('Sua conta foi autenticada, mas ainda não possui cadastro de acesso no PRGD.', 'erro');
                     await auth.signOut();
                     return;
                 }
-                const data = docSnap.data() || {};
+                data = docSnap.data() || {};
                 if (data.ativo === false) {
                     exibirAlertaAuth('Seu acesso ao PRGD está desativado.', 'erro');
                     await auth.signOut();
                     return;
                 }
                 const modulos = Array.isArray(data.modulosPermitidos) ? data.modulosPermitidos.map(m => String(m).trim()).filter(Boolean) : ['dashboard'];
-                window.currentUser = { ...data, email: userEmail, modulosPermitidos: modulos };
+                window.currentUser = { ...data, uid: user.uid, email: userEmail, modulosPermitidos: modulos };
                 atualizarInterfaceSessao();
                 authScreen.classList.add('hidden');
                 appWrapper.classList.remove('hidden');
@@ -625,7 +652,7 @@
             if (aba === 'dashboard') renderCharts();
         }
 
-        function mudarAba(aba) { cambiarAba(aba); }
+        function mudarAba(aba) { if (aba !== 'dashboard' && !usuarioPode(aba)) { alert('Você não possui acesso a este módulo.'); return; } cambiarAba(aba); }
 
         function iniciarSnapshotFirestore() {
             encerrarSnapshots();
@@ -687,7 +714,7 @@
                 `<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('usuarios', '${u.id}')">
                     <td class="p-4 font-bold text-slate-800">${escapeHtml(u.nome || u.email)}</td>
                     <td class="p-4 text-slate-600">${escapeHtml(u.email || u.id)}</td>
-                    <td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${u.subgrupoId || u.orgao || 'GERAL'}</span></td>
+                    <td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${escapeHtml(u.subgrupoId || u.orgao || 'GERAL')}</span></td>
                     <td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'amber' : 'slate'}-100 text-${u.perfil === 'admin' ? 'amber-900' : 'slate-700'} text-xs font-bold px-2 py-0.5 rounded uppercase">${escapeHtml(u.perfil || 'comum')}</span></td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
                 </tr>`
@@ -746,20 +773,20 @@
                         <div class="flex justify-between items-start mb-2 gap-1">
                             <span class="bg-${ePassado ? 'slate' : 'amber'}-100 text-${ePassado ? 'slate' : 'amber'}-800 text-[11px] font-bold px-2 py-0.5 rounded">${ePassado ? 'Realizado' : 'Próximo Evento'}</span>
                             <span class="bg-${e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple'}-100 text-${e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple'}-900 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                                <i class="fa-solid fa-${e.visibilidade === 'Aberto ao Público' ? 'globe' : 'lock'}"></i> ${e.visibilidade || 'Público'}
+                                <i class="fa-solid fa-${e.visibilidade === 'Aberto ao Público' ? 'globe' : 'lock'}"></i> ${escapeHtml(e.visibilidade || 'Público')}
                             </span>
                         </div>
-                        <h4 class="font-bold text-slate-800 text-base mt-1">${e.titulo || '-'}</h4>
+                        <h4 class="font-bold text-slate-800 text-base mt-1">${escapeHtml(e.titulo || '-')}</h4>
                         <p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Palestrante: ${escapeHtml(e.palestrante || 'Não informado')}</p>
                         <div class="bg-slate-50 p-2.5 rounded-lg border my-2 text-[11px] space-y-1">
                             <p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> <strong>Início:</strong> ${dtStart ? new Date(dtStart).toLocaleString('pt-BR') : '-'}</p>
                             ${dtEnd ? `<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-red-500 mr-1"></i> <strong>Fim:</strong> ${new Date(dtEnd).toLocaleString('pt-BR')}</p>` : ''}
-                            <p class="text-slate-600"><i class="fa-solid fa-certificate text-blue-600 mr-1"></i> <strong>Certificado:</strong> <span class="font-bold text-slate-800">${e.geracaoCertificado || 'Não'}</span></p>
+                            <p class="text-slate-600"><i class="fa-solid fa-certificate text-blue-600 mr-1"></i> <strong>Certificado:</strong> <span class="font-bold text-slate-800">${escapeHtml(e.geracaoCertificado || 'Não')}</span></p>
                         </div>
-                        <p class="text-xs text-slate-500 line-clamp-2">${e.descricao || 'Sem descrição.'}</p>
+                        <p class="text-xs text-slate-500 line-clamp-2">${escapeHtml(e.descricao || 'Sem descrição.')}</p>
                     </div>
                     <div class="border-t pt-3 mt-3 flex justify-between items-center">
-                        <span class="text-xs text-indigo-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>${e.local || 'Local não informado'}</span>
+                        <span class="text-xs text-indigo-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(e.local || 'Local não informado')}</span>
                         <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>
                     </div>
                 </div>`;
@@ -774,7 +801,7 @@
                     <div>
                         <div class="flex justify-between items-start">
                             <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">${escapeHtml(l.tipoEspaco || 'Auditório')}</span>
-                            <span class="text-xs font-bold ${l.natureza === 'Privado' ? 'text-amber-600' : 'text-emerald-600'}">${l.natureza || 'Público'}</span>
+                            <span class="text-xs font-bold ${l.natureza === 'Privado' ? 'text-amber-600' : 'text-emerald-600'}">${escapeHtml(l.natureza || 'Público')}</span>
                         </div>
                         <h4 class="font-bold text-slate-800 text-base mt-2">${escapeHtml(l.nome || l.id)}</h4>
                         <p class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>${escapeHtml(l.capacidade || '0')} sentadas</strong></p>
@@ -934,7 +961,8 @@
                 if (selectEdit) selectEdit.value = item.subgrupoId || item.orgao;
             }
 
-            document.getElementById('detalhe-area-admin').classList.remove('hidden');
+            const podeEditar = colecao === 'usuarios' ? window.currentUser?.perfil === ADMIN_PERFIL : usuarioPode(colecao);
+            document.getElementById('detalhe-area-admin').classList.toggle('hidden', !podeEditar);
             document.getElementById('modal-detalhes').classList.remove('hidden');
         };
 
@@ -965,8 +993,11 @@
             try {
                 await db.collection('demandas').doc(docId).update({
                     status: novoStatus,
-                    historicoStatus: demanda.historicoStatus
+                    historicoStatus: demanda.historicoStatus,
+                    atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                    atualizadoPorUid: window.currentUser.uid
                 });
+                await registrarAuditoria('STATUS_UPDATE', 'demandas', docId, { status: novoStatus });
                 alert('Acompanhamento registrado com sucesso!');
                 detalharRegistro('demandas', docId);
             } catch (err) {
@@ -984,7 +1015,7 @@
             const inputs = document.querySelectorAll('.edit-dinamico-input');
             inputs.forEach(input => {
                 const fieldName = input.getAttribute('data-field');
-                if (fieldName) updatedData[fieldName] = input.value;
+                if (fieldName && !CAMPOS_SISTEMA.includes(fieldName)) updatedData[fieldName] = input.value;
             });
 
             const cbs = document.querySelectorAll('.edit-modulo-cb');
@@ -993,7 +1024,10 @@
             }
 
             try {
+                updatedData.atualizadoEm = firebase.firestore.FieldValue.serverTimestamp();
+                updatedData.atualizadoPorUid = window.currentUser.uid;
                 await db.collection(colecao).doc(docId).update(updatedData);
+                await registrarAuditoria('UPDATE', colecao, docId, { campos: Object.keys(updatedData) });
                 alert('Registro atualizado com sucesso!');
                 fecharModal('modal-detalhes');
             } catch (err) {
@@ -1005,11 +1039,12 @@
             const colecao = document.getElementById('edit-colecao').value;
             const docId = document.getElementById('edit-doc-id').value;
 
-            try { exigirPermissao(colecao); } catch (err) { alert(err.message); return; }
-            if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+            try { exigirPermissao(colecao); if (window.currentUser?.perfil !== ADMIN_PERFIL) throw new Error('A exclusão de registros é restrita ao administrador.'); } catch (err) { alert(err.message); return; }
+            if (!confirm('Tem certeza que deseja excluir este registro? Esta ação não poderá ser desfeita.')) return;
 
             try {
                 await db.collection(colecao).doc(docId).delete();
+                await registrarAuditoria('DELETE', colecao, docId);
                 alert('Registro excluído com sucesso!');
                 fecharModal('modal-detalhes');
             } catch (err) {
@@ -1116,19 +1151,25 @@
                         email: document.getElementById('univ-c5').value.trim()
                     };
                     await db.collection('orgaos').doc(sigla).set(novoObj);
+                    await registrarAuditoria('CREATE', 'orgaos', sigla);
 
                 } else if (tipo === 'fornecedor') {
                     novoObj = {
+                        criadoPorUid: window.currentUser.uid, criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                        atualizadoPorUid: window.currentUser.uid, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
                         nome: document.getElementById('univ-c1').value,
                         cnpj: document.getElementById('univ-c2').value,
                         categoria: document.getElementById('univ-c3').value,
                         responsavel: document.getElementById('univ-c4').value,
                         numeroContrato: document.getElementById('univ-c5').value
                     };
-                    await db.collection('fornecedores').add(novoObj);
+                    const refFornecedor = await db.collection('fornecedores').add(novoObj);
+                    await registrarAuditoria('CREATE', 'fornecedores', refFornecedor.id);
 
                 } else if (tipo === 'evento') {
                     novoObj = {
+                        criadoPorUid: window.currentUser.uid, criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                        atualizadoPorUid: window.currentUser.uid, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
                         titulo: document.getElementById('univ-c1').value,
                         palestrante: document.getElementById('univ-c2').value,
                         dataInicio: document.getElementById('univ-c3').value,
@@ -1137,15 +1178,19 @@
                         descricao: document.getElementById('univ-c6').value,
                         visibilidade: 'Aberto ao Público'
                     };
-                    await db.collection('eventos').add(novoObj);
+                    const refEvento = await db.collection('eventos').add(novoObj);
+                    await registrarAuditoria('CREATE', 'eventos', refEvento.id);
 
                 } else if (tipo === 'local') {
                     novoObj = {
+                        criadoPorUid: window.currentUser.uid, criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                        atualizadoPorUid: window.currentUser.uid, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
                         nome: document.getElementById('univ-c1').value,
                         capacidade: document.getElementById('univ-c2').value,
                         natureza: document.getElementById('univ-c3').value
                     };
-                    await db.collection('locais').add(novoObj);
+                    const refLocal = await db.collection('locais').add(novoObj);
+                    await registrarAuditoria('CREATE', 'locais', refLocal.id);
 
                 } else if (tipo === 'usuario') {
                     const email = document.getElementById('univ-c2').value.toLowerCase().trim();
@@ -1154,27 +1199,42 @@
                     const cbs = document.querySelectorAll('.user-modulo-cb:checked');
                     const modulosPermitidos = Array.from(cbs).map(cb => cb.value);
 
+                    let novoUid = null;
+                    let tempApp = null;
                     try {
-                        const tempApp = firebase.initializeApp(firebaseConfig, 'SecondaryApp');
-                        await tempApp.auth().createUserWithEmailAndPassword(email, password);
-                        await tempApp.delete();
-                    } catch (authErr) {
-                        if (authErr.code !== 'auth/email-already-in-use') {
-                            throw new Error('Erro ao registrar credenciais de acesso: ' + authErr.message);
+                        tempApp = firebase.initializeApp(firebaseConfig, 'SecondaryApp');
+                        let cred;
+                        try { cred = await tempApp.auth().createUserWithEmailAndPassword(email, password); }
+                        catch (authErr) {
+                            if (authErr.code !== 'auth/email-already-in-use') throw authErr;
+                            cred = await tempApp.auth().signInWithEmailAndPassword(email, password);
                         }
+                        novoUid = cred.user.uid;
+                    } catch (authErr) {
+                        throw new Error('Erro ao registrar/validar credenciais de acesso: ' + authErr.message);
+                    } finally {
+                        if (tempApp) { try { await tempApp.delete(); } catch (_) {} }
                     }
-
                     novoObj = {
-                        nome: document.getElementById('univ-c1').value,
+                        uid: novoUid,
+                        nome: document.getElementById('univ-c1').value.trim(),
                         email,
                         subgrupoId: document.getElementById('univ-c3').value,
                         perfil: document.getElementById('univ-c4').value,
-                        modulosPermitidos
+                        ativo: true,
+                        modulosPermitidos,
+                        criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                        criadoPorUid: window.currentUser.uid,
+                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                        atualizadoPorUid: window.currentUser.uid
                     };
-                    await db.collection('usuarios').doc(email).set(novoObj);
+                    await db.collection('usuarios').doc(novoUid).set(novoObj);
+                    await registrarAuditoria('CREATE', 'usuarios', novoUid, { email });
 
                 } else if (tipo === 'demanda') {
                     novoObj = {
+                        criadoPorUid: window.currentUser.uid, criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                        atualizadoPorUid: window.currentUser.uid, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
                         titulo: document.getElementById('univ-c1').value,
                         orgao: document.getElementById('univ-c2').value,
                         categoria: document.getElementById('univ-c3').value,
@@ -1184,7 +1244,8 @@
                             { data: new Date().toISOString(), status: 'Pendente', descricao: document.getElementById('univ-c4').value || 'Abertura de demanda.' }
                         ]
                     };
-                    await db.collection('demandas').add(novoObj);
+                    const refDemanda = await db.collection('demandas').add(novoObj);
+                    await registrarAuditoria('CREATE', 'demandas', refDemanda.id);
                 }
 
                 alert('Cadastro realizado e sincronizado com sucesso!');
@@ -1209,6 +1270,7 @@
 
         function processarArquivoCSV() {
             const colecao = document.getElementById('import-colecao-alvo').value;
+            try { exigirPermissao(colecao); if (window.currentUser?.perfil !== ADMIN_PERFIL) throw new Error('Importação restrita ao administrador.'); } catch (err) { alert(err.message); return; }
             const fileInput = document.getElementById('input-file-csv');
             
             if (!fileInput.files || fileInput.files.length === 0) {
@@ -1248,11 +1310,15 @@
                         importCount++;
                     } else if (colecao === 'usuarios' && cols.length >= 2) {
                         const email = cols[1].toLowerCase();
-                        await db.collection('usuarios').doc(email).set({
+                        exigirEmailInstitucional(email);
+                        await db.collection('usuarios').doc('LEGACY_' + email).set({
                             nome: cols[0] || email, email,
                             subgrupoId: cols[2] || 'ATI',
                             perfil: (cols[3] || 'comum').toLowerCase(),
-                            modulosPermitidos: MODULOS_TODOS
+                            ativo: false, authProvisionamentoPendente: true,
+                            modulosPermitidos: ['dashboard'],
+                            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                            criadoPorUid: window.currentUser.uid
                         });
                         importCount++;
                     }
