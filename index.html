@@ -80,11 +80,11 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
             </form>
             
-            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 1.0.9 · ATI-PE</p>
+            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 1.1.0 · ATI-PE</p>
         </div>
     </div>
 
-    <!-- CONTEÚDO PROTEGIDO DA APLICAÇÃO (OCULTO POR PADRÃO) -->
+    <!-- CONTEÚDO PROTEGIDO DA APLICAÇÃO -->
     <div id="app-wrapper" class="hidden flex-col justify-between min-h-screen">
         
         <!-- Header Navbar -->
@@ -294,6 +294,21 @@
 
         </main>
 
+        <!-- MODAL CRIAÇÃO / CADASTRO UNIVERSAL DETALHADO -->
+        <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-[110]">
+            <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4 border-b pb-3">
+                    <h3 id="form-univ-titulo" class="text-base font-bold text-slate-900">Novo Cadastro</h3>
+                    <button onclick="fecharModal('modal-form-universal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <form id="form-univ-body" onsubmit="salvarCadastroUniversal(event)" class="space-y-3 text-sm">
+                    <input type="hidden" id="form-univ-tipo">
+                    <div id="form-univ-campos"></div>
+                    <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar no Firestore</button>
+                </form>
+            </div>
+        </div>
+
         <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
             PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v16.1 STABLE</span>
         </footer>
@@ -320,33 +335,53 @@
         window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [] };
         let abaAtual = 'dashboard';
 
+        const MODULOS_TODOS = ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
+
         // MONITOR DE SEGURANÇA E AUTENTICAÇÃO
         auth.onAuthStateChanged(user => {
             const authScreen = document.getElementById('auth-screen');
             const appWrapper = document.getElementById('app-wrapper');
 
             if (user) {
-                // Usuário Autenticado: Oculta painel de login e exibe a aplicação completa
                 authScreen.classList.add('hidden');
                 appWrapper.classList.remove('hidden');
                 appWrapper.classList.add('flex');
 
-                db.collection("usuarios").doc(user.email.toLowerCase()).get().then(docSnap => {
+                const userEmail = user.email.toLowerCase();
+
+                db.collection("usuarios").doc(userEmail).get().then(docSnap => {
                     if (docSnap.exists()) {
-                        window.currentUser = docSnap.data();
+                        const data = docSnap.data();
+                        
+                        // SANITIZAÇÃO: Remove aspas extras caso estejam no Firestore (ex: ""dashboard"" -> dashboard)
+                        let modulosLimpos = MODULOS_TODOS;
+                        if (Array.isArray(data.modulosPermitidos)) {
+                            modulosLimpos = data.modulosPermitidos.map(m => String(m).replace(/["']/g, '').trim());
+                        }
+
+                        window.currentUser = {
+                            ...data,
+                            modulosPermitidos: modulosLimpos
+                        };
                     } else {
                         window.currentUser = {
                             nome: user.email.split('@')[0],
                             email: user.email,
                             perfil: 'admin',
-                            modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios']
+                            modulosPermitidos: MODULOS_TODOS
                         };
                     }
+
+                    // REGRA DE SUPER USUÁRIO FORÇADA
+                    if (userEmail === 'arlindo.santos@ati.pe.gov.br') {
+                        window.currentUser.perfil = 'admin';
+                        window.currentUser.modulosPermitidos = MODULOS_TODOS;
+                    }
+
                     atualizarInterfaceSessao();
                     iniciarSnapshotFirestore();
                 });
             } else {
-                // Usuário não autenticado: Mantém a tela de login bloqueando todo o conteúdo
                 window.currentUser = null;
                 authScreen.classList.remove('hidden');
                 appWrapper.classList.add('hidden');
@@ -360,6 +395,23 @@
                 document.getElementById('user-name-display').textContent = user.nome || user.email;
                 document.getElementById('user-role-display').textContent = (user.perfil || 'USUÁRIO').toUpperCase();
                 document.getElementById('session-info').textContent = (user.nome || user.email) + ' (' + (user.perfil || 'Acesso').toUpperCase() + ')';
+            }
+            atualizarVisibilidadeAbas();
+        }
+
+        function atualizarVisibilidadeAbas() {
+            const user = window.currentUser;
+            const permitidos = user ? (user.perfil === 'admin' ? MODULOS_TODOS : (user.modulosPermitidos || MODULOS_TODOS)) : MODULOS_TODOS;
+
+            MODULOS_TODOS.forEach(mod => {
+                const btnTab = document.getElementById('btn-tab-' + mod);
+                if (btnTab) {
+                    btnTab.style.display = permitidos.includes(mod) ? 'inline-flex' : 'none';
+                }
+            });
+
+            if (!permitidos.includes(abaAtual)) {
+                mudarAba(permitidos[0] || 'dashboard');
             }
         }
 
@@ -448,9 +500,44 @@
             auth.signOut();
         }
 
-        function cambiarAba(aba) {
+        function fecharModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function abrirModalForm(tipo) {
+            document.getElementById('form-univ-tipo').value = tipo;
+            const container = document.getElementById('form-univ-campos');
+            document.getElementById('form-univ-titulo').textContent = 'Novo Cadastro: ' + tipo.toUpperCase();
+
+            container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Título / Nome</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>' +
+                '<div><label class="block font-medium text-slate-700 mb-1">Descrição / Detalhes</label><textarea id="univ-c2" rows="3" class="w-full p-2 border rounded"></textarea></div>';
+
+            document.getElementById('modal-form-universal').classList.remove('hidden');
+        }
+
+        async function salvarCadastroUniversal(e) {
+            e.preventDefault();
+            const tipo = document.getElementById('form-univ-tipo').value;
+            const c1 = document.getElementById('univ-c1').value;
+            const c2 = document.getElementById('univ-c2').value;
+
+            try {
+                await db.collection(tipo + 's').add({
+                    nome: c1,
+                    titulo: c1,
+                    descricao: c2,
+                    dataCriacao: new Date().toISOString()
+                });
+                alert('Cadastro salvo com sucesso no Firestore!');
+                fecharModal('modal-form-universal');
+            } catch (err) {
+                alert('Erro ao salvar no Firestore: ' + err.message);
+            }
+        }
+
+        function mudarAba(aba) {
             abaAtual = aba;
-            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'].forEach(a => {
+            MODULOS_TODOS.forEach(a => {
                 const el = document.getElementById('aba-' + a);
                 const btn = document.getElementById('btn-tab-' + a);
                 if (el) el.classList.toggle('hidden', a !== abaAtual);
@@ -458,8 +545,6 @@
             });
             if (aba === 'dashboard') renderCharts();
         }
-
-        function mudarAba(aba) { cambiarAba(aba); }
 
         function iniciarSnapshotFirestore() {
             const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
@@ -487,7 +572,7 @@
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
             tbody.innerHTML = window.dbData.usuarios.map(u => 
-                '<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-slate-800">' + (u.nome || u.email) + '</td><td class="p-4 text-slate-600">' + (u.email || u.id) + '</td><td class="p-4">' + (u.subgrupoId || u.orgao || 'GERAL') + '</td><td class="p-4 font-bold uppercase text-xs">' + (u.perfil || 'comum') + '</td><td class="p-4 text-center"><span class="text-xs text-slate-400">Ativo</span></td></tr>'
+                '<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-slate-800">' + (u.nome || u.email) + '</td><td class="p-4 text-slate-600">' + (u.email || u.id) + '</td><td class="p-4">' + (u.subgrupoId || u.orgao || 'GERAL') + '</td><td class="p-4 font-bold uppercase text-xs">' + (u.perfil || 'comum') + '</td><td class="p-4 text-center"><span class="text-xs text-emerald-600 font-bold">Ativo</span></td></tr>'
             ).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum usuário registrado.</td></tr>';
         }
 
@@ -495,7 +580,7 @@
             const tbody = document.getElementById('tabela-orgaos');
             if (!tbody) return;
             tbody.innerHTML = window.dbData.orgaos.map(o => 
-                '<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-indigo-900">' + (o.sigla || o.id) + '</td><td class="p-4">' + (o.nome || '-') + '</td><td class="p-4">' + (o.tipoJuridico || '-') + '</td><td class="p-4">' + (o.responsavel || '-') + '</td><td class="p-4">' + (o.email || '-') + '</td><td class="p-4 text-center"><span class="text-xs text-slate-400">Ativo</span></td></tr>'
+                '<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-indigo-900">' + (o.sigla || o.id) + '</td><td class="p-4">' + (o.nome || '-') + '</td><td class="p-4">' + (o.tipoJuridico || '-') + '</td><td class="p-4">' + (o.responsavel || '-') + '</td><td class="p-4">' + (o.email || '-') + '</td><td class="p-4 text-center"><span class="text-xs text-emerald-600 font-bold">Ativo</span></td></tr>'
             ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
         }
 
@@ -503,7 +588,7 @@
             const tbody = document.getElementById('tabela-demandas');
             if (!tbody) return;
             tbody.innerHTML = window.dbData.demandas.map(d => 
-                '<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-blue-900">' + (d.orgao || 'Geral') + '</td><td class="p-4">' + (d.titulo || '-') + '</td><td class="p-4 text-xs">' + (d.categoria || '-') + '</td><td class="p-4 text-xs font-bold">' + (d.prioridade || 'Média') + '</td><td class="p-4">' + (d.status || 'Pendente') + '</td><td class="p-4 text-center"><span class="text-xs text-slate-400">Ativo</span></td></tr>'
+                '<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-blue-900">' + (d.orgao || 'Geral') + '</td><td class="p-4">' + (d.titulo || '-') + '</td><td class="p-4 text-xs">' + (d.categoria || '-') + '</td><td class="p-4 text-xs font-bold">' + (d.prioridade || 'Média') + '</td><td class="p-4">' + (d.status || 'Pendente') + '</td><td class="p-4 text-center"><span class="text-xs text-emerald-600 font-bold">Ativo</span></td></tr>'
             ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma demanda registrada.</td></tr>';
         }
 
