@@ -3,24 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema - Autenticação</title>
+  <title>CRM ATI-PE</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f4f6f9; min-height: 100vh; }
 
-    body {
-      background-color: #f4f6f9;
+    /* --- TELA DE LOGIN --- */
+    #auth-container {
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 20px;
     }
 
-    .container {
+    .card-login {
       background: #ffffff;
       padding: 30px;
       border-radius: 8px;
@@ -30,173 +27,139 @@
       position: relative;
     }
 
-    .tabs {
+    .tabs { display: flex; border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
+    .tab-btn { flex: 1; padding: 10px; background: none; border: none; font-size: 15px; font-weight: bold; color: #666; cursor: pointer; transition: color 0.3s, border-bottom 0.3s; }
+    .tab-btn.active { color: #007bff; border-bottom: 3px solid #007bff; }
+    
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #333; }
+    .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    .form-group input:focus { outline: none; border-color: #007bff; }
+    
+    .btn { width: 100%; padding: 10px; background-color: #007bff; border: none; border-radius: 4px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+    .btn:hover { background-color: #0056b3; }
+    
+    .forgot-link { display: block; margin-top: 10px; text-align: right; font-size: 13px; color: #007bff; text-decoration: none; cursor: pointer; }
+    .forgot-link:hover { text-decoration: underline; }
+    
+    .message { margin-top: 15px; padding: 10px; border-radius: 4px; font-size: 14px; display: none; text-align: center; }
+    .message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+    .footer-version { margin-top: 25px; padding-top: 10px; border-top: 1px solid #eee; text-align: center; font-size: 12px; color: #888; }
+
+    /* --- TELA DA APLICAÇÃO (CRM / DASHBOARD) --- */
+    #app-container {
+      display: none; /* Inicia oculto até a autenticação */
+      padding: 20px;
+    }
+
+    .app-header {
+      background: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       display: flex;
-      border-bottom: 2px solid #e0e0e0;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
     }
 
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      background: none;
-      border: none;
-      font-size: 15px;
-      font-weight: bold;
-      color: #666;
-      cursor: pointer;
-      transition: color 0.3s, border-bottom 0.3s;
-    }
-
-    .tab-btn.active {
-      color: #007bff;
-      border-bottom: 3px solid #007bff;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 14px;
-      color: #333;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: #007bff;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 10px;
-      background-color: #007bff;
-      border: none;
-      border-radius: 4px;
+    .btn-logout {
+      background-color: #dc3545;
       color: white;
-      font-size: 16px;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
       font-weight: bold;
       cursor: pointer;
-      transition: background-color 0.2s;
     }
+    .btn-logout:hover { background-color: #c82333; }
 
-    .btn:hover {
-      background-color: #0056b3;
-    }
-
-    .forgot-link {
-      display: block;
-      margin-top: 10px;
-      text-align: right;
-      font-size: 13px;
-      color: #007bff;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .forgot-link:hover {
-      text-decoration: underline;
-    }
-
-    .message {
-      margin-top: 15px;
-      padding: 10px;
-      border-radius: 4px;
-      font-size: 14px;
-      display: none;
-      text-align: center;
-    }
-
-    .message.error {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    .message.success {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    .form-section {
-      display: none;
-    }
-
-    .form-section.active {
-      display: block;
-    }
-
-    .footer-version {
-      margin-top: 25px;
-      padding-top: 10px;
-      border-top: 1px solid #eee;
-      text-align: center;
-      font-size: 12px;
-      color: #888;
+    .app-content {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      min-height: 400px;
     }
   </style>
 
+  <!-- Firebase SDK Compatível -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
-  <div class="container">
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
-      <button class="tab-btn" onclick="switchTab('change-password')">Alterar Senha</button>
+  <!-- CONTÊINER 1: TELA DE AUTENTICAÇÃO -->
+  <div id="auth-container">
+    <div class="card-login">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
+        <button class="tab-btn" onclick="switchTab('change-password')">Alterar Senha</button>
+      </div>
+
+      <div id="feedback-msg" class="message"></div>
+
+      <!-- Formulário de Login -->
+      <form id="login-form" class="form-section active" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-email">E-mail</label>
+          <input type="email" id="login-email" required placeholder="seu.nome@ati.pe.gov.br">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Senha</label>
+          <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn">Entrar no Sistema</button>
+        <a class="forgot-link" onclick="handleResetPassword()">Esqueceu a senha?</a>
+      </form>
+
+      <!-- Formulário de Alteração de Senha -->
+      <form id="password-form" class="form-section" onsubmit="handleChangePassword(event)">
+        <div class="form-group">
+          <label for="current-password">Senha Atual</label>
+          <input type="password" id="current-password" required placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <label for="new-password">Nova Senha</label>
+          <input type="password" id="new-password" required placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <label for="confirm-password">Confirmar Nova Senha</label>
+          <input type="password" id="confirm-password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn">Atualizar Senha</button>
+      </form>
+
+      <div class="footer-version">
+        Versão <span id="app-version">1.0.8</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTÊINER 2: APLICAÇÃO REAL DO CRM -->
+  <div id="app-container">
+    <div class="app-header">
+      <div>
+        <strong>CRM ATI-PE</strong> | Conectado como: <span id="user-email-display">...</span>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">Sair</button>
     </div>
 
-    <div id="feedback-msg" class="message"></div>
-
-    <!-- Formulário de Login -->
-    <form id="login-form" class="form-section active" onsubmit="handleLogin(event)">
-      <div class="form-group">
-        <label for="login-email">E-mail</label>
-        <input type="email" id="login-email" required placeholder="seu.nome@ati.pe.gov.br">
-      </div>
-      <div class="form-group">
-        <label for="login-password">Senha</label>
-        <input type="password" id="login-password" required placeholder="••••••••">
-      </div>
-      <button type="submit" class="btn">Entrar no Sistema</button>
-      <a class="forgot-link" onclick="handleResetPassword()">Esqueceu a senha?</a>
-    </form>
-
-    <!-- Formulário de Alteração de Senha -->
-    <form id="password-form" class="form-section" onsubmit="handleChangePassword(event)">
-      <div class="form-group">
-        <label for="current-password">Senha Atual</label>
-        <input type="password" id="current-password" required placeholder="••••••••">
-      </div>
-      <div class="form-group">
-        <label for="new-password">Nova Senha</label>
-        <input type="password" id="new-password" required placeholder="••••••••">
-      </div>
-      <div class="form-group">
-        <label for="confirm-password">Confirmar Nova Senha</label>
-        <input type="password" id="confirm-password" required placeholder="••••••••">
-      </div>
-      <button type="submit" class="btn">Atualizar Senha</button>
-    </form>
-
-    <div class="footer-version">
-      Versão <span id="app-version">1.0.6</span>
+    <div class="app-content">
+      <h2>Painel Principal do CRM</h2>
+      <p style="margin-top: 15px; color: #555;">
+        Bem-vindo ao sistema! Sua autenticação foi concluída com sucesso no Firebase.
+      </p>
+      <!-- Cole aqui os módulos, tabelas ou formulários do seu CRM -->
     </div>
   </div>
 
   <script>
+    // Configurações do Firebase do Projeto prgd-ati-pe
     const firebaseConfig = {
       apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
       authDomain: "prgd-ati-pe.firebaseapp.com",
@@ -207,16 +170,27 @@
       measurementId: "G-MWES9XN421"
     };
 
-    let auth = null;
-
-    try {
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      auth = firebase.auth();
-    } catch (e) {
-      console.error("Erro ao inicializar Firebase:", e);
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
     }
+    const auth = firebase.auth();
+
+    // MONITOR DE ESTADO DE AUTENTICAÇÃO (Exibe a App ou o Login)
+    auth.onAuthStateChanged(user => {
+      const authContainer = document.getElementById('auth-container');
+      const appContainer = document.getElementById('app-container');
+
+      if (user) {
+        // Usuário logado: Oculta login e exibe a aplicação CRM
+        authContainer.style.display = 'none';
+        appContainer.style.display = 'block';
+        document.getElementById('user-email-display').innerText = user.email;
+      } else {
+        // Usuário deslogado: Exibe a tela de login
+        authContainer.style.display = 'flex';
+        appContainer.style.display = 'none';
+      }
+    });
 
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -252,17 +226,8 @@
       const password = document.getElementById('login-password').value;
 
       try {
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-
-        showMessage('Login realizado com sucesso! Entrando...', true);
-
-        localStorage.setItem('userEmail', user.email);
-        setTimeout(() => {
-          // CORREÇÃO GITHUB PAGES: Aponta para o arquivo .html real do painel
-          window.location.href = 'dashboard.html'; // Altere para 'painel.html' ou 'main.html' caso seu arquivo tenha outro nome no repositório
-        }, 1000);
-
+        await auth.signInWithEmailAndPassword(email, password);
+        showMessage('Login realizado com sucesso!', true);
       } catch (error) {
         if (
           error.code === 'auth/invalid-login-credentials' ||
@@ -288,7 +253,7 @@
 
       try {
         await auth.sendPasswordResetEmail(email);
-        showMessage('E-mail de redefinição de senha enviado com sucesso!', true);
+        showMessage('E-mail de redefinição de senha enviado!', true);
       } catch (error) {
         if (error.code === 'auth/user-not-found') {
           showMessage('Este e-mail não está cadastrado no sistema.');
@@ -325,7 +290,6 @@
 
         showMessage('Senha alterada com sucesso!', true);
         document.getElementById('password-form').reset();
-
       } catch (error) {
         if (
           error.code === 'auth/invalid-login-credentials' ||
@@ -337,6 +301,10 @@
           showMessage('Erro ao atualizar senha.');
         }
       }
+    }
+
+    function handleLogout() {
+      auth.signOut();
     }
   </script>
 </body>
