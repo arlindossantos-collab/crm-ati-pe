@@ -41,7 +41,6 @@
 
             <div id="auth-alert" class="hidden p-2.5 rounded-lg text-xs font-semibold mb-3 text-center"></div>
 
-            <!-- Formulário de Login -->
             <form id="form-login" onsubmit="fazerLogin(event)">
                 <div class="space-y-3 text-sm">
                     <div>
@@ -57,7 +56,6 @@
                 <button type="button" onclick="resetarSenha()" class="w-full mt-3 text-xs text-blue-700 hover:underline text-center block font-medium">Esqueceu a senha?</button>
             </form>
 
-            <!-- Formulário de Alteração de Senha -->
             <form id="form-alterar-senha" onsubmit="fazerAlteracaoSenha(event)" class="hidden">
                 <div class="space-y-3 text-sm">
                     <div>
@@ -80,14 +78,13 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
             </form>
             
-            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 19.3 · ATI-PE</p>
+            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 19.4 · ATI-PE</p>
         </div>
     </div>
 
     <!-- CONTEÚDO PROTEGIDO DA APLICAÇÃO -->
     <div id="app-wrapper" class="hidden flex-col justify-between min-h-screen">
         
-        <!-- Header Navbar -->
         <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                 <div class="flex items-center space-x-3">
@@ -95,7 +92,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.3</span>
+                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.4</span>
                         </div>
                         <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                     </div>
@@ -112,10 +109,7 @@
             </div>
         </header>
 
-        <!-- Main Container -->
         <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
-
-            <!-- Status da Sessão -->
             <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
                 <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Autenticado</span></span>
                 <span class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold">Base Unificada Firestore Sync</span>
@@ -124,32 +118,14 @@
             <!-- Navegação por Abas -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
-                    <button id="btn-tab-dashboard" onclick="mudarAba('dashboard')" class="px-4 py-2 rounded-lg transition tab-active">
-                        <i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard
-                    </button>
-                    <button id="btn-tab-demandas" onclick="mudarAba('demandas')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                        <i class="fa-solid fa-list-check mr-1.5"></i> Demandas
-                    </button>
-                    <button id="btn-tab-eventos" onclick="mudarAba('eventos')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                        <i class="fa-solid fa-calendar-day mr-1.5"></i> Eventos
-                    </button>
-                    <button id="btn-tab-locais" onclick="mudarAba('locais')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                        <i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais de Eventos
-                    </button>
-                    <button id="btn-tab-orgaos" onclick="mudarAba('orgaos')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                        <i class="fa-solid fa-sitemap mr-1.5"></i> Órgãos / Secretarias
-                    </button>
-                    <button id="btn-tab-fornecedores" onclick="mudarAba('fornecedores')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                        <i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores
-                    </button>
-                    <button id="btn-tab-usuarios" onclick="mudarAba('usuarios')" class="px-4 py-2 rounded-lg transition tab-inactive">
-                        <i class="fa-solid fa-users-gear mr-1.5"></i> Usuários
-                    </button>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="exportarUsuariosCSV()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-csv"></i> Exportar Dados
-                    </button>
+                    <button id="btn-tab-dashboard" onclick="mudarAba('dashboard')" class="px-4 py-2 rounded-lg transition tab-active"><i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard</button>
+                    <button id="btn-tab-demandas" onclick="mudarAba('demandas')" class="px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-list-check mr-1.5"></i> Demandas</button>
+                    <button id="btn-tab-eventos" onclick="mudarAba('eventos')" class="px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-calendar-day mr-1.5"></i> Eventos</button>
+                    <button id="btn-tab-locais" onclick="mudarAba('locais')" class="px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais</button>
+                    <button id="btn-tab-orgaos" onclick="mudarAba('orgaos')" class="px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-sitemap mr-1.5"></i> Órgãos</button>
+                    <button id="btn-tab-fornecedores" onclick="mudarAba('fornecedores')" class="px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores</button>
+                    <button id="btn-tab-grupos" onclick="mudarAba('grupos')" class="px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-tags mr-1.5"></i> Grupos</button>
+                    <button id="btn-tab-usuarios" onclick="mudarAba('usuarios')" class="px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-users-gear mr-1.5"></i> Usuários</button>
                 </div>
             </div>
 
@@ -165,7 +141,7 @@
                         <h3 id="dash-tot-eventos" class="text-3xl font-bold text-amber-600 mt-1">0</h3>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                        <p class="text-xs font-semibold text-slate-500 uppercase">Locais Auditórios</p>
+                        <p class="text-xs font-semibold text-slate-500 uppercase">Locais / Auditórios</p>
                         <h3 id="dash-tot-locais" class="text-3xl font-bold text-purple-600 mt-1">0</h3>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
@@ -201,14 +177,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[700px]">
                         <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
-                            <tr>
-                                <th class="p-4">Órgão Solicitante</th>
-                                <th class="p-4">Título da Demanda</th>
-                                <th class="p-4">Categoria</th>
-                                <th class="p-4">Prioridade</th>
-                                <th class="p-4">Status</th>
-                                <th class="p-4 text-center">Ações</th>
-                            </tr>
+                            <tr><th class="p-4">Órgão Solicitante</th><th class="p-4">Título da Demanda</th><th class="p-4">Categoria</th><th class="p-4">Prioridade</th><th class="p-4">Status</th><th class="p-4 text-center">Ações</th></tr>
                         </thead>
                         <tbody id="tabela-demandas" class="divide-y divide-slate-100 text-sm"></tbody>
                     </table>
@@ -221,9 +190,9 @@
                     <h3 class="text-base font-bold text-slate-800">Agenda Institucional e Eventos por Grupo</h3>
                     <div class="flex items-center gap-2">
                         <select id="filtro-eventos" onchange="renderEventos()" class="p-2 border rounded-lg text-xs bg-white font-medium">
-                            <option value="todos">Todos os Eventos Permitidos</option>
-                            <option value="futuros" selected>Apenas Próximos / Futuros</option>
-                            <option value="passados">Apenas Realizados / Passados</option>
+                            <option value="todos">Todos os Eventos</option>
+                            <option value="futuros" selected>Próximos / Futuros</option>
+                            <option value="passados">Realizados / Passados</option>
                         </select>
                         <button onclick="abrirModalForm('evento')" id="btn-novo-evento" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-calendar-plus"></i> Criar Evento
@@ -247,11 +216,8 @@
             <!-- ABA ÓRGÃOS -->
             <div id="aba-orgaos" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos, Secretarias e Entidades</h3>
+                    <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos e Secretarias</h3>
                     <div class="flex gap-2">
-                        <button onclick="abrirModalImportacao('orgaos')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
-                        </button>
                         <button onclick="abrirModalForm('orgao')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria
                         </button>
@@ -260,14 +226,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[700px]">
                         <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
-                            <tr>
-                                <th class="p-4">Sigla</th>
-                                <th class="p-4">Nome do Órgão / Secretaria</th>
-                                <th class="p-4">Tipo Jurídico</th>
-                                <th class="p-4">Responsável TIC</th>
-                                <th class="p-4">E-mail Contato</th>
-                                <th class="p-4 text-center">Ações</th>
-                            </tr>
+                            <tr><th class="p-4">Sigla</th><th class="p-4">Nome do Órgão</th><th class="p-4">Tipo Jurídico</th><th class="p-4">Contato</th><th class="p-4 text-center">Ações</th></tr>
                         </thead>
                         <tbody id="tabela-orgaos" class="divide-y divide-slate-100 text-sm"></tbody>
                     </table>
@@ -277,11 +236,8 @@
             <!-- ABA FORNECEDORES -->
             <div id="aba-fornecedores" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC Detalhados</h3>
+                    <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC</h3>
                     <div class="flex gap-2">
-                        <button onclick="abrirModalImportacao('fornecedores')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
-                        </button>
                         <button onclick="abrirModalForm('fornecedor')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-plus"></i> Novo Fornecedor
                         </button>
@@ -290,17 +246,29 @@
                 <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
             </div>
 
+            <!-- ABA GRUPOS -->
+            <div id="aba-grupos" class="hidden space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 class="text-base font-bold text-slate-800">Gerenciamento de Grupos de Acesso</h3>
+                    <button onclick="abrirModalForm('grupo')" class="bg-indigo-700 hover:bg-indigo-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> Novo Grupo
+                    </button>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
+                            <tr><th class="p-4 w-1/3">Nome do Grupo</th><th class="p-4">Descrição</th><th class="p-4 text-center w-32">Ações</th></tr>
+                        </thead>
+                        <tbody id="tabela-grupos" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- ABA USUÁRIOS -->
             <div id="aba-usuarios" class="hidden space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários</h3>
                     <div class="flex gap-2">
-                        <button onclick="abrirModalImportacao('usuarios')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
-                        </button>
-                        <button onclick="exportarUsuariosCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-file-export"></i> Exportar Usuários (.csv)
-                        </button>
                         <button onclick="abrirModalForm('usuario')" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-user-plus"></i> Novo Usuário
                         </button>
@@ -309,19 +277,12 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[700px]">
                         <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
-                            <tr>
-                                <th class="p-4">Nome</th>
-                                <th class="p-4">E-mail Institucional</th>
-                                <th class="p-4">Órgão / Secretaria</th>
-                                <th class="p-4">Grupo / Perfil</th>
-                                <th class="p-4 text-center">Ações</th>
-                            </tr>
+                            <tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Órgão / Secretaria</th><th class="p-4">Grupo / Perfil</th><th class="p-4 text-center">Ações</th></tr>
                         </thead>
                         <tbody id="tabela-usuarios" class="divide-y divide-slate-100 text-sm"></tbody>
                     </table>
                 </div>
             </div>
-
         </main>
 
         <!-- MODAL UNIVERSAL DETALHAR & EDITAR COMPLETO -->
@@ -335,7 +296,7 @@
                 
                 <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl border-slate-300">
                     <div class="flex justify-between items-center mb-3">
-                        <p class="text-xs font-bold text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square text-blue-800"></i> Edição Completa e Gerenciamento do Registro</p>
+                        <p class="text-xs font-bold text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square text-blue-800"></i> Edição Completa</p>
                         <button type="button" onclick="excluirRegistroUniversal()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-bold transition flex items-center gap-1 shadow-sm">
                             <i class="fa-solid fa-trash-can"></i> Excluir Registro
                         </button>
@@ -346,14 +307,14 @@
                         <div id="edit-campos-dinamicos" class="max-h-60 overflow-y-auto pr-1"></div>
                         <div class="flex justify-end gap-2 pt-3 border-t">
                             <button type="button" onclick="fecharModal('modal-detalhes')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Cancelar</button>
-                            <button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded hover:bg-blue-800 transition shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Todas as Alterações</button>
+                            <button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded hover:bg-blue-800 transition shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Alterações</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- MODAL CRIAÇÃO / CADASTRO UNIVERSAL DETALHADO -->
+        <!-- MODAL CRIAÇÃO -->
         <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-[110]">
             <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center mb-4 border-b pb-3">
@@ -362,39 +323,14 @@
                 </div>
                 <form id="form-univ-body" onsubmit="salvarCadastroUniversal(event)" class="space-y-3 text-sm">
                     <input type="hidden" id="form-univ-tipo">
-                    <div id="form-univ-campos"></div>
+                    <div id="form-univ-campos" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                     <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar no Firestore</button>
                 </form>
             </div>
         </div>
 
-        <!-- MODAL IMPORTAÇÃO DE PLANILHA / CSV -->
-        <div id="modal-importacao" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-[110]">
-            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-                <div class="flex justify-between items-center mb-4 border-b pb-3">
-                    <h3 id="import-titulo-modal" class="text-base font-bold text-slate-900">Importar Dados via CSV / Planilha</h3>
-                    <button onclick="fecharModal('modal-importacao')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-                </div>
-                <div class="space-y-4 text-xs">
-                    <input type="hidden" id="import-colecao-alvo">
-                    <p class="text-slate-600">Selecione um arquivo <strong>.csv</strong> contendo os registros para importar automaticamente na base PRGD.</p>
-                    <div class="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center bg-slate-50">
-                        <i class="fa-solid fa-file-csv text-3xl text-emerald-600 mb-2"></i>
-                        <input type="file" id="input-file-csv" accept=".csv, .txt" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-                    </div>
-                    <div class="bg-amber-50 border border-amber-200 p-2.5 rounded text-amber-900">
-                        <p class="font-bold mb-0.5"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Formato Esperado:</p>
-                        <p id="import-instrucoes-formato" class="font-mono text-[11px]"></p>
-                    </div>
-                    <button type="button" onclick="processarArquivoCSV()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Processar e Importar Registros
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.3 FIREBASE SYNC</span>
+            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.4 FIREBASE SYNC</span>
         </footer>
     </div>
 
@@ -405,13 +341,6 @@
         let snapshotUnsubscribers = [];
         let chartCategoriasInstance = null;
         let chartStatusInstance = null;
-
-        function urlExternaSegura(value) {
-            try {
-                const u = new URL(String(value || ''), window.location.href);
-                return ['http:', 'https:'].includes(u.protocol) ? u.href : '';
-            } catch (_) { return ''; }
-        }
 
         function emailInstitucionalValido(email) { return DOMINIO_EMAIL_RE.test(String(email || '').trim()); }
         function exigirEmailInstitucional(email) {
@@ -425,12 +354,6 @@
             return !!u && (u.perfil === ADMIN_PERFIL || (Array.isArray(u.modulosPermitidos) && u.modulosPermitidos.includes(modulo)));
         }
         function exigirPermissao(modulo) { if (!usuarioPode(modulo)) throw new Error('Você não possui permissão para esta operação.'); }
-        async function registrarAuditoria(acao, colecao, docId, detalhes = {}) {
-            const u = window.currentUser;
-            if (!u?.uid) return;
-            try { await db.collection('auditoria').add({ acao, colecao, docId: docId || null, usuarioUid: u.uid, usuarioEmail: u.email || '', usuarioNome: u.nome || '', perfil: u.perfil || 'comum', detalhes, criadoEm: firebase.firestore.FieldValue.serverTimestamp() }); }
-            catch (err) { console.warn('Auditoria não registrada:', err); }
-        }
         function encerrarSnapshots() { snapshotUnsubscribers.forEach(unsub => { try { unsub(); } catch (_) {} }); snapshotUnsubscribers = []; }
 
         const firebaseConfig = {
@@ -443,23 +366,21 @@
             measurementId: "G-MWES9XN421"
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
         window.currentUser = null;
-        window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [] };
+        window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [], grupos: [] };
         let abaAtual = 'dashboard';
 
-        const MODULOS_TODOS = ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
+        const MODULOS_TODOS = ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'grupos', 'usuarios'];
 
         auth.onAuthStateChanged(async user => {
             const authScreen = document.getElementById('auth-screen');
             const appWrapper = document.getElementById('app-wrapper');
             encerrarSnapshots();
-            window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [] };
+            window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [], grupos: [] };
 
             if (!user) {
                 window.currentUser = null;
@@ -481,31 +402,17 @@
                 let data = null;
                 if (!docSnap.exists) {
                     const legacySnap = await db.collection('usuarios').doc(userEmail).get();
-                    if (legacySnap.exists) {
-                        data = legacySnap.data() || {};
-                    }
+                    if (legacySnap.exists) data = legacySnap.data() || {};
                 } else {
                     data = docSnap.data() || {};
                 }
 
-                if (!data) {
-                    data = {
-                        nome: userEmail.split('@')[0],
-                        email: userEmail,
-                        perfil: 'comum',
-                        grupoUsuario: 'ATI',
-                        modulosPermitidos: MODULOS_TODOS
-                    };
-                }
-
-                if (data.ativo === false) {
-                    exibirAlertaAuth('Seu acesso ao PRGD está desativado.', 'erro');
-                    await auth.signOut();
-                    return;
-                }
+                if (!data) data = { nome: userEmail.split('@')[0], email: userEmail, perfil: 'comum', grupoUsuario: 'Geral', modulosPermitidos: MODULOS_TODOS };
+                if (data.ativo === false) { exibirAlertaAuth('Seu acesso ao PRGD está desativado.', 'erro'); await auth.signOut(); return; }
 
                 const modulos = Array.isArray(data.modulosPermitidos) ? data.modulosPermitidos.map(m => String(m).trim()).filter(Boolean) : MODULOS_TODOS;
-                window.currentUser = { ...data, uid: user.uid, email: userEmail, grupoUsuario: data.grupoUsuario || 'ATI', modulosPermitidos: modulos };
+                window.currentUser = { ...data, uid: user.uid, email: userEmail, grupoUsuario: data.grupoUsuario || 'Geral', modulosPermitidos: modulos };
+                
                 atualizarInterfaceSessao();
                 authScreen.classList.add('hidden');
                 appWrapper.classList.remove('hidden');
@@ -522,8 +429,8 @@
             const user = window.currentUser;
             if (user) {
                 document.getElementById('user-name-display').textContent = user.nome || user.email;
-                document.getElementById('user-role-display').textContent = `${(user.perfil || 'USUÁRIO').toUpperCase()} [${user.grupoUsuario || 'GERAL'}]`;
-                document.getElementById('session-info').textContent = (user.nome || user.email) + ' (' + (user.perfil || 'Acesso').toUpperCase() + ') - Grupo: ' + (user.grupoUsuario || 'ATI');
+                document.getElementById('user-role-display').textContent = `${(user.perfil || 'USUÁRIO').toUpperCase()} [${user.grupoUsuario || 'Geral'}]`;
+                document.getElementById('session-info').textContent = `${user.nome || user.email} (${(user.perfil || 'Acesso').toUpperCase()}) - Grupo: ${user.grupoUsuario || 'Geral'}`;
             }
             atualizarVisibilidadeAbas();
         }
@@ -531,17 +438,11 @@
         function atualizarVisibilidadeAbas() {
             const user = window.currentUser;
             const permitidos = user ? (user.perfil === 'admin' ? MODULOS_TODOS : (Array.isArray(user.modulosPermitidos) ? user.modulosPermitidos : MODULOS_TODOS)) : MODULOS_TODOS;
-
             MODULOS_TODOS.forEach(mod => {
                 const btnTab = document.getElementById('btn-tab-' + mod);
-                if (btnTab) {
-                    btnTab.style.display = permitidos.includes(mod) ? 'inline-flex' : 'none';
-                }
+                if (btnTab) btnTab.style.display = permitidos.includes(mod) ? 'inline-flex' : 'none';
             });
-
-            if (!permitidos.includes(abaAtual)) {
-                mudarAba(permitidos[0] || 'dashboard');
-            }
+            if (!permitidos.includes(abaAtual)) mudarAba(permitidos[0] || 'dashboard');
         }
 
         function alternarTabAuth(tab) {
@@ -563,76 +464,51 @@
             const el = document.getElementById('auth-alert');
             if (!msg) { el.classList.add('hidden'); return; }
             el.textContent = msg;
-            el.className = 'p-2.5 rounded-lg text-xs font-semibold mb-3 text-center ' + (tipo === 'sucesso' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800');
+            el.className = `p-2.5 rounded-lg text-xs font-semibold mb-3 text-center ${tipo === 'sucesso' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`;
             el.classList.remove('hidden');
         }
 
         async function fazerLogin(e) {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const senha = document.getElementById('login-senha').value;
             try {
                 exigirEmailInstitucional(email);
-                await auth.signInWithEmailAndPassword(email, senha);
+                await auth.signInWithEmailAndPassword(email, document.getElementById('login-senha').value);
             } catch (error) {
                 if (error.message && error.message.includes('domínio')) exibirAlertaAuth(error.message, 'erro');
                 else if (['auth/invalid-login-credentials','auth/invalid-credential','auth/user-not-found','auth/wrong-password'].includes(error.code)) exibirAlertaAuth('Usuário inexistente ou senha incorreta.', 'erro');
-                else exibirAlertaAuth('Não foi possível autenticar. Verifique os dados e tente novamente.', 'erro');
+                else exibirAlertaAuth('Não foi possível autenticar.', 'erro');
             }
         }
 
         async function fazerAlteracaoSenha(e) {
             e.preventDefault();
             const email = document.getElementById('pass-email').value.trim();
-            const passAtual = document.getElementById('pass-atual').value;
             const passNova = document.getElementById('pass-nova').value;
-            const passConfirma = document.getElementById('pass-confirma').value;
-
-            try { exigirEmailInstitucional(email); } catch (err) { exibirAlertaAuth(err.message, 'erro'); return; }
-
-            if (passNova !== passConfirma) {
-                exibirAlertaAuth('A nova senha e a confirmação não coincidem.', 'erro');
-                return;
-            }
-
+            if (passNova !== document.getElementById('pass-confirma').value) { exibirAlertaAuth('Senhas não coincidem.', 'erro'); return; }
             try {
-                const userCred = await auth.signInWithEmailAndPassword(email, passAtual);
+                exigirEmailInstitucional(email);
+                const userCred = await auth.signInWithEmailAndPassword(email, document.getElementById('pass-atual').value);
                 await userCred.user.updatePassword(passNova);
-                exibirAlertaAuth('Senha alterada com sucesso! Faça login com a nova senha.', 'sucesso');
+                exibirAlertaAuth('Senha alterada! Faça login.', 'sucesso');
                 document.getElementById('form-alterar-senha').reset();
             } catch (error) {
-                if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                    exibirAlertaAuth('A senha atual fornecida está incorreta.', 'erro');
-                } else if (error.code === 'auth/weak-password') {
-                    exibirAlertaAuth('A nova senha deve ter no mínimo 6 caracteres.', 'erro');
-                } else {
-                    exibirAlertaAuth('Erro ao atualizar a senha.', 'erro');
-                }
+                exibirAlertaAuth('Erro ao atualizar senha.', 'erro');
             }
         }
 
         async function resetarSenha() {
             const email = document.getElementById('login-email').value.trim();
-            if (!email) {
-                exibirAlertaAuth('Informe o seu e-mail no campo acima.', 'erro');
-                return;
-            }
+            if (!email) { exibirAlertaAuth('Informe o e-mail.', 'erro'); return; }
             try {
                 exigirEmailInstitucional(email);
                 await auth.sendPasswordResetEmail(email);
-                exibirAlertaAuth('Se a conta existir, as instruções de redefinição foram enviadas.', 'sucesso');
-            } catch (error) {
-                exibirAlertaAuth(error.message && error.message.includes('domínio') ? error.message : 'Não foi possível solicitar a redefinição.', 'erro');
-            }
+                exibirAlertaAuth('Instruções enviadas.', 'sucesso');
+            } catch (error) { exibirAlertaAuth('Não foi possível redefinir.', 'erro'); }
         }
 
-        function fazerLogout() {
-            auth.signOut();
-        }
-
-        function fecharModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
+        function fazerLogout() { auth.signOut(); }
+        function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function cambiarAba(aba) {
             abaAtual = aba;
@@ -640,58 +516,48 @@
                 const el = document.getElementById('aba-' + a);
                 const btn = document.getElementById('btn-tab-' + a);
                 if (el) el.classList.toggle('hidden', a !== abaAtual);
-                if (btn) btn.className = 'px-4 py-2 rounded-lg transition ' + (a === abaAtual ? 'tab-active' : 'tab-inactive');
+                if (btn) btn.className = `px-4 py-2 rounded-lg transition ${a === abaAtual ? 'tab-active' : 'tab-inactive'}`;
             });
             if (aba === 'dashboard') renderCharts();
         }
 
-        function mudarAba(aba) { cambiarAba(aba); }
+        function mudarAba(aba) { if (aba !== 'dashboard' && !usuarioPode(aba)) { alert('Acesso restrito.'); return; } cambiarAba(aba); }
 
         function iniciarSnapshotFirestore() {
             encerrarSnapshots();
-            const permitidos = MODULOS_TODOS;
-            permitidos.forEach(col => {
+            MODULOS_TODOS.forEach(col => {
                 if (col === 'dashboard') return;
                 const unsubscribe = db.collection(col).onSnapshot(snap => {
                     window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     renderizarTudo();
-                }, err => {
-                    console.error(`Erro ao carregar coleção ${col}:`, err);
-                });
+                }, err => console.error(`Erro na coleção ${col}:`, err));
                 snapshotUnsubscribers.push(unsubscribe);
             });
         }
 
         function renderizarTudo() {
-            renderUsuarios();
-            renderOrgaos();
-            renderDemandas();
-            renderEventos();
-            renderLocais();
-            renderFornecedores();
-            renderDashboardKPIs();
-            preencherSelectOrgaos();
+            renderUsuarios(); renderOrgaos(); renderGrupos(); renderDemandas();
+            renderEventos(); renderLocais(); renderFornecedores(); renderDashboardKPIs();
+            preencherSelectsDinamicos();
         }
 
-        function preencherSelectOrgaos() {
-            const selects = document.querySelectorAll('.select-orgaos-dinamico');
-            selects.forEach(select => {
+        function preencherSelectsDinamicos() {
+            // Select de Órgãos
+            const selectsOrgaos = document.querySelectorAll('.select-orgaos-dinamico');
+            selectsOrgaos.forEach(select => {
                 const valAtual = select.value;
-                select.innerHTML = '<option value="">Selecione o Órgão / Secretaria</option>';
-                
-                const orgaosOrdenados = [...window.dbData.orgaos].sort((a, b) => 
-                    (a.sigla || a.id || '').localeCompare(b.sigla || b.id || '')
-                );
-
-                orgaosOrdenados.forEach(o => {
-                    const sigla = o.sigla || o.id;
-                    const nome = o.nome ? ` - ${o.nome}` : '';
-                    const opt = document.createElement('option');
-                    opt.value = sigla;
-                    opt.textContent = `${sigla}${nome}`;
-                    select.appendChild(opt);
-                });
-
+                select.innerHTML = '<option value="">Selecione o Órgão/Secretaria</option>';
+                const orgaosOrd = [...window.dbData.orgaos].sort((a,b) => (a.sigla||a.id||'').localeCompare(b.sigla||b.id||''));
+                orgaosOrd.forEach(o => { select.innerHTML += `<option value="${escapeHtml(o.sigla||o.id)}">${escapeHtml(o.sigla||o.id)} - ${escapeHtml(o.nome||'')}</option>`; });
+                if (valAtual) select.value = valAtual;
+            });
+            
+            // Select de Grupos
+            const selectsGrupos = document.querySelectorAll('.select-grupos-dinamico');
+            selectsGrupos.forEach(select => {
+                const valAtual = select.value;
+                select.innerHTML = '<option value="Todos os Grupos">Todos os Grupos (Geral)</option>';
+                window.dbData.grupos.forEach(g => { select.innerHTML += `<option value="${escapeHtml(g.nome||g.id)}">${escapeHtml(g.nome||g.id)}</option>`; });
                 if (valAtual) select.value = valAtual;
             });
         }
@@ -703,14 +569,26 @@
                 `<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('usuarios', '${u.id}')">
                     <td class="p-4 font-bold text-slate-800">${escapeHtml(u.nome || u.email)}</td>
                     <td class="p-4 text-slate-600">${escapeHtml(u.email || u.id)}</td>
-                    <td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${escapeHtml(u.subgrupoId || u.orgao || 'GERAL')}</span></td>
+                    <td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${escapeHtml(u.subgrupoId || u.orgao || '-')}</span></td>
                     <td class="p-4">
                         <span class="bg-${u.perfil === 'admin' ? 'amber' : 'slate'}-100 text-${u.perfil === 'admin' ? 'amber-900' : 'slate-700'} text-xs font-bold px-2 py-0.5 rounded uppercase">${escapeHtml(u.perfil || 'comum')}</span>
-                        <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-0.5 rounded ml-1">${escapeHtml(u.grupoUsuario || 'ATI')}</span>
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-0.5 rounded ml-1">${escapeHtml(u.grupoUsuario || 'Geral')}</span>
                     </td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
                 </tr>`
             ).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
+        }
+
+        function renderGrupos() {
+            const tbody = document.getElementById('tabela-grupos');
+            if (!tbody) return;
+            tbody.innerHTML = window.dbData.grupos.map(g => 
+                `<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('grupos', '${g.id}')">
+                    <td class="p-4 font-bold text-indigo-900">${escapeHtml(g.nome || g.id)}</td>
+                    <td class="p-4 text-slate-600 text-xs">${escapeHtml(g.descricao || '-')}</td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Editar</button></td>
+                </tr>`
+            ).join('') || '<tr><td colspan="3" class="p-4 text-center text-slate-400">Nenhum grupo registrado.</td></tr>';
         }
 
         function renderOrgaos() {
@@ -720,12 +598,14 @@
                 `<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro('orgaos', '${o.id}')">
                     <td class="p-4 font-bold text-indigo-900">${escapeHtml(o.sigla || o.id)}</td>
                     <td class="p-4 text-slate-800 font-medium">${escapeHtml(o.nome || '-')}</td>
-                    <td class="p-4 text-xs"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">${escapeHtml(o.tipoJuridico || o.naturezaJuridica || 'Secretaria')}</span></td>
-                    <td class="p-4 text-xs text-slate-600">${escapeHtml(o.responsavel || '-')}</td>
-                    <td class="p-4 text-xs text-slate-600">${escapeHtml(o.email || '-')}</td>
-                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
+                    <td class="p-4 text-xs"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">${escapeHtml(o.tipoJuridico || '-')}</span></td>
+                    <td class="p-4 text-xs text-slate-600">
+                        <div><i class="fa-solid fa-envelope mr-1"></i>${escapeHtml(o.email || '-')}</div>
+                        <div class="mt-1"><i class="fa-solid fa-phone mr-1"></i>${escapeHtml(o.telefone || '-')}</div>
+                    </td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar</button></td>
                 </tr>`
-            ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
+            ).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
         }
 
         function renderDemandas() {
@@ -738,7 +618,7 @@
                     <td class="p-4 text-xs text-slate-500">${escapeHtml(d.categoria || '-')}</td>
                     <td class="p-4 text-xs font-bold text-${d.prioridade === 'Alta' ? 'red' : 'amber'}-600">${escapeHtml(d.prioridade || 'Média')}</td>
                     <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">${escapeHtml(d.status || 'Pendente')}</span></td>
-                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar</button></td>
                 </tr>`
             ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma demanda registrada.</td></tr>';
         }
@@ -751,44 +631,33 @@
             const user = window.currentUser;
 
             let lista = window.dbData.eventos;
-
-            // Filtro por Grupo de Usuário (Exibe eventos do grupo do usuário logado ou "Todos os Grupos")
             if (user && user.perfil !== 'admin') {
-                const grupoUser = user.grupoUsuario || 'ATI';
+                const grupoUser = user.grupoUsuario || 'Geral';
                 lista = lista.filter(e => !e.grupoDestino || e.grupoDestino === 'Todos os Grupos' || e.grupoDestino === grupoUser);
             }
-
             if (filtro === 'futuros') lista = lista.filter(e => (e.dataInicio || e.data) >= agora);
             if (filtro === 'passados') lista = lista.filter(e => (e.dataInicio || e.data) < agora);
 
             grid.innerHTML = lista.map(e => {
-                const dtStart = e.dataInicio || e.data;
-                const dtEnd = e.dataFim;
-                const ePassado = dtStart < agora;
-                
+                const ePassado = (e.dataInicio || e.data) < agora;
                 return `
                 <div onclick="detalharRegistro('eventos', '${e.id}')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between cursor-pointer hover:border-amber-400 transition">
                     <div>
                         <div class="flex justify-between items-start mb-2 gap-1">
                             <span class="bg-${ePassado ? 'slate' : 'amber'}-100 text-${ePassado ? 'slate' : 'amber'}-800 text-[11px] font-bold px-2 py-0.5 rounded">${ePassado ? 'Realizado' : 'Próximo Evento'}</span>
-                            <span class="bg-indigo-100 text-indigo-900 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                                <i class="fa-solid fa-users text-indigo-700"></i> ${escapeHtml(e.grupoDestino || 'Todos os Grupos')}
-                            </span>
+                            <span class="bg-indigo-100 text-indigo-900 text-[10px] font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-users text-indigo-700 mr-1"></i> ${escapeHtml(e.grupoDestino || 'Todos os Grupos')}</span>
                         </div>
                         <h4 class="font-bold text-slate-800 text-base mt-1">${escapeHtml(e.titulo || '-')}</h4>
-                        <p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Palestrante: ${escapeHtml(e.palestrante || 'Não informado')}</p>
                         <div class="bg-slate-50 p-2.5 rounded-lg border my-2 text-[11px] space-y-1">
-                            <p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> <strong>Início:</strong> ${dtStart ? new Date(dtStart).toLocaleString('pt-BR') : '-'}</p>
-                            ${dtEnd ? `<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-red-500 mr-1"></i> <strong>Fim:</strong> ${new Date(dtEnd).toLocaleString('pt-BR')}</p>` : ''}
+                            <p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> <strong>Início:</strong> ${(e.dataInicio || e.data) ? new Date(e.dataInicio || e.data).toLocaleString('pt-BR') : '-'}</p>
                         </div>
-                        <p class="text-xs text-slate-500 line-clamp-2">${escapeHtml(e.descricao || 'Sem descrição.')}</p>
                     </div>
                     <div class="border-t pt-3 mt-3 flex justify-between items-center">
                         <span class="text-xs text-indigo-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(e.local || 'Local não informado')}</span>
-                        <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>
+                        <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar</span>
                     </div>
                 </div>`;
-            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento localizado para o seu grupo com este filtro.</p>';
+            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento encontrado.</p>';
         }
 
         function renderLocais() {
@@ -799,17 +668,21 @@
                     <div>
                         <div class="flex justify-between items-start">
                             <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">${escapeHtml(l.tipoEspaco || 'Auditório')}</span>
-                            <span class="text-xs font-bold ${l.natureza === 'Privado' ? 'text-amber-600' : 'text-emerald-600'}">${escapeHtml(l.natureza || 'Público')}</span>
+                            <span class="text-xs font-bold text-emerald-600">${escapeHtml(l.natureza || 'Público')}</span>
                         </div>
                         <h4 class="font-bold text-slate-800 text-base mt-2">${escapeHtml(l.nome || l.id)}</h4>
                         <p class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>${escapeHtml(l.capacidade || '0')} sentadas</strong></p>
                     </div>
-                    <div class="mt-3 border-t pt-2 flex justify-between items-center text-xs text-slate-500">
-                        <span><i class="fa-solid fa-snowflake mr-1"></i>${escapeHtml(l.climatizacao || 'Sim')}</span>
-                        <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>
+                    <div class="mt-3 border-t pt-2 flex justify-between items-center text-[10px] text-slate-600">
+                        <span class="flex gap-1.5">
+                            <span class="${l.climatizacao === 'Sim' ? 'text-blue-600 font-bold' : 'text-slate-400'}"><i class="fa-solid fa-snowflake mr-0.5"></i>Ar</span>
+                            <span class="${l.som === 'Sim' ? 'text-amber-600 font-bold' : 'text-slate-400'}"><i class="fa-solid fa-volume-high mr-0.5"></i>Som</span>
+                            <span class="${l.estacionamento === 'Sim' ? 'text-emerald-600 font-bold' : 'text-slate-400'}"><i class="fa-solid fa-square-parking mr-0.5"></i>Vagas</span>
+                        </span>
+                        <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar</span>
                     </div>
                 </div>`
-            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local de eventos cadastrado.</p>';
+            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local cadastrado.</p>';
         }
 
         function renderFornecedores() {
@@ -820,6 +693,8 @@
                     <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">${escapeHtml(f.categoria || 'Geral')}</span>
                     <h4 class="font-bold text-slate-800 mt-2">${escapeHtml(f.nome || f.razaoSocial || '-')}</h4>
                     <p class="text-xs text-slate-500"><i class="fa-solid fa-id-card mr-1"></i> CNPJ: ${escapeHtml(f.cnpj || '-')}</p>
+                    <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-envelope mr-1"></i> ${escapeHtml(f.email || 'Sem e-mail')}</p>
+                    <p class="text-xs text-slate-500"><i class="fa-solid fa-phone mr-1"></i> ${escapeHtml(f.telefone || 'Sem telefone')}</p>
                     <div class="mt-3 border-t pt-2 text-right"><span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span></div>
                 </div>`
             ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor cadastrado.</p>';
@@ -842,7 +717,7 @@
             let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-4">';
             for (let k in item) {
                 if (k !== 'senhaHash' && k !== 'senha' && k !== 'historicoStatus') {
-                    htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${escapeHtml(k)}</span><span class="font-semibold text-slate-800">${escapeHtml(Array.isArray(item[k]) ? item[k].join(', ') : item[k])}</span></div>`;
+                    htmlContent += `<div class="p-2 bg-slate-50 border rounded break-words"><span class="text-slate-400 text-[10px] uppercase font-bold block">${escapeHtml(k)}</span><span class="font-semibold text-slate-800">${escapeHtml(Array.isArray(item[k]) ? item[k].join(', ') : item[k])}</span></div>`;
                 }
             }
             htmlContent += '</div>';
@@ -852,36 +727,41 @@
             document.getElementById('edit-doc-id').value = docId;
 
             let editFieldsHtml = '';
-            if (colecao === 'usuarios') {
-                editFieldsHtml = `
-                    <div><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px]">Nome completo</label><input type="text" data-field="nome" value="${escapeHtml(item.nome || '')}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium"></div>
-                    <div><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px]">E-mail institucional</label><input type="email" value="${escapeHtml(item.email || '')}" disabled class="w-full p-2 border rounded bg-slate-100 text-slate-500"></div>
-                    <div><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px]">Órgão / Secretaria</label><select data-field="subgrupoId" class="edit-dinamico-input select-orgaos-dinamico w-full p-2 border rounded bg-white font-medium"></select></div>
-                    <div><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px]">Grupo de Acesso / Destino</label>
-                        <select data-field="grupoUsuario" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">
-                            <option value="ATI" ${item.grupoUsuario === 'ATI' ? 'selected' : ''}>ATI (Agência de Tecnologia)</option>
-                            <option value="Secretarias" ${item.grupoUsuario === 'Secretarias' ? 'selected' : ''}>Secretarias Executivas</option>
-                            <option value="Fornecedores" ${item.grupoUsuario === 'Fornecedores' ? 'selected' : ''}>Fornecedores TIC</option>
-                            <option value="Público Geral" ${item.grupoUsuario === 'Público Geral' ? 'selected' : ''}>Público Geral</option>
-                        </select>
-                    </div>
-                    <div><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px]">Perfil</label><select data-field="perfil" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium"><option value="comum" ${item.perfil === 'comum' ? 'selected' : ''}>Comum</option><option value="admin" ${item.perfil === 'admin' ? 'selected' : ''}>Administrador</option></select></div>
-                `;
-            } else {
-                for (let k in item) {
-                    if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus') continue;
-                    const fieldVal = item[k] !== undefined ? item[k] : '';
-                    editFieldsHtml += `<div class="mb-2">
-                        <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k}</label>
-                        <input type="text" data-field="${escapeHtml(k)}" value="${escapeHtml(fieldVal)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">
-                    </div>`;
+            for (let k in item) {
+                if (CAMPOS_SISTEMA.includes(k) || k === 'id' || k === 'historicoStatus') continue;
+                const fieldVal = item[k] !== undefined ? item[k] : '';
+                
+                editFieldsHtml += `<div class="mb-2 w-full col-span-1 ${String(fieldVal).length > 50 || k === 'descricao' || k === 'endereco' ? 'sm:col-span-2' : ''}">
+                    <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k}</label>`;
+                
+                if (k === 'modulosPermitidos' && Array.isArray(fieldVal)) {
+                    editFieldsHtml += `<div class="grid grid-cols-2 gap-1.5 p-2 border rounded bg-white">`;
+                    MODULOS_TODOS.forEach(m => {
+                        editFieldsHtml += `<label class="inline-flex items-center text-xs"><input type="checkbox" value="${m}" class="edit-modulo-cb mr-1.5" ${fieldVal.includes(m) ? 'checked' : ''}> ${m.toUpperCase()}</label>`;
+                    });
+                    editFieldsHtml += `</div>`;
+                } else if (k === 'subgrupoId' || k === 'orgao') {
+                    editFieldsHtml += `<select data-field="${escapeHtml(k)}" class="edit-dinamico-input select-orgaos-dinamico w-full p-2 border rounded bg-white font-medium" data-val="${escapeHtml(fieldVal)}"></select>`;
+                } else if (k === 'grupoUsuario' || k === 'grupoDestino') {
+                    editFieldsHtml += `<select data-field="${escapeHtml(k)}" class="edit-dinamico-input select-grupos-dinamico w-full p-2 border rounded bg-white font-medium" data-val="${escapeHtml(fieldVal)}"></select>`;
+                } else if (k === 'climatizacao' || k === 'som' || k === 'estacionamento') {
+                    editFieldsHtml += `<select data-field="${escapeHtml(k)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium"><option value="Sim" ${fieldVal === 'Sim' ? 'selected' : ''}>Sim</option><option value="Não" ${fieldVal === 'Não' ? 'selected' : ''}>Não</option></select>`;
+                } else if (String(fieldVal).length > 50 || k === 'descricao' || k === 'endereco') {
+                    editFieldsHtml += `<textarea data-field="${escapeHtml(k)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">${escapeHtml(fieldVal)}</textarea>`;
+                } else {
+                    editFieldsHtml += `<input type="text" data-field="${escapeHtml(k)}" value="${escapeHtml(fieldVal)}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" ${k === 'email' && colecao === 'usuarios' ? 'disabled' : ''}>`;
                 }
+                editFieldsHtml += `</div>`;
             }
 
-            document.getElementById('edit-campos-dinamicos').innerHTML = editFieldsHtml;
-            preencherSelectOrgaos();
+            document.getElementById('edit-campos-dinamicos').innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${editFieldsHtml}</div>`;
+            preencherSelectsDinamicos();
+            
+            // Restaura o valor dos selects dinâmicos após preenchidos
+            document.querySelectorAll('#edit-campos-dinamicos select[data-val]').forEach(s => { s.value = s.getAttribute('data-val'); });
 
-            document.getElementById('detalhe-area-admin').classList.remove('hidden');
+            const podeEditar = colecao === 'usuarios' ? window.currentUser?.perfil === ADMIN_PERFIL : usuarioPode(colecao);
+            document.getElementById('detalhe-area-admin').classList.toggle('hidden', !podeEditar);
             document.getElementById('modal-detalhes').classList.remove('hidden');
         };
 
@@ -904,6 +784,8 @@
                 });
 
                 if (colecao === 'usuarios') {
+                    const cbs = document.querySelectorAll('.edit-modulo-cb:checked');
+                    updatedData.modulosPermitidos = Array.from(cbs).map(cb => cb.value);
                     updatedData.uid = original?.uid || docId;
                     updatedData.email = original?.email || docId;
                     if (original?.criadoPorUid) updatedData.criadoPorUid = original.criadoPorUid;
@@ -917,26 +799,21 @@
                 alert('Registro atualizado com sucesso no Firestore!');
                 fecharModal('modal-detalhes');
             } catch (err) {
-                console.error('Erro ao atualizar registro no Firestore:', err);
                 alert('Erro ao atualizar registro: ' + (err.message || 'Verifique as regras do Firestore.'));
             } finally {
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Todas as Alterações'; }
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Alterações'; }
             }
         };
 
         window.excluirRegistroUniversal = async function() {
             const colecao = document.getElementById('edit-colecao').value;
             const docId = document.getElementById('edit-doc-id').value;
-
             if (!confirm('Tem certeza que deseja excluir este registro?')) return;
-
             try {
                 await db.collection(colecao).doc(docId).delete();
                 alert('Registro excluído com sucesso!');
                 fecharModal('modal-detalhes');
-            } catch (err) {
-                alert('Erro ao excluir registro: ' + err.message);
-            }
+            } catch (err) { alert('Erro ao excluir registro: ' + err.message); }
         };
 
         function abrirModalForm(tipo) {
@@ -946,150 +823,130 @@
 
             if (tipo === 'evento') {
                 container.innerHTML = `
-                    <div><label class="block font-medium text-slate-700 mb-1">Título do Evento</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Título do Evento</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">Palestrante</label><input type="text" id="univ-c2" class="w-full p-2 border rounded"></div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div><label class="block font-medium text-slate-700 mb-1">Data/Hora Início</label><input type="datetime-local" id="univ-c3" required class="w-full p-2 border rounded"></div>
-                        <div><label class="block font-medium text-slate-700 mb-1">Data/Hora Fim</label><input type="datetime-local" id="univ-c4" required class="w-full p-2 border rounded"></div>
-                    </div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Grupo Destinatário do Evento</label>
-                        <select id="univ-grupo-destino" class="w-full p-2 border rounded bg-white font-medium">
-                            <option value="Todos os Grupos">Todos os Grupos (Aberto a Todos)</option>
-                            <option value="ATI">Apenas Grupo ATI</option>
-                            <option value="Secretarias">Apenas Secretarias Executivas</option>
-                            <option value="Fornecedores">Apenas Fornecedores TIC</option>
-                            <option value="Público Geral">Apenas Público Geral</option>
-                        </select>
-                    </div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Grupo Destinatário</label><select id="univ-grupo-destino" class="w-full p-2 border rounded select-grupos-dinamico bg-white"></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Data/Hora Início</label><input type="datetime-local" id="univ-c3" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Data/Hora Fim</label><input type="datetime-local" id="univ-c4" required class="w-full p-2 border rounded"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">Local / Espaço</label><input type="text" id="univ-c5" class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Descrição</label><textarea id="univ-c6" rows="2" class="w-full p-2 border rounded"></textarea></div>
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Descrição</label><textarea id="univ-c6" rows="2" class="w-full p-2 border rounded"></textarea></div>
                 `;
             } else if (tipo === 'usuario') {
                 container.innerHTML = `
-                    <div><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label><input type="email" id="univ-c2" required class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Senha inicial</label><input type="password" id="univ-pass" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Órgão / Secretaria Vinculada</label><select id="univ-c3" required class="w-full p-2 border rounded select-orgaos-dinamico bg-white font-medium text-slate-800"></select></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Grupo de Acesso do Usuário</label>
-                        <select id="univ-grupo-user" class="w-full p-2 border rounded bg-white font-medium">
-                            <option value="ATI">ATI (Agência de Tecnologia)</option>
-                            <option value="Secretarias">Secretarias Executivas</option>
-                            <option value="Fornecedores">Fornecedores TIC</option>
-                            <option value="Público Geral">Público Geral</option>
-                        </select>
-                    </div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Perfil de Acesso</label><select id="univ-c4" class="w-full p-2 border rounded bg-white"><option value="comum">Comum</option><option value="admin">Admin</option></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Senha inicial</label><input type="password" id="univ-pass" required minlength="6" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Órgão / Secretaria</label><select id="univ-c3" required class="w-full p-2 border rounded select-orgaos-dinamico bg-white font-medium"></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Grupo de Acesso</label><select id="univ-grupo-user" class="w-full p-2 border rounded select-grupos-dinamico bg-white font-medium"></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Perfil</label><select id="univ-c4" class="w-full p-2 border rounded bg-white"><option value="comum">Comum</option><option value="admin">Admin</option></select></div>
                 `;
-                preencherSelectOrgaos();
             } else if (tipo === 'orgao') {
                 container.innerHTML = `
                     <div><label class="block font-medium text-slate-700 mb-1">Sigla do Órgão</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded uppercase"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Nome Completo do Órgão / Secretaria</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Tipo Jurídico</label><select id="univ-c3" class="w-full p-2 border rounded bg-white"><option value="Secretaria">Secretaria</option><option value="Autarquia">Autarquia</option><option value="Empresa Pública">Empresa Pública</option></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Responsável TIC</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">E-mail Contato</label><input type="email" id="univ-c5" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Telefone</label><input type="text" id="univ-c6" class="w-full p-2 border rounded"></div>
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Endereço Completo</label><input type="text" id="univ-c7" class="w-full p-2 border rounded"></div>
                 `;
             } else if (tipo === 'fornecedor') {
                 container.innerHTML = `
-                    <div><label class="block font-medium text-slate-700 mb-1">Razão Social / Nome Fantasia</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Razão Social / Nome</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">CNPJ</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Categoria TIC</label><input type="text" id="univ-c3" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Responsável</label><input type="text" id="univ-c4" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Contrato N°</label><input type="text" id="univ-c5" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">E-mail</label><input type="email" id="univ-c6" class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Telefone</label><input type="text" id="univ-c7" class="w-full p-2 border rounded"></div>
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Endereço</label><input type="text" id="univ-c8" class="w-full p-2 border rounded"></div>
+                `;
+            } else if (tipo === 'local') {
+                container.innerHTML = `
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Nome do Espaço</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Capacidade</label><input type="number" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Natureza</label><select id="univ-c3" class="w-full p-2 border rounded bg-white"><option value="Público">Público</option><option value="Privado">Privado</option></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Climatização?</label><select id="univ-c4" class="w-full p-2 border rounded bg-white"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Equip. Som?</label><select id="univ-c5" class="w-full p-2 border rounded bg-white"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Estacionamento?</label><select id="univ-c6" class="w-full p-2 border rounded bg-white"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Valor Aluguel (R$)</label><input type="text" id="univ-c7" placeholder="Ex: Gratuito, 500.00" class="w-full p-2 border rounded"></div>
+                `;
+            } else if (tipo === 'grupo') {
+                container.innerHTML = `
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Nome do Grupo</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded" placeholder="Ex: Sec. Saúde, Fornecedores Externos"></div>
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Descrição</label><textarea id="univ-c2" rows="2" class="w-full p-2 border rounded"></textarea></div>
                 `;
             } else if (tipo === 'demanda') {
                 container.innerHTML = `
-                    <div><label class="block font-medium text-slate-700 mb-1">Título da Demanda</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
-                    <div><label class="block font-medium text-slate-700 mb-1">Órgão Solicitante</label><select id="univ-c2" required class="w-full p-2 border rounded select-orgaos-dinamico bg-white font-medium text-slate-800"></select></div>
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Título da Demanda</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
+                    <div class="col-span-2"><label class="block font-medium text-slate-700 mb-1">Órgão Solicitante</label><select id="univ-c2" required class="w-full p-2 border rounded select-orgaos-dinamico bg-white font-medium"></select></div>
                 `;
-                preencherSelectOrgaos();
             }
 
+            preencherSelectsDinamicos();
             document.getElementById('modal-form-universal').classList.remove('hidden');
         }
 
         async function salvarCadastroUniversal(e) {
             e.preventDefault();
             const tipo = document.getElementById('form-univ-tipo').value;
+            const uidStamp = window.currentUser?.uid || 'SISTEMA';
 
             try {
-                if (tipo === 'evento') {
-                    const novoObj = {
-                        titulo: document.getElementById('univ-c1').value,
-                        palestrante: document.getElementById('univ-c2').value,
-                        dataInicio: document.getElementById('univ-c3').value,
-                        dataFim: document.getElementById('univ-c4').value,
-                        grupoDestino: document.getElementById('univ-grupo-destino').value,
-                        local: document.getElementById('univ-c5').value,
-                        descricao: document.getElementById('univ-c6').value,
-                        criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-                        criadoPorUid: window.currentUser?.uid || 'SISTEMA'
-                    };
-                    await db.collection('eventos').add(novoObj);
-
+                if (tipo === 'grupo') {
+                    const nome = document.getElementById('univ-c1').value.trim();
+                    await db.collection('grupos').doc(nome).set({ nome, descricao: document.getElementById('univ-c2').value, criadoPorUid: uidStamp });
+                } else if (tipo === 'evento') {
+                    await db.collection('eventos').add({
+                        titulo: document.getElementById('univ-c1').value, palestrante: document.getElementById('univ-c2').value,
+                        dataInicio: document.getElementById('univ-c3').value, dataFim: document.getElementById('univ-c4').value,
+                        grupoDestino: document.getElementById('univ-grupo-destino').value, local: document.getElementById('univ-c5').value,
+                        descricao: document.getElementById('univ-c6').value, criadoEm: firebase.firestore.FieldValue.serverTimestamp(), criadoPorUid: uidStamp
+                    });
                 } else if (tipo === 'usuario') {
                     const email = document.getElementById('univ-c2').value.toLowerCase().trim();
                     const password = document.getElementById('univ-pass').value;
-
-                    let novoUid = null;
                     let tempApp = null;
                     try {
                         tempApp = firebase.initializeApp(firebaseConfig, 'SecondaryApp');
-                        let cred = await tempApp.auth().createUserWithEmailAndPassword(email, password);
-                        novoUid = cred.user.uid;
-                    } catch (authErr) {
-                        if (authErr.code === 'auth/email-already-in-use') {
-                            novoUid = email;
-                        } else {
-                            throw authErr;
-                        }
-                    } finally {
-                        if (tempApp) { try { await tempApp.delete(); } catch (_) {} }
-                    }
+                        await tempApp.auth().createUserWithEmailAndPassword(email, password);
+                    } catch (authErr) { if (authErr.code !== 'auth/email-already-in-use') throw authErr; }
+                    finally { if (tempApp) { try { await tempApp.delete(); } catch (_) {} } }
 
-                    const novoObj = {
-                        uid: novoUid,
-                        nome: document.getElementById('univ-c1').value.trim(),
-                        email,
-                        subgrupoId: document.getElementById('univ-c3').value,
-                        grupoUsuario: document.getElementById('univ-grupo-user').value,
-                        perfil: document.getElementById('univ-c4').value,
-                        ativo: true,
-                        modulosPermitidos: MODULOS_TODOS,
-                        criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-                        criadoPorUid: window.currentUser?.uid || 'SISTEMA'
-                    };
-                    await db.collection('usuarios').doc(novoUid).set(novoObj);
+                    await db.collection('usuarios').doc(email).set({
+                        uid: email, nome: document.getElementById('univ-c1').value.trim(), email,
+                        subgrupoId: document.getElementById('univ-c3').value, grupoUsuario: document.getElementById('univ-grupo-user').value,
+                        perfil: document.getElementById('univ-c4').value, ativo: true, modulosPermitidos: MODULOS_TODOS,
+                        criadoEm: firebase.firestore.FieldValue.serverTimestamp(), criadoPorUid: uidStamp
+                    });
                 } else if (tipo === 'orgao') {
                     const sigla = document.getElementById('univ-c1').value.toUpperCase().trim();
-                    await db.collection('orgaos').doc(sigla).set({ sigla, nome: document.getElementById('univ-c2').value });
+                    await db.collection('orgaos').doc(sigla).set({
+                        sigla, nome: document.getElementById('univ-c2').value, tipoJuridico: document.getElementById('univ-c3').value,
+                        responsavel: document.getElementById('univ-c4').value, email: document.getElementById('univ-c5').value,
+                        telefone: document.getElementById('univ-c6').value, endereco: document.getElementById('univ-c7').value
+                    });
                 } else if (tipo === 'fornecedor') {
-                    await db.collection('fornecedores').add({ nome: document.getElementById('univ-c1').value, cnpj: document.getElementById('univ-c2').value });
+                    await db.collection('fornecedores').add({
+                        nome: document.getElementById('univ-c1').value, cnpj: document.getElementById('univ-c2').value,
+                        categoria: document.getElementById('univ-c3').value, responsavel: document.getElementById('univ-c4').value,
+                        numeroContrato: document.getElementById('univ-c5').value, email: document.getElementById('univ-c6').value,
+                        telefone: document.getElementById('univ-c7').value, endereco: document.getElementById('univ-c8').value
+                    });
+                } else if (tipo === 'local') {
+                    await db.collection('locais').add({
+                        nome: document.getElementById('univ-c1').value, capacidade: document.getElementById('univ-c2').value,
+                        natureza: document.getElementById('univ-c3').value, climatizacao: document.getElementById('univ-c4').value,
+                        som: document.getElementById('univ-c5').value, estacionamento: document.getElementById('univ-c6').value,
+                        valorAluguel: document.getElementById('univ-c7').value
+                    });
                 } else if (tipo === 'demanda') {
                     await db.collection('demandas').add({ titulo: document.getElementById('univ-c1').value, orgao: document.getElementById('univ-c2').value, status: 'Pendente' });
                 }
 
                 alert('Cadastro realizado e salvo no Firestore com sucesso!');
                 fecharModal('modal-form-universal');
-            } catch (err) {
-                alert('Erro ao cadastrar: ' + err.message);
-            }
-        }
-
-        function exportarUsuariosCSV() {
-            let csv = "Nome;Email;Orgao;Grupo;Perfil\n";
-            window.dbData.usuarios.forEach(u => {
-                csv += `${u.nome || ''};${escapeHtml(u.email || u.id)};${escapeHtml(u.subgrupoId || u.orgao || '')};${u.grupoUsuario || 'ATI'};${u.perfil || ''}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "usuarios_prgd.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function renderDashboardKPIs() {
-            document.getElementById('dash-tot-demandas').textContent = window.dbData.demandas.length;
-            document.getElementById('dash-tot-eventos').textContent = window.dbData.eventos.length;
-            document.getElementById('dash-tot-locais').textContent = window.dbData.locais.length;
-            document.getElementById('dash-tot-orgaos').textContent = window.dbData.orgaos.length;
-            document.getElementById('dash-tot-fornecedores').textContent = window.dbData.fornecedores.length;
+            } catch (err) { alert('Erro ao cadastrar: ' + err.message); }
         }
 
         function renderCharts() {
