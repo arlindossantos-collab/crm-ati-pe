@@ -412,7 +412,7 @@
                 { id: 'FOR-001', nome: 'Tech Cloud Solutions PE', cnpj: '12.345.678/0001-90', categoria: 'Infraestrutura / Cloud', responsavel: 'Carlos Eduardo', telefone: '(81) 98888-7777', email: 'contato@techcloudpe.com.br', numeroContrato: 'Contrato nº 012/2025-ATI', valorContratual: 'R$ 2.400.000,00', statusContrato: 'Ativo / Em Execução', escopoServico: 'Suporte, governança cloud privada e sustentação de banco de dados.', endereco: 'Av. Agamenon Magalhães, Recife - PE', ramo: 'Infraestrutura', pontoFocal: 'Carlos Eduardo', eventosParticipados: 'GOV IN PLAY 2025', descricao: 'Parceiro principal em hospedagem cloud.' }
             ],
             usuarios: [
-                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', subgrupoId: 'ATI', perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'] }
+                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', subgrupoId: 'ATI', perfil: 'admin', senha: '123', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'] }
             ]
         };
 
@@ -769,7 +769,7 @@
 
                 let editFieldsHtml = '';
                 for (let k in item) {
-                    if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus' || k === 'modulosPermitidos') continue;
+                    if (k === 'id' || k === 'senhaHash' || k === 'senha' || k === 'historicoStatus' || k === 'modulosPermitidos') continue;
                     const fieldVal = item[k] !== undefined ? item[k] : '';
                     const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'escopoServico' || k === 'eventosParticipados';
                     
