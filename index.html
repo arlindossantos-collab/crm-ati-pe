@@ -80,7 +80,7 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
             </form>
             
-            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 16.3.0 · ATI-PE</p>
+            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 16.4.0 · ATI-PE</p>
         </div>
     </div>
 
@@ -95,7 +95,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v16.3 STABLE</span>
+                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v16.4 STABLE</span>
                         </div>
                         <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                     </div>
@@ -394,7 +394,7 @@
         </div>
 
         <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v16.3 STABLE</span>
+            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v16.4 STABLE</span>
         </footer>
     </div>
 
@@ -421,7 +421,6 @@
 
         const MODULOS_TODOS = ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
 
-        // MONITOR DE SEGURANÇA E AUTENTICAÇÃO
         auth.onAuthStateChanged(user => {
             const authScreen = document.getElementById('auth-screen');
             const appWrapper = document.getElementById('app-wrapper');
@@ -599,7 +598,6 @@
 
         function mudarAba(aba) { cambiarAba(aba); }
 
-        // LISTENER EM TEMPO REAL FIRESTORE
         function iniciarSnapshotFirestore() {
             const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
             colecoes.forEach(col => {
@@ -798,7 +796,7 @@
             let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-4">';
             for (let k in item) {
                 if (k !== 'senhaHash' && k !== 'senha' && k !== 'historicoStatus') {
-                    htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${k}</span><span class="font-semibold text-slate-800">${item[k]}</span></div>`;
+                    htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${k}</span><span class="font-semibold text-slate-800">${Array.isArray(item[k]) ? item[k].join(', ') : item[k]}</span></div>`;
                 }
             }
             htmlContent += '</div>';
@@ -886,7 +884,14 @@
                 editFieldsHtml += `<div class="mb-2">
                     <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k}</label>`;
                 
-                if (isLongText) {
+                if (k === 'modulosPermitidos' && Array.isArray(fieldVal)) {
+                    editFieldsHtml += `<div class="grid grid-cols-2 gap-1.5 p-2 border rounded bg-white">`;
+                    MODULOS_TODOS.forEach(m => {
+                        const checked = fieldVal.includes(m) ? 'checked' : '';
+                        editFieldsHtml += `<label class="inline-flex items-center text-xs"><input type="checkbox" value="${m}" class="edit-modulo-cb mr-1.5" ${checked}> ${m.toUpperCase()}</label>`;
+                    });
+                    editFieldsHtml += `</div>`;
+                } else if (isLongText) {
                     editFieldsHtml += `<textarea data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">${fieldVal}</textarea>`;
                 } else if (k === 'subgrupoId' || k === 'orgao') {
                     editFieldsHtml += `<select data-field="${k}" class="edit-dinamico-input select-orgaos-dinamico w-full p-2 border rounded bg-white font-medium"></select>`;
@@ -954,6 +959,12 @@
                 const fieldName = input.getAttribute('data-field');
                 if (fieldName) updatedData[fieldName] = input.value;
             });
+
+            // Se for usuário e tiver a seleção de módulos
+            const cbs = document.querySelectorAll('.edit-modulo-cb');
+            if (cbs.length > 0) {
+                updatedData.modulosPermitidos = Array.from(cbs).filter(cb => cb.checked).map(cb => cb.value);
+            }
 
             try {
                 await db.collection(colecao).doc(docId).update(updatedData);
@@ -1030,8 +1041,22 @@
                 container.innerHTML = `
                     <div><label class="block font-medium text-slate-700 mb-1">Nome Completo</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label><input type="email" id="univ-c2" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block font-medium text-slate-700 mb-1">Senha do Usuário</label><input type="password" id="univ-pass" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full p-2 border rounded"></div>
                     <div><label class="block font-medium text-slate-700 mb-1">Órgão / Secretaria Vinculada</label><select id="univ-c3" required class="w-full p-2 border rounded select-orgaos-dinamico bg-white font-medium text-slate-800"></select></div>
                     <div><label class="block font-medium text-slate-700 mb-1">Perfil de Acesso</label><select id="univ-c4" class="w-full p-2 border rounded bg-white"><option value="comum">Comum</option><option value="admin">Admin</option></select></div>
+                    
+                    <div class="pt-2">
+                        <label class="block font-medium text-slate-700 mb-1.5">Módulos Permitidos no Painel</label>
+                        <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 border rounded-lg text-xs">
+                            <label class="inline-flex items-center gap-1.5 font-medium"><input type="checkbox" value="dashboard" class="user-modulo-cb" checked> Dashboard</label>
+                            <label class="inline-flex items-center gap-1.5 font-medium"><input type="checkbox" value="demandas" class="user-modulo-cb" checked> Demandas</label>
+                            <label class="inline-flex items-center gap-1.5 font-medium"><input type="checkbox" value="eventos" class="user-modulo-cb" checked> Eventos</label>
+                            <label class="inline-flex items-center gap-1.5 font-medium"><input type="checkbox" value="locais" class="user-modulo-cb" checked> Locais</label>
+                            <label class="inline-flex items-center gap-1.5 font-medium"><input type="checkbox" value="orgaos" class="user-modulo-cb" checked> Órgãos</label>
+                            <label class="inline-flex items-center gap-1.5 font-medium"><input type="checkbox" value="fornecedores" class="user-modulo-cb" checked> Fornecedores</label>
+                            <label class="inline-flex items-center gap-1.5 font-medium"><input type="checkbox" value="usuarios" class="user-modulo-cb" checked> Usuários</label>
+                        </div>
+                    </div>
                 `;
                 preencherSelectOrgaos();
             } else if (tipo === 'demanda') {
@@ -1064,7 +1089,6 @@
                     };
                     await db.collection('orgaos').doc(sigla).set(novoObj);
                     
-                    // Atualiza a memória local imediatamente e re-renderiza
                     const idx = window.dbData.orgaos.findIndex(o => o.id === sigla || o.sigla === sigla);
                     if (idx >= 0) window.dbData.orgaos[idx] = { id: sigla, ...novoObj };
                     else window.dbData.orgaos.push({ id: sigla, ...novoObj });
@@ -1104,11 +1128,27 @@
 
                 } else if (tipo === 'usuario') {
                     const email = document.getElementById('univ-c2').value.toLowerCase().trim();
+                    const password = document.getElementById('univ-pass').value;
+                    const cbs = document.querySelectorAll('.user-modulo-cb:checked');
+                    const modulosPermitidos = Array.from(cbs).map(cb => cb.value);
+
+                    // Cria conta de autenticação no Firebase
+                    try {
+                        const tempApp = firebase.initializeApp(firebaseConfig, 'SecondaryApp');
+                        await tempApp.auth().createUserWithEmailAndPassword(email, password);
+                        await tempApp.delete();
+                    } catch (authErr) {
+                        if (authErr.code !== 'auth/email-already-in-use') {
+                            throw new Error('Erro ao registrar credenciais de acesso: ' + authErr.message);
+                        }
+                    }
+
                     novoObj = {
                         nome: document.getElementById('univ-c1').value,
                         email,
                         subgrupoId: document.getElementById('univ-c3').value,
-                        perfil: document.getElementById('univ-c4').value
+                        perfil: document.getElementById('univ-c4').value,
+                        modulosPermitidos
                     };
                     await db.collection('usuarios').doc(email).set(novoObj);
                     window.dbData.usuarios.push({ id: email, ...novoObj });
@@ -1193,7 +1233,8 @@
                         await db.collection('usuarios').doc(email).set({
                             nome: cols[0] || email, email,
                             subgrupoId: cols[2] || 'ATI',
-                            perfil: (cols[3] || 'comum').toLowerCase()
+                            perfil: (cols[3] || 'comum').toLowerCase(),
+                            modulosPermitidos: MODULOS_TODOS
                         });
                         importCount++;
                     }
