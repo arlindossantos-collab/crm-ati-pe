@@ -178,12 +178,12 @@
     </form>
 
     <div class="footer-version">
-      Versão <span id="app-version">1.0.3</span>
+      Versão <span id="app-version">1.0.4</span>
     </div>
   </div>
 
   <script>
-    // Configurações do Firebase integradas
+    // Configurações do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
       authDomain: "prgd-ati-pe.firebaseapp.com",
@@ -236,7 +236,7 @@
       hideMessage();
 
       if (!auth) {
-        showMessage('Erro de conexão: Serviços de autenticação indisponíveis.');
+        showMessage('Erro de conexão com o Firebase.');
         return;
       }
 
@@ -251,24 +251,26 @@
 
         localStorage.setItem('userEmail', user.email);
         setTimeout(() => {
-          window.location.href = '/dashboard'; // Altere para a URL/página principal do seu sistema
+          window.location.href = '/dashboard'; // Altere para a página principal
         }, 1000);
 
       } catch (error) {
         console.error("Erro do Firebase Auth:", error.code, error.message);
 
+        // Tratamento para invalid-credential e invalid-login-credentials
         if (
+          error.code === 'auth/invalid-login-credentials' ||
+          error.code === 'auth/invalid-credential' ||
           error.code === 'auth/user-not-found' || 
-          error.code === 'auth/wrong-password' || 
-          error.code === 'auth/invalid-credential'
+          error.code === 'auth/wrong-password'
         ) {
-          showMessage('Usuário inexistente ou senha inválida.');
+          showMessage('Usuário inexistente ou senha incorreta.');
         } else if (error.code === 'auth/invalid-email') {
           showMessage('Formato de e-mail inválido.');
         } else if (error.code === 'auth/network-request-failed') {
-          showMessage('Falha na conexão de rede com o servidor de autenticação.');
+          showMessage('Falha de rede ao conectar ao servidor do Firebase.');
         } else {
-          showMessage('Erro ao autenticar: ' + (error.message || 'Verifique seus dados.'));
+          showMessage('Erro ao autenticar: ' + error.message);
         }
       }
     }
@@ -278,7 +280,7 @@
       hideMessage();
 
       if (!auth) {
-        showMessage('Erro de conexão com o serviço de autenticação.');
+        showMessage('Erro de conexão com o Firebase.');
         return;
       }
 
@@ -294,7 +296,7 @@
       const user = auth.currentUser;
 
       if (!user) {
-        showMessage('Para alterar a senha, realize o login primeiro na aba "Entrar".');
+        showMessage('Para alterar a senha, efetue o login primeiro na aba "Entrar".');
         return;
       }
 
@@ -308,12 +310,16 @@
 
       } catch (error) {
         console.error("Erro ao alterar senha:", error);
-        if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        if (
+          error.code === 'auth/invalid-login-credentials' ||
+          error.code === 'auth/invalid-credential' ||
+          error.code === 'auth/wrong-password'
+        ) {
           showMessage('A senha atual informada está incorreta.');
         } else if (error.code === 'auth/weak-password') {
-          showMessage('A nova senha deve possuir pelo menos 6 caracteres.');
+          showMessage('A nova senha deve ter no mínimo 6 caracteres.');
         } else {
-          showMessage('Erro ao atualizar a senha no banco.');
+          showMessage('Erro ao atualizar senha no banco.');
         }
       }
     }
