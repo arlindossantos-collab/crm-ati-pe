@@ -80,7 +80,7 @@
                 <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
             </form>
             
-            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 16.2.0 · ATI-PE</p>
+            <p class="text-[11px] text-slate-400 text-center mt-6">Versão 16.3.0 · ATI-PE</p>
         </div>
     </div>
 
@@ -95,7 +95,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v16.2 STABLE</span>
+                            <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v16.3 STABLE</span>
                         </div>
                         <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                     </div>
@@ -394,7 +394,7 @@
         </div>
 
         <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v16.2 STABLE</span>
+            PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v16.3 STABLE</span>
         </footer>
     </div>
 
@@ -455,7 +455,6 @@
                         };
                     }
 
-                    // SUPER USUÁRIO FORÇADO PARA O SEU E-MAIL
                     if (userEmail === 'arlindo.santos@ati.pe.gov.br') {
                         window.currentUser.perfil = 'admin';
                         window.currentUser.modulosPermitidos = MODULOS_TODOS;
@@ -600,13 +599,12 @@
 
         function mudarAba(aba) { cambiarAba(aba); }
 
+        // LISTENER EM TEMPO REAL FIRESTORE
         function iniciarSnapshotFirestore() {
             const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
             colecoes.forEach(col => {
                 db.collection(col).onSnapshot(snap => {
-                    if (!snap.empty) {
-                        window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    }
+                    window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     renderizarTudo();
                 }, err => {
                     console.warn(`Snapshot em ${col} falhou`, err);
@@ -625,14 +623,12 @@
             preencherSelectOrgaos();
         }
 
-        // PREENCHIMENTO DINÂMICO E RECURSIVO DOS ÓRGÃOS NOS SELECTS
         function preencherSelectOrgaos() {
             const selects = document.querySelectorAll('.select-orgaos-dinamico');
             selects.forEach(select => {
                 const valAtual = select.value;
                 select.innerHTML = '<option value="">Selecione o Órgão / Secretaria</option>';
                 
-                // Ordena alfabeticamente pela Sigla
                 const orgaosOrdenados = [...window.dbData.orgaos].sort((a, b) => 
                     (a.sigla || a.id || '').localeCompare(b.sigla || b.id || '')
                 );
@@ -903,7 +899,6 @@
             document.getElementById('edit-campos-dinamicos').innerHTML = editFieldsHtml;
             preencherSelectOrgaos();
             
-            // Re-seleciona o valor atual do órgão no edit se aplicável
             if (item.subgrupoId || item.orgao) {
                 const selectEdit = document.querySelector('#edit-campos-dinamicos .select-orgaos-dinamico');
                 if (selectEdit) selectEdit.value = item.subgrupoId || item.orgao;
@@ -1057,67 +1052,88 @@
             const tipo = document.getElementById('form-univ-tipo').value;
             let novoObj = {};
 
-            if (tipo === 'orgao') {
-                const sigla = document.getElementById('univ-c1').value.toUpperCase();
-                novoObj = {
-                    sigla, nome: document.getElementById('univ-c2').value,
-                    tipoJuridico: document.getElementById('univ-c3').value,
-                    responsavel: document.getElementById('univ-c4').value,
-                    email: document.getElementById('univ-c5').value
-                };
-                await db.collection('orgaos').doc(sigla).set(novoObj);
-            } else if (tipo === 'fornecedor') {
-                novoObj = {
-                    nome: document.getElementById('univ-c1').value,
-                    cnpj: document.getElementById('univ-c2').value,
-                    categoria: document.getElementById('univ-c3').value,
-                    responsavel: document.getElementById('univ-c4').value,
-                    numeroContrato: document.getElementById('univ-c5').value
-                };
-                await db.collection('fornecedores').add(novoObj);
-            } else if (tipo === 'evento') {
-                novoObj = {
-                    titulo: document.getElementById('univ-c1').value,
-                    palestrante: document.getElementById('univ-c2').value,
-                    dataInicio: document.getElementById('univ-c3').value,
-                    dataFim: document.getElementById('univ-c4').value,
-                    local: document.getElementById('univ-c5').value,
-                    descricao: document.getElementById('univ-c6').value,
-                    visibilidade: 'Aberto ao Público'
-                };
-                await db.collection('eventos').add(novoObj);
-            } else if (tipo === 'local') {
-                novoObj = {
-                    nome: document.getElementById('univ-c1').value,
-                    capacidade: document.getElementById('univ-c2').value,
-                    natureza: document.getElementById('univ-c3').value
-                };
-                await db.collection('locais').add(novoObj);
-            } else if (tipo === 'usuario') {
-                const email = document.getElementById('univ-c2').value.toLowerCase();
-                novoObj = {
-                    nome: document.getElementById('univ-c1').value,
-                    email,
-                    subgrupoId: document.getElementById('univ-c3').value,
-                    perfil: document.getElementById('univ-c4').value
-                };
-                await db.collection('usuarios').doc(email).set(novoObj);
-            } else if (tipo === 'demanda') {
-                novoObj = {
-                    titulo: document.getElementById('univ-c1').value,
-                    orgao: document.getElementById('univ-c2').value,
-                    categoria: document.getElementById('univ-c3').value,
-                    descricao: document.getElementById('univ-c4').value,
-                    prioridade: 'Alta', status: 'Pendente',
-                    historicoStatus: [
-                        { data: new Date().toISOString(), status: 'Pendente', descricao: document.getElementById('univ-c4').value || 'Abertura de demanda.' }
-                    ]
-                };
-                await db.collection('demandas').add(novoObj);
-            }
+            try {
+                if (tipo === 'orgao') {
+                    const sigla = document.getElementById('univ-c1').value.toUpperCase().trim();
+                    novoObj = {
+                        sigla,
+                        nome: document.getElementById('univ-c2').value.trim(),
+                        tipoJuridico: document.getElementById('univ-c3').value,
+                        responsavel: document.getElementById('univ-c4').value.trim(),
+                        email: document.getElementById('univ-c5').value.trim()
+                    };
+                    await db.collection('orgaos').doc(sigla).set(novoObj);
+                    
+                    // Atualiza a memória local imediatamente e re-renderiza
+                    const idx = window.dbData.orgaos.findIndex(o => o.id === sigla || o.sigla === sigla);
+                    if (idx >= 0) window.dbData.orgaos[idx] = { id: sigla, ...novoObj };
+                    else window.dbData.orgaos.push({ id: sigla, ...novoObj });
 
-            alert('Cadastro realizado com sucesso!');
-            fecharModal('modal-form-universal');
+                } else if (tipo === 'fornecedor') {
+                    novoObj = {
+                        nome: document.getElementById('univ-c1').value,
+                        cnpj: document.getElementById('univ-c2').value,
+                        categoria: document.getElementById('univ-c3').value,
+                        responsavel: document.getElementById('univ-c4').value,
+                        numeroContrato: document.getElementById('univ-c5').value
+                    };
+                    const docRef = await db.collection('fornecedores').add(novoObj);
+                    window.dbData.fornecedores.push({ id: docRef.id, ...novoObj });
+
+                } else if (tipo === 'evento') {
+                    novoObj = {
+                        titulo: document.getElementById('univ-c1').value,
+                        palestrante: document.getElementById('univ-c2').value,
+                        dataInicio: document.getElementById('univ-c3').value,
+                        dataFim: document.getElementById('univ-c4').value,
+                        local: document.getElementById('univ-c5').value,
+                        descricao: document.getElementById('univ-c6').value,
+                        visibilidade: 'Aberto ao Público'
+                    };
+                    const docRef = await db.collection('eventos').add(novoObj);
+                    window.dbData.eventos.push({ id: docRef.id, ...novoObj });
+
+                } else if (tipo === 'local') {
+                    novoObj = {
+                        nome: document.getElementById('univ-c1').value,
+                        capacidade: document.getElementById('univ-c2').value,
+                        natureza: document.getElementById('univ-c3').value
+                    };
+                    const docRef = await db.collection('locais').add(novoObj);
+                    window.dbData.locais.push({ id: docRef.id, ...novoObj });
+
+                } else if (tipo === 'usuario') {
+                    const email = document.getElementById('univ-c2').value.toLowerCase().trim();
+                    novoObj = {
+                        nome: document.getElementById('univ-c1').value,
+                        email,
+                        subgrupoId: document.getElementById('univ-c3').value,
+                        perfil: document.getElementById('univ-c4').value
+                    };
+                    await db.collection('usuarios').doc(email).set(novoObj);
+                    window.dbData.usuarios.push({ id: email, ...novoObj });
+
+                } else if (tipo === 'demanda') {
+                    novoObj = {
+                        titulo: document.getElementById('univ-c1').value,
+                        orgao: document.getElementById('univ-c2').value,
+                        categoria: document.getElementById('univ-c3').value,
+                        descricao: document.getElementById('univ-c4').value,
+                        prioridade: 'Alta', status: 'Pendente',
+                        historicoStatus: [
+                            { data: new Date().toISOString(), status: 'Pendente', descricao: document.getElementById('univ-c4').value || 'Abertura de demanda.' }
+                        ]
+                    };
+                    const docRef = await db.collection('demandas').add(novoObj);
+                    window.dbData.demandas.push({ id: docRef.id, ...novoObj });
+                }
+
+                renderizarTudo();
+                alert('Cadastro realizado e sincronizado com sucesso!');
+                fecharModal('modal-form-universal');
+            } catch (err) {
+                alert('Erro ao realizar o cadastro: ' + err.message);
+            }
         }
 
         function abrirModalImportacao(colecao) {
