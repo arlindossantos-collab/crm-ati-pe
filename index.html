@@ -1,311 +1,919 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM ATI-PE</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f4f6f9; min-height: 100vh; }
-
-    /* --- TELA DE LOGIN --- */
-    #auth-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .card-login {
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 400px;
-      position: relative;
-    }
-
-    .tabs { display: flex; border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
-    .tab-btn { flex: 1; padding: 10px; background: none; border: none; font-size: 15px; font-weight: bold; color: #666; cursor: pointer; transition: color 0.3s, border-bottom 0.3s; }
-    .tab-btn.active { color: #007bff; border-bottom: 3px solid #007bff; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRGD - Plataforma de Relacionamento do Governo Digital | ATI-PE</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para Dashboard Gerencial -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #333; }
-    .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-    .form-group input:focus { outline: none; border-color: #007bff; }
-    
-    .btn { width: 100%; padding: 10px; background-color: #007bff; border: none; border-radius: 4px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
-    .btn:hover { background-color: #0056b3; }
-    
-    .forgot-link { display: block; margin-top: 10px; text-align: right; font-size: 13px; color: #007bff; text-decoration: none; cursor: pointer; }
-    .forgot-link:hover { text-decoration: underline; }
-    
-    .message { margin-top: 15px; padding: 10px; border-radius: 4px; font-size: 14px; display: none; text-align: center; }
-    .message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    
-    .form-section { display: none; }
-    .form-section.active { display: block; }
-    .footer-version { margin-top: 25px; padding-top: 10px; border-top: 1px solid #eee; text-align: center; font-size: 12px; color: #888; }
+    <!-- Firebase SDK Compatível -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    /* --- TELA DA APLICAÇÃO (CRM / DASHBOARD) --- */
-    #app-container {
-      display: none; /* Inicia oculto até a autenticação */
-      padding: 20px;
-    }
-
-    .app-header {
-      background: white;
-      padding: 15px 25px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .btn-logout {
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .btn-logout:hover { background-color: #c82333; }
-
-    .app-content {
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      min-height: 400px;
-    }
-  </style>
-
-  <!-- Firebase SDK Compatível -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
+        .tab-active { background-color: #ffffff; color: #1e3a8a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .tab-inactive { color: #64748b; font-weight: 500; }
+        .tab-inactive:hover { color: #0f172a; }
+    </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
-  <!-- CONTÊINER 1: TELA DE AUTENTICAÇÃO -->
-  <div id="auth-container">
-    <div class="card-login">
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
-        <button class="tab-btn" onclick="switchTab('change-password')">Alterar Senha</button>
-      </div>
+    <!-- Header Navbar -->
+    <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-blue-900 px-3 py-1.5 rounded-lg font-bold text-xl tracking-wider">PRGD</div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v16.1 STABLE</span>
+                    </div>
+                    <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
+                </div>
+            </div>
+            <div id="auth-actions">
+                <button onclick="abrirModalLogin('login')" id="btn-login" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-right-to-bracket"></i> Entrar / Autenticar
+                </button>
+                <div id="user-logged" class="hidden flex items-center gap-3">
+                    <div class="text-right">
+                        <p id="user-name-display" class="text-xs font-bold text-white"></p>
+                        <p id="user-role-display" class="text-[10px] text-blue-200 uppercase tracking-wider"></p>
+                    </div>
+                    <button onclick="abrirModalLogin('alterar')" class="bg-amber-600 hover:bg-amber-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition" title="Alterar Senha">
+                        <i class="fa-solid fa-key"></i>
+                    </button>
+                    <button onclick="fazerLogout()" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
 
-      <div id="feedback-msg" class="message"></div>
+    <!-- Modal Login & Alteração de Senha -->
+    <div id="modal-login" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <div class="flex gap-4">
+                    <button id="tab-login-btn" onclick="alternarTabAuth('login')" class="text-sm font-bold text-blue-900 border-b-2 border-blue-900 pb-1">Entrar</button>
+                    <button id="tab-pass-btn" onclick="alternarTabAuth('alterar')" class="text-sm font-bold text-slate-500 hover:text-slate-800 pb-1">Alterar Senha</button>
+                </div>
+                <button onclick="fecharModal('modal-login')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
 
-      <!-- Formulário de Login -->
-      <form id="login-form" class="form-section active" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label for="login-email">E-mail</label>
-          <input type="email" id="login-email" required placeholder="seu.nome@ati.pe.gov.br">
-        </div>
-        <div class="form-group">
-          <label for="login-password">Senha</label>
-          <input type="password" id="login-password" required placeholder="••••••••">
-        </div>
-        <button type="submit" class="btn">Entrar no Sistema</button>
-        <a class="forgot-link" onclick="handleResetPassword()">Esqueceu a senha?</a>
-      </form>
+            <div id="auth-alert" class="hidden p-2.5 rounded-lg text-xs font-semibold mb-3 text-center"></div>
 
-      <!-- Formulário de Alteração de Senha -->
-      <form id="password-form" class="form-section" onsubmit="handleChangePassword(event)">
-        <div class="form-group">
-          <label for="current-password">Senha Atual</label>
-          <input type="password" id="current-password" required placeholder="••••••••">
-        </div>
-        <div class="form-group">
-          <label for="new-password">Nova Senha</label>
-          <input type="password" id="new-password" required placeholder="••••••••">
-        </div>
-        <div class="form-group">
-          <label for="confirm-password">Confirmar Nova Senha</label>
-          <input type="password" id="confirm-password" required placeholder="••••••••">
-        </div>
-        <button type="submit" class="btn">Atualizar Senha</button>
-      </form>
+            <!-- Formulário de Login -->
+            <form id="form-login" onsubmit="fazerLoginLocal(event)">
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label>
+                        <input type="email" id="login-email" required placeholder="nome@orgao.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Senha</label>
+                        <input type="password" id="login-senha" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </div>
+                </div>
+                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Acessar Sistema</button>
+                <button type="button" onclick="resetarSenha()" class="w-full mt-2 text-xs text-blue-700 hover:underline text-center block">Esqueceu a senha?</button>
+            </form>
 
-      <div class="footer-version">
-        Versão <span id="app-version">1.0.8</span>
-      </div>
+            <!-- Formulário de Alteração de Senha -->
+            <form id="form-alterar-senha" onsubmit="fazerAlteracaoSenha(event)" class="hidden">
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Senha Atual</label>
+                        <input type="password" id="pass-atual" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Nova Senha</label>
+                        <input type="password" id="pass-nova" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Confirmar Nova Senha</label>
+                        <input type="password" id="pass-confirma" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </div>
+                </div>
+                <button type="submit" class="w-full mt-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-500 transition">Atualizar Senha</button>
+            </form>
+        </div>
     </div>
-  </div>
 
-  <!-- CONTÊINER 2: APLICAÇÃO REAL DO CRM -->
-  <div id="app-container">
-    <div class="app-header">
-      <div>
-        <strong>CRM ATI-PE</strong> | Conectado como: <span id="user-email-display">...</span>
-      </div>
-      <button class="btn-logout" onclick="handleLogout()">Sair</button>
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+
+        <!-- Status da Sessão -->
+        <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
+            <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Visitante (Leitura Restrita)</span></span>
+            <span class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold">Cloud Firestore Sync Ativo</span>
+        </div>
+
+        <!-- Navegação por Abas -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
+                <button id="btn-tab-dashboard" onclick="mudarAba('dashboard')" class="px-4 py-2 rounded-lg transition tab-active">
+                    <i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard
+                </button>
+                <button id="btn-tab-demandas" onclick="mudarAba('demandas')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                    <i class="fa-solid fa-list-check mr-1.5"></i> Demandas
+                </button>
+                <button id="btn-tab-eventos" onclick="mudarAba('eventos')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                    <i class="fa-solid fa-calendar-day mr-1.5"></i> Eventos
+                </button>
+                <button id="btn-tab-locais" onclick="mudarAba('locais')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                    <i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais de Eventos
+                </button>
+                <button id="btn-tab-orgaos" onclick="mudarAba('orgaos')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                    <i class="fa-solid fa-sitemap mr-1.5"></i> Órgãos / Secretarias
+                </button>
+                <button id="btn-tab-fornecedores" onclick="mudarAba('fornecedores')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                    <i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores
+                </button>
+                <button id="btn-tab-usuarios" onclick="mudarAba('usuarios')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                    <i class="fa-solid fa-users-gear mr-1.5"></i> Usuários
+                </button>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="exportarRelatorioCSV()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-file-csv"></i> Exportar Dados
+                </button>
+            </div>
+        </div>
+
+        <!-- ABA DASHBOARD -->
+        <div id="aba-dashboard" class="block space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Demandas Ativas</p>
+                    <h3 id="dash-tot-demandas" class="text-3xl font-bold text-blue-900 mt-1">0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Eventos Programados</p>
+                    <h3 id="dash-tot-eventos" class="text-3xl font-bold text-amber-600 mt-1">0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Locais Auditórios</p>
+                    <h3 id="dash-tot-locais" class="text-3xl font-bold text-purple-600 mt-1">0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Órgãos Cadastrados</p>
+                    <h3 id="dash-tot-orgaos" class="text-3xl font-bold text-indigo-600 mt-1">0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-semibold text-slate-500 uppercase">Fornecedores TIC</p>
+                    <h3 id="dash-tot-fornecedores" class="text-3xl font-bold text-emerald-600 mt-1">0</h3>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h4 class="text-sm font-bold text-slate-700 mb-4"><i class="fa-solid fa-chart-bar text-blue-800 mr-2"></i>Demandas por Categoria</h4>
+                    <canvas id="chartCategorias" class="max-h-64"></canvas>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h4 class="text-sm font-bold text-slate-700 mb-4"><i class="fa-solid fa-chart-pie text-emerald-600 mr-2"></i>Status das Solicitações</h4>
+                    <canvas id="chartStatus" class="max-h-64"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA DEMANDAS -->
+        <div id="aba-demandas" class="hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-slate-800">Solicitações de Governo Digital</h3>
+                <button onclick="abrirModalForm('demanda')" id="btn-nova-demanda" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Nova Demanda
+                </button>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
+                        <tr>
+                            <th class="p-4">Órgão Solicitante</th>
+                            <th class="p-4">Título da Demanda</th>
+                            <th class="p-4">Categoria</th>
+                            <th class="p-4">Prioridade</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-demandas" class="divide-y divide-slate-100 text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ABA EVENTOS -->
+        <div id="aba-eventos" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 class="text-base font-bold text-slate-800">Agenda Institucional e Eventos Exclusivos</h3>
+                <div class="flex items-center gap-2">
+                    <select id="filtro-eventos" onchange="renderEventos()" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="todos">Todos os Eventos Permitidos</option>
+                        <option value="futuros" selected>Apenas Próximos / Futuros</option>
+                        <option value="passados">Apenas Realizados / Passados</option>
+                    </select>
+                    <button onclick="abrirModalForm('evento')" id="btn-novo-evento" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-calendar-plus"></i> Criar Evento
+                    </button>
+                </div>
+            </div>
+            <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </div>
+
+        <!-- ABA LOCAIS DE EVENTOS -->
+        <div id="aba-locais" class="hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-slate-800">Catálogo de Espaços e Auditórios</h3>
+                <button onclick="abrirModalForm('local')" class="bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Novo Local / Auditório
+                </button>
+            </div>
+            <div id="grid-locais" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </div>
+
+        <!-- ABA ÓRGÃOS E SECRETARIAS -->
+        <div id="aba-orgaos" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos, Secretarias e Entidades</h3>
+                <div class="flex gap-2">
+                    <button onclick="abrirModalImportacao('orgaos')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
+                    </button>
+                    <button onclick="abrirModalForm('orgao')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria
+                    </button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
+                        <tr>
+                            <th class="p-4">Sigla</th>
+                            <th class="p-4">Nome do Órgão / Secretaria</th>
+                            <th class="p-4">Tipo Jurídico</th>
+                            <th class="p-4">Responsável TIC</th>
+                            <th class="p-4">E-mail Contato</th>
+                            <th class="p-4 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-orgaos" class="divide-y divide-slate-100 text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ABA FORNECEDORES -->
+        <div id="aba-fornecedores" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC Detalhados</h3>
+                <div class="flex gap-2">
+                    <button onclick="abrirModalImportacao('fornecedores')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
+                    </button>
+                    <button onclick="abrirModalForm('fornecedor')" id="btn-novo-fornecedor" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> Novo Fornecedor
+                    </button>
+                </div>
+            </div>
+            <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </div>
+
+        <!-- ABA USUÁRIOS -->
+        <div id="aba-usuarios" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários e Permissões</h3>
+                <div class="flex gap-2">
+                    <button onclick="abrirModalImportacao('usuarios')" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
+                    </button>
+                    <button onclick="exportarUsuariosCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-export"></i> Exportar Usuários (.csv)
+                    </button>
+                    <button onclick="abrirModalForm('usuario')" class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-user-plus"></i> Novo Usuário
+                    </button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
+                        <tr>
+                            <th class="p-4">Nome</th>
+                            <th class="p-4">E-mail Institucional</th>
+                            <th class="p-4">Órgão / Secretaria</th>
+                            <th class="p-4">Perfil</th>
+                            <th class="p-4">Módulos Visíveis</th>
+                            <th class="p-4 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-usuarios" class="divide-y divide-slate-100 text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL UNIVERSAL DETALHAR & EDITAR COMPLETO -->
+    <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 id="detalhe-titulo-modal" class="text-base font-bold text-slate-900">Detalhamento Completo</h3>
+                <button onclick="fecharModal('modal-detalhes')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="detalhe-conteudo" class="space-y-3 text-sm text-slate-700 mb-4"></div>
+            
+            <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl border-slate-300">
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-xs font-bold text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square text-blue-800"></i> Edição Completa e Gerenciamento do Registro</p>
+                    <button type="button" onclick="excluirRegistroUniversal()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-bold transition flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-trash-can"></i> Excluir Registro
+                    </button>
+                </div>
+                <form id="form-edicao-admin" onsubmit="salvarEdicaoUniversal(event)" class="space-y-2.5 text-xs">
+                    <input type="hidden" id="edit-colecao">
+                    <input type="hidden" id="edit-doc-id">
+                    <div id="edit-campos-dinamicos" class="max-h-60 overflow-y-auto pr-1"></div>
+                    <div class="flex justify-end gap-2 pt-3 border-t">
+                        <button type="button" onclick="fecharModal('modal-detalhes')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Cancelar</button>
+                        <button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded hover:bg-blue-800 transition shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Todas as Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <div class="app-content">
-      <h2>Painel Principal do CRM</h2>
-      <p style="margin-top: 15px; color: #555;">
-        Bem-vindo ao sistema! Sua autenticação foi concluída com sucesso no Firebase.
-      </p>
-      <!-- Cole aqui os módulos, tabelas ou formulários do seu CRM -->
+    <!-- MODAL CRIAÇÃO / CADASTRO UNIVERSAL DETALHADO -->
+    <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 id="form-univ-titulo" class="text-base font-bold text-slate-900">Novo Cadastro</h3>
+                <button onclick="fecharModal('modal-form-universal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-univ-body" onsubmit="salvarCadastroUniversal(event)" class="space-y-3 text-sm">
+                <input type="hidden" id="form-univ-tipo">
+                <div id="form-univ-campos"></div>
+                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar no Firestore</button>
+            </form>
+        </div>
     </div>
-  </div>
 
-  <script>
-    // Configurações do Firebase do Projeto prgd-ati-pe
-    const firebaseConfig = {
-      apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
-      authDomain: "prgd-ati-pe.firebaseapp.com",
-      projectId: "prgd-ati-pe",
-      storageBucket: "prgd-ati-pe.firebasestorage.app",
-      messagingSenderId: "798768232646",
-      appId: "1:798768232646:web:31b80951f237b4af17bfc7",
-      measurementId: "G-MWES9XN421"
-    };
+    <!-- MODAL IMPORTAÇÃO DE PLANILHA / CSV -->
+    <div id="modal-importacao" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 id="import-titulo-modal" class="text-base font-bold text-slate-900">Importar Dados via CSV / Planilha</h3>
+                <button onclick="fecharModal('modal-importacao')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-4 text-xs">
+                <input type="hidden" id="import-colecao-alvo">
+                <p class="text-slate-600">Selecione um arquivo <strong>.csv</strong> contendo os registros no padrão da tabela para importar automaticamente na base PRGD e sincronizar no Firestore.</p>
+                <div class="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center bg-slate-50">
+                    <i class="fa-solid fa-file-csv text-3xl text-emerald-600 mb-2"></i>
+                    <input type="file" id="input-file-csv" accept=".csv, .txt" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                </div>
+                <div class="bg-amber-50 border border-amber-200 p-2.5 rounded text-amber-900">
+                    <p class="font-bold mb-0.5"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Formato Esperado:</p>
+                    <p id="import-instrucoes-formato" class="font-mono text-[11px]"></p>
+                </div>
+                <button type="button" onclick="processarArquivoCSV()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Processar e Importar Registros
+                </button>
+            </div>
+        </div>
+    </div>
 
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    const auth = firebase.auth();
+    <!-- SCRIPT FIREBASE INTEGRADO COM AUTENTICAÇÃO REAL -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
+            authDomain: "prgd-ati-pe.firebaseapp.com",
+            projectId: "prgd-ati-pe",
+            storageBucket: "prgd-ati-pe.firebasestorage.app",
+            messagingSenderId: "798768232646",
+            appId: "1:798768232646:web:31b80951f237b4af17bfc7",
+            measurementId: "G-MWES9XN421"
+        };
 
-    // MONITOR DE ESTADO DE AUTENTICAÇÃO (Exibe a App ou o Login)
-    auth.onAuthStateChanged(user => {
-      const authContainer = document.getElementById('auth-container');
-      const appContainer = document.getElementById('app-container');
-
-      if (user) {
-        // Usuário logado: Oculta login e exibe a aplicação CRM
-        authContainer.style.display = 'none';
-        appContainer.style.display = 'block';
-        document.getElementById('user-email-display').innerText = user.email;
-      } else {
-        // Usuário deslogado: Exibe a tela de login
-        authContainer.style.display = 'flex';
-        appContainer.style.display = 'none';
-      }
-    });
-
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.form-section').forEach(sec => sec.classList.remove('active'));
-      hideMessage();
-
-      if (tab === 'login') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('login-form').classList.add('active');
-      } else {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('password-form').classList.add('active');
-      }
-    }
-
-    function showMessage(text, isSuccess = false) {
-      const msgBox = document.getElementById('feedback-msg');
-      msgBox.innerText = text;
-      msgBox.className = `message ${isSuccess ? 'success' : 'error'}`;
-      msgBox.style.display = 'block';
-    }
-
-    function hideMessage() {
-      const msgBox = document.getElementById('feedback-msg');
-      msgBox.style.display = 'none';
-    }
-
-    async function handleLogin(event) {
-      event.preventDefault();
-      hideMessage();
-
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
-
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-        showMessage('Login realizado com sucesso!', true);
-      } catch (error) {
-        if (
-          error.code === 'auth/invalid-login-credentials' ||
-          error.code === 'auth/invalid-credential' ||
-          error.code === 'auth/user-not-found' || 
-          error.code === 'auth/wrong-password'
-        ) {
-          showMessage('Usuário inexistente ou senha incorreta.');
-        } else {
-          showMessage('Erro ao autenticar: ' + error.message);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
-      }
-    }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-    async function handleResetPassword() {
-      hideMessage();
-      const email = document.getElementById('login-email').value;
+        window.firebaseDb = db;
+        window.currentUser = null;
+        window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [] };
+        let abaAtual = 'dashboard';
 
-      if (!email) {
-        showMessage('Preencha o campo de E-mail para enviar a redefinição de senha.');
-        return;
-      }
+        const MÓDULOS_SISTEMA = [
+            { id: 'dashboard', nome: 'Dashboard' },
+            { id: 'demandas', nome: 'Demandas' },
+            { id: 'eventos', nome: 'Eventos' },
+            { id: 'locais', nome: 'Locais de Eventos' },
+            { id: 'orgaos', nome: 'Órgãos / Secretarias' },
+            { id: 'fornecedores', nome: 'Fornecedores' },
+            { id: 'usuarios', nome: 'Usuários & Permissões' }
+        ];
 
-      try {
-        await auth.sendPasswordResetEmail(email);
-        showMessage('E-mail de redefinição de senha enviado!', true);
-      } catch (error) {
-        if (error.code === 'auth/user-not-found') {
-          showMessage('Este e-mail não está cadastrado no sistema.');
-        } else {
-          showMessage('Erro ao enviar e-mail: ' + error.message);
+        // Monitor do Firebase Auth
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                db.collection("usuarios").doc(user.email.toLowerCase()).get().then(docSnap => {
+                    if (docSnap.exists()) {
+                        window.currentUser = docSnap.data();
+                    } else {
+                        window.currentUser = {
+                            nome: user.email.split('@')[0],
+                            email: user.email,
+                            perfil: 'admin',
+                            modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios']
+                        };
+                    }
+                    atualizarInterfaceSessao();
+                });
+            } else {
+                window.currentUser = null;
+                atualizarInterfaceSessao();
+            }
+        });
+
+        function atualizarInterfaceSessao() {
+            const user = window.currentUser;
+            if (user) {
+                document.getElementById('user-name-display').textContent = user.nome || user.email;
+                document.getElementById('user-role-display').textContent = (user.perfil || 'USUÁRIO').toUpperCase();
+                document.getElementById('session-info').textContent = (user.nome || user.email) + ' (' + (user.perfil || 'Acesso').toUpperCase() + ')';
+                document.getElementById('btn-login').classList.add('hidden');
+                document.getElementById('user-logged').classList.remove('hidden');
+            } else {
+                document.getElementById('session-info').textContent = 'Visitante (Leitura Restrita)';
+                document.getElementById('btn-login').classList.remove('hidden');
+                document.getElementById('user-logged').classList.add('hidden');
+            }
+            atualizarVisibilidadeAbas();
         }
-      }
-    }
 
-    async function handleChangePassword(event) {
-      event.preventDefault();
-      hideMessage();
-
-      const currentPassword = document.getElementById('current-password').value;
-      const newPassword = document.getElementById('new-password').value;
-      const confirmPassword = document.getElementById('confirm-password').value;
-
-      if (newPassword !== confirmPassword) {
-        showMessage('A nova senha e a confirmação não coincidem.');
-        return;
-      }
-
-      const user = auth.currentUser;
-
-      if (!user) {
-        showMessage('Para alterar a senha, efetue o login primeiro na aba "Entrar".');
-        return;
-      }
-
-      try {
-        const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPassword);
-        await user.reauthenticateWithCredential(credential);
-        await user.updatePassword(newPassword);
-
-        showMessage('Senha alterada com sucesso!', true);
-        document.getElementById('password-form').reset();
-      } catch (error) {
-        if (
-          error.code === 'auth/invalid-login-credentials' ||
-          error.code === 'auth/invalid-credential' ||
-          error.code === 'auth/wrong-password'
-        ) {
-          showMessage('A senha atual informada está incorreta.');
-        } else {
-          showMessage('Erro ao atualizar senha.');
+        function abrirModalLogin(tab = 'login') {
+            document.getElementById('modal-login').classList.remove('hidden');
+            alternarTabAuth(tab);
         }
-      }
-    }
 
-    function handleLogout() {
-      auth.signOut();
-    }
-  </script>
+        function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function alternarTabAuth(tab) {
+            exibirAlertaAuth('', '');
+            if (tab === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-alterar-senha').classList.add('hidden');
+                document.getElementById('tab-login-btn').className = 'text-sm font-bold text-blue-900 border-b-2 border-blue-900 pb-1';
+                document.getElementById('tab-pass-btn').className = 'text-sm font-bold text-slate-500 hover:text-slate-800 pb-1';
+            } else {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-alterar-senha').classList.remove('hidden');
+                document.getElementById('tab-login-btn').className = 'text-sm font-bold text-slate-500 hover:text-slate-800 pb-1';
+                document.getElementById('tab-pass-btn').className = 'text-sm font-bold text-blue-900 border-b-2 border-blue-900 pb-1';
+            }
+        }
+
+        function exibirAlertaAuth(msg, tipo) {
+            const el = document.getElementById('auth-alert');
+            if (!msg) { el.classList.add('hidden'); return; }
+            el.textContent = msg;
+            el.className = 'p-2.5 rounded-lg text-xs font-semibold mb-3 text-center ' + (tipo === 'sucesso' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800');
+            el.classList.remove('hidden');
+        }
+
+        async function fazerLoginLocal(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const senha = document.getElementById('login-senha').value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, senha);
+                fecharModal('modal-login');
+                alert('Bem-vindo! Autenticação realizada com sucesso.');
+            } catch (error) {
+                if (error.code === 'auth/invalid-login-credentials' || error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    exibirAlertaAuth('Usuário inexistente ou senha incorreta.', 'erro');
+                } else {
+                    exibirAlertaAuth('Erro ao autenticar: ' + error.message, 'erro');
+                }
+            }
+        }
+
+        async function fazerAlteracaoSenha(e) {
+            e.preventDefault();
+            const passAtual = document.getElementById('pass-atual').value;
+            const passNova = document.getElementById('pass-nova').value;
+            const passConfirma = document.getElementById('pass-confirma').value;
+
+            if (passNova !== passConfirma) {
+                exibirAlertaAuth('A nova senha e a confirmação não coincidem.', 'erro');
+                return;
+            }
+
+            const user = auth.currentUser;
+            if (!user) {
+                exibirAlertaAuth('Você precisa estar logado para alterar a senha.', 'erro');
+                return;
+            }
+
+            try {
+                const cred = firebase.auth.EmailAuthProvider.credential(user.email, passAtual);
+                await user.reauthenticateWithCredential(cred);
+                await user.updatePassword(passNova);
+                
+                exibirAlertaAuth('Senha alterada com sucesso!', 'sucesso');
+                document.getElementById('form-alterar-senha').reset();
+            } catch (error) {
+                if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    exibirAlertaAuth('A senha atual fornecida está incorreta.', 'erro');
+                } else if (error.code === 'auth/weak-password') {
+                    exibirAlertaAuth('A nova senha deve ter no mínimo 6 caracteres.', 'erro');
+                } else {
+                    exibirAlertaAuth('Erro ao atualizar senha no servidor.', 'erro');
+                }
+            }
+        }
+
+        async function resetarSenha() {
+            const email = document.getElementById('login-email').value.trim();
+            if (!email) {
+                exibirAlertaAuth('Informe o seu e-mail para enviar a redefinição.', 'erro');
+                return;
+            }
+            try {
+                await auth.sendPasswordResetEmail(email);
+                exibirAlertaAuth('E-mail de redefinição enviado com sucesso!', 'sucesso');
+            } catch (error) {
+                exibirAlertaAuth('Erro ao enviar e-mail de redefinição.', 'erro');
+            }
+        }
+
+        function fazerLogout() {
+            auth.signOut().then(() => {
+                window.currentUser = null;
+                atualizarInterfaceSessao();
+                mudarAba('dashboard');
+            });
+        }
+
+        function atualizarVisibilidadeAbas() {
+            const user = window.currentUser;
+            const permitidos = user ? (user.perfil === 'admin' ? ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'] : (user.modulosPermitidos || ['dashboard', 'demandas', 'eventos'])) : ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores'];
+
+            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'].forEach(mod => {
+                const btnTab = document.getElementById('btn-tab-' + mod);
+                if (btnTab) {
+                    btnTab.style.display = permitidos.includes(mod) ? 'inline-flex' : 'none';
+                }
+            });
+
+            if (!permitidos.includes(abaAtual)) {
+                mudarAba(permitidos[0] || 'dashboard');
+            }
+        }
+
+        function mudarAba(aba) {
+            abaAtual = aba;
+            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'].forEach(a => {
+                const el = document.getElementById('aba-' + a);
+                const btn = document.getElementById('btn-tab-' + a);
+                if (el) el.classList.toggle('hidden', a !== abaAtual);
+                if (btn) btn.className = 'px-4 py-2 rounded-lg transition ' + (a === abaAtual ? 'tab-active' : 'tab-inactive');
+            });
+            if (aba === 'dashboard') renderCharts();
+        }
+
+        function iniciarSnapshotFirestore() {
+            const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
+            colecoes.forEach(col => {
+                db.collection(col).onSnapshot(snap => {
+                    if (!snap.empty) {
+                        window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    }
+                    renderizarTudo();
+                }, err => {
+                    console.warn('Erro Snapshot:', err);
+                });
+            });
+        }
+
+        function renderizarTudo() {
+            renderUsuarios();
+            renderOrgaos();
+            renderDemandas();
+            renderEventos();
+            renderLocais();
+            renderFornecedores();
+            renderDashboardKPIs();
+            preencherSelectOrgaos();
+            atualizarVisibilidadeAbas();
+        }
+
+        function preencherSelectOrgaos() {
+            const selects = document.querySelectorAll('.select-orgaos-dinamico');
+            selects.forEach(select => {
+                const valAtual = select.value;
+                select.innerHTML = '<option value="">Selecione o Órgão / Secretaria</option>';
+                window.dbData.orgaos.forEach(o => {
+                    const opt = document.createElement('option');
+                    opt.value = o.sigla || o.id;
+                    opt.textContent = (o.sigla || o.id) + ' - ' + (o.nome || '');
+                    select.appendChild(opt);
+                });
+                if (valAtual) select.value = valAtual;
+            });
+        }
+
+        function renderUsuarios() {
+            const tbody = document.getElementById('tabela-usuarios');
+            if (!tbody) return;
+            tbody.innerHTML = window.dbData.usuarios.map(u => {
+                const mods = u.perfil === 'admin' ? 'Acesso Total (Admin)' : (u.modulosPermitidos && u.modulosPermitidos.length > 0 ? u.modulosPermitidos.join(', ') : 'Padrão');
+                return '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro(\'usuarios\', \'' + u.id + '\')">' +
+                    '<td class="p-4 font-bold text-slate-800">' + (u.nome || u.email) + '</td>' +
+                    '<td class="p-4 text-slate-600">' + (u.email || u.id) + '</td>' +
+                    '<td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">' + (u.subgrupoId || u.orgao || 'GERAL') + '</span></td>' +
+                    '<td class="p-4"><span class="bg-' + (u.perfil === 'admin' ? 'amber' : 'slate') + '-100 text-' + (u.perfil === 'admin' ? 'amber-900' : 'slate-700') + ' text-xs font-bold px-2 py-0.5 rounded uppercase">' + (u.perfil || 'comum') + '</span></td>' +
+                    '<td class="p-4 text-xs font-medium text-slate-500 max-w-xs truncate">' + mods + '</td>' +
+                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar Permissões</button></td>' +
+                '</tr>';
+            }).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
+        }
+
+        function renderOrgaos() {
+            const tbody = document.getElementById('tabela-orgaos');
+            if (!tbody) return;
+            tbody.innerHTML = window.dbData.orgaos.map(o => 
+                '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro(\'orgaos\', \'' + o.id + '\')">' +
+                    '<td class="p-4 font-bold text-indigo-900">' + (o.sigla || o.id) + '</td>' +
+                    '<td class="p-4 text-slate-800 font-medium">' + (o.nome || '-') + '</td>' +
+                    '<td class="p-4 text-xs"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">' + (o.tipoJuridico || o.naturezaJuridica || 'Secretaria') + '</span></td>' +
+                    '<td class="p-4 text-xs text-slate-600">' + (o.responsavel || '-') + '</td>' +
+                    '<td class="p-4 text-xs text-slate-600">' + (o.email || '-') + '</td>' +
+                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>' +
+                '</tr>'
+            ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
+        }
+
+        function renderDemandas() {
+            const tbody = document.getElementById('tabela-demandas');
+            if (!tbody) return;
+            tbody.innerHTML = window.dbData.demandas.map(d => 
+                '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro(\'demandas\', \'' + d.id + '\')">' +
+                    '<td class="p-4 font-bold text-blue-900">' + (d.orgao || 'Geral') + '</td>' +
+                    '<td class="p-4 font-medium text-slate-900">' + (d.titulo || '-') + '</td>' +
+                    '<td class="p-4 text-xs text-slate-500">' + (d.categoria || '-') + '</td>' +
+                    '<td class="p-4 text-xs font-bold text-' + (d.prioridade === 'Alta' ? 'red' : 'amber') + '-600">' + (d.prioridade || 'Média') + '</td>' +
+                    '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">' + (d.status || 'Pendente') + '</span></td>' +
+                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>' +
+                '</tr>'
+            ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma demanda registrada.</td></tr>';
+        }
+
+        function renderEventos() {
+            const grid = document.getElementById('grid-eventos');
+            if (!grid) return;
+            const filtro = document.getElementById('filtro-eventos')?.value || 'todos';
+            const agora = new Date().toISOString();
+
+            let lista = window.dbData.eventos.filter(e => {
+                if (!e.visibilidade || e.visibilidade === 'Aberto ao Público') return true;
+                if (!window.currentUser) return false;
+                
+                const userOrg = (window.currentUser.subgrupoId || window.currentUser.orgao || '').toUpperCase();
+                const userEmail = (window.currentUser.email || '').toLowerCase();
+                const grupoAlvo = (e.grupoDestinatario || e.visibilidade || '').toUpperCase();
+                
+                if (window.currentUser.perfil === 'admin') return true;
+                if (grupoAlvo.includes(userOrg) || grupoAlvo.includes(userEmail)) return true;
+                return false;
+            });
+
+            if (filtro === 'futuros') lista = lista.filter(e => (e.dataInicio || e.data) >= agora);
+            if (filtro === 'passados') lista = lista.filter(e => (e.dataInicio || e.data) < agora);
+
+            grid.innerHTML = lista.map(e => {
+                const dtStart = e.dataInicio || e.data;
+                const dtEnd = e.dataFim;
+                const ePassado = dtStart < agora;
+                
+                return '<div onclick="detalharRegistro(\'eventos\', \'' + e.id + '\')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between cursor-pointer hover:border-amber-400 transition">' +
+                    '<div>' +
+                        '<div class="flex justify-between items-start mb-2 gap-1">' +
+                            '<span class="bg-' + (ePassado ? 'slate' : 'amber') + '-100 text-' + (ePassado ? 'slate' : 'amber') + '-800 text-[11px] font-bold px-2 py-0.5 rounded">' + (ePassado ? 'Realizado' : 'Próximo Evento') + '</span>' +
+                            '<span class="bg-' + (e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple') + '-100 text-' + (e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple') + '-900 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">' +
+                                '<i class="fa-solid fa-' + (e.visibilidade === 'Aberto ao Público' ? 'globe' : 'lock') + '"></i> ' + (e.visibilidade || 'Público') +
+                            '</span>' +
+                        '</div>' +
+                        '<h4 class="font-bold text-slate-800 text-base mt-1">' + (e.titulo || '-') + '</h4>' +
+                        '<p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Palestrante: ' + (e.palestrante || 'Não informado') + '</p>' +
+                        '<div class="bg-slate-50 p-2.5 rounded-lg border my-2 text-[11px] space-y-1">' +
+                            '<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> <strong>Início:</strong> ' + (dtStart ? new Date(dtStart).toLocaleString('pt-BR') : '-') + '</p>' +
+                            (dtEnd ? '<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-red-500 mr-1"></i> <strong>Fim:</strong> ' + new Date(dtEnd).toLocaleString('pt-BR') + '</p>' : '') +
+                            '<p class="text-slate-600"><i class="fa-solid fa-certificate text-blue-600 mr-1"></i> <strong>Certificado:</strong> <span class="font-bold text-slate-800">' + (e.geracaoCertificado || 'Não') + '</span></p>' +
+                        '</div>' +
+                        '<p class="text-xs text-slate-500 line-clamp-2">' + (e.descricao || 'Sem descrição.') + '</p>' +
+                    '</div>' +
+                    '<div class="border-t pt-3 mt-3 flex justify-between items-center">' +
+                        '<span class="text-xs text-indigo-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>' + (e.local || 'Local não informado') + '</span>' +
+                        '<span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>' +
+                    '</div>' +
+                '</div>';
+            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento localizado com este filtro ou você não possui permissão de grupo.</p>';
+        }
+
+        function renderLocais() {
+            const grid = document.getElementById('grid-locais');
+            if (!grid) return;
+            grid.innerHTML = window.dbData.locais.map(l => 
+                '<div onclick="detalharRegistro(\'locais\', \'' + l.id + '\')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-purple-500 transition flex flex-col justify-between">' +
+                    '<div>' +
+                        '<div class="flex justify-between items-start">' +
+                            '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">' + (l.tipoEspaco || 'Auditório') + '</span>' +
+                            '<span class="text-xs font-bold ' + (l.natureza === 'Privado' ? 'text-amber-600' : 'text-emerald-600') + '">' + (l.natureza || 'Público') + '</span>' +
+                        '</div>' +
+                        '<h4 class="font-bold text-slate-800 text-base mt-2">' + (l.nome || l.id) + '</h4>' +
+                        '<p class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>' + (l.capacidade || '0') + ' sentadas</strong></p>' +
+                        '<p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-money-bill-wave mr-1"></i> Aluguel: <strong>' + (l.valorAluguel ? 'R$ ' + l.valorAluguel : 'Gratuito / Público') + '</strong></p>' +
+                    '</div>' +
+                    '<div class="mt-3 border-t pt-2 flex justify-between items-center text-xs text-slate-500">' +
+                        '<span><i class="fa-solid fa-snowflake mr-1"></i>' + (l.climatizacao || 'Sim') + '</span>' +
+                        '<span><i class="fa-solid fa-square-parking mr-1"></i>' + (l.estacionamento || 'Sim') + '</span>' +
+                        '<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span>' +
+                    '</div>' +
+                '</div>'
+            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local de eventos cadastrado.</p>';
+        }
+
+        function renderFornecedores() {
+            const grid = document.getElementById('grid-fornecedores');
+            if (!grid) return;
+            grid.innerHTML = window.dbData.fornecedores.map(f => 
+                '<div onclick="detalharRegistro(\'fornecedores\', \'' + f.id + '\')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-emerald-500 transition">' +
+                    '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">' + (f.categoria || 'Geral') + '</span>' +
+                    '<h4 class="font-bold text-slate-800 mt-2">' + (f.nome || f.razaoSocial || '-') + '</h4>' +
+                    '<p class="text-xs text-slate-500"><i class="fa-solid fa-id-card mr-1"></i> CNPJ: ' + (f.cnpj || '-') + '</p>' +
+                    '<p class="text-xs text-slate-500"><i class="fa-solid fa-file-contract mr-1"></i> Contrato: ' + (f.numeroContrato || '-') + '</p>' +
+                    '<p class="text-xs text-slate-500"><i class="fa-solid fa-user-tie mr-1"></i> Resp: ' + (f.responsavel || '-') + '</p>' +
+                    '<div class="mt-3 border-t pt-2 text-right"><span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">Detalhar / Editar</span></div>' +
+                '</div>'
+            ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor cadastrado.</p>';
+        }
+
+        function renderDashboardKPIs() {
+            document.getElementById('dash-tot-demandas').textContent = window.dbData.demandas.length;
+            document.getElementById('dash-tot-eventos').textContent = window.dbData.eventos.length;
+            document.getElementById('dash-tot-locais').textContent = window.dbData.locais.length;
+            document.getElementById('dash-tot-orgaos').textContent = window.dbData.orgaos.length;
+            document.getElementById('dash-tot-fornecedores').textContent = window.dbData.fornecedores.length;
+        }
+
+        window.detalharRegistro = function(colecao, docId) {
+            const item = window.dbData[colecao].find(i => i.id === docId);
+            if (!item) return;
+
+            document.getElementById('detalhe-titulo-modal').textContent = 'Detalhamento (' + colecao.toUpperCase() + ')';
+            
+            let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-4">';
+            for (let k in item) {
+                if (k !== 'senhaHash' && k !== 'senha' && k !== 'historicoStatus' && k !== 'modulosPermitidos') {
+                    htmlContent += '<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">' + k + '</span><span class="font-semibold text-slate-800">' + item[k] + '</span></div>';
+                }
+            }
+            if (colecao === 'usuarios') {
+                const userPerms = item.modulosPermitidos || ['dashboard', 'demandas', 'eventos'];
+                htmlContent += '<div class="p-2 bg-slate-50 border rounded sm:col-span-2"><span class="text-slate-400 text-[10px] uppercase font-bold block">Módulos de Acesso Permitidos</span><span class="font-semibold text-indigo-900">' + userPerms.join(', ') + '</span></div>';
+            }
+            htmlContent += '</div>';
+
+            document.getElementById('detalhe-conteudo').innerHTML = htmlContent;
+
+            document.getElementById('edit-colecao').value = colecao;
+            document.getElementById('edit-doc-id').value = docId;
+
+            let editFieldsHtml = '';
+            for (let k in item) {
+                if (k === 'id' || k === 'senhaHash' || k === 'historicoStatus' || k === 'modulosPermitidos') continue;
+                const fieldVal = item[k] !== undefined ? item[k] : '';
+                editFieldsHtml += '<div class="mb-2"><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">' + k + '</label>';
+                editFieldsHtml += '<input type="text" data-field="' + k + '" value="' + fieldVal + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">';
+                editFieldsHtml += '</div>';
+            }
+
+            document.getElementById('edit-campos-dinamicos').innerHTML = editFieldsHtml;
+            document.getElementById('detalhe-area-admin').classList.remove('hidden');
+            document.getElementById('modal-detalhes').classList.remove('hidden');
+        };
+
+        window.salvarEdicaoUniversal = async function(e) {
+            e.preventDefault();
+            const colecao = document.getElementById('edit-colecao').value;
+            const docId = document.getElementById('edit-doc-id').value;
+            
+            const updatedData = {};
+            const inputs = document.querySelectorAll('.edit-dinamico-input');
+            inputs.forEach(input => {
+                const fieldName = input.getAttribute('data-field');
+                if (fieldName) {
+                    updatedData[fieldName] = input.value;
+                }
+            });
+
+            try {
+                await db.collection(colecao).doc(docId).update(updatedData);
+                alert('Registro atualizado com sucesso!');
+                fecharModal('modal-detalhes');
+            } catch (err) {
+                alert('Erro ao atualizar registro.');
+            }
+        };
+
+        window.excluirRegistroUniversal = async function() {
+            const colecao = document.getElementById('edit-colecao').value;
+            const docId = document.getElementById('edit-doc-id').value;
+
+            if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+
+            try {
+                await db.collection(colecao).doc(docId).delete();
+                alert('Registro excluído com sucesso!');
+                fecharModal('modal-detalhes');
+            } catch (err) {
+                alert('Erro ao excluir registro.');
+            }
+        };
+
+        window.abrirModalForm = function(tipo) {
+            document.getElementById('form-univ-tipo').value = tipo;
+            const container = document.getElementById('form-univ-campos');
+            document.getElementById('form-univ-titulo').textContent = 'Novo Cadastro: ' + tipo.toUpperCase();
+
+            container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Título / Nome</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>' +
+                '<div><label class="block font-medium text-slate-700 mb-1">Descrição / Detalhes</label><textarea id="univ-c2" rows="3" class="w-full p-2 border rounded"></textarea></div>';
+
+            document.getElementById('modal-form-universal').classList.remove('hidden');
+        };
+
+        window.salvarCadastroUniversal = async function(e) {
+            e.preventDefault();
+            const tipo = document.getElementById('form-univ-tipo').value;
+            const c1 = document.getElementById('univ-c1').value;
+            const c2 = document.getElementById('univ-c2').value;
+
+            try {
+                await db.collection(tipo + 's').add({
+                    nome: c1,
+                    titulo: c1,
+                    descricao: c2,
+                    dataCriacao: new Date().toISOString()
+                });
+                alert('Cadastro salvo com sucesso!');
+                fecharModal('modal-form-universal');
+            } catch (err) {
+                alert('Erro ao salvar no Firestore.');
+            }
+        };
+
+        function renderCharts() {
+            const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
+            if (ctx1) {
+                new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Infraestrutura', 'Sistemas Web', 'Transformação Digital', 'Capacitação'],
+                        datasets: [{ data: [15, 22, 9, 6], backgroundColor: '#1e3a8a' }]
+                    },
+                    options: { plugins: { legend: { display: false } } }
+                });
+            }
+
+            const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
+            if (ctx2) {
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pendentes', 'Em Andamento', 'Concluídos'],
+                        datasets: [{ data: [4, 18, 30], backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'] }]
+                    }
+                });
+            }
+        }
+
+        window.onload = () => {
+            iniciarSnapshotFirestore();
+        };
+    </script>
+
+    <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v16.1 STABLE</span>
+    </footer>
 </body>
 </html>
