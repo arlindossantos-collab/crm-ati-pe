@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v19.9 SAFE PERMISSIONS & ROBUST UPDATE      -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v20.0 FIREBASE DIRECT SYNC & FULL PERSISTENCE -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -48,7 +48,7 @@
                 </button>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.9 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v20.0 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -61,7 +61,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.9 SAFE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v20.0 CLOUD SYNC</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -83,7 +83,7 @@
     <!-- Main Container -->
     <main id="main-content" class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full hidden">
         <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
-            <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Sincronizado com Firestore Cloud</span></span>
+            <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Sincronizado em Tempo Real com Firestore Cloud</span></span>
             <span id="badge-perfil-acesso" class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold uppercase"></span>
         </div>
 
@@ -188,8 +188,8 @@
             <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento e Edição Completa</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
             <div id="detalhe-conteudo" class="space-y-3 text-sm mb-4"></div>
             <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl">
-                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Gerenciamento Dinâmico</p><button type="button" id="btn-excluir-registro" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer">Excluir Registro</button></div>
-                <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-72 overflow-y-auto space-y-2"></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="submit" class="px-4 py-2 bg-blue-900 text-white font-bold rounded cursor-pointer">Salvar Todas as Alterações</button></div></form>
+                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Gerenciamento Cloud</p><button type="button" id="btn-excluir-registro" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer">Excluir Registro</button></div>
+                <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-72 overflow-y-auto space-y-2"></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="submit" class="px-4 py-2 bg-blue-900 text-white font-bold rounded cursor-pointer">Salvar na Nuvem (Firestore)</button></div></form>
             </div>
         </div>
     </div>
@@ -197,11 +197,11 @@
     <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="form-univ-titulo" class="text-base font-bold">Novo Cadastro</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-form-universal"><i class="fa-solid fa-xmark text-lg"></i></button></div>
-            <form id="form-univ-body" class="space-y-3 text-sm"><input type="hidden" id="form-univ-tipo"><div id="form-univ-campos"></div><button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold cursor-pointer">Salvar Sincronizado no Firestore</button></form>
+            <form id="form-univ-body" class="space-y-3 text-sm"><input type="hidden" id="form-univ-tipo"><div id="form-univ-campos"></div><button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold cursor-pointer">Salvar na Nuvem (Firestore)</button></form>
         </div>
     </div>
 
-    <!-- Script Principal Refinado & Seguro -->
+    <!-- Script Principal com Gravação Direta na Nuvem -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -259,8 +259,7 @@
                 { id: 'DEM-001', orgao: 'SEFAZ', titulo: 'Migração SOGo.PE', categoria: 'E-mail', prioridade: 'Alta', status: 'Em Andamento', descricao: 'Migração das contas de e-mail.' }
             ],
             eventos: [
-                { id: 'EV-001', titulo: 'GOV IN PLAY 2026', palestrante: 'Equipe ATI', dataInicio: '2026-10-24T09:00', dataFim: '2026-10-24T17:00', visibilidade: 'Aberto ao Público', descricao: 'Encontro de gestores de TIC.' },
-                { id: 'EV-002', titulo: 'Seminário de Cibersegurança 2024', palestrante: 'Comitê de Segurança', dataInicio: '2024-05-10T09:00', dataFim: '2024-05-10T17:00', visibilidade: 'Interno', descricao: 'Evento realizado anteriormente.' }
+                { id: 'EV-001', titulo: 'GOV IN PLAY 2026', palestrante: 'Equipe ATI', dataInicio: '2026-10-24T09:00', dataFim: '2026-10-24T17:00', visibilidade: 'Aberto ao Público', descricao: 'Encontro de gestores de TIC.' }
             ],
             locais: [
                 { id: 'LOC-001', nome: 'Auditório ATI', tipoEspaco: 'Auditório', capacidade: '150', valorAluguel: 'Gratuito' }
@@ -349,8 +348,7 @@
                     }
                     renderizarTudo();
                 }, err => {
-                    if (dbData[col].length === 0) dbData[col] = initialMockData[col] || [];
-                    renderizarTudo();
+                    console.warn("Erro no snapshot de " + col + ":", err.message);
                 });
             });
         }
@@ -500,7 +498,7 @@
         }
 
         function detalharRegistro(colecao, id) {
-            const item = dbData[colecao].find(i => i.id === id);
+            const item = dbData[colecao].find(i => String(i.id) === String(id));
             if (!item) return;
             document.getElementById('detalhe-titulo-modal').textContent = 'Detalhar / Editar (' + colecao.toUpperCase() + ')';
             document.getElementById('edit-colecao').value = colecao;
@@ -561,26 +559,18 @@
                     try {
                         await updatePassword(auth.currentUser, novaSenha);
                     } catch (err) {
-                        console.warn("Aviso na atualização de senha Auth (pode exigir reautenticação):", err.message);
+                        console.warn("Aviso na atualização de senha Auth:", err.message);
                     }
                 }
             }
 
             try {
-                // Tenta salvar no Firestore de forma segura
-                await setDoc(doc(db, colecao, id), objAtualizado, { merge: true });
-                alert('Registro atualizado e sincronizado com sucesso!');
+                // Força a escrita estritamente na nuvem (Firestore)
+                await setDoc(doc(db, colecao, String(id)), objAtualizado, { merge: true });
+                alert('Alterações salvas e sincronizadas na nuvem com sucesso!');
                 fecharModal('modal-detalhes');
             } catch(err) {
-                console.error("Erro Firestore:", err);
-                // Fallback de salvamento local em memória para garantir continuidade caso as regras de permissão bloqueiem
-                const idx = dbData[colecao].findIndex(i => String(i.id) === String(id));
-                if (idx !== -1) {
-                    dbData[colecao][idx] = { ...dbData[colecao][idx], ...objAtualizado };
-                    renderizarTudo();
-                }
-                alert('Registro atualizado localmente! (Nota de permissão Firestore: ' + err.message + ')');
-                fecharModal('modal-detalhes');
+                alert('Erro ao salvar no Firestore: ' + err.message + '\n\nCertifique-se de que publicou as regras de segurança abertas no console do Firebase.');
             }
         }
 
@@ -624,53 +614,28 @@
                 const tags = Array.from(document.querySelectorAll('.form-check-tag:checked')).map(cb => cb.value);
                 
                 const obj = { id: email, nome: c1, email, orgao: c3, perfil: c4, modulosPermitidos: modulos, tags };
-                try {
-                    await setDoc(doc(db, 'usuarios', email), obj);
-                } catch(err) {
-                    dbData.usuarios.push(obj);
-                    renderizarTudo();
-                }
+                await setDoc(doc(db, 'usuarios', email), obj);
             } else if (tipo === 'orgao') {
                 const obj = { id: c1.toUpperCase().trim(), sigla: c1.toUpperCase().trim(), nome: c2, tipoJuridico: c3, responsavel: c4 };
-                try {
-                    await setDoc(doc(db, 'orgaos', obj.id), obj);
-                } catch(err) {
-                    dbData.orgaos.push(obj);
-                    renderizarTudo();
-                }
+                await setDoc(doc(db, 'orgaos', obj.id), obj);
             } else if (tipo === 'evento') {
                 const obj = { id: 'EV-' + Date.now(), titulo: c1, palestrante: c2, dataInicio: c3, descricao: c4, visibilidade: 'Público' };
-                try {
-                    await addDoc(collection(db, 'eventos'), obj);
-                } catch(err) {
-                    dbData.eventos.push(obj);
-                    renderizarTudo();
-                }
+                await addDoc(collection(db, 'eventos'), obj);
             } else {
                 const obj = { id: 'OBJ-' + Date.now(), nome: c1, descricao: c2 };
-                try {
-                    await addDoc(collection(db, tipo + 's'), obj);
-                } catch(err) {
-                    dbData[tipo + 's'].push(obj);
-                    renderizarTudo();
-                }
+                await addDoc(collection(db, tipo + 's'), obj);
             }
 
-            alert('Cadastro realizado com sucesso!');
+            alert('Salvo e sincronizado na nuvem com sucesso!');
             fecharModal('modal-form-universal');
         }
 
         async function excluirRegistroUniversal() {
             const colecao = document.getElementById('edit-colecao').value;
             const id = document.getElementById('edit-doc-id').value;
-            if (!confirm('Deseja realmente excluir este registro?')) return;
-            try {
-                await deleteDoc(doc(db, colecao, id));
-            } catch(err) {
-                dbData[colecao] = dbData[colecao].filter(i => String(i.id) !== String(id));
-                renderizarTudo();
-            }
-            alert('Registro excluído com sucesso!');
+            if (!confirm('Deseja realmente excluir este registro da nuvem?')) return;
+            await deleteDoc(doc(db, colecao, String(id)));
+            alert('Registro excluído da nuvem com sucesso!');
             fecharModal('modal-detalhes');
         }
 
