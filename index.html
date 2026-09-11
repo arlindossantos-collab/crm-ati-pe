@@ -1,7 +1,7 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v18.3 STABLE                                -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v18.4 STABLE                                -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
-<!-- ATUALIZAÇÃO: Correção definitiva do fluxo de autenticação e loop      -->
+<!-- ATUALIZAÇÃO: Correção definitiva do gatilho de login via clique direto -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -57,25 +57,23 @@
                     <h3 class="text-lg font-bold text-slate-900">Acesso Restrito PRGD</h3>
                     <p class="text-xs text-slate-500 mt-1">Informe suas credenciais cadastradas na base para acessar o sistema.</p>
                 </div>
-                <form id="form-login" onsubmit="fazerLoginLocal(event)">
-                    <div class="space-y-4 text-sm">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">E-mail Institucional</label>
-                            <input type="email" id="login-email" required placeholder="arlindo.santos@ati.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Senha</label>
-                            <input type="password" id="login-senha" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
-                        </div>
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">E-mail Institucional</label>
+                        <input type="email" id="login-email" required placeholder="arlindo.santos@ati.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
                     </div>
-                    <button type="submit" class="w-full mt-6 py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-right-to-bracket"></i> Autenticar e Entrar
-                    </button>
-                </form>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Senha</label>
+                        <input type="password" id="login-senha" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
+                    </div>
+                </div>
+                <button type="button" onclick="fazerLoginLocal()" class="w-full mt-6 py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-right-to-bracket"></i> Autenticar e Entrar
+                </button>
             </div>
             <!-- Controle de Versão na Tela de Autenticação -->
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.3 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.4 STABLE</span></p>
             </div>
         </div>
     </div>
@@ -88,7 +86,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.3 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.4 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -1393,12 +1391,15 @@
             reader.readAsText(file, 'UTF-8');
         };
 
-        window.fazerLoginLocal = function(e) {
+        window.fazerLoginLocal = function() {
             try {
-                if (e) e.preventDefault();
-                
                 const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
                 const senhaInput = document.getElementById('login-senha').value;
+
+                if (!emailInput || !senhaInput) {
+                    alert('Por favor, preencha o e-mail e a senha.');
+                    return;
+                }
 
                 // Garante que a base de usuários esteja populada para evitar falhas
                 if (!window.dbData.usuarios || window.dbData.usuarios.length === 0) {
@@ -1421,13 +1422,13 @@
 
                     if (!userFound) {
                         alert('Acesso negado: E-mail não localizado na base de usuários cadastrados.');
-                        return false;
+                        return;
                     }
 
                     const senhaNoBanco = userFound.senha || userFound.senhaHash;
                     if (senhaNoBanco !== senhaInput) {
                         alert('Acesso negado: Senha incorreta para o e-mail informado.');
-                        return false;
+                        return;
                     }
 
                     window.currentUser = userFound;
@@ -1441,11 +1442,9 @@
 
                 atualizarVisibilidadeAbas();
                 alert('Autenticado com sucesso! Bem-vindo(a), ' + (window.currentUser.nome || window.currentUser.email) + '.');
-                return false;
             } catch (err) {
                 console.error('Erro crítico no login:', err);
                 alert('Ocorreu um erro ao processar o login: ' + err.message);
-                return false;
             }
         };
 
@@ -1504,7 +1503,7 @@
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.3 STABLE</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.4 STABLE</span>
     </footer>
 </body>
 </html>
