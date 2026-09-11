@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function myProfile() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return signedIn() && myProfile().perfil == 'admin' && myProfile().ativo != false;
+    }
+
+    function hasModule(moduleId) {
+      return signedIn()
+        && myProfile().ativo != false
+        && (isAdmin() || myProfile().modulosPermitidos.hasAny([moduleId]));
+    }
+
+    // Cada módulo só pode ser lido por usuários que receberam explicitamente
+    // o módulo em modulosPermitidos. Administradores têm acesso total.
+    match /demandas/{id} {
+      allow read: if hasModule('demandas');
+      allow write: if isAdmin();
+    }
+    match /eventos/{id} {
+      allow read: if hasModule('eventos');
+      allow write: if isAdmin();
+    }
+    match /locais/{id} {
+      allow read: if hasModule('locais');
+      allow write: if isAdmin();
+    }
+    match /orgaos/{id} {
+      allow read: if hasModule('orgaos');
+      allow write: if isAdmin();
+    }
+    match /fornecedores/{id} {
+      allow read: if hasModule('fornecedores');
+      allow write: if isAdmin();
+    }
+    match /bases/{id} {
+      allow read: if hasModule('bases');
+      allow write: if isAdmin();
+    }
+
+    // Perfis não são uma base pública: cada usuário pode ler o próprio perfil;
+    // administradores podem administrar todos os perfis.
+    match /usuarios/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Índice de e-mail usado apenas para migração/consulta administrativa.
+    match /usuarios_email/{email} {
+      allow read: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}

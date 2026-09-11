@@ -1,54 +1,67 @@
-# PRGD v19.0 — Firebase como fonte única da base de usuários
+# PRGD ATI-PE — v19.0.0 Firebase Authentication
 
-## Objetivo
+Esta versão corrige a arquitetura de autenticação: a senha não fica mais armazenada no Firestore. Os usuários criados pelo painel são contas reais do **Firebase Authentication (Email/Password)** e seus dados de perfil ficam no Firestore.
 
-A v19.0 elimina a ideia de uma base local de usuários no HTML. A coleção Firestore `usuarios` é a fonte de dados do cadastro do PRGD e cada documento deve usar o UID do Firebase Authentication como ID:
+## Principais correções
 
-`usuarios/{UID}`
+- Login real com Firebase Authentication.
+- Persistência de sessão no navegador com `browserLocalPersistence`.
+- Criação de usuário pelo painel usando `createUserWithEmailAndPassword` em uma instância secundária do Firebase, sem derrubar a sessão do administrador.
+- Perfil do usuário salvo em `usuarios/{uid}`.
+- Índice `usuarios_email/{email}` para apoio à migração.
+- Senhas antigas não são mais gravadas/atualizadas no Firestore.
+- Dados de cada módulo são carregados por `onSnapshot` e compartilhados automaticamente para os usuários que possuem aquele módulo em `modulosPermitidos`.
+- Regras do Firestore impedem que um usuário leia um módulo que não recebeu.
+- Tags livres para usuários, incluindo inicialmente `diretor`, `coordenador`, `interno` e `externo`.
+- A aba Bases Compartilhadas permite cadastrar novas tags usando a categoria `Tag de Usuário`.
+- Exportação CSV passa a incluir Tags.
 
-## O que mudou
+## Configuração obrigatória no Firebase Console
 
-- Lista de usuários carregada diretamente do Firestore via `onSnapshot`.
-- Novo usuário: cria conta no Firebase Authentication e, em seguida, cria o perfil em `usuarios/{UID}`.
-- Edição de usuário: altera nome, órgão, perfil, situação e módulos diretamente no Firestore.
-- E-mail é tratado como identidade do Firebase e fica bloqueado na edição.
-- Senha de usuário não é gravada no Firestore; o administrador pode enviar e-mail de redefinição.
-- Desativação de usuário é feita por `ativo:false`, preservando a conta Authentication.
-- Botão “Sincronizar Firebase” remove somente documentos legados/duplicados identificáveis (`LEGACY_*` e documentos antigos cujo ID é o e-mail e que possuem correspondente `usuarios/{UID}`).
-- O HTML não contém uma lista fixa de usuários.
-- Auditoria registra operações administrativas.
-
-## Limitação importante do Firebase Web SDK
-
-Uma página web não pode listar todos os usuários do Firebase Authentication nem excluir/alterar a senha de outro usuário com privilégios administrativos. Por isso:
-
-- Firestore fornece a base de perfis/permissões exibida no PRGD.
-- Criação de novas contas usa o fluxo atual com app secundário.
-- Alteração de senha de terceiros usa o fluxo oficial de redefinição por e-mail.
-- Para sincronização completa entre “usuários existentes no Firebase Authentication” e Firestore, inclusive descoberta de contas Authentication sem perfil Firestore, alteração de e-mail e exclusão definitiva, recomenda-se uma Cloud Function com Firebase Admin SDK.
-
-## Implantação das Rules
-
-Use o arquivo `firestore_v19.rules` no Firebase Console ou Firebase CLI. As regras negam tudo por padrão e concedem acesso por perfil/módulo.
-
-## Atenção ao primeiro administrador
-
-Antes de aplicar regras que exigem `usuarios/{UID}`, garanta que a conta administrativa atual tenha um documento com seu UID e `perfil: "admin"`, `ativo: true` e `modulosPermitidos` contendo os módulos necessários.
-
-## Estrutura mínima do perfil
+1. Abra o projeto `prgd-ati-pe`.
+2. Vá em **Authentication > Sign-in method**.
+3. Ative **Email/Password**.
+4. Crie manualmente a primeira conta administrativa no Authentication, por exemplo a conta do administrador responsável.
+5. No Firestore, crie o perfil dessa conta na coleção `usuarios`, usando o **UID exibido no Authentication** como ID do documento. Exemplo:
 
 ```json
 {
-  "uid": "UID_DO_FIREBASE_AUTH",
-  "nome": "Nome do usuário",
-  "email": "usuario@ati.pe.gov.br",
-  "subgrupoId": "ATI",
+  "uid": "UID_DA_CONTA",
+  "nome": "Administrador PRGD",
+  "email": "admin@exemplo.pe.gov.br",
   "perfil": "admin",
   "ativo": true,
-  "modulosPermitidos": ["dashboard", "usuarios"],
-  "criadoEm": "timestamp",
-  "criadoPorUid": "UID_ADMIN",
-  "atualizadoEm": "timestamp",
-  "atualizadoPorUid": "UID_ADMIN"
+  "tags": ["diretor", "interno"],
+  "modulosPermitidos": ["dashboard", "demandas", "eventos", "locais", "orgaos", "fornecedores", "bases", "usuarios"]
 }
 ```
+
+6. Publique as regras:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+7. Publique o site:
+
+```bash
+firebase deploy --only hosting
+```
+
+## Importante sobre usuários antigos
+
+A versão anterior usava documentos por e-mail e armazenava senha no Firestore. Essa prática não deve continuar. O usuário antigo precisa existir no Firebase Authentication. Depois de criado no Authentication com o mesmo e-mail, o PRGD pode aproveitar o cadastro legado e migrar o perfil para `usuarios/{uid}`.
+
+## CSV de usuários
+
+Formato da v19:
+
+```text
+NOME;EMAIL;ORGAO;PERFIL;SENHA;TAGS
+```
+
+A senha do CSV é utilizada somente no momento da criação da conta no Firebase Authentication; ela não é salva no Firestore.
+
+## Segurança
+
+A `apiKey` presente no HTML é uma chave pública de configuração do Firebase e não substitui as regras de segurança. A proteção real está no Firebase Authentication + Firestore Security Rules. Nunca coloque uma credencial de Service Account no HTML.
