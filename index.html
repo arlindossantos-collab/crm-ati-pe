@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v19.0.2 FIREBASE AUTH                          -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v19.1.0 FIREBASE AUTH — PRESERVAÇÃO COMPLETA                          -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ATUALIZAÇÃO: Autenticação direta e síncrona no Firestore Cloud        -->
 <!-- ===================================================================== -->
@@ -50,7 +50,7 @@
             </div>
             <!-- Controle de Versão na Tela de Autenticação -->
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.0.2 FIREBASE AUTH</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.1.0 FIREBASE AUTH — PRESERVAÇÃO COMPLETA</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.0.2 FIREBASE AUTH</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.1.0 FIREBASE AUTH — PRESERVAÇÃO COMPLETA</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -1597,11 +1597,18 @@
             renderizarTudo();
         }
 
-        async function fazerLogout() {
-            await signOut(auth);
+        async function fazerLogout(event) {
+            if (event) event.preventDefault();
+            try { await signOut(auth); } catch (err) { console.warn('Falha no signOut:', err); }
             currentUser = null;
             dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [] };
+            unsubscribers.forEach(fn => { try { fn(); } catch(e) {} });
+            unsubscribers = [];
             verificarAutenticacaoObrigatoria();
+            const nameDisplay = document.getElementById('user-name-display');
+            const roleDisplay = document.getElementById('user-role-display');
+            if (nameDisplay) nameDisplay.textContent = '';
+            if (roleDisplay) roleDisplay.textContent = '';
         }
 
         function exportarUsuariosCSV() {
@@ -1613,7 +1620,7 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "usuarios_prgd_v19.0.1.csv");
+            link.setAttribute("download", "usuarios_prgd_v19.1.0.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1647,14 +1654,60 @@
         // --- INICIALIZAÇÃO E BIND DE EVENTOS ---
         async function inicializarAplicacao() {
             try {
-                const btnLogin = document.getElementById('btn-executar-login');
-                if (!btnLogin) throw new Error('Botão de autenticação não encontrado no HTML.');
+                // Eventos por delegação: permanecem funcionais mesmo quando a interface
+                // é redesenhada/re-renderizada após os snapshots do Firestore.
+                document.addEventListener('click', (event) => {
+                    const login = event.target.closest('#btn-executar-login');
+                    if (login) return fazerLoginLocal(event);
 
-                // O botão é ligado imediatamente, antes de qualquer consulta ao Firestore.
-                btnLogin.addEventListener('click', fazerLoginLocal);
-                document.getElementById('login-senha')?.addEventListener('keydown', e => {
-                    if (e.key === 'Enter') fazerLoginLocal(e);
+                    const logout = event.target.closest('#btn-executar-logout');
+                    if (logout) return fazerLogout(event);
+
+                    const tab = event.target.closest('.nav-tab');
+                    if (tab) return mudarAba(tab.getAttribute('data-tab'));
+
+                    const abrirForm = event.target.closest('.btn-abrir-form');
+                    if (abrirForm) return abrirModalForm(abrirForm.getAttribute('data-modal-target'));
+
+                    const abrirImport = event.target.closest('.btn-abrir-import');
+                    if (abrirImport) return abrirModalImportacao(abrirImport.getAttribute('data-import-target'));
+
+                    const fechar = event.target.closest('.btn-fechar-modal');
+                    if (fechar) return fecharModal(fechar.getAttribute('data-target'));
+
+                    const exportar = event.target.closest('#btn-export-csv, #btn-export-usuarios');
+                    if (exportar) return exportarUsuariosCSV();
+
+                    const processar = event.target.closest('#btn-processar-csv');
+                    if (processar) return processarArquivoCSV();
+
+                    const excluir = event.target.closest('#btn-excluir-registro');
+                    if (excluir) return excluirRegistroUniversal();
+
+                    const acompanhamento = event.target.closest('#btn-add-acompanhamento');
+                    if (acompanhamento) return adicionarAcompanhamentoDemanda(acompanhamento.getAttribute('data-docid'));
+
+                    const linha = event.target.closest('.tr-detalhe');
+                    if (linha) return detalharRegistro(linha.getAttribute('data-colecao'), linha.getAttribute('data-id'));
+
+                    const card = event.target.closest('.card-detalhe');
+                    if (card) return detalharRegistro(card.getAttribute('data-colecao'), card.getAttribute('data-id'));
+                }, { passive: false });
+
+                document.addEventListener('submit', (event) => {
+                    if (event.target && event.target.id === 'form-univ-body') return salvarCadastroUniversal(event);
+                    if (event.target && event.target.id === 'form-edicao-admin') return salvarEdicaoUniversal(event);
                 });
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' && event.target?.id === 'login-senha') {
+                        event.preventDefault();
+                        fazerLoginLocal(event);
+                    }
+                });
+
+                const filtroEv = document.getElementById('filtro-eventos');
+                if (filtroEv) filtroEv.addEventListener('change', renderEventos);
 
                 verificarAutenticacaoObrigatoria();
                 await setPersistence(auth, browserLocalPersistence);
@@ -1670,31 +1723,13 @@
                         console.error('Erro ao carregar sessão/perfil:', e);
                         currentUser = null;
                         verificarAutenticacaoObrigatoria();
-                        alert('Não foi possível carregar o perfil do usuário no Firestore. Verifique as regras de segurança.');
+                        alert('Não foi possível carregar o perfil do usuário no Firestore. Verifique as regras de segurança.\n\n' + (e?.message || e));
                     }
                 });
-
-                const bind = (id, event, fn) => {
-                    const el = document.getElementById(id);
-                    if (el) el.addEventListener(event, fn);
-                    else console.warn('Elemento não encontrado:', id);
-                };
-                bind('btn-executar-logout', 'click', fazerLogout);
-                bind('btn-export-csv', 'click', exportarUsuariosCSV);
-                bind('btn-export-usuarios', 'click', exportarUsuariosCSV);
-                bind('btn-processar-csv', 'click', processarArquivoCSV);
-                bind('btn-excluir-registro', 'click', excluirRegistroUniversal);
-                bind('form-edicao-admin', 'submit', salvarEdicaoUniversal);
-                bind('form-univ-body', 'submit', salvarCadastroUniversal);
-
-                document.querySelectorAll('.nav-tab').forEach(btn => btn.addEventListener('click', () => mudarAba(btn.getAttribute('data-tab'))));
-                document.querySelectorAll('.btn-abrir-form').forEach(btn => btn.addEventListener('click', () => abrirModalForm(btn.getAttribute('data-modal-target'))));
-                document.querySelectorAll('.btn-abrir-import').forEach(btn => btn.addEventListener('click', () => abrirModalImportacao(btn.getAttribute('data-import-target'))));
-                document.querySelectorAll('.btn-fechar-modal').forEach(btn => btn.addEventListener('click', () => fecharModal(btn.getAttribute('data-target'))));
-                bind('filtro-eventos', 'change', renderEventos);
             } catch (e) {
                 console.error('Falha na inicialização do PRGD:', e);
-                alert('Falha ao inicializar o sistema. Abra o console do navegador (F12) para verificar o erro.\n\n' + (e?.message || e));
+                // O login e os controles por delegação já estão instalados.
+                alert('Falha na inicialização do sistema: ' + (e?.message || e));
             }
         }
 
@@ -1703,7 +1738,7 @@
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.0.2 FIREBASE AUTH</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.1.0 FIREBASE AUTH — PRESERVAÇÃO COMPLETA</span>
     </footer>
 </body>
 </html>
