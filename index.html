@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v19.6 FULL USER PERMISSIONS & MODULES       -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v19.7 STABLE ISOLATED MODULES & EVENT FILTER-->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -48,7 +48,7 @@
                 </button>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.6 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.7 STABLE</span></p>
             </div>
         </div>
     </div>
@@ -61,7 +61,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.6 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.7 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -129,7 +129,17 @@
 
         <!-- ABA EVENTOS -->
         <div id="aba-eventos" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Agenda Institucional e Eventos Exclusivos</h3><button type="button" data-modal-target="evento" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Criar Evento</button></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 class="text-base font-bold text-slate-800">Agenda Institucional e Eventos Exclusivos</h3>
+                <div class="flex items-center gap-2">
+                    <div class="inline-flex bg-slate-200 p-1 rounded-lg text-xs font-semibold">
+                        <button type="button" id="filtro-evento-todos" class="px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition">Todos</button>
+                        <button type="button" id="filtro-evento-futuros" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Futuros</button>
+                        <button type="button" id="filtro-evento-realizados" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Realizados</button>
+                    </div>
+                    <button type="button" data-modal-target="evento" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Criar Evento</button>
+                </div>
+            </div>
             <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
@@ -179,11 +189,11 @@
     <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="form-univ-titulo" class="text-base font-bold">Novo Cadastro</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-form-universal"><i class="fa-solid fa-xmark text-lg"></i></button></div>
-            <form id="form-univ-body" class="space-y-3 text-sm"><input type="hidden" id="form-univ-tipo"><div id="form-univ-campos"></div><button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold">Salvar Sincronizado no Firestore</button></form>
+            <form id="form-univ-body" class="space-y-3 text-sm"><input type="hidden" id="form-univ-tipo"><div id="form-univ-campos"></div><button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold cursor-pointer">Salvar Sincronizado no Firestore</button></form>
         </div>
     </div>
 
-    <!-- Script Principal com Gestão Completa de Usuários e Permissões Granulares -->
+    <!-- Script Principal com Isolamento de Módulos e Filtro de Eventos -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -207,6 +217,7 @@
         let currentUser = null;
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [] };
         let abaAtual = 'dashboard';
+        let filtroEventoAtual = 'todos';
 
         const MÓDULOS_SISTEMA = [
             { id: 'dashboard', nome: 'Dashboard' },
@@ -219,6 +230,7 @@
             { id: 'usuarios', nome: 'Usuários' }
         ];
 
+        // Mocks robustos para todas as coleções de forma isolada e segura
         const initialMockData = {
             orgaos: [
                 { id: 'ATI', sigla: 'ATI', nome: 'Agência Estadual de Tecnologia da Informação', tipoJuridico: 'Autarquia', responsavel: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br' },
@@ -227,13 +239,26 @@
             demandas: [
                 { id: 'DEM-001', orgao: 'SEFAZ', titulo: 'Migração SOGo.PE', categoria: 'E-mail', prioridade: 'Alta', status: 'Em Andamento' }
             ],
-            eventos: [], locais: [], fornecedores: [], bases: [],
+            eventos: [
+                { id: 'EV-001', titulo: 'GOV IN PLAY 2026', palestrante: 'Equipe ATI', dataInicio: '2026-10-24T09:00', dataFim: '2026-10-24T17:00', visibilidade: 'Aberto ao Público', descricao: 'Encontro de gestores de TIC.' },
+                { id: 'EV-002', titulo: 'Seminário de Cibersegurança 2024', palestrante: 'Comitê de Segurança', dataInicio: '2024-05-10T09:00', dataFim: '2024-05-10T17:00', visibilidade: 'Interno', descricao: 'Evento realizado anteriormente sobre LGPD e segurança.' }
+            ],
+            locais: [
+                { id: 'LOC-001', nome: 'Auditório ATI', tipoEspaco: 'Auditório', capacidade: '150', valorAluguel: 'Gratuito' }
+            ],
+            fornecedores: [
+                { id: 'FOR-001', nome: 'Tech Cloud Solutions', cnpj: '12.345.678/0001-90', categoria: 'Cloud' }
+            ],
+            bases: [
+                { id: 'BASE-01', categoria: 'Subgrupo / Papel', sigla: 'GESTOR_TI', nome: 'Gestor de TI', observacao: 'Governança tecnológica' },
+                { id: 'BASE-02', categoria: 'Subgrupo / Papel', sigla: 'FUNC_ATI', nome: 'Funcionários ATI', observacao: 'Colaboradores efetivos' }
+            ],
             usuarios: [
-                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', orgao: 'ATI', perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] }
+                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', orgao: 'ATI', perfil: 'admin', modulosPermitidos: MÓDULOS_SISTEMA.map(m=>m.id) }
             ]
         };
 
-        async function restaurarDadosCompletos() {
+        async function restaurarDadosIsolados() {
             try {
                 for (const [colecao, itens] of Object.entries(initialMockData)) {
                     for (const item of itens) {
@@ -241,7 +266,7 @@
                     }
                 }
             } catch (err) {
-                console.warn("Restauracao:", err);
+                console.warn("Aviso de sincronização isolada:", err);
             }
         }
 
@@ -292,6 +317,7 @@
                 if (btn) btn.className = 'nav-tab px-4 py-2 rounded-lg transition ' + (mod.id === abaAtual ? 'tab-active' : 'tab-inactive');
             });
             if (aba === 'dashboard') renderCharts();
+            if (aba === 'eventos') renderEventos();
         }
 
         function iniciarSnapshotFirestore() {
@@ -299,7 +325,7 @@
                 onSnapshot(collection(db, col), snap => {
                     if (!snap.empty) {
                         dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    } else {
+                    } else if (dbData[col].length === 0) {
                         dbData[col] = initialMockData[col] || [];
                     }
                     renderizarTudo();
@@ -369,7 +395,34 @@
         function renderEventos() {
             const grid = document.getElementById('grid-eventos');
             if (!grid) return;
-            grid.innerHTML = dbData.eventos.map(e => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe" data-colecao="eventos" data-id="${e.id}"><h4 class="font-bold">${e.titulo}</h4><p class="text-xs text-slate-500">${e.descricao || ''}</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento.</p>';
+            
+            const agora = new Date();
+            const eventosFiltrados = dbData.eventos.filter(e => {
+                const dataFimEvt = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
+                const isRealizado = dataFimEvt < agora;
+                if (filtroEventoAtual === 'futuros') return !isRealizado;
+                if (filtroEventoAtual === 'realizados') return isRealizado;
+                return true;
+            });
+
+            grid.innerHTML = eventosFiltrados.map(e => {
+                const dataFimEvt = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
+                const isRealizado = dataFimEvt < agora;
+                const badgeStatus = isRealizado ? '<span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded ml-2">Realizado</span>' : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded ml-2">Futuro / Em Breve</span>';
+                
+                return `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe hover:border-amber-400 transition flex flex-col justify-between" data-colecao="eventos" data-id="${e.id}">` +
+                    `<div>` +
+                        `<div class="flex items-center justify-between"><span class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded">${e.visibilidade || 'Público'}</span>${badgeStatus}</div>` +
+                        `<h4 class="font-bold text-base mt-2 text-slate-900">${e.titulo}</h4>` +
+                        `<p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> ${e.palestrante || 'Equipe'}</p>` +
+                        `<p class="text-xs text-slate-500 mt-2">${e.descricao || ''}</p>` +
+                    `</div>` +
+                    `<div class="mt-4 pt-3 border-t text-[11px] text-slate-400 flex items-center justify-between">` +
+                        `<span><i class="fa-solid fa-calendar mr-1"></i> ${e.dataInicio ? new Date(e.dataInicio).toLocaleDateString('pt-BR') : 'Data não informada'}</span>` +
+                        `<span class="text-blue-900 font-bold hover:underline">Ver Detalhes &rarr;</span>` +
+                    `</div>` +
+                `</div>`;
+            }).join('') || '<p class="text-slate-400 text-sm col-span-3 text-center py-8">Nenhum evento encontrado para este filtro.</p>';
             vincularCliquesTabelas();
         }
 
@@ -442,29 +495,28 @@
             const c4 = document.getElementById('uc-4')?.value || '';
 
             if (tipo === 'usuario') {
-                const email = c2.toLowerCase();
+                const email = c2.toLowerCase().trim();
                 const modulos = Array.from(document.querySelectorAll('.form-check-modulo:checked')).map(cb => cb.value);
                 const obj = { id: email, nome: c1, email, orgao: c3, perfil: c4, modulosPermitidos: modulos };
-                dbData.usuarios.push(obj);
                 await setDoc(doc(db, 'usuarios', email), obj);
             } else if (tipo === 'orgao') {
-                const obj = { id: c1.toUpperCase(), sigla: c1.toUpperCase(), nome: c2, tipoJuridico: c3, responsavel: c4 };
+                const obj = { id: c1.toUpperCase().trim(), sigla: c1.toUpperCase().trim(), nome: c2, tipoJuridico: c3, responsavel: c4 };
                 await setDoc(doc(db, 'orgaos', obj.id), obj);
             } else {
                 const obj = { id: 'OBJ-' + Date.now(), nome: c1, descricao: c2 };
                 await addDoc(collection(db, tipo + 's'), obj);
             }
 
-            alert('Salvo com sucesso!');
+            alert('Cadastro realizado e sincronizado com sucesso!');
             fecharModal('modal-form-universal');
         }
 
         async function excluirRegistroUniversal() {
             const colecao = document.getElementById('edit-colecao').value;
             const id = document.getElementById('edit-doc-id').value;
-            if (!confirm('Deseja excluir?')) return;
+            if (!confirm('Deseja realmente excluir este registro?')) return;
             await deleteDoc(doc(db, colecao, id));
-            alert('Excluído!');
+            alert('Registro excluído com sucesso!');
             fecharModal('modal-detalhes');
         }
 
@@ -476,12 +528,12 @@
                 const cred = await signInWithEmailAndPassword(auth, email, senha);
                 const userDoc = dbData.usuarios.find(u => (u.email || u.id) === email);
                 currentUser = userDoc || { email: cred.user.email, perfil: 'admin', orgao: 'ATI', modulosPermitidos: MÓDULOS_SISTEMA.map(m=>m.id) };
-                await restaurarDadosCompletos();
+                await restaurarDadosIsolados();
                 atualizarVisibilidadeAbas();
             } catch(err) {
                 if (email === 'arlindo.santos@ati.pe.gov.br' && senha === '123') {
                     currentUser = { email, nome: 'Arlindo Santos', perfil: 'admin', orgao: 'ATI', modulosPermitidos: MÓDULOS_SISTEMA.map(m=>m.id) };
-                    await restaurarDadosCompletos();
+                    await restaurarDadosIsolados();
                     atualizarVisibilidadeAbas();
                 } else {
                     alert('Erro de autenticação: ' + err.message);
@@ -505,7 +557,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            restaurarDadosCompletos();
+            restaurarDadosIsolados();
             renderizarTudo();
             iniciarSnapshotFirestore();
             verificarAutenticacaoObrigatoria();
@@ -514,7 +566,7 @@
                 if (user) {
                     const userDoc = dbData.usuarios.find(u => (u.email || u.id) === user.email);
                     currentUser = userDoc || { email: user.email, perfil: 'admin', orgao: 'ATI', modulosPermitidos: MÓDULOS_SISTEMA.map(m=>m.id) };
-                    await restaurarDadosCompletos();
+                    await restaurarDadosIsolados();
                     atualizarVisibilidadeAbas();
                 }
             });
@@ -524,6 +576,22 @@
             document.getElementById('btn-export-csv').onclick = exportarUsuariosCSV;
             document.getElementById('form-univ-body').onsubmit = salvarCadastroUniversal;
             document.getElementById('btn-excluir-registro').onclick = excluirRegistroUniversal;
+
+            // Filtros de eventos
+            const btnTodos = document.getElementById('filtro-evento-todos');
+            const btnFuturos = document.getElementById('filtro-evento-futuros');
+            const btnRealizados = document.getElementById('filtro-evento-realizados');
+
+            const atualizarEstilosFiltroEventos = (ativo) => {
+                [btnTodos, btnFuturos, btnRealizados].forEach(b => {
+                    b.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-950 transition';
+                });
+                ativo.className = 'px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition font-bold';
+            };
+
+            btnTodos.onclick = () => { filtroEventoAtual = 'todos'; atualizarEstilosFiltroEventos(btnTodos); renderEventos(); };
+            btnFuturos.onclick = () => { filtroEventoAtual = 'futuros'; atualizarEstilosFiltroEventos(btnFuturos); renderEventos(); };
+            btnRealizados.onclick = () => { filtroEventoAtual = 'realizados'; atualizarEstilosFiltroEventos(btnRealizados); renderEventos(); };
 
             MÓDULOS_SISTEMA.forEach(m => {
                 const b = document.querySelector(`[data-tab="${m.id}"]`);
