@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v19.4 STABLE RESTORE & SYNC                 -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v19.5 STABLE FULL RICH DATA RESTORE         -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -48,7 +48,7 @@
                 </button>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.4 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.5 STABLE</span></p>
             </div>
         </div>
     </div>
@@ -61,7 +61,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.4 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.5 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -93,10 +93,10 @@
                 <button type="button" data-tab="dashboard" class="nav-tab px-4 py-2 rounded-lg transition tab-active"><i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard</button>
                 <button type="button" data-tab="demandas" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-list-check mr-1.5"></i> Demandas</button>
                 <button type="button" data-tab="eventos" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-calendar-day mr-1.5"></i> Eventos</button>
-                <button type="button" data-tab="locais" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais</button>
-                <button type="button" data-tab="orgaos" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-sitemap mr-1.5"></i> Órgãos</button>
+                <button type="button" data-tab="locais" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais de Eventos</button>
+                <button type="button" data-tab="orgaos" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-sitemap mr-1.5"></i> Órgãos / Secretarias</button>
                 <button type="button" data-tab="fornecedores" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores</button>
-                <button type="button" data-tab="bases" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-database mr-1.5"></i> Bases</button>
+                <button type="button" data-tab="bases" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-database mr-1.5"></i> Bases Compartilhadas</button>
                 <button type="button" data-tab="usuarios" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-users-gear mr-1.5"></i> Usuários</button>
             </div>
             <div class="flex items-center gap-2">
@@ -124,54 +124,57 @@
         <!-- ABA DEMANDAS -->
         <div id="aba-demandas" class="hidden space-y-4">
             <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Solicitações de Governo Digital</h3><button type="button" data-modal-target="demanda" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Demanda</button></div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Órgão</th><th class="p-4">Título</th><th class="p-4">Categoria</th><th class="p-4">Prioridade</th><th class="p-4">Status</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-demandas" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Órgão Solicitante</th><th class="p-4">Título da Demanda</th><th class="p-4">Categoria</th><th class="p-4">Prioridade</th><th class="p-4">Status</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-demandas" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA EVENTOS -->
         <div id="aba-eventos" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Agenda Institucional</h3><button type="button" data-modal-target="evento" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Criar Evento</button></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 class="text-base font-bold text-slate-800">Agenda Institucional e Eventos Exclusivos</h3>
+                <button type="button" data-modal-target="evento" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Criar Evento</button>
+            </div>
             <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
         <!-- ABA LOCAIS -->
         <div id="aba-locais" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Espaços e Auditórios</h3><button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Local</button></div>
+            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Catálogo de Espaços e Auditórios</h3><button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Local / Auditório</button></div>
             <div id="grid-locais" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
         <!-- ABA ÓRGÃOS -->
         <div id="aba-orgaos" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Órgãos e Secretarias</h3><button type="button" data-modal-target="orgao" class="btn-abrir-form btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Órgão</button></div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Sigla</th><th class="p-4">Nome</th><th class="p-4">Tipo</th><th class="p-4">Responsável</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-orgaos" class="divide-y text-sm"></tbody></table></div>
+            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos, Secretarias e Entidades</h3><button type="button" data-modal-target="orgao" class="btn-abrir-form btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria</button></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Sigla</th><th class="p-4">Nome do Órgão / Secretaria</th><th class="p-4">Tipo Jurídico</th><th class="p-4">Responsável TIC</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-orgaos" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA FORNECEDORES -->
         <div id="aba-fornecedores" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Fornecedores TIC</h3><button type="button" data-modal-target="fornecedor" class="btn-abrir-form btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Fornecedor</button></div>
+            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC Detalhados</h3><button type="button" data-modal-target="fornecedor" class="btn-abrir-form btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Fornecedor</button></div>
             <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
         <!-- ABA BASES -->
         <div id="aba-bases" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Bases Compartilhadas</h3><button type="button" data-modal-target="base" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Parâmetro</button></div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria</th><th class="p-4">Sigla</th><th class="p-4">Nome</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
+            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Gerenciamento de Bases Compartilhadas</h3><button type="button" data-modal-target="base" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Parâmetro de Base</button></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria / Domínio</th><th class="p-4">Identificador / Sigla</th><th class="p-4">Nome / Descrição</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA USUÁRIOS -->
         <div id="aba-usuarios" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Usuários e Permissões</h3><button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button></div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail</th><th class="p-4">Órgão</th><th class="p-4">Perfil</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
+            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários e Permissões</h3><button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Órgão</th><th class="p-4">Perfil</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
         </div>
     </main>
 
     <!-- Modais -->
     <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento Completo</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
             <div id="detalhe-conteudo" class="space-y-3 text-sm mb-4"></div>
             <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl">
-                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Gerenciamento</p><button type="button" id="btn-excluir-registro" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold">Excluir</button></div>
-                <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-60 overflow-y-auto"></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded">Salvar</button></div></form>
+                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Edição e Gerenciamento</p><button type="button" id="btn-excluir-registro" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold">Excluir Registro</button></div>
+                <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-60 overflow-y-auto"></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded">Salvar Alterações</button></div></form>
             </div>
         </div>
     </div>
@@ -179,11 +182,11 @@
     <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="form-univ-titulo" class="text-base font-bold">Novo Cadastro</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-form-universal"><i class="fa-solid fa-xmark text-lg"></i></button></div>
-            <form id="form-univ-body" class="space-y-3 text-sm"><input type="hidden" id="form-univ-tipo"><div id="form-univ-campos"></div><button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold">Salvar no Firestore</button></form>
+            <form id="form-univ-body" class="space-y-3 text-sm"><input type="hidden" id="form-univ-tipo"><div id="form-univ-campos"></div><button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold">Salvar Sincronizado no Firestore</button></form>
         </div>
     </div>
 
-    <!-- Script Principal com Auto-Resturação -->
+    <!-- Script Principal com Dados Ricos Restaurados -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -208,34 +211,35 @@
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [] };
         let abaAtual = 'dashboard';
 
+        // Base de dados rica original restaurada integralmente
         const initialMockData = {
             orgaos: [
-                { id: 'ATI', sigla: 'ATI', nome: 'Agência Estadual de Tecnologia da Informação', tipoJuridico: 'Autarquia', responsavel: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br' },
-                { id: 'SEFAZ', sigla: 'SEFAZ', nome: 'Secretaria da Fazenda de Pernambuco', tipoJuridico: 'Administração Direta', responsavel: 'Gestão de TI SEFAZ', email: 'ti@sefaz.pe.gov.br' },
-                { id: 'SEPLAG', sigla: 'SEPLAG', nome: 'Secretaria de Planejamento e Gestão', tipoJuridico: 'Administração Direta', responsavel: 'Gestão de TI SEPLAG', email: 'ti@seplag.pe.gov.br' }
+                { id: 'ATI', sigla: 'ATI', nome: 'Agência Estadual de Tecnologia da Informação', tipoJuridico: 'Autarquia', responsavel: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', telefone: '(81) 3182-4500', endereco: 'Rua Imperial, 1687 - São José, Recife - PE' },
+                { id: 'SEFAZ', sigla: 'SEFAZ', nome: 'Secretaria da Fazenda de Pernambuco', tipoJuridico: 'Administração Direta (Secretaria)', responsavel: 'Gestão de TI SEFAZ', email: 'ti@sefaz.pe.gov.br', telefone: '(81) 3181-1200', endereco: 'Rua da Aurora, 469 - Boa Vista, Recife - PE' },
+                { id: 'SEPLAG', sigla: 'SEPLAG', nome: 'Secretaria de Planejamento e Gestão', tipoJuridico: 'Administração Direta (Secretaria)', responsavel: 'Gestão de TI SEPLAG', email: 'ti@seplag.pe.gov.br', telefone: '(81) 3183-8000', endereco: 'Av. Granito, s/n - Campo Grande, Recife - PE' }
             ],
             demandas: [
-                { id: 'DEM-001', orgao: 'SEFAZ', titulo: 'Migração do Sistema de Correios para SOGo.PE', categoria: 'Infraestrutura / E-mail', prioridade: 'Alta', status: 'Em Andamento', descricao: 'Migração das 120.000 contas do Estado.' }
+                { id: 'DEM-001', orgao: 'SEFAZ', titulo: 'Migração do Sistema de Correios para SOGo.PE', categoria: 'Infraestrutura / E-mail', prioridade: 'Alta', status: 'Em Andamento', descricao: 'Migração das 120.000 contas do Estado para o novo ambiente SOGo.PE.', historicoStatus: [{ data: new Date().toISOString(), status: 'Em Andamento', descricao: 'Início da implantação e testes de diretório.' }] }
             ],
             eventos: [
-                { id: 'EV-001', titulo: 'GOV IN PLAY 2026', palestrante: 'Equipe ATI', descricao: 'Encontro de gestores de TIC do Estado de Pernambuco.' }
+                { id: 'EV-001', titulo: 'GOV IN PLAY 2026', palestrante: 'Equipe de Relacionamento ATI / Especialistas em GovDigital', dataInicio: '2026-10-24T09:00', dataFim: '2026-10-24T17:00', local: 'Auditório ATI', geracaoCertificado: 'Sim', linkInscricao: 'https://sead.pe.gov.br/inscricao-gov-in-play', visibilidade: 'Aberto ao Público', descricao: 'Encontro de gestores de TIC do Estado de Pernambuco para alinhamento estratégico.' }
             ],
             locais: [
-                { id: 'LOC-001', nome: 'Auditório do Governo Digital - ATI', tipoEspaco: 'Auditório', capacidade: '150', valorAluguel: 'Gratuito' }
+                { id: 'LOC-001', nome: 'Auditório do Governo Digital - ATI', tipoEspaco: 'Auditório', natureza: 'Público', capacidade: '150', valorAluguel: 'Gratuito', climatizacao: 'Sim (Ar-Condicionado)', som: 'Sim (Mesa + Som)', estacionamento: 'Sim', cozinha: 'Sim', banheiro: 'Sim', responsavel: 'Gestão ATI', endereco: 'Rua Imperial, Recife - PE' }
             ],
             fornecedores: [
-                { id: 'FOR-001', nome: 'Tech Cloud Solutions PE', cnpj: '12.345.678/0001-90', categoria: 'Cloud', responsavel: 'Carlos Eduardo' }
+                { id: 'FOR-001', nome: 'Tech Cloud Solutions PE', cnpj: '12.345.678/0001-90', categoria: 'Infraestrutura / Cloud', responsavel: 'Carlos Eduardo', telefone: '(81) 98888-7777', email: 'contato@techcloudpe.com.br', numeroContrato: 'Contrato nº 012/2025-ATI', valorContratual: 'R$ 2.400.000,00', statusContrato: 'Ativo / Em Execução', escopoServico: 'Suporte, governança cloud privada e sustentação de banco de dados.', endereco: 'Av. Agamenon Magalhães, Recife - PE', ramo: 'Infraestrutura', pontoFocal: 'Carlos Eduardo', eventosParticipados: 'GOV IN PLAY 2025', descricao: 'Parceiro principal em hospedagem cloud.' }
             ],
             bases: [
-                { id: 'BASE-01', categoria: 'Subgrupo / Papel', sigla: 'GESTOR_TI', nome: 'Gestor de TI', observacao: 'Governança tecnológica' }
+                { id: 'BASE-01', categoria: 'Subgrupo / Papel', sigla: 'GESTOR_TI', nome: 'Gestor de TI', observacao: 'Responsável pela governança tecnológica do órgão' },
+                { id: 'BASE-02', categoria: 'Subgrupo / Papel', sigla: 'FUNC_ATI', nome: 'Funcionários ATI', observacao: 'Colaboradores efetivos e comissionados da ATI-PE' }
             ],
             usuarios: [
-                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] }
+                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', subgrupoId: 'ATI', perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] }
             ]
         };
 
-        // Função de Auto-Resturação: popula o Firestore automaticamente se estiver vazio
-        async function restaurarDadosAutomaticamente() {
+        async function restaurarDadosRicosAutomaticamente() {
             try {
                 for (const [colecao, itens] of Object.entries(initialMockData)) {
                     for (const item of itens) {
@@ -243,7 +247,7 @@
                     }
                 }
             } catch (err) {
-                console.warn("Aviso na auto-resturação:", err);
+                console.warn("Aviso na restauração rica:", err);
             }
         }
 
@@ -310,7 +314,7 @@
 
         function preencherSelectOrgaos() {
             document.querySelectorAll('.select-orgaos-dinamico').forEach(select => {
-                select.innerHTML = '<option value="">Selecione o Órgão</option>';
+                select.innerHTML = '<option value="">Selecione o Órgão / Secretaria</option>';
                 dbData.orgaos.forEach(o => {
                     const opt = document.createElement('option');
                     opt.value = o.sigla || o.id;
@@ -323,49 +327,49 @@
         function renderUsuarios() {
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
-            tbody.innerHTML = dbData.usuarios.map(u => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="usuarios" data-id="${u.id}"><td class="p-4 font-bold">${u.nome || u.email}</td><td class="p-4">${u.email || u.id}</td><td class="p-4">${u.orgao || 'ATI'}</td><td class="p-4 uppercase font-bold">${u.perfil || 'comum'}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
+            tbody.innerHTML = dbData.usuarios.map(u => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="usuarios" data-id="${u.id}"><td class="p-4 font-bold">${u.nome || u.email}</td><td class="p-4">${u.email || u.id}</td><td class="p-4">${u.subgrupoId || u.orgao || 'ATI'}</td><td class="p-4 uppercase font-bold">${u.perfil || 'comum'}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
             vincularCliquesTabelas();
         }
 
         function renderOrgaos() {
             const tbody = document.getElementById('tabela-orgaos');
             if (!tbody) return;
-            tbody.innerHTML = dbData.orgaos.map(o => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="orgaos" data-id="${o.id}"><td class="p-4 font-bold">${o.sigla || o.id}</td><td class="p-4">${o.nome}</td><td class="p-4">${o.tipoJuridico || '-'}</td><td class="p-4">${o.responsavel || '-'}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
+            tbody.innerHTML = dbData.orgaos.map(o => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="orgaos" data-id="${o.id}"><td class="p-4 font-bold text-indigo-900">${o.sigla || o.id}</td><td class="p-4">${o.nome}</td><td class="p-4"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded text-xs font-bold">${o.tipoJuridico || 'Secretaria'}</span></td><td class="p-4 text-xs">${o.responsavel || '-'}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
             vincularCliquesTabelas();
         }
 
         function renderBases() {
             const tbody = document.getElementById('tabela-bases');
             if (!tbody) return;
-            tbody.innerHTML = dbData.bases.map(b => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="bases" data-id="${b.id}"><td class="p-4">${b.categoria}</td><td class="p-4 font-mono">${b.sigla}</td><td class="p-4">${b.nome}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
+            tbody.innerHTML = dbData.bases.map(b => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="bases" data-id="${b.id}"><td class="p-4 font-bold">${b.categoria}</td><td class="p-4 font-mono text-xs">${b.sigla}</td><td class="p-4">${b.nome}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
             vincularCliquesTabelas();
         }
 
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
             if (!tbody) return;
-            tbody.innerHTML = dbData.demandas.map(d => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="demandas" data-id="${d.id}"><td class="p-4 font-bold">${d.orgao}</td><td class="p-4">${d.titulo}</td><td class="p-4">${d.categoria}</td><td class="p-4">${d.prioridade}</td><td class="p-4">${d.status}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
+            tbody.innerHTML = dbData.demandas.map(d => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="demandas" data-id="${d.id}"><td class="p-4 font-bold">${d.orgao || 'Geral'}</td><td class="p-4 font-medium">${d.titulo}</td><td class="p-4 text-xs">${d.categoria || '-'}</td><td class="p-4 text-xs font-bold">${d.prioridade || 'Média'}</td><td class="p-4"><span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-semibold">${d.status || 'Pendente'}</span></td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
             vincularCliquesTabelas();
         }
 
         function renderEventos() {
             const grid = document.getElementById('grid-eventos');
             if (!grid) return;
-            grid.innerHTML = dbData.eventos.map(e => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe" data-colecao="eventos" data-id="${e.id}"><h4 class="font-bold">${e.titulo}</h4><p class="text-xs text-slate-500 mt-1">${e.descricao || ''}</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento cadastrado.</p>';
+            grid.innerHTML = dbData.eventos.map(e => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe hover:border-amber-400 transition" data-colecao="eventos" data-id="${e.id}"><span class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded">${e.visibilidade || 'Público'}</span><h4 class="font-bold text-base mt-2">${e.titulo}</h4><p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> ${e.palestrante || ''}</p><p class="text-xs text-slate-500 mt-2">${e.descricao || ''}</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento cadastrado.</p>';
             vincularCliquesTabelas();
         }
 
         function renderLocais() {
             const grid = document.getElementById('grid-locais');
             if (!grid) return;
-            grid.innerHTML = dbData.locais.map(l => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe" data-colecao="locais" data-id="${l.id}"><h4 class="font-bold">${l.nome}</h4><p class="text-xs text-slate-500">Capacidade: ${l.capacidade || 0}</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local cadastrado.</p>';
+            grid.innerHTML = dbData.locais.map(l => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe hover:border-purple-400 transition" data-colecao="locais" data-id="${l.id}"><span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">${l.tipoEspaco || 'Auditório'}</span><h4 class="font-bold text-base mt-2">${l.nome}</h4><p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>${l.capacidade || 0} sentadas</strong></p><p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-money-bill-wave mr-1"></i> Aluguel: <strong>${l.valorAluguel || 'Gratuito'}</strong></p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local cadastrado.</p>';
             vincularCliquesTabelas();
         }
 
         function renderFornecedores() {
             const grid = document.getElementById('grid-fornecedores');
             if (!grid) return;
-            grid.innerHTML = dbData.fornecedores.map(f => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe" data-colecao="fornecedores" data-id="${f.id}"><h4 class="font-bold">${f.nome}</h4><p class="text-xs text-slate-500">CNPJ: ${f.cnpj}</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor cadastrado.</p>';
+            grid.innerHTML = dbData.fornecedores.map(f => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe hover:border-emerald-400 transition" data-colecao="fornecedores" data-id="${f.id}"><span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">${f.categoria || 'TIC'}</span><h4 class="font-bold text-base mt-2">${f.nome}</h4><p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-id-card mr-1"></i> CNPJ: ${f.cnpj || '-'}</p><p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-briefcase mr-1"></i> Contrato: ${f.numeroContrato || '-'}</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor cadastrado.</p>';
             vincularCliquesTabelas();
         }
 
@@ -386,8 +390,13 @@
         function detalharRegistro(colecao, id) {
             const item = dbData[colecao].find(i => i.id === id);
             if (!item) return;
-            document.getElementById('detalhe-titulo-modal').textContent = 'Detalhes (' + colecao.toUpperCase() + ')';
-            document.getElementById('detalhe-conteudo').innerHTML = Object.entries(item).map(([k,v]) => `<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${k}</span><span class="font-medium">${v}</span></div>`).join('');
+            document.getElementById('detalhe-titulo-modal').textContent = 'Detalhes Completo (' + colecao.toUpperCase() + ')';
+            document.getElementById('detalhe-conteudo').innerHTML = Object.entries(item).map(([k,v]) => {
+                if (k === 'historicoStatus' && Array.isArray(v)) {
+                    return `<div class="p-2 bg-slate-50 rounded sm:col-span-2"><span class="text-[10px] text-slate-400 font-bold uppercase block">${k}</span>` + v.map(h => `<div class="text-xs text-slate-700 mt-1 font-medium"><strong>[${h.status}]</strong> ${h.descricao} (${new Date(h.data).toLocaleString('pt-BR')})</div>`).join('') + `</div>`;
+                }
+                return `<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${k}</span><span class="font-medium text-slate-800">${v}</span></div>`;
+            }).join('');
             document.getElementById('edit-colecao').value = colecao;
             document.getElementById('edit-doc-id').value = id;
             document.getElementById('detalhe-area-admin').classList.remove('hidden');
@@ -400,10 +409,12 @@
             document.getElementById('form-univ-titulo').textContent = 'Novo Cadastro: ' + tipo.toUpperCase();
 
             if (tipo === 'orgao') {
-                container.innerHTML = '<div><label class="block mb-1 font-medium">Sigla</label><input type="text" id="uc-1" required class="w-full p-2 border rounded uppercase"></div><div><label class="block mb-1 font-medium">Nome</label><input type="text" id="uc-2" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Tipo</label><input type="text" id="uc-3" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Responsável</label><input type="text" id="uc-4" class="w-full p-2 border rounded"></div>';
+                container.innerHTML = '<div><label class="block mb-1 font-medium">Sigla</label><input type="text" id="uc-1" required class="w-full p-2 border rounded uppercase"></div><div><label class="block mb-1 font-medium">Nome Completo</label><input type="text" id="uc-2" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Tipo Jurídico</label><input type="text" id="uc-3" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Responsável TIC</label><input type="text" id="uc-4" class="w-full p-2 border rounded"></div>';
             } else if (tipo === 'demanda') {
-                container.innerHTML = '<div><label class="block mb-1 font-medium">Título</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Órgão</label><select id="uc-2" class="w-full p-2 border rounded select-orgaos-dinamico"></select></div><div><label class="block mb-1 font-medium">Categoria</label><input type="text" id="uc-3" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Descrição</label><textarea id="uc-4" class="w-full p-2 border rounded"></textarea></div>';
+                container.innerHTML = '<div><label class="block mb-1 font-medium">Título da Demanda</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Órgão Solicitante</label><select id="uc-2" class="w-full p-2 border rounded select-orgaos-dinamico"></select></div><div><label class="block mb-1 font-medium">Categoria</label><input type="text" id="uc-3" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Descrição Completa</label><textarea id="uc-4" class="w-full p-2 border rounded"></textarea></div>';
                 preencherSelectOrgaos();
+            } else if (tipo === 'fornecedor') {
+                container.innerHTML = '<div><label class="block mb-1 font-medium">Razão Social / Nome</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">CNPJ</label><input type="text" id="uc-2" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Categoria TIC</label><input type="text" id="uc-3" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Número do Contrato</label><input type="text" id="uc-4" class="w-full p-2 border rounded"></div>';
             } else {
                 container.innerHTML = '<div><label class="block mb-1 font-medium">Nome / Título</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Descrição / Detalhes</label><input type="text" id="uc-2" class="w-full p-2 border rounded"></div>';
             }
@@ -418,19 +429,21 @@
             const c3 = document.getElementById('uc-3')?.value || '';
             const c4 = document.getElementById('uc-4')?.value || '';
 
-            let novoObj = { id: tipo.toUpperCase() + '-' + Date.now() };
             if (tipo === 'orgao') {
-                novoObj = { id: c1.toUpperCase(), sigla: c1.toUpperCase(), nome: c2, tipoJuridico: c3, responsavel: c4 };
-                await setDoc(doc(db, 'orgaos', novoObj.id), novoObj);
+                const obj = { id: c1.toUpperCase(), sigla: c1.toUpperCase(), nome: c2, tipoJuridico: c3, responsavel: c4 };
+                await setDoc(doc(db, 'orgaos', obj.id), obj);
             } else if (tipo === 'demanda') {
-                novoObj = { id: 'DEM-' + Date.now(), titulo: c1, orgao: c2, categoria: c3, descricao: c4, status: 'Pendente', prioridade: 'Média' };
-                await addDoc(collection(db, 'demandas'), novoObj);
+                const obj = { id: 'DEM-' + Date.now(), titulo: c1, orgao: c2, categoria: c3, descricao: c4, status: 'Pendente', prioridade: 'Alta', historicoStatus: [{ data: new Date().toISOString(), status: 'Pendente', descricao: c4 }] };
+                await addDoc(collection(db, 'demandas'), obj);
+            } else if (tipo === 'fornecedor') {
+                const obj = { id: 'FOR-' + Date.now(), nome: c1, cnpj: c2, categoria: c3, numeroContrato: c4 };
+                await addDoc(collection(db, 'fornecedores'), obj);
             } else {
-                novoObj = { id: 'OBJ-' + Date.now(), nome: c1, descricao: c2 };
-                await addDoc(collection(db, tipo + 's'), novoObj);
+                const obj = { id: 'OBJ-' + Date.now(), nome: c1, descricao: c2 };
+                await addDoc(collection(db, tipo + 's'), obj);
             }
 
-            alert('Objeto criado e sincronizado com o Firebase com sucesso!');
+            alert('Cadastro realizado e sincronizado com sucesso!');
             fecharModal('modal-form-universal');
         }
 
@@ -454,12 +467,12 @@
             try {
                 const cred = await signInWithEmailAndPassword(auth, email, senha);
                 currentUser = { email: cred.user.email, perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] };
-                await restaurarDadosAutomaticamente();
+                await restaurarDadosRicosAutomaticamente();
                 atualizarVisibilidadeAbas();
             } catch(err) {
                 if (email === 'arlindo.santos@ati.pe.gov.br' && senha === '123') {
                     currentUser = { email, perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] };
-                    await restaurarDadosAutomaticamente();
+                    await restaurarDadosRicosAutomaticamente();
                     atualizarVisibilidadeAbas();
                 } else {
                     alert('Erro de autenticação: ' + err.message);
@@ -477,13 +490,13 @@
 
         function renderCharts() {
             const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
-            if (ctx1) new Chart(ctx1, { type: 'bar', data: { labels: ['Infra', 'Web', 'Gov'], datasets: [{ data: [5, 12, 8], backgroundColor: '#1e3a8a' }] } });
+            if (ctx1) new Chart(ctx1, { type: 'bar', data: { labels: ['Infra', 'Web', 'Gov'], datasets: [{ data: [15, 22, 9], backgroundColor: '#1e3a8a' }] } });
             const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
-            if (ctx2) new Chart(ctx2, { type: 'doughnut', data: { labels: ['Pendentes', 'Andamento'], datasets: [{ data: [3, 10], backgroundColor: ['#f59e0b', '#3b82f6'] }] } });
+            if (ctx2) new Chart(ctx2, { type: 'doughnut', data: { labels: ['Pendentes', 'Em Andamento'], datasets: [{ data: [4, 18], backgroundColor: ['#f59e0b', '#3b82f6'] }] } });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            restaurarDadosAutomaticamente();
+            restaurarDadosRicosAutomaticamente();
             renderizarTudo();
             iniciarSnapshotFirestore();
             verificarAutenticacaoObrigatoria();
@@ -491,7 +504,7 @@
             onAuthStateChanged(auth, async user => {
                 if (user) {
                     currentUser = { email: user.email, perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] };
-                    await restaurarDadosAutomaticamente();
+                    await restaurarDadosRicosAutomaticamente();
                     atualizarVisibilidadeAbas();
                 }
             });
