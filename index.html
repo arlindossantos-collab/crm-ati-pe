@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v19.3 STABLE FIREBASE SYNC & CROSS-BROWSER  -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v19.4 STABLE RESTORE & SYNC                 -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -48,7 +48,7 @@
                 </button>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.3 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.4 STABLE</span></p>
             </div>
         </div>
     </div>
@@ -61,7 +61,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.3 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.4 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -164,7 +164,7 @@
         </div>
     </main>
 
-    <!-- Modais Genéricos -->
+    <!-- Modais -->
     <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
@@ -183,11 +183,11 @@
         </div>
     </div>
 
-    <!-- Script Principal -->
+    <!-- Script Principal com Auto-Resturação -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -210,12 +210,42 @@
 
         const initialMockData = {
             orgaos: [
-                { id: 'ATI', sigla: 'ATI', nome: 'Agência Estadual de Tecnologia da Informação', tipoJuridico: 'Autarquia', responsavel: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br' }
+                { id: 'ATI', sigla: 'ATI', nome: 'Agência Estadual de Tecnologia da Informação', tipoJuridico: 'Autarquia', responsavel: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br' },
+                { id: 'SEFAZ', sigla: 'SEFAZ', nome: 'Secretaria da Fazenda de Pernambuco', tipoJuridico: 'Administração Direta', responsavel: 'Gestão de TI SEFAZ', email: 'ti@sefaz.pe.gov.br' },
+                { id: 'SEPLAG', sigla: 'SEPLAG', nome: 'Secretaria de Planejamento e Gestão', tipoJuridico: 'Administração Direta', responsavel: 'Gestão de TI SEPLAG', email: 'ti@seplag.pe.gov.br' }
             ],
-            demandas: [{ id: 'DEM-001', orgao: 'ATI', titulo: 'Implantação PRGD Cloud', categoria: 'Sistemas Web', prioridade: 'Alta', status: 'Em Andamento', descricao: 'Sincronização com Firestore.' }],
-            eventos: [], locais: [], fornecedores: [], bases: [],
-            usuarios: [{ id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] }]
+            demandas: [
+                { id: 'DEM-001', orgao: 'SEFAZ', titulo: 'Migração do Sistema de Correios para SOGo.PE', categoria: 'Infraestrutura / E-mail', prioridade: 'Alta', status: 'Em Andamento', descricao: 'Migração das 120.000 contas do Estado.' }
+            ],
+            eventos: [
+                { id: 'EV-001', titulo: 'GOV IN PLAY 2026', palestrante: 'Equipe ATI', descricao: 'Encontro de gestores de TIC do Estado de Pernambuco.' }
+            ],
+            locais: [
+                { id: 'LOC-001', nome: 'Auditório do Governo Digital - ATI', tipoEspaco: 'Auditório', capacidade: '150', valorAluguel: 'Gratuito' }
+            ],
+            fornecedores: [
+                { id: 'FOR-001', nome: 'Tech Cloud Solutions PE', cnpj: '12.345.678/0001-90', categoria: 'Cloud', responsavel: 'Carlos Eduardo' }
+            ],
+            bases: [
+                { id: 'BASE-01', categoria: 'Subgrupo / Papel', sigla: 'GESTOR_TI', nome: 'Gestor de TI', observacao: 'Governança tecnológica' }
+            ],
+            usuarios: [
+                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] }
+            ]
         };
+
+        // Função de Auto-Resturação: popula o Firestore automaticamente se estiver vazio
+        async function restaurarDadosAutomaticamente() {
+            try {
+                for (const [colecao, itens] of Object.entries(initialMockData)) {
+                    for (const item of itens) {
+                        await setDoc(doc(db, colecao, String(item.id)), item, { merge: true });
+                    }
+                }
+            } catch (err) {
+                console.warn("Aviso na auto-resturação:", err);
+            }
+        }
 
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
 
@@ -262,12 +292,12 @@
                 onSnapshot(collection(db, col), snap => {
                     if (!snap.empty) {
                         dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    } else if (dbData[col].length === 0) {
+                    } else {
                         dbData[col] = initialMockData[col] || [];
                     }
                     renderizarTudo();
                 }, err => {
-                    console.warn('Snapshot offline/fallback para ' + col, err);
+                    console.warn('Snapshot fallback para ' + col, err);
                     if (dbData[col].length === 0) dbData[col] = initialMockData[col] || [];
                     renderizarTudo();
                 });
@@ -275,8 +305,6 @@
         }
 
         function renderizarTudo() {
-            if (!dbData.usuarios.length) dbData.usuarios = initialMockData.usuarios;
-            if (!dbData.orgaos.length) dbData.orgaos = initialMockData.orgaos;
             renderUsuarios(); renderOrgaos(); renderBases(); renderDemandas(); renderEventos(); renderLocais(); renderFornecedores(); renderDashboardKPIs(); preencherSelectOrgaos(); atualizarVisibilidadeAbas();
         }
 
@@ -426,10 +454,12 @@
             try {
                 const cred = await signInWithEmailAndPassword(auth, email, senha);
                 currentUser = { email: cred.user.email, perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] };
+                await restaurarDadosAutomaticamente();
                 atualizarVisibilidadeAbas();
             } catch(err) {
                 if (email === 'arlindo.santos@ati.pe.gov.br' && senha === '123') {
                     currentUser = { email, perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] };
+                    await restaurarDadosAutomaticamente();
                     atualizarVisibilidadeAbas();
                 } else {
                     alert('Erro de autenticação: ' + err.message);
@@ -453,13 +483,15 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            restaurarDadosAutomaticamente();
             renderizarTudo();
             iniciarSnapshotFirestore();
             verificarAutenticacaoObrigatoria();
 
-            onAuthStateChanged(auth, user => {
+            onAuthStateChanged(auth, async user => {
                 if (user) {
                     currentUser = { email: user.email, perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] };
+                    await restaurarDadosAutomaticamente();
                     atualizarVisibilidadeAbas();
                 }
             });
