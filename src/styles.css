@@ -1,0 +1,1 @@
+body{font-family:system-ui;max-width:1000px;margin:2rem auto;padding:0 1rem}input,button{padding:.6rem;margin:.25rem}header{display:flex;justify-content:space-between}nav{display:flex;gap:.5rem;flex-wrap:wrap}#login-form{display:grid;max-width:22rem}#login-error{color:#b00}

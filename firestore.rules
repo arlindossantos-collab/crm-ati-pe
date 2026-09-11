@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function auth(){return request.auth != null;}
+  function profile(){return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;}
+  function active(){return auth() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) && (!('ativo' in profile()) || profile().ativo == true);}
+  function admin(){return active() && profile().perfil == 'admin';}
+  function module(m){return active() && (admin() || (profile().modulosPermitidos is list && m in profile().modulosPermitidos));}
+  match /usuarios/{uid} {
+   allow read: if active();
+   allow create,delete: if admin();
+   allow update: if admin() || (active() && uid==request.auth.uid
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','telefone','fotoUrl']));
+  }
+  match /grupos/{id}{allow read,write:if module('grupos');}
+  match /demandas/{id}{allow read:if module('demandas'); allow create:if module('demandas') && request.resource.data.criadoPorUid==request.auth.uid; allow update:if module('demandas'); allow delete:if admin();}
+  match /eventos/{id}{allow read,write:if module('eventos');}
+  match /locais/{id}{allow read,write:if module('locais');}
+  match /orgaos/{id}{allow read,write:if module('orgaos');}
+  match /fornecedores/{id}{allow read,write:if module('fornecedores');}
+  match /auditoria/{id}{allow read:if admin(); allow create:if active(); allow update,delete:if false;}
+  match /{document=**}{allow read,write:if false;}
+ }
+}
