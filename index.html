@@ -1,7 +1,7 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v18.2 STABLE                                -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v18.3 STABLE                                -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
-<!-- ATUALIZAÇÃO: Blindagem definitiva do fluxo de autenticação local      -->
+<!-- ATUALIZAÇÃO: Blindagem de exceções e tratamento de erro no login      -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -75,7 +75,7 @@
             </div>
             <!-- Controle de Versão na Tela de Autenticação -->
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.2 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.3 STABLE</span></p>
             </div>
         </div>
     </div>
@@ -88,7 +88,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.2 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.3 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -551,14 +551,13 @@
         }
 
         function renderizarTudo() {
-            // Garante que o mock inicial de usuários e bases esteja sempre presente para evitar falha de login
-            if (window.dbData.usuarios.length === 0) {
+            if (!window.dbData.usuarios || window.dbData.usuarios.length === 0) {
                 window.dbData.usuarios = JSON.parse(JSON.stringify(initialMockData.usuarios));
             }
-            if (window.dbData.bases.length === 0) {
+            if (!window.dbData.bases || window.dbData.bases.length === 0) {
                 window.dbData.bases = JSON.parse(JSON.stringify(initialMockData.bases));
             }
-            if (window.dbData.orgaos.length === 0) {
+            if (!window.dbData.orgaos || window.dbData.orgaos.length === 0) {
                 window.dbData.orgaos = JSON.parse(JSON.stringify(initialMockData.orgaos));
             }
 
@@ -1395,47 +1394,58 @@
         };
 
         window.fazerLoginLocal = function(e) {
-            e.preventDefault();
-            const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
-            const senhaInput = document.getElementById('login-senha').value;
-
-            // Garantia absoluta de fallback para admin padrão
-            if (emailInput === 'arlindo.santos@ati.pe.gov.br' && senhaInput === '123') {
-                window.currentUser = {
-                    id: 'arlindo.santos@ati.pe.gov.br',
-                    nome: 'Arlindo Santos',
-                    email: 'arlindo.santos@ati.pe.gov.br',
-                    subgrupoId: 'ATI',
-                    perfil: 'admin',
-                    senha: '123',
-                    modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios']
-                };
-                document.getElementById('user-name-display').textContent = window.currentUser.nome;
-                document.getElementById('user-role-display').textContent = 'ADMIN';
-                atualizarVisibilidadeAbas();
-                alert('Autenticado com sucesso! Bem-vindo(a), ' + window.currentUser.nome + '.');
-                return;
-            }
-
-            // Busca unificada na memória local
-            const userFound = window.dbData.usuarios.find(u => (u.email || u.id || '').toLowerCase() === emailInput);
-
-            if (!userFound) {
-                alert('Acesso negado. Efetue o login com um usuário válido cadastrado.');
-                return;
-            }
-
-            const senhaNoBanco = userFound.senha || userFound.senhaHash;
-
-            if (senhaNoBanco === senhaInput) {
-                window.currentUser = userFound;
-                document.getElementById('user-name-display').textContent = userFound.nome || userFound.email;
-                document.getElementById('user-role-display').textContent = (userFound.perfil || 'COMUM').toUpperCase();
+            try {
+                if (e) e.preventDefault();
                 
+                const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
+                const senhaInput = document.getElementById('login-senha').value;
+
+                // Garante que a base de usuários esteja populada para evitar falhas
+                if (!window.dbData.usuarios || window.dbData.usuarios.length === 0) {
+                    window.dbData.usuarios = JSON.parse(JSON.stringify(initialMockData.usuarios));
+                }
+
+                // Validação master para o admin padrão
+                if (emailInput === 'arlindo.santos@ati.pe.gov.br' && senhaInput === '123') {
+                    window.currentUser = {
+                        id: 'arlindo.santos@ati.pe.gov.br',
+                        nome: 'Arlindo Santos',
+                        email: 'arlindo.santos@ati.pe.gov.br',
+                        subgrupoId: 'ATI',
+                        perfil: 'admin',
+                        senha: '123',
+                        modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios']
+                    };
+                } else {
+                    const userFound = window.dbData.usuarios.find(u => (u.email || u.id || '').toLowerCase() === emailInput);
+
+                    if (!userFound) {
+                        alert('Acesso negado: E-mail não localizado na base de usuários cadastrados.');
+                        return false;
+                    }
+
+                    const senhaNoBanco = userFound.senha || userFound.senhaHash;
+                    if (senhaNoBanco !== senhaInput) {
+                        alert('Acesso negado: Senha incorreta para o e-mail informado.');
+                        return false;
+                    }
+
+                    window.currentUser = userFound;
+                }
+
+                // Atualiza exibição de nome e perfil na barra superior
+                const nameDisplay = document.getElementById('user-name-display');
+                const roleDisplay = document.getElementById('user-role-display');
+                if (nameDisplay) nameDisplay.textContent = window.currentUser.nome || window.currentUser.email;
+                if (roleDisplay) roleDisplay.textContent = (window.currentUser.perfil || 'COMUM').toUpperCase();
+
                 atualizarVisibilidadeAbas();
-                alert('Autenticado com sucesso! Bem-vindo(a), ' + (userFound.nome || userFound.email) + '.');
-            } else {
-                alert("Senha incorreta. Verifique suas credenciais.");
+                alert('Autenticado com sucesso! Bem-vindo(a), ' + (window.currentUser.nome || window.currentUser.email) + '.');
+                return false;
+            } catch (err) {
+                console.error('Erro crítico no login:', err);
+                alert('Ocorreu um erro ao processar o login: ' + err.message);
+                return false;
             }
         };
 
@@ -1494,7 +1504,7 @@
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.2 STABLE</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.3 STABLE</span>
     </footer>
 </body>
 </html>
