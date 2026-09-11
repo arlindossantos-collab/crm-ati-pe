@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v19.0.1 FIREBASE AUTH                          -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v19.0.2 FIREBASE AUTH                          -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ATUALIZAÇÃO: Autenticação direta e síncrona no Firestore Cloud        -->
 <!-- ===================================================================== -->
@@ -50,7 +50,7 @@
             </div>
             <!-- Controle de Versão na Tela de Autenticação -->
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.0.1 FIREBASE AUTH</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.0.2 FIREBASE AUTH</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.0.1 FIREBASE AUTH</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.0.2 FIREBASE AUTH</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -394,6 +394,84 @@
             </div>
         </div>
     </div>
+
+    <!-- Login bootstrap de emergência: funciona mesmo se o módulo principal ainda não tiver inicializado -->
+    <script>
+    (function () {
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
+            authDomain: "prgd-ati-pe.firebaseapp.com",
+            projectId: "prgd-ati-pe",
+            storageBucket: "prgd-ati-pe.firebasestorage.app",
+            messagingSenderId: "798768232646",
+            appId: "1:798768232646:web:31b80951f237b4af17bfc7"
+        };
+        const btn = document.getElementById('btn-executar-login');
+        if (!btn) return;
+        btn.style.minHeight = '48px';
+        btn.style.display = 'flex';
+        btn.style.visibility = 'visible';
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+
+        let busy = false;
+        btn.addEventListener('click', async function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (busy) return;
+            const email = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
+            const senha = document.getElementById('login-senha')?.value || '';
+            if (!email || !senha) {
+                alert('Informe o e-mail e a senha.');
+                return;
+            }
+            busy = true;
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Conectando ao Firebase...';
+            try {
+                const [{ initializeApp, getApps, getApp }, authMod] = await Promise.all([
+                    import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'),
+                    import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js')
+                ]);
+                const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
+                const auth = authMod.getAuth(app);
+                await authMod.setPersistence(auth, authMod.browserLocalPersistence);
+                const cred = await authMod.signInWithEmailAndPassword(auth, email, senha);
+                btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Autenticado';
+                // O módulo principal recebe o mesmo estado de autenticação via onAuthStateChanged.
+                setTimeout(() => {
+                    const modal = document.getElementById('modal-login');
+                    const main = document.getElementById('main-content');
+                    if (main) main.classList.remove('hidden');
+                    if (modal) modal.classList.add('hidden');
+                    window.dispatchEvent(new CustomEvent('prgd:firebase-authenticated', { detail: { uid: cred.user.uid, email: cred.user.email } }));
+                }, 150);
+            } catch (err) {
+                console.error('[PRGD] Falha no login:', err);
+                const mensagens = {
+                    'auth/invalid-credential': 'E-mail ou senha inválidos.',
+                    'auth/invalid-email': 'O e-mail informado é inválido.',
+                    'auth/user-disabled': 'Este usuário está desativado no Firebase Authentication.',
+                    'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos.',
+                    'auth/network-request-failed': 'Não foi possível comunicar com o Firebase. Verifique a internet e o domínio publicado.',
+                    'auth/operation-not-allowed': 'O provedor E-mail/Senha não está habilitado no Firebase Authentication.',
+                    'auth/configuration-not-found': 'O Firebase Authentication não está configurado para este projeto.'
+                };
+                alert('Falha ao autenticar no Firebase.\n\n' + (mensagens[err?.code] || err?.message || String(err)));
+            } finally {
+                busy = false;
+                btn.disabled = false;
+                if (btn.innerHTML.includes('Autenticado')) return;
+                btn.innerHTML = original;
+            }
+        }, true);
+
+        document.getElementById('login-senha')?.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') btn.click();
+        });
+    })();
+    </script>
 
     <!-- Firebase SDK v10 (Modular) & Application Core Script -->
     <script type="module">
@@ -1625,7 +1703,7 @@
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.0.1 FIREBASE AUTH</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.0.2 FIREBASE AUTH</span>
     </footer>
 </body>
 </html>
