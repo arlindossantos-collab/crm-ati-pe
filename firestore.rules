@@ -2,27 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
-    function myProfile() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
-    function activeUser() { return signedIn() && myProfile().ativo != false; }
-    function isAdmin() { return activeUser() && myProfile().perfil == 'admin'; }
-    function hasModule(moduleId) {
-      return activeUser() && (
-        isAdmin() ||
-        (myProfile().modulosPermitidos != null && myProfile().modulosPermitidos.hasAny([moduleId]))
-      );
-    }
-    match /demandas/{id} { allow read: if hasModule('demandas'); allow write: if isAdmin(); }
-    match /eventos/{id} { allow read: if hasModule('eventos'); allow write: if isAdmin(); }
-    match /locais/{id} { allow read: if hasModule('locais'); allow write: if isAdmin(); }
-    match /orgaos/{id} { allow read: if hasModule('orgaos'); allow write: if isAdmin(); }
-    match /fornecedores/{id} { allow read: if hasModule('fornecedores'); allow write: if isAdmin(); }
-    match /bases/{id} { allow read: if hasModule('bases'); allow write: if isAdmin(); }
-    match /usuarios/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
-      allow create, update, delete: if isAdmin();
-    }
-    match /usuarios_email/{email} {
-      allow read, create, update, delete: if isAdmin();
-    }
+    function profile() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
+    function admin() { return signedIn() && profile().perfil == 'admin' && profile().ativo != false; }
+    match /{document=**} { allow read, write: if admin(); }
+    match /usuarios/{uid} { allow read: if signedIn() && (request.auth.uid == uid || admin()); allow create, update, delete: if admin(); }
   }
 }

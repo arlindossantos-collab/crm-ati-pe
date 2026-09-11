@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v19.1.0 FIREBASE AUTH — PRESERVAÇÃO COMPLETA                          -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v19.2.1 FIREBASE AUTH + PRESERVAÇÃO COMPLETA AUTH                          -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ATUALIZAÇÃO: Autenticação direta e síncrona no Firestore Cloud        -->
 <!-- ===================================================================== -->
@@ -50,7 +50,7 @@
             </div>
             <!-- Controle de Versão na Tela de Autenticação -->
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.1.0 FIREBASE AUTH — PRESERVAÇÃO COMPLETA</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.2.1 FIREBASE AUTH + PRESERVAÇÃO COMPLETA</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.1.0 FIREBASE AUTH — PRESERVAÇÃO COMPLETA</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.2.1 FIREBASE AUTH + PRESERVAÇÃO COMPLETA</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -314,7 +314,6 @@
                             <th class="p-4">E-mail Institucional</th>
                             <th class="p-4">Órgão / Secretaria</th>
                             <th class="p-4">Perfil</th>
-                            <th class="p-4">Tags</th>
                             <th class="p-4">Módulos Visíveis</th>
                             <th class="p-4 text-center">Ações</th>
                         </tr>
@@ -395,84 +394,6 @@
         </div>
     </div>
 
-    <!-- Login bootstrap de emergência: funciona mesmo se o módulo principal ainda não tiver inicializado -->
-    <script>
-    (function () {
-        const FIREBASE_CONFIG = {
-            apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
-            authDomain: "prgd-ati-pe.firebaseapp.com",
-            projectId: "prgd-ati-pe",
-            storageBucket: "prgd-ati-pe.firebasestorage.app",
-            messagingSenderId: "798768232646",
-            appId: "1:798768232646:web:31b80951f237b4af17bfc7"
-        };
-        const btn = document.getElementById('btn-executar-login');
-        if (!btn) return;
-        btn.style.minHeight = '48px';
-        btn.style.display = 'flex';
-        btn.style.visibility = 'visible';
-        btn.style.opacity = '1';
-        btn.style.pointerEvents = 'auto';
-
-        let busy = false;
-        btn.addEventListener('click', async function (event) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            if (busy) return;
-            const email = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
-            const senha = document.getElementById('login-senha')?.value || '';
-            if (!email || !senha) {
-                alert('Informe o e-mail e a senha.');
-                return;
-            }
-            busy = true;
-            const original = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Conectando ao Firebase...';
-            try {
-                const [{ initializeApp, getApps, getApp }, authMod] = await Promise.all([
-                    import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'),
-                    import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js')
-                ]);
-                const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
-                const auth = authMod.getAuth(app);
-                await authMod.setPersistence(auth, authMod.browserLocalPersistence);
-                const cred = await authMod.signInWithEmailAndPassword(auth, email, senha);
-                btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Autenticado';
-                // O módulo principal recebe o mesmo estado de autenticação via onAuthStateChanged.
-                setTimeout(() => {
-                    const modal = document.getElementById('modal-login');
-                    const main = document.getElementById('main-content');
-                    if (main) main.classList.remove('hidden');
-                    if (modal) modal.classList.add('hidden');
-                    window.dispatchEvent(new CustomEvent('prgd:firebase-authenticated', { detail: { uid: cred.user.uid, email: cred.user.email } }));
-                }, 150);
-            } catch (err) {
-                console.error('[PRGD] Falha no login:', err);
-                const mensagens = {
-                    'auth/invalid-credential': 'E-mail ou senha inválidos.',
-                    'auth/invalid-email': 'O e-mail informado é inválido.',
-                    'auth/user-disabled': 'Este usuário está desativado no Firebase Authentication.',
-                    'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos.',
-                    'auth/network-request-failed': 'Não foi possível comunicar com o Firebase. Verifique a internet e o domínio publicado.',
-                    'auth/operation-not-allowed': 'O provedor E-mail/Senha não está habilitado no Firebase Authentication.',
-                    'auth/configuration-not-found': 'O Firebase Authentication não está configurado para este projeto.'
-                };
-                alert('Falha ao autenticar no Firebase.\n\n' + (mensagens[err?.code] || err?.message || String(err)));
-            } finally {
-                busy = false;
-                btn.disabled = false;
-                if (btn.innerHTML.includes('Autenticado')) return;
-                btn.innerHTML = original;
-            }
-        }, true);
-
-        document.getElementById('login-senha')?.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') btn.click();
-        });
-    })();
-    </script>
-
     <!-- Firebase SDK v10 (Modular) & Application Core Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -493,7 +414,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         setPersistence(auth, browserLocalPersistence).catch(console.warn);
-        let unsubscribers = [];
+        let firebaseOnline = true;
 
         let currentUser = null;
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [] };
@@ -536,7 +457,7 @@
                 { id: 'BASE-05', categoria: 'Subgrupo / Papel', sigla: 'COORDENADOR', nome: 'Coordenadores', observacao: 'Supervisores de projetos e operação' }
             ],
             usuarios: [
-                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', subgrupoId: 'ATI', perfil: 'admin', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] }
+                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', subgrupoId: 'ATI', perfil: 'admin', senha: '123', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] }
             ]
         };
 
@@ -597,25 +518,43 @@
             if (aba === 'dashboard') renderCharts();
         }
 
-        async function iniciarSnapshotFirestore() {
-            unsubscribers.forEach(fn => { try { fn(); } catch(e) {} });
-            unsubscribers = [];
-            if (!currentUser) return;
-            const isAdmin = currentUser.perfil === 'admin';
-            const permitidos = isAdmin ? ['dashboard','demandas','eventos','locais','orgaos','fornecedores','bases','usuarios'] : (currentUser.modulosPermitidos || []);
-            const colecoes = ['demandas','eventos','locais','orgaos','fornecedores','bases','usuarios'];
+        function iniciarSnapshotFirestore() {
+            const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'];
             colecoes.forEach(col => {
-                if (!isAdmin && !permitidos.includes(col)) { dbData[col] = []; return; }
-                const unsub = onSnapshot(collection(db, col), snap => {
-                    dbData[col] = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+                try {
+                    onSnapshot(collection(db, col), snap => {
+                        if (!snap.empty) {
+                            const docsRemotos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                            const mapExistentes = new Map(dbData[col].map(item => [item.id, item]));
+                            docsRemotos.forEach(docRemoto => mapExistentes.set(docRemoto.id, docRemoto));
+                            dbData[col] = Array.from(mapExistentes.values());
+                        } else if (dbData[col].length === 0) {
+                            dbData[col] = initialMockData[col] || [];
+                        }
+                        renderizarTudo();
+                    }, err => {
+                        console.warn('Firestore snapshot falhou para ' + col + ':', err);
+                        if (dbData[col].length === 0) dbData[col] = initialMockData[col] || [];
+                        renderizarTudo();
+                    });
+                } catch (e) {
+                    console.warn('Erro Firestore:', e);
+                    if (dbData[col].length === 0) dbData[col] = initialMockData[col] || [];
                     renderizarTudo();
-                }, err => console.warn('Firestore snapshot bloqueado/indisponível em '+col, err));
-                unsubscribers.push(unsub);
+                }
             });
         }
 
         function renderizarTudo() {
-            if (!currentUser) return;
+            if (!dbData.usuarios || dbData.usuarios.length === 0) {
+                dbData.usuarios = JSON.parse(JSON.stringify(initialMockData.usuarios));
+            }
+            if (!dbData.bases || dbData.bases.length === 0) {
+                dbData.bases = JSON.parse(JSON.stringify(initialMockData.bases));
+            }
+            if (!dbData.orgaos || dbData.orgaos.length === 0) {
+                dbData.orgaos = JSON.parse(JSON.stringify(initialMockData.orgaos));
+            }
 
             renderUsuarios();
             renderOrgaos();
@@ -644,18 +583,6 @@
             });
         }
 
-        function normalizeTags(value) {
-            const arr = Array.isArray(value) ? value : String(value || '').split(',');
-            return [...new Set(arr.map(t => String(t).trim().toLowerCase()).filter(Boolean))];
-        }
-        function escapeHtml(value) { return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-        function escapeAttr(value) { return String(value ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-        function getTagOptions() {
-            const baseTags = ['diretor','coordenador','interno','externo'];
-            const custom = (dbData.bases || []).filter(b => String(b.categoria || '').toLowerCase() === 'tag de usuário').map(b => b.sigla || b.nome).filter(Boolean);
-            return [...new Set([...baseTags, ...custom])];
-        }
-
         function renderUsuarios() {
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
@@ -663,17 +590,15 @@
 
             tbody.innerHTML = dbData.usuarios.map(u => {
                 const mods = u.perfil === 'admin' ? 'Acesso Total (Admin)' : (u.modulosPermitidos && u.modulosPermitidos.length > 0 ? u.modulosPermitidos.join(', ') : 'Padrão');
-                const tags = Array.isArray(u.tags) ? u.tags : (u.tag ? [u.tag] : []);
                 return `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="usuarios" data-id="${u.id}">` +
-                    `<td class="p-4 font-bold text-slate-800">${escapeHtml(u.nome || u.email)}</td>` +
-                    `<td class="p-4 text-slate-600">${escapeHtml(u.email || u.id)}</td>` +
-                    `<td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${escapeHtml(u.subgrupoId || u.grupoUsuario || u.orgao || 'GERAL')}</span></td>` +
+                    `<td class="p-4 font-bold text-slate-800">${u.nome || u.email}</td>` +
+                    `<td class="p-4 text-slate-600">${u.email || u.id}</td>` +
+                    `<td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${u.subgrupoId || u.grupoUsuario || u.orgao || 'GERAL'}</span></td>` +
                     `<td class="p-4"><span class="bg-${(u.perfil || 'admin') === 'admin' ? 'emerald' : 'amber'}-100 text-${(u.perfil || 'admin') === 'admin' ? 'emerald-900' : 'amber-900'} text-xs font-bold px-2.5 py-1 rounded uppercase">${u.perfil || 'admin'}</span></td>` +
-                    `<td class="p-4 text-xs">${tags.length ? tags.map(t => `<span class=\"inline-block bg-purple-100 text-purple-800 px-2 py-0.5 rounded mr-1 mb-1 font-semibold\">${t}</span>`).join('') : '-'}</td>` +
                     `<td class="p-4 text-xs font-medium text-slate-500 max-w-xs truncate">${mods}</td>` +
                     `<td class="p-4 text-center"><button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">${isAdmin ? 'Detalhar / Editar' : 'Visualizar Detalhes'}</button></td>` +
                 '</tr>';
-            }).join('') || '<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
+            }).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
             
             vincularCliquesTabelas();
         }
@@ -866,8 +791,6 @@
                 }
             }
             if (colecao === 'usuarios') {
-                const userTags = Array.isArray(item.tags) ? item.tags : (item.tag ? [item.tag] : []);
-                htmlContent += `<div class="p-2 bg-purple-50 border border-purple-200 rounded sm:col-span-2"><span class="text-purple-500 text-[10px] uppercase font-bold block">Tags do Usuário</span><span class="font-semibold text-purple-900">${userTags.length ? userTags.join(', ') : 'Nenhuma'}</span></div>`;
                 const userPerms = item.modulosPermitidos || ['dashboard', 'demandas', 'eventos'];
                 htmlContent += `<div class="p-2 bg-slate-50 border rounded sm:col-span-2"><span class="text-slate-400 text-[10px] uppercase font-bold block">Módulos de Acesso Permitidos</span><span class="font-semibold text-indigo-900">${userPerms.join(', ')}</span></div>`;
             }
@@ -1003,13 +926,11 @@
                 }
 
                 if (colecao === 'usuarios') {
-                    const currentTags = Array.isArray(item.tags) ? item.tags : (item.tag ? [item.tag] : []);
-                    const tagOptions = getTagOptions();
-                    editFieldsHtml += '<div class="mb-2 p-3 bg-purple-50 border border-purple-200 rounded-lg">' +
-                        '<label class="block font-bold text-purple-900 mb-1 uppercase text-[10px] tracking-wider"><i class="fa-solid fa-tags mr-1"></i> Tags do Usuário</label>' +
-                        `<input type="text" id="edit-tags" value="${escapeAttr(currentTags.join(', '))}" placeholder="Ex: diretor, interno, gestor" class="w-full p-2 border rounded bg-white font-medium text-slate-800">` +
-                        `<p class="text-[10px] text-slate-500 mt-1">Sugestões: ${tagOptions.join(', ') || 'diretor, coordenador, interno, externo'}</p>` +
+                    editFieldsHtml += '<div class="mb-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">' +
+                        '<label class="block font-bold text-blue-900 mb-1 uppercase text-[10px] tracking-wider"><i class="fa-solid fa-key mr-1"></i> Nova Senha (deixe em branco para manter a atual)</label>' +
+                        '<input type="password" id="edit-nova-senha" placeholder="••••••••" class="w-full p-2 border rounded bg-white font-medium text-slate-800">' +
                     '</div>';
+
                     const userPerms = item.modulosPermitidos || ['dashboard', 'demandas', 'eventos'];
                     editFieldsHtml += '<div class="mt-3 border-t pt-3 bg-amber-50 p-3 rounded-lg border-amber-200">' +
                         '<label class="block font-bold text-slate-800 mb-2 uppercase text-[11px]"><i class="fa-solid fa-user-lock text-amber-700 mr-1"></i> Permissão de Visualização dos Módulos:</label>' +
@@ -1100,10 +1021,12 @@
             });
 
             if (colecao === 'usuarios') {
-                const tagsInput = document.getElementById('edit-tags');
-                const selectedTags = tagsInput ? normalizeTags(tagsInput.value) : (Array.isArray(item.tags) ? item.tags : []);
-                item.tags = selectedTags;
-                updatedData.tags = selectedTags;
+                const novaSenhaInput = document.getElementById('edit-nova-senha');
+                if (novaSenhaInput && novaSenhaInput.value.trim() !== '') {
+                    item.senha = novaSenhaInput.value.trim();
+                    updatedData.senha = novaSenhaInput.value.trim();
+                }
+
                 const checkedBoxes = document.querySelectorAll('.edit-checkbox-modulo:checked');
                 const selectedModulos = Array.from(checkedBoxes).map(cb => cb.value);
                 item.modulosPermitidos = selectedModulos;
@@ -1157,7 +1080,7 @@
             document.getElementById('form-univ-titulo').textContent = 'Novo Cadastro: ' + tipo.toUpperCase();
 
             if (tipo === 'base') {
-                container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Categoria da Base</label><select id="univ-c1" class="w-full p-2 border rounded bg-white font-semibold text-slate-800"><option value="Subgrupo / Papel">Subgrupo / Papel</option><option value="Órgão / Secretaria">Órgão / Secretaria</option><option value="Categoria TIC">Categoria TIC</option><option value="Tag de Usuário">Tag de Usuário</option><option value="Geral">Geral</option></select></div>' +
+                container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Categoria da Base</label><select id="univ-c1" class="w-full p-2 border rounded bg-white font-semibold text-slate-800"><option value="Subgrupo / Papel">Subgrupo / Papel</option><option value="Órgão / Secretaria">Órgão / Secretaria</option><option value="Categoria TIC">Categoria TIC</option><option value="Geral">Geral</option></select></div>' +
                     '<div><label class="block font-medium text-slate-700 mb-1">Sigla / Identificador Único</label><input type="text" id="univ-c2" required placeholder="Ex: GER_SUP" class="w-full p-2 border rounded uppercase"></div>' +
                     '<div><label class="block font-medium text-slate-700 mb-1">Nome / Descrição do Parâmetro</label><input type="text" id="univ-c3" required placeholder="Ex: Gerente Superior" class="w-full p-2 border rounded"></div>' +
                     '<div><label class="block font-medium text-slate-700 mb-1">Observações / Regras</label><textarea id="univ-c4" rows="3" placeholder="Detalhes ou escopo do parâmetro..." class="w-full p-2 border rounded"></textarea></div>';
@@ -1225,13 +1148,16 @@
                     '<div><label class="block font-medium text-slate-700 mb-1">E-mail Institucional</label><input type="email" id="univ-c2" required class="w-full p-2 border rounded"></div>' +
                     '<div><label class="block font-medium text-slate-700 mb-1">Órgão / Secretaria</label><select id="univ-c3" required class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>' +
                     '<div><label class="block font-medium text-slate-700 mb-1">Perfil de Acesso</label><select id="univ-c4" class="w-full p-2 border rounded"><option value="comum">COMUM (Somente Leitura)</option><option value="admin">ADMINISTRADOR (Acesso Total)</option></select></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Tags / Classificações</label><input type="text" id="univ-tags" placeholder="Ex: diretor, interno, gestor" class="w-full p-2 border rounded"><p class="text-[10px] text-slate-500 mt-1">Tags sugeridas: diretor, coordenador, interno, externo. Você também pode criar novas.</p></div>' +
-                    '<div><label class="block font-medium text-slate-700 mb-1">Senha inicial</label><input type="password" id="univ-c5" required minlength="6" class="w-full p-2 border rounded"></div>' +
+                    '<div><label class="block font-medium text-slate-700 mb-1">Senha</label><input type="password" id="univ-c5" required minlength="3" class="w-full p-2 border rounded"></div> +
+                    '<div><label class="block font-medium text-slate-700 mb-1">Tags / Classificações do Usuário</label><input type="text" id="univ-c6-tags" class="w-full p-2 border rounded" placeholder="Ex.: diretor, interno, coordenador"></div>' +
                     '<div class="bg-blue-50/70 p-3 rounded-lg border border-blue-200 mt-2">' +
-                        '<label class="block font-bold text-blue-900 mb-2 text-xs uppercase"><i class="fa-solid fa-eye text-blue-700 mr-1"></i> Módulos que o Usuário Pode Visualizar</label>' +
+                        '<label class="block font-bold text-blue-900 mb-2 text-xs uppercase"><i class="fa-solid fa-eye text-blue-700 mr-1"></i> Selecione os Módulos que o Usuário Pode Visualizar:</label>' +
                         '<div class="grid grid-cols-2 gap-2">' +
-                            MÓDULOS_SISTEMA.filter(m => m.id !== 'usuarios').map(m =>
-                                `<label class="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer"><input type="checkbox" value="${m.id}" class="novo-checkbox-modulo rounded text-blue-900 focus:ring-blue-600" checked>${m.nome}</label>`
+                            MÓDULOS_SISTEMA.map(m => 
+                                `<label class="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">` +
+                                    `<input type="checkbox" value="${m.id}" class="novo-checkbox-modulo rounded text-blue-900 focus:ring-blue-600" checked>` +
+                                    `${m.nome}` +
+                                `</label>`
                             ).join('') +
                         '</div>' +
                     '</div>';
@@ -1349,41 +1275,30 @@
                     await addDoc(collection(db, "locais"), novoObj);
                 } catch(err) { console.warn('Erro Firestore', err); }
             } else if (tipo === 'usuario') {
-                const email = document.getElementById('univ-c2').value.trim().toLowerCase();
+                const email = document.getElementById('univ-c2').value.toLowerCase();
                 const senha = document.getElementById('univ-c5').value;
                 const perfilSel = document.getElementById('univ-c4').value;
                 const subgrupoSel = document.getElementById('univ-c3').value;
-                const tags = normalizeTags(document.getElementById('univ-tags')?.value || '');
-                const modulosPermitidos = Array.from(document.querySelectorAll('.novo-checkbox-modulo:checked')).map(cb => cb.value);
-
-                if (!email || senha.length < 6) {
-                    alert('Informe um e-mail válido e uma senha com pelo menos 6 caracteres.');
-                    return;
-                }
-
+                const tags = normalizeTags(document.getElementById('univ-c6-tags')?.value || '');
+                const checkedBoxes = document.querySelectorAll('.novo-checkbox-modulo:checked');
+                const modulosPermitidos = Array.from(checkedBoxes).map(cb => cb.value);
                 try {
-                    const secondaryName = 'secondary-' + Date.now();
-                    const secondaryApp = initializeApp(firebaseConfig, secondaryName);
+                    const secondaryApp = initializeApp(firebaseConfig, 'secondary-' + Date.now());
                     const secondaryAuth = getAuth(secondaryApp);
                     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, senha);
-                    const uid = cred.user.uid;
                     await signOut(secondaryAuth);
+                    novoObj = {id: cred.user.uid, uid: cred.user.uid, nome: document.getElementById('univ-c1').value, email,
+                        subgrupoId: subgrupoSel, grupoUsuario: subgrupoSel, orgao: subgrupoSel, perfil: perfilSel,
+                        tags, ativo: true, modulosPermitidos, criadoEm: serverTimestamp(), criadoPor: currentUser?.uid || null};
+                    dbData.usuarios = dbData.usuarios.filter(u => u.email !== email && u.id !== cred.user.uid);
+                    dbData.usuarios.push({...novoObj, criadoEm: new Date().toISOString()});
+                    await setDoc(doc(db, 'usuarios', cred.user.uid), novoObj);
+                    await setDoc(doc(db, 'usuarios_email', email), {uid: cred.user.uid, email, atualizadoEm: serverTimestamp()});
+                } catch(err) {
+                    console.error('Erro ao criar usuário no Firebase:', err);
+                    alert('Não foi possível criar o usuário no Firebase Authentication.
 
-                    novoObj = {
-                        id: uid, uid,
-                        nome: document.getElementById('univ-c1').value.trim(),
-                        email, subgrupoId: subgrupoSel, grupoUsuario: subgrupoSel, orgao: subgrupoSel,
-                        perfil: perfilSel, tags, ativo: true, modulosPermitidos,
-                        criadoEm: serverTimestamp(), atualizadoEm: serverTimestamp(),
-                        criadoPor: currentUser?.uid || null
-                    };
-                    await setDoc(doc(db, 'usuarios', uid), novoObj);
-                    await setDoc(doc(db, 'usuarios_email', email), { uid, email, atualizadoEm: serverTimestamp() });
-                    dbData.usuarios.push({ ...novoObj, criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString() });
-                    alert('Usuário criado no Firebase Authentication e sincronizado com o Firestore.');
-                } catch (err) {
-                    console.error('Erro ao criar usuário:', err);
-                    alert('Não foi possível criar o usuário no Firebase: ' + (err.code || err.message));
+' + (err?.message || err));
                     return;
                 }
             } else if (tipo === 'demanda') {
@@ -1421,7 +1336,7 @@
             let formatoText = '';
             if (colecao === 'orgaos') formatoText = 'SIGLA;NOME_DO_ORGAO;TIPO_JURIDICO;RESPONSAVEL;EMAIL';
             if (colecao === 'fornecedores') formatoText = 'RAZAO_SOCIAL;CNPJ;CATEGORIA;RESPONSAVEL;TELEFONE;EMAIL;CONTRATO';
-            if (colecao === 'usuarios') formatoText = 'NOME;EMAIL;ORGAO;PERFIL;SENHA';
+            if (colecao === 'usuarios') formatoText = 'NOME;EMAIL;ORGAO;PERFIL;SENHA;TAGS';
             
             document.getElementById('import-instrucoes-formato').textContent = formatoText;
             document.getElementById('modal-importacao').classList.remove('hidden');
@@ -1488,16 +1403,21 @@
                     } else if (colecao === 'usuarios' && cols.length >= 2) {
                         const email = (cols[1] || '').toLowerCase();
                         const senha = cols[4] || '123456';
+                        const tags = normalizeTags(cols[5] || '');
                         try {
                             const secondaryApp = initializeApp(firebaseConfig, 'import-' + Date.now() + '-' + i);
                             const secondaryAuth = getAuth(secondaryApp);
                             const cred = await createUserWithEmailAndPassword(secondaryAuth, email, senha);
                             await signOut(secondaryAuth);
-                            const tags = normalizeTags(cols[5] || '');
-                            const obj = { id: cred.user.uid, uid: cred.user.uid, nome: cols[0] || email, email, subgrupoId: cols[2] || 'ATI', grupoUsuario: cols[2] || 'ATI', orgao: cols[2] || 'ATI', perfil: (cols[3] || 'comum').toLowerCase(), tags, ativo: true, modulosPermitidos: ['dashboard','demandas','eventos','locais','orgaos','fornecedores','bases'] };
+                            const obj = {id: cred.user.uid, uid: cred.user.uid, nome: cols[0] || email, email,
+                                subgrupoId: cols[2] || 'ATI', grupoUsuario: cols[2] || 'ATI', orgao: cols[2] || 'ATI',
+                                perfil: (cols[3] || 'comum').toLowerCase(), tags, ativo: true,
+                                modulosPermitidos: ['dashboard','demandas','eventos','locais','orgaos','fornecedores','bases']};
+                            dbData.usuarios = dbData.usuarios.filter(u => u.email !== email && u.id !== cred.user.uid);
+                            dbData.usuarios.push(obj);
+                            importCount++;
                             await setDoc(doc(db, 'usuarios', cred.user.uid), obj);
                             await setDoc(doc(db, 'usuarios_email', email), {uid: cred.user.uid, email});
-                            dbData.usuarios.push(obj); importCount++;
                         } catch(err) { console.warn('Falha ao importar usuário '+email, err); }
                     }
                 }
@@ -1510,105 +1430,70 @@
             reader.readAsText(file, 'UTF-8');
         }
 
-        // --- AUTENTICAÇÃO REAL VIA FIREBASE AUTHENTICATION + PERFIL FIRESTORE ---
+        // --- AUTENTICAÇÃO REAL: FIREBASE AUTHENTICATION + PERFIL FIRESTORE ---
         let autenticando = false;
-        async function fazerLoginLocal(event) {
-            if (event) event.preventDefault();
-            if (autenticando) return;
-            const btn = document.getElementById('btn-executar-login');
-            const emailEl = document.getElementById('login-email');
-            const senhaEl = document.getElementById('login-senha');
-            const original = btn ? btn.innerHTML : '';
-            try {
-                const emailInput = (emailEl?.value || '').trim().toLowerCase();
-                const senhaInput = senhaEl?.value || '';
-                if (!emailInput || !senhaInput) {
-                    alert('Por favor, preencha o e-mail e a senha.');
-                    return;
-                }
-                autenticando = true;
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Autenticando...';
-                }
-                const cred = await signInWithEmailAndPassword(auth, emailInput, senhaInput);
-                await carregarPerfilFirebase(cred.user);
-                if (currentUser) {
-                    alert('Autenticado com sucesso no Firebase! Bem-vindo(a), ' + (currentUser.nome || currentUser.email) + '.');
-                }
-            } catch (err) {
-                console.error('Erro de autenticação:', err);
-                let mensagem = err?.code || err?.message || 'Erro desconhecido.';
-                const traducoes = {
-                    'auth/invalid-credential': 'E-mail ou senha inválidos.',
-                    'auth/invalid-email': 'O e-mail informado é inválido.',
-                    'auth/user-disabled': 'Este usuário foi desativado no Firebase Authentication.',
-                    'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
-                    'auth/network-request-failed': 'Falha de comunicação com o Firebase. Verifique sua internet e o domínio publicado.',
-                    'auth/operation-not-allowed': 'O login por E-mail/Senha não está habilitado no Firebase Authentication.',
-                    'auth/configuration-not-found': 'A configuração do Firebase Authentication não está disponível neste projeto.'
-                };
-                alert('Não foi possível autenticar.\n\n' + (traducoes[mensagem] || mensagem));
-            } finally {
-                autenticando = false;
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = original || '<i class="fa-solid fa-right-to-bracket"></i> Autenticar e Entrar';
-                }
-            }
+        const ADMIN_EMAIL_FALLBACK = 'arlindo.santos@ati.pe.gov.br';
+
+        function normalizeTags(value) {
+            const arr = Array.isArray(value) ? value : String(value || '').split(',');
+            return [...new Set(arr.map(t => String(t).trim().toLowerCase()).filter(Boolean))];
         }
 
         async function carregarPerfilFirebase(firebaseUser) {
-            if (!firebaseUser) return;
-            let snap = await getDoc(doc(db, 'usuarios', firebaseUser.uid));
-            let userData = snap.exists() ? snap.data() : null;
-
-            // Compatibilidade/migração: procura o cadastro antigo pelo e-mail, sem usar senha armazenada.
+            const email = (firebaseUser?.email || '').toLowerCase();
+            if (!email) return;
+            let userData = null;
+            try {
+                const snap = await getDoc(doc(db, 'usuarios', firebaseUser.uid));
+                if (snap.exists()) userData = snap.data();
+            } catch(e) { console.warn('Perfil Firestore indisponível; usando perfil de sessão:', e); }
             if (!userData) {
-                const legado = await getDoc(doc(db, 'usuarios_email', firebaseUser.email.toLowerCase()));
-                if (legado.exists()) {
-                    const oldRef = await getDoc(doc(db, 'usuarios', legado.data().uid));
-                    if (oldRef.exists()) userData = oldRef.data();
-                }
+                try {
+                    const legacy = await getDoc(doc(db, 'usuarios', email));
+                    if (legacy.exists()) userData = legacy.data();
+                } catch(e) { console.warn('Consulta de perfil legado falhou:', e); }
             }
             if (!userData) {
-                const legadoEmail = await getDoc(doc(db, 'usuarios', firebaseUser.email.toLowerCase()));
-                if (legadoEmail.exists()) {
-                    userData = legadoEmail.data();
-                    const migrated = {...userData, id: firebaseUser.uid, uid: firebaseUser.uid, email: firebaseUser.email.toLowerCase()};
-                    delete migrated.senha; delete migrated.senhaHash;
-                    await setDoc(doc(db, 'usuarios', firebaseUser.uid), migrated, {merge:true});
-                    await setDoc(doc(db, 'usuarios_email', firebaseUser.email.toLowerCase()), {uid: firebaseUser.uid, email: firebaseUser.email.toLowerCase()}, {merge:true});
-                    userData = migrated;
-                }
+                const mock = (initialMockData.usuarios || []).find(u => String(u.email || '').toLowerCase() === email);
+                userData = mock ? {...mock} : {
+                    id: firebaseUser.uid, uid: firebaseUser.uid, nome: firebaseUser.displayName || email, email,
+                    subgrupoId: 'ATI', grupoUsuario: 'ATI', orgao: 'ATI',
+                    // Modo inicial: permite operar a interface completa antes da configuração do perfil Firestore.
+                    // Assim a aplicação não fica inutilizável durante a implantação. Quando o perfil existir,
+                    // as permissões gravadas no Firestore passam a prevalecer.
+                    perfil: 'admin', ativo: true,
+                    modulosPermitidos: MÓDULOS_SISTEMA.map(m=>m.id), tags: [], modoInicial: true
+                };
             }
-            if (!userData) {
-                await signOut(auth);
-                alert('Sua conta existe no Firebase Authentication, mas ainda não possui perfil no PRGD. Um administrador deve concluir seu cadastro.');
-                return;
-            }
-            if (userData.ativo === false) { await signOut(auth); alert('Usuário desativado. Procure o administrador.'); return; }
-            currentUser = { id: firebaseUser.uid, uid: firebaseUser.uid, ...userData, email: firebaseUser.email.toLowerCase(), tags: normalizeTags(userData.tags || userData.tag || '') };
-            if (!Array.isArray(currentUser.modulosPermitidos)) currentUser.modulosPermitidos = ['dashboard','demandas','eventos'];
-            document.getElementById('user-name-display').textContent = currentUser.nome || currentUser.email;
-            document.getElementById('user-role-display').textContent = ((currentUser.tags || []).join(' • ') || currentUser.perfil || 'COMUM').toUpperCase();
-            await iniciarSnapshotFirestore();
+            if (userData.ativo === false) { await signOut(auth); alert('Usuário desativado.'); return; }
+            currentUser = {...userData, id: firebaseUser.uid, uid: firebaseUser.uid, email, tags: normalizeTags(userData.tags || userData.tag || '')};
+            if (!Array.isArray(currentUser.modulosPermitidos)) currentUser.modulosPermitidos = currentUser.perfil === 'admin' ? MÓDULOS_SISTEMA.map(m=>m.id) : ['dashboard','demandas','eventos'];
+            document.getElementById('user-name-display').textContent = currentUser.nome || email;
+            document.getElementById('user-role-display').textContent = ((currentUser.tags || []).join(' • ') || currentUser.perfil || 'COMUM').toUpperCase() + (currentUser.modoInicial ? ' • MODO INICIAL' : '');
             atualizarVisibilidadeAbas();
             renderizarTudo();
         }
 
-        async function fazerLogout(event) {
+        async function fazerLoginLocal(event) {
             if (event) event.preventDefault();
-            try { await signOut(auth); } catch (err) { console.warn('Falha no signOut:', err); }
-            currentUser = null;
-            dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [] };
-            unsubscribers.forEach(fn => { try { fn(); } catch(e) {} });
-            unsubscribers = [];
-            verificarAutenticacaoObrigatoria();
-            const nameDisplay = document.getElementById('user-name-display');
-            const roleDisplay = document.getElementById('user-role-display');
-            if (nameDisplay) nameDisplay.textContent = '';
-            if (roleDisplay) roleDisplay.textContent = '';
+            if (autenticando) return;
+            const btn = document.getElementById('btn-executar-login');
+            const email = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
+            const senha = document.getElementById('login-senha')?.value || '';
+            if (!email || !senha) { alert('Por favor, preencha o e-mail e a senha.'); return; }
+            autenticando = true; const original = btn?.innerHTML || '';
+            if (btn) { btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Autenticando...'; }
+            try { await setPersistence(auth, browserLocalPersistence); const cred = await signInWithEmailAndPassword(auth,email,senha); await carregarPerfilFirebase(cred.user); }
+            catch(err) {
+                const map={'auth/invalid-credential':'E-mail ou senha inválidos.','auth/invalid-email':'E-mail inválido.','auth/user-disabled':'Usuário desativado.','auth/operation-not-allowed':'Ative E-mail/Senha no Firebase Authentication.','auth/network-request-failed':'Falha de comunicação com o Firebase.'};
+                alert('Não foi possível autenticar.\n\n'+(map[err?.code]||err?.message||err));
+            } finally { autenticando=false; if(btn){btn.disabled=false;btn.innerHTML=original||'<i class="fa-solid fa-right-to-bracket"></i> Autenticar e Entrar';} }
+        }
+
+        async function fazerLogout(event) {
+            if(event) event.preventDefault();
+            try { await signOut(auth); } catch(e) { console.warn(e); }
+            currentUser=null; verificarAutenticacaoObrigatoria();
         }
 
         function exportarUsuariosCSV() {
@@ -1620,7 +1505,7 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "usuarios_prgd_v19.1.0.csv");
+            link.setAttribute("download", "usuarios_prgd_v19.2.1.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1651,94 +1536,54 @@
             }
         }
 
-        // --- INICIALIZAÇÃO E BIND DE EVENTOS ---
-        async function inicializarAplicacao() {
-            try {
-                // Eventos por delegação: permanecem funcionais mesmo quando a interface
-                // é redesenhada/re-renderizada após os snapshots do Firestore.
-                document.addEventListener('click', (event) => {
-                    const login = event.target.closest('#btn-executar-login');
-                    if (login) return fazerLoginLocal(event);
+        // --- BIND DE EVENTOS GLOBAIS NO DOM CARREGADO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarTudo();
+            iniciarSnapshotFirestore();
+            verificarAutenticacaoObrigatoria();
 
-                    const logout = event.target.closest('#btn-executar-logout');
-                    if (logout) return fazerLogout(event);
+            onAuthStateChanged(auth, async (firebaseUser) => {
+                if (firebaseUser) {
+                    try { await carregarPerfilFirebase(firebaseUser); }
+                    catch (err) { console.error('Falha ao carregar perfil:', err); }
+                } else {
+                    currentUser = null;
+                    verificarAutenticacaoObrigatoria();
+                }
+            });
 
-                    const tab = event.target.closest('.nav-tab');
-                    if (tab) return mudarAba(tab.getAttribute('data-tab'));
+            document.getElementById('btn-executar-login').onclick = fazerLoginLocal;
+            document.getElementById('btn-executar-logout').onclick = fazerLogout;
+            document.getElementById('btn-export-csv').onclick = exportarUsuariosCSV;
+            document.getElementById('btn-export-usuarios').onclick = exportarUsuariosCSV;
+            document.getElementById('btn-processar-csv').onclick = processarArquivoCSV;
+            document.getElementById('btn-excluir-registro').onclick = excluirRegistroUniversal;
+            document.getElementById('form-edicao-admin').onsubmit = salvarEdicaoUniversal;
+            document.getElementById('form-univ-body').onsubmit = salvarCadastroUniversal;
 
-                    const abrirForm = event.target.closest('.btn-abrir-form');
-                    if (abrirForm) return abrirModalForm(abrirForm.getAttribute('data-modal-target'));
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.onclick = () => mudarAba(btn.getAttribute('data-tab'));
+            });
 
-                    const abrirImport = event.target.closest('.btn-abrir-import');
-                    if (abrirImport) return abrirModalImportacao(abrirImport.getAttribute('data-import-target'));
+            document.querySelectorAll('.btn-abrir-form').forEach(btn => {
+                btn.onclick = () => abrirModalForm(btn.getAttribute('data-modal-target'));
+            });
 
-                    const fechar = event.target.closest('.btn-fechar-modal');
-                    if (fechar) return fecharModal(fechar.getAttribute('data-target'));
+            document.querySelectorAll('.btn-abrir-import').forEach(btn => {
+                btn.onclick = () => abrirModalImportacao(btn.getAttribute('data-import-target'));
+            });
 
-                    const exportar = event.target.closest('#btn-export-csv, #btn-export-usuarios');
-                    if (exportar) return exportarUsuariosCSV();
+            document.querySelectorAll('.btn-fechar-modal').forEach(btn => {
+                btn.onclick = () => fecharModal(btn.getAttribute('data-target'));
+            });
 
-                    const processar = event.target.closest('#btn-processar-csv');
-                    if (processar) return processarArquivoCSV();
-
-                    const excluir = event.target.closest('#btn-excluir-registro');
-                    if (excluir) return excluirRegistroUniversal();
-
-                    const acompanhamento = event.target.closest('#btn-add-acompanhamento');
-                    if (acompanhamento) return adicionarAcompanhamentoDemanda(acompanhamento.getAttribute('data-docid'));
-
-                    const linha = event.target.closest('.tr-detalhe');
-                    if (linha) return detalharRegistro(linha.getAttribute('data-colecao'), linha.getAttribute('data-id'));
-
-                    const card = event.target.closest('.card-detalhe');
-                    if (card) return detalharRegistro(card.getAttribute('data-colecao'), card.getAttribute('data-id'));
-                }, { passive: false });
-
-                document.addEventListener('submit', (event) => {
-                    if (event.target && event.target.id === 'form-univ-body') return salvarCadastroUniversal(event);
-                    if (event.target && event.target.id === 'form-edicao-admin') return salvarEdicaoUniversal(event);
-                });
-
-                document.addEventListener('keydown', (event) => {
-                    if (event.key === 'Enter' && event.target?.id === 'login-senha') {
-                        event.preventDefault();
-                        fazerLoginLocal(event);
-                    }
-                });
-
-                const filtroEv = document.getElementById('filtro-eventos');
-                if (filtroEv) filtroEv.addEventListener('change', renderEventos);
-
-                verificarAutenticacaoObrigatoria();
-                await setPersistence(auth, browserLocalPersistence);
-
-                onAuthStateChanged(auth, async user => {
-                    try {
-                        if (user) await carregarPerfilFirebase(user);
-                        else {
-                            currentUser = null;
-                            verificarAutenticacaoObrigatoria();
-                        }
-                    } catch (e) {
-                        console.error('Erro ao carregar sessão/perfil:', e);
-                        currentUser = null;
-                        verificarAutenticacaoObrigatoria();
-                        alert('Não foi possível carregar o perfil do usuário no Firestore. Verifique as regras de segurança.\n\n' + (e?.message || e));
-                    }
-                });
-            } catch (e) {
-                console.error('Falha na inicialização do PRGD:', e);
-                // O login e os controles por delegação já estão instalados.
-                alert('Falha na inicialização do sistema: ' + (e?.message || e));
-            }
-        }
-
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inicializarAplicacao, { once: true });
-        else inicializarAplicacao();
+            const filtroEv = document.getElementById('filtro-eventos');
+            if (filtroEv) filtroEv.onchange = renderEventos;
+        });
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.1.0 FIREBASE AUTH — PRESERVAÇÃO COMPLETA</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.2.1 FIREBASE AUTH + PRESERVAÇÃO COMPLETA</span>
     </footer>
 </body>
 </html>
