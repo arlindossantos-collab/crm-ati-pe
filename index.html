@@ -1,7 +1,7 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v18.6 STABLE                                -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v18.7 CLOUD AUTH                          -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
-<!-- ATUALIZAÇÃO: Blindagem do login para múltiplos esquemas do Firestore  -->
+<!-- ATUALIZAÇÃO: Autenticação direta e síncrona no Firestore Cloud        -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -50,7 +50,7 @@
             </div>
             <!-- Controle de Versão na Tela de Autenticação -->
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.6 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.7 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.6 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.7 CLOUD</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -87,7 +87,7 @@
 
         <!-- Status da Sessão -->
         <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
-            <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Autenticado</span></span>
+            <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Autenticado via Firestore Cloud</span></span>
             <span id="badge-perfil-acesso" class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold uppercase"></span>
         </div>
 
@@ -698,7 +698,7 @@
                         `<p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Palestrante: ${e.palestrante || 'Não informado'}</p>` +
                         '<div class="bg-slate-50 p-2.5 rounded-lg border my-2 text-[11px] space-y-1">' +
                             `<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> <strong>Início:</strong> ${dtStart ? new Date(dtStart).toLocaleString('pt-BR') : '-'}</p>` +
-                            (dtEnd ? `<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-red-500 mr-1"></i> <strong>Fim:</strong> ${new Date(dtEnd).toLocaleString('pt-BR')}</p>` : '') +
+                            (dtEnd ? `<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-red-500 mr-1"></i> <strong>Fim:</strong> ${new Date(dtEnd).toLocaleString('pt-BR') : '-'}</p>` : '') +
                             `<p class="text-slate-600"><i class="fa-solid fa-certificate text-blue-600 mr-1"></i> <strong>Certificado:</strong> <span class="font-bold text-slate-800">${e.geracaoCertificado || 'Não'}</span></p>` +
                         '</div>' +
                         `<p class="text-xs text-slate-500 line-clamp-2">${e.descricao || 'Sem descrição.'}</p>` +
@@ -1427,7 +1427,8 @@
             reader.readAsText(file, 'UTF-8');
         }
 
-        function fazerLoginLocal() {
+        // --- AUTENTICAÇÃO DIRETA NA NUVEM (FIRESTORE CLOUD) ---
+        async function fazerLoginLocal() {
             try {
                 const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
                 const senhaInput = document.getElementById('login-senha').value;
@@ -1437,10 +1438,7 @@
                     return;
                 }
 
-                if (!dbData.usuarios || dbData.usuarios.length === 0) {
-                    dbData.usuarios = JSON.parse(JSON.stringify(initialMockData.usuarios));
-                }
-
+                // Master admin bypass de emergência
                 if (emailInput === 'arlindo.santos@ati.pe.gov.br' && senhaInput === '123') {
                     currentUser = {
                         id: 'arlindo.santos@ati.pe.gov.br',
@@ -1453,38 +1451,42 @@
                         modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios']
                     };
                 } else {
-                    const userFound = dbData.usuarios.find(u => (u.email || u.id || '').toLowerCase() === emailInput);
+                    // Consulta direta e síncrona na nuvem (Firestore Cloud) usando o e-mail como ID do documento
+                    const docRef = doc(db, "usuarios", emailInput);
+                    const docSnap = await getDoc(docRef);
 
-                    if (!userFound) {
-                        alert('Acesso negado: E-mail não localizado na base de usuários cadastrados.');
+                    if (!docSnap.exists()) {
+                        alert('Acesso negado: E-mail não localizado na base de usuários cadastrados no Firestore.');
                         return;
                     }
 
-                    // BLINDAGEM: Se o usuário veio do Firestore sem o campo de senha explícito, permite o acesso temporário com '123' ou '123456'
-                    const senhaNoBanco = userFound.senha || userFound.senhaHash || '123';
+                    const userData = docSnap.data();
+                    const senhaNoBanco = userData.senha || userData.senhaHash || '123';
+
                     if (senhaNoBanco !== senhaInput) {
                         alert('Acesso negado: Senha incorreta para o e-mail informado.');
                         return;
                     }
 
                     currentUser = {
-                        ...userFound,
-                        subgrupoId: userFound.subgrupoId || userFound.grupoUsuario || userFound.orgao || 'ATI',
-                        perfil: userFound.perfil || 'admin',
-                        modulosPermitidos: userFound.modulosPermitidos || ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios']
+                        id: docSnap.id,
+                        ...userData,
+                        subgrupoId: userData.subgrupoId || userData.grupoUsuario || userData.orgao || 'ATI',
+                        perfil: userData.perfil || 'comum',
+                        modulosPermitidos: userData.modulosPermitidos || ['dashboard', 'demandas', 'eventos']
                     };
                 }
 
                 const nameDisplay = document.getElementById('user-name-display');
                 const roleDisplay = document.getElementById('user-role-display');
                 if (nameDisplay) nameDisplay.textContent = currentUser.nome || currentUser.email;
-                if (roleDisplay) roleDisplay.textContent = (currentUser.perfil || 'ADMIN').toUpperCase();
+                if (roleDisplay) roleDisplay.textContent = (currentUser.perfil || 'COMUM').toUpperCase();
 
                 atualizarVisibilidadeAbas();
-                alert('Autenticado com sucesso! Bem-vindo(a), ' + (currentUser.nome || currentUser.email) + '.');
+                alert('Autenticado com sucesso via Nuvem! Bem-vindo(a), ' + (currentUser.nome || currentUser.email) + '.');
             } catch (err) {
-                console.error('Erro crítico no login:', err);
-                alert('Ocorreu um erro ao processar o login: ' + err.message);
+                console.error('Erro crítico no login em nuvem:', err);
+                alert('Ocorreu um erro ao conectar com o Firestore Cloud: ' + err.message);
             }
         }
 
@@ -1502,7 +1504,7 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "usuarios_prgd_v18.csv");
+            link.setAttribute("download", "usuarios_prgd_v18.7.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1570,7 +1572,7 @@
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.6 STABLE</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.7 CLOUD</span>
     </footer>
 </body>
 </html>
