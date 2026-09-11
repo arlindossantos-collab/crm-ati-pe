@@ -1,4 +1,4 @@
-# PRGD ATI-PE — v19.0.0 Firebase Authentication
+# PRGD ATI-PE — v19.0.1 Firebase Authentication
 
 Esta versão corrige a arquitetura de autenticação: a senha não fica mais armazenada no Firestore. Os usuários criados pelo painel são contas reais do **Firebase Authentication (Email/Password)** e seus dados de perfil ficam no Firestore.
 

@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v19.0.0 FIREBASE AUTH                          -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v19.0.1 FIREBASE AUTH                          -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ATUALIZAÇÃO: Autenticação direta e síncrona no Firestore Cloud        -->
 <!-- ===================================================================== -->
@@ -50,7 +50,7 @@
             </div>
             <!-- Controle de Versão na Tela de Autenticação -->
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.0.0 FIREBASE AUTH</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.0.1 FIREBASE AUTH</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.0.0 FIREBASE AUTH</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.0.1 FIREBASE AUTH</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -1433,18 +1433,50 @@
         }
 
         // --- AUTENTICAÇÃO REAL VIA FIREBASE AUTHENTICATION + PERFIL FIRESTORE ---
-        async function fazerLoginLocal() {
+        let autenticando = false;
+        async function fazerLoginLocal(event) {
+            if (event) event.preventDefault();
+            if (autenticando) return;
+            const btn = document.getElementById('btn-executar-login');
+            const emailEl = document.getElementById('login-email');
+            const senhaEl = document.getElementById('login-senha');
+            const original = btn ? btn.innerHTML : '';
             try {
-                const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
-                const senhaInput = document.getElementById('login-senha').value;
-                if (!emailInput || !senhaInput) { alert('Por favor, preencha o e-mail e a senha.'); return; }
-
+                const emailInput = (emailEl?.value || '').trim().toLowerCase();
+                const senhaInput = senhaEl?.value || '';
+                if (!emailInput || !senhaInput) {
+                    alert('Por favor, preencha o e-mail e a senha.');
+                    return;
+                }
+                autenticando = true;
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Autenticando...';
+                }
                 const cred = await signInWithEmailAndPassword(auth, emailInput, senhaInput);
                 await carregarPerfilFirebase(cred.user);
-                alert('Autenticado com sucesso no Firebase! Bem-vindo(a), ' + (currentUser.nome || currentUser.email) + '.');
+                if (currentUser) {
+                    alert('Autenticado com sucesso no Firebase! Bem-vindo(a), ' + (currentUser.nome || currentUser.email) + '.');
+                }
             } catch (err) {
                 console.error('Erro de autenticação:', err);
-                alert('Acesso negado pelo Firebase: ' + (err.code || err.message));
+                let mensagem = err?.code || err?.message || 'Erro desconhecido.';
+                const traducoes = {
+                    'auth/invalid-credential': 'E-mail ou senha inválidos.',
+                    'auth/invalid-email': 'O e-mail informado é inválido.',
+                    'auth/user-disabled': 'Este usuário foi desativado no Firebase Authentication.',
+                    'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
+                    'auth/network-request-failed': 'Falha de comunicação com o Firebase. Verifique sua internet e o domínio publicado.',
+                    'auth/operation-not-allowed': 'O login por E-mail/Senha não está habilitado no Firebase Authentication.',
+                    'auth/configuration-not-found': 'A configuração do Firebase Authentication não está disponível neste projeto.'
+                };
+                alert('Não foi possível autenticar.\n\n' + (traducoes[mensagem] || mensagem));
+            } finally {
+                autenticando = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = original || '<i class="fa-solid fa-right-to-bracket"></i> Autenticar e Entrar';
+                }
             }
         }
 
@@ -1503,7 +1535,7 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "usuarios_prgd_v19.0.0.csv");
+            link.setAttribute("download", "usuarios_prgd_v19.0.1.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1534,46 +1566,66 @@
             }
         }
 
-        // --- BIND DE EVENTOS GLOBAIS NO DOM CARREGADO ---
-        document.addEventListener('DOMContentLoaded', () => {
-            verificarAutenticacaoObrigatoria();
-            onAuthStateChanged(auth, async user => {
-                if (user) { try { await carregarPerfilFirebase(user); } catch(e) { console.error(e); } }
-                else { currentUser = null; verificarAutenticacaoObrigatoria(); }
-            });
+        // --- INICIALIZAÇÃO E BIND DE EVENTOS ---
+        async function inicializarAplicacao() {
+            try {
+                const btnLogin = document.getElementById('btn-executar-login');
+                if (!btnLogin) throw new Error('Botão de autenticação não encontrado no HTML.');
 
-            document.getElementById('btn-executar-login').onclick = fazerLoginLocal;
-            document.getElementById('btn-executar-logout').onclick = fazerLogout;
-            document.getElementById('btn-export-csv').onclick = exportarUsuariosCSV;
-            document.getElementById('btn-export-usuarios').onclick = exportarUsuariosCSV;
-            document.getElementById('btn-processar-csv').onclick = processarArquivoCSV;
-            document.getElementById('btn-excluir-registro').onclick = excluirRegistroUniversal;
-            document.getElementById('form-edicao-admin').onsubmit = salvarEdicaoUniversal;
-            document.getElementById('form-univ-body').onsubmit = salvarCadastroUniversal;
+                // O botão é ligado imediatamente, antes de qualquer consulta ao Firestore.
+                btnLogin.addEventListener('click', fazerLoginLocal);
+                document.getElementById('login-senha')?.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') fazerLoginLocal(e);
+                });
 
-            document.querySelectorAll('.nav-tab').forEach(btn => {
-                btn.onclick = () => mudarAba(btn.getAttribute('data-tab'));
-            });
+                verificarAutenticacaoObrigatoria();
+                await setPersistence(auth, browserLocalPersistence);
 
-            document.querySelectorAll('.btn-abrir-form').forEach(btn => {
-                btn.onclick = () => abrirModalForm(btn.getAttribute('data-modal-target'));
-            });
+                onAuthStateChanged(auth, async user => {
+                    try {
+                        if (user) await carregarPerfilFirebase(user);
+                        else {
+                            currentUser = null;
+                            verificarAutenticacaoObrigatoria();
+                        }
+                    } catch (e) {
+                        console.error('Erro ao carregar sessão/perfil:', e);
+                        currentUser = null;
+                        verificarAutenticacaoObrigatoria();
+                        alert('Não foi possível carregar o perfil do usuário no Firestore. Verifique as regras de segurança.');
+                    }
+                });
 
-            document.querySelectorAll('.btn-abrir-import').forEach(btn => {
-                btn.onclick = () => abrirModalImportacao(btn.getAttribute('data-import-target'));
-            });
+                const bind = (id, event, fn) => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener(event, fn);
+                    else console.warn('Elemento não encontrado:', id);
+                };
+                bind('btn-executar-logout', 'click', fazerLogout);
+                bind('btn-export-csv', 'click', exportarUsuariosCSV);
+                bind('btn-export-usuarios', 'click', exportarUsuariosCSV);
+                bind('btn-processar-csv', 'click', processarArquivoCSV);
+                bind('btn-excluir-registro', 'click', excluirRegistroUniversal);
+                bind('form-edicao-admin', 'submit', salvarEdicaoUniversal);
+                bind('form-univ-body', 'submit', salvarCadastroUniversal);
 
-            document.querySelectorAll('.btn-fechar-modal').forEach(btn => {
-                btn.onclick = () => fecharModal(btn.getAttribute('data-target'));
-            });
+                document.querySelectorAll('.nav-tab').forEach(btn => btn.addEventListener('click', () => mudarAba(btn.getAttribute('data-tab'))));
+                document.querySelectorAll('.btn-abrir-form').forEach(btn => btn.addEventListener('click', () => abrirModalForm(btn.getAttribute('data-modal-target'))));
+                document.querySelectorAll('.btn-abrir-import').forEach(btn => btn.addEventListener('click', () => abrirModalImportacao(btn.getAttribute('data-import-target'))));
+                document.querySelectorAll('.btn-fechar-modal').forEach(btn => btn.addEventListener('click', () => fecharModal(btn.getAttribute('data-target'))));
+                bind('filtro-eventos', 'change', renderEventos);
+            } catch (e) {
+                console.error('Falha na inicialização do PRGD:', e);
+                alert('Falha ao inicializar o sistema. Abra o console do navegador (F12) para verificar o erro.\n\n' + (e?.message || e));
+            }
+        }
 
-            const filtroEv = document.getElementById('filtro-eventos');
-            if (filtroEv) filtroEv.onchange = renderEventos;
-        });
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inicializarAplicacao, { once: true });
+        else inicializarAplicacao();
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.0.0 FIREBASE AUTH</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v19.0.1 FIREBASE AUTH</span>
     </footer>
 </body>
 </html>
