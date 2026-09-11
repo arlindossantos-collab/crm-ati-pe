@@ -1,7 +1,7 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v18.0 STABLE                                -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v18.1 STABLE                                -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
-<!-- ATUALIZAÇÃO: Sincronização síncrona com Firestore e Módulo "Bases"    -->
+<!-- ATUALIZAÇÃO: Correção de autenticação e persistência de login         -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -75,7 +75,7 @@
             </div>
             <!-- Controle de Versão na Tela de Autenticação -->
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.0 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.1 STABLE</span></p>
             </div>
         </div>
     </div>
@@ -88,7 +88,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.0 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.1 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -288,7 +288,7 @@
             <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
-        <!-- ABA BASES COMPARTILHADAS (NOVO MÓDULO) -->
+        <!-- ABA BASES COMPARTILHADAS -->
         <div id="aba-bases" class="hidden space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
@@ -529,7 +529,11 @@
                 try {
                     window.firebaseMethods.onSnapshot(window.firebaseMethods.collection(window.firebaseDb, col), snap => {
                         if (!snap.empty) {
-                            window.dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                            const docsRemotos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                            // Mescla inteligentemente mantendo dados locais e remotos atualizados
+                            const mapExistentes = new Map(window.dbData[col].map(item => [item.id, item]));
+                            docsRemotos.forEach(docRemoto => mapExistentes.set(docRemoto.id, docRemoto));
+                            window.dbData[col] = Array.from(mapExistentes.values());
                         } else if (window.dbData[col].length === 0) {
                             window.dbData[col] = initialMockData[col] || [];
                         }
@@ -1245,7 +1249,11 @@
                     perfil: document.getElementById('univ-c4').value, senha, ativo: true,
                     modulosPermitidos
                 };
+                
+                // Atualiza localmente com segurança
+                window.dbData.usuarios = window.dbData.usuarios.filter(u => u.id !== email);
                 window.dbData.usuarios.push(novoObj);
+
                 try {
                     await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "usuarios", email), novoObj);
                 } catch(err) { console.warn('Erro Firestore', err); }
@@ -1381,40 +1389,39 @@
             const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
             const senhaInput = document.getElementById('login-senha').value;
 
-            if (emailInput === 'arlindo.santos@ati.pe.gov.br' && senhaInput === '123') {
-                window.currentUser = {
+            // Busca primeiro na base de dados em memória / cache unificada
+            let userFound = window.dbData.usuarios.find(u => (u.email || u.id || '').toLowerCase() === emailInput);
+
+            // Fallback para admin padrão ou se não encontrar em memória
+            if (!userFound && emailInput === 'arlindo.santos@ati.pe.gov.br' && senhaInput === '123') {
+                userFound = {
                     id: 'arlindo.santos@ati.pe.gov.br',
                     nome: 'Arlindo Santos',
                     email: 'arlindo.santos@ati.pe.gov.br',
                     subgrupoId: 'ATI',
                     perfil: 'admin',
+                    senha: '123',
                     modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios']
                 };
-                document.getElementById('user-name-display').textContent = window.currentUser.nome;
-                document.getElementById('user-role-display').textContent = 'ADMIN';
-                atualizarVisibilidadeAbas();
-                alert('Autenticado com sucesso! Bem-vindo(a), ' + window.currentUser.nome + '.');
-                return;
             }
 
-            let userFound = window.dbData.usuarios.find(u => (u.email || u.id) === emailInput);
-
+            // Se ainda não encontrou, tenta buscar pontualmente no Firestore
             if (!userFound) {
                 try {
                     const docRef = window.firebaseMethods.doc(window.firebaseDb, "usuarios", emailInput);
                     const docSnap = await window.firebaseMethods.getDoc(docRef);
                     if (docSnap.exists()) {
                         userFound = { id: docSnap.id, ...docSnap.data() };
-                        if (!window.dbData.usuarios.some(u => (u.email || u.id) === emailInput)) {
+                        if (!window.dbData.usuarios.some(u => (u.email || u.id || '').toLowerCase() === emailInput)) {
                             window.dbData.usuarios.push(userFound);
                         }
                     }
-                } catch (err) { console.warn('Erro ao buscar usuário no Firestore:', err); }
+                } catch (err) { console.warn('Aviso de consulta de login no Firestore:', err); }
             }
 
-            if (!userFound) { 
-                alert('Acesso negado. Usuário não localizado na base cadastrada.'); 
-                return; 
+            if (!userFound) {
+                alert('Acesso negado. Usuário não localizado na base cadastrada.');
+                return;
             }
 
             const senhaNoBanco = userFound.senha || userFound.senhaHash;
@@ -1486,7 +1493,7 @@
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.0 STABLE</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.1 STABLE</span>
     </footer>
 </body>
 </html>
