@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v19.8 REFINED USERS, TAGS & FULL EDIT       -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v19.7 STABLE ISOLATED MODULES & EVENT FILTER-->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -48,7 +48,7 @@
                 </button>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.8 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v19.7 STABLE</span></p>
             </div>
         </div>
     </div>
@@ -61,7 +61,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.8 REFINED</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v19.7 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -97,7 +97,7 @@
                 <button type="button" data-tab="orgaos" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-sitemap mr-1.5"></i> Órgãos / Secretarias</button>
                 <button type="button" data-tab="fornecedores" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores</button>
                 <button type="button" data-tab="bases" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-database mr-1.5"></i> Bases Compartilhadas</button>
-                <button type="button" data-tab="usuarios" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-users-gear mr-1.5"></i> Usuários & Tags</button>
+                <button type="button" data-tab="usuarios" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-users-gear mr-1.5"></i> Usuários & Permissões</button>
             </div>
             <div class="flex items-center gap-2">
                 <button type="button" id="btn-export-csv" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
@@ -169,27 +169,19 @@
 
         <!-- ABA USUÁRIOS -->
         <div id="aba-usuarios" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários e Permissões por Tags</h3>
-                <div class="flex items-center gap-2">
-                    <select id="filtro-tag-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
-                        <option value="">Filtrar por Tag / Categoria</option>
-                    </select>
-                    <button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Órgão</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Módulos</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
+            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários e Permissões</h3><button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Órgão / Secretaria</th><th class="p-4">Perfil</th><th class="p-4">Módulos Visíveis</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
         </div>
     </main>
 
     <!-- Modais -->
     <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento e Edição Completa</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento Completo</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
             <div id="detalhe-conteudo" class="space-y-3 text-sm mb-4"></div>
             <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl">
-                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Gerenciamento Dinâmico</p><button type="button" id="btn-excluir-registro" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer">Excluir Registro</button></div>
-                <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-72 overflow-y-auto space-y-2"></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="submit" class="px-4 py-2 bg-blue-900 text-white font-bold rounded cursor-pointer">Salvar Todas as Alterações</button></div></form>
+                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Edição e Gerenciamento</p><button type="button" id="btn-excluir-registro" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold">Excluir Registro</button></div>
+                <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-60 overflow-y-auto"></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded">Salvar Alterações</button></div></form>
             </div>
         </div>
     </div>
@@ -201,11 +193,11 @@
         </div>
     </div>
 
-    <!-- Script Principal Refinado -->
+    <!-- Script Principal com Isolamento de Módulos e Filtro de Eventos -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -226,7 +218,6 @@
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [] };
         let abaAtual = 'dashboard';
         let filtroEventoAtual = 'todos';
-        let filtroTagAtual = '';
 
         const MÓDULOS_SISTEMA = [
             { id: 'dashboard', nome: 'Dashboard' },
@@ -239,28 +230,18 @@
             { id: 'usuarios', nome: 'Usuários' }
         ];
 
-        const TAGS_DISPONIVEIS = [
-            { nome: 'Internos ATI', cor: 'bg-blue-100 text-blue-800 border-blue-300' },
-            { nome: 'Externos', cor: 'bg-purple-100 text-purple-800 border-purple-300' },
-            { nome: 'Terceirizados', cor: 'bg-amber-100 text-amber-800 border-amber-300' },
-            { nome: 'Fornecedores', cor: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-            { nome: 'Gerentes', cor: 'bg-indigo-100 text-indigo-800 border-indigo-300' },
-            { nome: 'Coordenadores', cor: 'bg-cyan-100 text-cyan-800 border-cyan-300' },
-            { nome: 'Diretores', cor: 'bg-rose-100 text-rose-800 border-rose-300' },
-            { nome: 'Convidados', cor: 'bg-slate-100 text-slate-800 border-slate-300' }
-        ];
-
+        // Mocks robustos para todas as coleções de forma isolada e segura
         const initialMockData = {
             orgaos: [
                 { id: 'ATI', sigla: 'ATI', nome: 'Agência Estadual de Tecnologia da Informação', tipoJuridico: 'Autarquia', responsavel: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br' },
                 { id: 'SEFAZ', sigla: 'SEFAZ', nome: 'Secretaria da Fazenda de Pernambuco', tipoJuridico: 'Secretaria', responsavel: 'Gestão de TI SEFAZ', email: 'ti@sefaz.pe.gov.br' }
             ],
             demandas: [
-                { id: 'DEM-001', orgao: 'SEFAZ', titulo: 'Migração SOGo.PE', categoria: 'E-mail', prioridade: 'Alta', status: 'Em Andamento', descricao: 'Migração das contas de e-mail.' }
+                { id: 'DEM-001', orgao: 'SEFAZ', titulo: 'Migração SOGo.PE', categoria: 'E-mail', prioridade: 'Alta', status: 'Em Andamento' }
             ],
             eventos: [
                 { id: 'EV-001', titulo: 'GOV IN PLAY 2026', palestrante: 'Equipe ATI', dataInicio: '2026-10-24T09:00', dataFim: '2026-10-24T17:00', visibilidade: 'Aberto ao Público', descricao: 'Encontro de gestores de TIC.' },
-                { id: 'EV-002', titulo: 'Seminário de Cibersegurança 2024', palestrante: 'Comitê de Segurança', dataInicio: '2024-05-10T09:00', dataFim: '2024-05-10T17:00', visibilidade: 'Interno', descricao: 'Evento realizado anteriormente.' }
+                { id: 'EV-002', titulo: 'Seminário de Cibersegurança 2024', palestrante: 'Comitê de Segurança', dataInicio: '2024-05-10T09:00', dataFim: '2024-05-10T17:00', visibilidade: 'Interno', descricao: 'Evento realizado anteriormente sobre LGPD e segurança.' }
             ],
             locais: [
                 { id: 'LOC-001', nome: 'Auditório ATI', tipoEspaco: 'Auditório', capacidade: '150', valorAluguel: 'Gratuito' }
@@ -269,10 +250,11 @@
                 { id: 'FOR-001', nome: 'Tech Cloud Solutions', cnpj: '12.345.678/0001-90', categoria: 'Cloud' }
             ],
             bases: [
-                { id: 'BASE-01', categoria: 'Subgrupo / Papel', sigla: 'GESTOR_TI', nome: 'Gestor de TI', observacao: 'Governança tecnológica' }
+                { id: 'BASE-01', categoria: 'Subgrupo / Papel', sigla: 'GESTOR_TI', nome: 'Gestor de TI', observacao: 'Governança tecnológica' },
+                { id: 'BASE-02', categoria: 'Subgrupo / Papel', sigla: 'FUNC_ATI', nome: 'Funcionários ATI', observacao: 'Colaboradores efetivos' }
             ],
             usuarios: [
-                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', orgao: 'ATI', perfil: 'admin', tags: ['Internos ATI', 'Diretores'], modulosPermitidos: MÓDULOS_SISTEMA.map(m=>m.id) }
+                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', orgao: 'ATI', perfil: 'admin', modulosPermitidos: MÓDULOS_SISTEMA.map(m=>m.id) }
             ]
         };
 
@@ -284,7 +266,7 @@
                     }
                 }
             } catch (err) {
-                console.warn("Aviso de sincronização:", err);
+                console.warn("Aviso de sincronização isolada:", err);
             }
         }
 
@@ -336,7 +318,6 @@
             });
             if (aba === 'dashboard') renderCharts();
             if (aba === 'eventos') renderEventos();
-            if (aba === 'usuarios') renderUsuarios();
         }
 
         function iniciarSnapshotFirestore() {
@@ -356,7 +337,7 @@
         }
 
         function renderizarTudo() {
-            renderUsuarios(); renderOrgaos(); renderBases(); renderDemandas(); renderEventos(); renderLocais(); renderFornecedores(); renderDashboardKPIs(); preencherSelectOrgaos(); atualizarVisibilidadeAbas(); preencherFiltroTags();
+            renderUsuarios(); renderOrgaos(); renderBases(); renderDemandas(); renderEventos(); renderLocais(); renderFornecedores(); renderDashboardKPIs(); preencherSelectOrgaos(); atualizarVisibilidadeAbas();
         }
 
         function preencherSelectOrgaos() {
@@ -373,46 +354,20 @@
             });
         }
 
-        function preencherFiltroTags() {
-            const select = document.getElementById('filtro-tag-usuario');
-            if (!select) return;
-            const valAtual = select.value;
-            select.innerHTML = '<option value="">Filtrar por Tag / Categoria</option>';
-            TAGS_DISPONIVEIS.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t.nome;
-                opt.textContent = t.nome;
-                select.appendChild(opt);
-            });
-            select.value = valAtual;
-        }
-
         function renderUsuarios() {
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
-            
-            const usuariosFiltrados = dbData.usuarios.filter(u => {
-                if (!filtroTagAtual) return true;
-                return (u.tags || []).includes(filtroTagAtual);
-            });
-
-            tbody.innerHTML = usuariosFiltrados.map(u => {
+            tbody.innerHTML = dbData.usuarios.map(u => {
                 const mods = u.perfil === 'admin' ? 'Acesso Total' : (u.modulosPermitidos || []).join(', ');
-                const tagsHtml = (u.tags || []).map(tName => {
-                    const tagObj = TAGS_DISPONIVEIS.find(t => t.nome === tName) || { cor: 'bg-slate-100 text-slate-800' };
-                    return `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${tagObj.cor} mr-1 mb-1">${tName}</span>`;
-                }).join('') || '<span class="text-slate-400 text-xs">Sem tags</span>';
-
                 return `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="usuarios" data-id="${u.id}">` +
                     `<td class="p-4 font-bold">${u.nome || u.email}</td>` +
                     `<td class="p-4 text-slate-600">${u.email || u.id}</td>` +
                     `<td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${u.orgao || 'ATI'}</span></td>` +
-                    `<td class="p-4">${tagsHtml}</td>` +
                     `<td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 text-${u.perfil === 'admin' ? 'emerald' : 'amber'}-900 font-bold px-2 py-0.5 rounded text-xs uppercase">${u.perfil || 'comum'}</span></td>` +
                     `<td class="p-4 text-xs text-slate-500 max-w-xs truncate">${mods}</td>` +
-                    `<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded font-semibold">Detalhar / Editar</button></td>` +
+                    `<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded font-semibold">Detalhar</button></td>` +
                 '</tr>';
-            }).join('') || '<p class="text-slate-400 text-sm col-span-7 text-center py-6">Nenhum usuário encontrado para esta tag.</p>';
+            }).join('');
             vincularCliquesTabelas();
         }
 
@@ -453,7 +408,7 @@
             grid.innerHTML = eventosFiltrados.map(e => {
                 const dataFimEvt = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
                 const isRealizado = dataFimEvt < agora;
-                const badgeStatus = isRealizado ? '<span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded ml-2">Realizado</span>' : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded ml-2">Futuro</span>';
+                const badgeStatus = isRealizado ? '<span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded ml-2">Realizado</span>' : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded ml-2">Futuro / Em Breve</span>';
                 
                 return `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe hover:border-amber-400 transition flex flex-col justify-between" data-colecao="eventos" data-id="${e.id}">` +
                     `<div>` +
@@ -464,24 +419,24 @@
                     `</div>` +
                     `<div class="mt-4 pt-3 border-t text-[11px] text-slate-400 flex items-center justify-between">` +
                         `<span><i class="fa-solid fa-calendar mr-1"></i> ${e.dataInicio ? new Date(e.dataInicio).toLocaleDateString('pt-BR') : 'Data não informada'}</span>` +
-                        `<span class="text-blue-900 font-bold hover:underline">Detalhar / Editar &rarr;</span>` +
+                        `<span class="text-blue-900 font-bold hover:underline">Ver Detalhes &rarr;</span>` +
                     `</div>` +
                 `</div>`;
-            }).join('') || '<p class="text-slate-400 text-sm col-span-3 text-center py-8">Nenhum evento encontrado.</p>';
+            }).join('') || '<p class="text-slate-400 text-sm col-span-3 text-center py-8">Nenhum evento encontrado para este filtro.</p>';
             vincularCliquesTabelas();
         }
 
         function renderLocais() {
             const grid = document.getElementById('grid-locais');
             if (!grid) return;
-            grid.innerHTML = dbData.locais.map(l => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe" data-colecao="locais" data-id="${l.id}"><h4 class="font-bold">${l.nome}</h4><p class="text-xs text-slate-500 mt-1">Capacidade: ${l.capacidade || 0}</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local.</p>';
+            grid.innerHTML = dbData.locais.map(l => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe" data-colecao="locais" data-id="${l.id}"><h4 class="font-bold">${l.nome}</h4></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local.</p>';
             vincularCliquesTabelas();
         }
 
         function renderFornecedores() {
             const grid = document.getElementById('grid-fornecedores');
             if (!grid) return;
-            grid.innerHTML = dbData.fornecedores.map(f => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe" data-colecao="fornecedores" data-id="${f.id}"><h4 class="font-bold">${f.nome}</h4><p class="text-xs text-slate-500 mt-1">CNPJ: ${f.cnpj || '-'}</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor.</p>';
+            grid.innerHTML = dbData.fornecedores.map(f => `<div class="bg-white p-5 rounded-xl border cursor-pointer tr-detalhe" data-colecao="fornecedores" data-id="${f.id}"><h4 class="font-bold">${f.nome}</h4></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor.</p>';
             vincularCliquesTabelas();
         }
 
@@ -502,81 +457,12 @@
         function detalharRegistro(colecao, id) {
             const item = dbData[colecao].find(i => i.id === id);
             if (!item) return;
-            document.getElementById('detalhe-titulo-modal').textContent = 'Detalhar / Editar (' + colecao.toUpperCase() + ')';
+            document.getElementById('detalhe-titulo-modal').textContent = 'Detalhes (' + colecao.toUpperCase() + ')';
+            document.getElementById('detalhe-conteudo').innerHTML = Object.entries(item).map(([k,v]) => `<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${k}</span><span class="font-medium">${Array.isArray(v) ? v.join(', ') : v}</span></div>`).join('');
             document.getElementById('edit-colecao').value = colecao;
             document.getElementById('edit-doc-id').value = id;
-
-            // Renderização dinâmica dos inputs de edição para TODOS os campos do registro
-            const containerEdit = document.getElementById('edit-campos-dinamicos');
-            containerEdit.innerHTML = Object.entries(item).map(([k, v]) => {
-                if (k === 'id') return `<input type="hidden" name="${k}" value="${v}">`;
-                if (k === 'modulosPermitidos' && colecao === 'usuarios') {
-                    return `<div class="p-2 bg-slate-50 rounded border"><label class="block font-bold text-[11px] uppercase mb-1">Módulos Permitidos</label>` +
-                        `<div class="grid grid-cols-2 gap-1">${MÓDULOS_SISTEMA.map(m => `<label class="text-[11px] flex items-center gap-1"><input type="checkbox" name="modulosPermitidos" value="${m.id}" ${(v || []).includes(m.id) ? 'checked' : ''}> ${m.nome}</label>`).join('')}</div></div>`;
-                }
-                if (k === 'tags' && colecao === 'usuarios') {
-                    return `<div class="p-2 bg-slate-50 rounded border"><label class="block font-bold text-[11px] uppercase mb-1">Tags do Usuário</label>` +
-                        `<div class="grid grid-cols-2 gap-1">${TAGS_DISPONIVEIS.map(t => `<label class="text-[11px] flex items-center gap-1"><input type="checkbox" name="tags" value="${t.nome}" ${(v || []).includes(t.nome) ? 'checked' : ''}> ${t.nome}</label>`).join('')}</div></div>`;
-                }
-                if (k === 'perfil' && colecao === 'usuarios') {
-                    return `<div><label class="block font-bold text-[11px] uppercase">${k}</label><select name="${k}" class="w-full p-2 border rounded text-xs bg-white"><option value="comum" ${v==='comum'?'selected':''}>COMUM</option><option value="admin" ${v==='admin'?'selected':''}>ADMINISTRADOR</option></select></div>`;
-                }
-                return `<div><label class="block font-bold text-[11px] uppercase">${k}</label><input type="text" name="${k}" value="${v !== undefined ? v : ''}" class="w-full p-2 border rounded text-xs bg-white"></div>`;
-            }).join('');
-
-            // Se for usuário, inclui campo de alteração de senha
-            if (colecao === 'usuarios') {
-                containerEdit.innerHTML += `<div class="p-3 bg-amber-50 border border-amber-200 rounded mt-2"><label class="block font-bold text-[11px] uppercase text-amber-900 mb-1">Redefinir Senha do Usuário</label><input type="password" id="nova-senha-input" placeholder="Nova senha (opcional)" class="w-full p-2 border rounded text-xs bg-white"></div>`;
-            }
-
-            document.getElementById('detalhe-conteudo').innerHTML = Object.entries(item).map(([k,v]) => `<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${k}</span><span class="font-medium">${Array.isArray(v) ? v.join(', ') : v}</span></div>`).join('');
             document.getElementById('detalhe-area-admin').classList.remove('hidden');
             document.getElementById('modal-detalhes').classList.remove('hidden');
-        }
-
-        async function salvarEdicaoAdmin(e) {
-            e.preventDefault();
-            const colecao = document.getElementById('edit-colecao').value;
-            const id = document.getElementById('edit-doc-id').value;
-            const form = document.getElementById('form-edicao-admin');
-            const formData = new FormData(form);
-            
-            let objAtualizado = {};
-            const checkboxesModulos = [];
-            const checkboxesTags = [];
-
-            for (let [key, value] of formData.entries()) {
-                if (key === 'modulosPermitidos') {
-                    checkboxesModulos.push(value);
-                } else if (key === 'tags') {
-                    checkboxesTags.push(value);
-                } else {
-                    objAtualizado[key] = value;
-                }
-            }
-
-            if (colecao === 'usuarios') {
-                objAtualizado.modulosPermitidos = checkboxesModulos;
-                objAtualizado.tags = checkboxesTags;
-                const novaSenha = document.getElementById('nova-senha-input')?.value;
-                if (novaSenha && auth.currentUser) {
-                    try {
-                        // Altera a senha se for o próprio usuário logado
-                        await updatePassword(auth.currentUser, novaSenha);
-                        alert('Senha alterada com sucesso no Firebase Auth!');
-                    } catch (err) {
-                        console.warn("Aviso na atualização de senha Auth:", err.message);
-                    }
-                }
-            }
-
-            try {
-                await setDoc(doc(db, colecao, id), objAtualizado, { merge: true });
-                alert('Registro atualizado com sucesso!');
-                fecharModal('modal-detalhes');
-            } catch(err) {
-                alert('Erro ao salvar alteração: ' + err.message);
-            }
         }
 
         function abrirModalForm(tipo) {
@@ -587,20 +473,15 @@
             if (tipo === 'usuario') {
                 container.innerHTML = '<div><label class="block mb-1 font-medium">Nome Completo</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div>' +
                     '<div><label class="block mb-1 font-medium">E-mail Institucional</label><input type="email" id="uc-2" required class="w-full p-2 border rounded"></div>' +
-                    '<div><label class="block mb-1 font-medium">Senha Inicial</label><input type="password" id="uc-senha" required placeholder="••••••••" class="w-full p-2 border rounded"></div>' +
                     '<div><label class="block mb-1 font-medium">Órgão / Secretaria</label><select id="uc-3" class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>' +
                     '<div><label class="block mb-1 font-medium">Perfil de Acesso</label><select id="uc-4" class="w-full p-2 border rounded font-bold"><option value="comum">COMUM (Somente Leitura)</option><option value="admin">ADMINISTRADOR (Acesso Total)</option></select></div>' +
                     '<div class="bg-blue-50 p-3 rounded-lg border border-blue-200 mt-2"><label class="block font-bold text-blue-900 mb-2 text-xs uppercase">Módulos Permitidos:</label>' +
-                    '<div class="grid grid-cols-2 gap-2">' + MÓDULOS_SISTEMA.map(m => `<label class="flex items-center gap-1.5 text-xs font-semibold cursor-pointer"><input type="checkbox" value="${m.id}" class="form-check-modulo rounded text-blue-900" checked> ${m.nome}</label>`).join('') + '</div></div>' +
-                    '<div class="bg-purple-50 p-3 rounded-lg border border-purple-200 mt-2"><label class="block font-bold text-purple-900 mb-2 text-xs uppercase">Tags e Categorias:</label>' +
-                    '<div class="grid grid-cols-2 gap-2">' + TAGS_DISPONIVEIS.map(t => `<label class="flex items-center gap-1.5 text-xs font-semibold cursor-pointer"><input type="checkbox" value="${t.nome}" class="form-check-tag rounded text-purple-900"> ${t.nome}</label>`).join('') + '</div></div>';
+                    '<div class="grid grid-cols-2 gap-2">' + MÓDULOS_SISTEMA.map(m => `<label class="flex items-center gap-1.5 text-xs font-semibold cursor-pointer"><input type="checkbox" value="${m.id}" class="form-check-modulo rounded text-blue-900" checked> ${m.nome}</label>`).join('') + '</div></div>';
                 preencherSelectOrgaos();
             } else if (tipo === 'orgao') {
                 container.innerHTML = '<div><label class="block mb-1 font-medium">Sigla</label><input type="text" id="uc-1" required class="w-full p-2 border rounded uppercase"></div><div><label class="block mb-1 font-medium">Nome</label><input type="text" id="uc-2" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Tipo</label><input type="text" id="uc-3" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Responsável</label><input type="text" id="uc-4" class="w-full p-2 border rounded"></div>';
-            } else if (tipo === 'evento') {
-                container.innerHTML = '<div><label class="block mb-1 font-medium">Título do Evento</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Palestrante / Responsável</label><input type="text" id="uc-2" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Data de Início</label><input type="datetime-local" id="uc-3" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Descrição</label><textarea id="uc-4" class="w-full p-2 border rounded"></textarea></div>';
             } else {
-                container.innerHTML = '<div><label class="block mb-1 font-medium">Nome / Título</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Descrição / Detalhes</label><input type="text" id="uc-2" class="w-full p-2 border rounded"></div>';
+                container.innerHTML = '<div><label class="block mb-1 font-medium">Nome / Título</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Descrição</label><input type="text" id="uc-2" class="w-full p-2 border rounded"></div>';
             }
             document.getElementById('modal-form-universal').classList.remove('hidden');
         }
@@ -615,24 +496,18 @@
 
             if (tipo === 'usuario') {
                 const email = c2.toLowerCase().trim();
-                const senha = document.getElementById('uc-senha')?.value || '123456';
                 const modulos = Array.from(document.querySelectorAll('.form-check-modulo:checked')).map(cb => cb.value);
-                const tags = Array.from(document.querySelectorAll('.form-check-tag:checked')).map(cb => cb.value);
-                
-                const obj = { id: email, nome: c1, email, orgao: c3, perfil: c4, modulosPermitidos: modulos, tags };
+                const obj = { id: email, nome: c1, email, orgao: c3, perfil: c4, modulosPermitidos: modulos };
                 await setDoc(doc(db, 'usuarios', email), obj);
             } else if (tipo === 'orgao') {
                 const obj = { id: c1.toUpperCase().trim(), sigla: c1.toUpperCase().trim(), nome: c2, tipoJuridico: c3, responsavel: c4 };
                 await setDoc(doc(db, 'orgaos', obj.id), obj);
-            } else if (tipo === 'evento') {
-                const obj = { id: 'EV-' + Date.now(), titulo: c1, palestrante: c2, dataInicio: c3, descricao: c4, visibilidade: 'Público' };
-                await addDoc(collection(db, 'eventos'), obj);
             } else {
                 const obj = { id: 'OBJ-' + Date.now(), nome: c1, descricao: c2 };
                 await addDoc(collection(db, tipo + 's'), obj);
             }
 
-            alert('Cadastro realizado com sucesso!');
+            alert('Cadastro realizado e sincronizado com sucesso!');
             fecharModal('modal-form-universal');
         }
 
@@ -667,8 +542,8 @@
         }
 
         function exportarUsuariosCSV() {
-            let csv = "Nome;Email;Orgao;Perfil;Tags;Modulos\n";
-            dbData.usuarios.forEach(u => { csv += (u.nome||'') + ';' + (u.email||u.id) + ';' + (u.orgao||'') + ';' + (u.perfil||'') + ';"' + (u.tags||[]).join(',') + '";"' + (u.modulosPermitidos||[]).join(',') + '"\n'; });
+            let csv = "Nome;Email;Orgao;Perfil;Modulos\n";
+            dbData.usuarios.forEach(u => { csv += (u.nome||'') + ';' + (u.email||u.id) + ';' + (u.orgao||'') + ';' + (u.perfil||'') + ';"' + (u.modulosPermitidos||[]).join(',') + '"\n'; });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", "usuarios_prgd.csv");
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
@@ -700,7 +575,6 @@
             document.getElementById('btn-executar-logout').onclick = () => { signOut(auth); currentUser = null; verificarAutenticacaoObrigatoria(); };
             document.getElementById('btn-export-csv').onclick = exportarUsuariosCSV;
             document.getElementById('form-univ-body').onsubmit = salvarCadastroUniversal;
-            document.getElementById('form-edicao-admin').onsubmit = salvarEdicaoAdmin;
             document.getElementById('btn-excluir-registro').onclick = excluirRegistroUniversal;
 
             // Filtros de eventos
@@ -718,12 +592,6 @@
             btnTodos.onclick = () => { filtroEventoAtual = 'todos'; atualizarEstilosFiltroEventos(btnTodos); renderEventos(); };
             btnFuturos.onclick = () => { filtroEventoAtual = 'futuros'; atualizarEstilosFiltroEventos(btnFuturos); renderEventos(); };
             btnRealizados.onclick = () => { filtroEventoAtual = 'realizados'; atualizarEstilosFiltroEventos(btnRealizados); renderEventos(); };
-
-            // Filtro por Tag de Usuários
-            document.getElementById('filtro-tag-usuario').onchange = (e) => {
-                filtroTagAtual = e.target.value;
-                renderUsuarios();
-            };
 
             MÓDULOS_SISTEMA.forEach(m => {
                 const b = document.querySelector(`[data-tab="${m.id}"]`);
