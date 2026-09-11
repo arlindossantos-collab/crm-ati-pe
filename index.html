@@ -1,3 +1,8 @@
+<!-- ===================================================================== -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v18.0 STABLE                                -->
+<!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
+<!-- ATUALIZAÇÃO: Sincronização síncrona com Firestore e Módulo "Bases"    -->
+<!-- ===================================================================== -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -70,7 +75,7 @@
             </div>
             <!-- Controle de Versão na Tela de Autenticação -->
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v17.0 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.0 STABLE</span></p>
             </div>
         </div>
     </div>
@@ -83,7 +88,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v17.0 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.0 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -131,6 +136,9 @@
                 </button>
                 <button id="btn-tab-fornecedores" onclick="mudarAba('fornecedores')" class="px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores
+                </button>
+                <button id="btn-tab-bases" onclick="mudarAba('bases')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                    <i class="fa-solid fa-database mr-1.5"></i> Bases Compartilhadas
                 </button>
                 <button id="btn-tab-usuarios" onclick="mudarAba('usuarios')" class="px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-users-gear mr-1.5"></i> Usuários
@@ -280,6 +288,33 @@
             <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
+        <!-- ABA BASES COMPARTILHADAS (NOVO MÓDULO) -->
+        <div id="aba-bases" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-base font-bold text-slate-800">Gerenciamento de Bases Compartilhadas</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Cadastre e gerencie os parâmetros globais que alimentam os formulários de Órgãos, Subgrupos e Perfis de Atuação.</p>
+                </div>
+                <button onclick="abrirModalForm('base')" class="btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Novo Parâmetro de Base
+                </button>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
+                        <tr>
+                            <th class="p-4">Categoria / Domínio</th>
+                            <th class="p-4">Identificador / Sigla</th>
+                            <th class="p-4">Nome / Descrição do Parâmetro</th>
+                            <th class="p-4">Observações Associadas</th>
+                            <th class="p-4 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-bases" class="divide-y divide-slate-100 text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- ABA USUÁRIOS -->
         <div id="aba-usuarios" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -354,7 +389,7 @@
             <form id="form-univ-body" onsubmit="salvarCadastroUniversal(event)" class="space-y-3 text-sm">
                 <input type="hidden" id="form-univ-tipo">
                 <div id="form-univ-campos"></div>
-                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar no Firestore</button>
+                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar Sincronizado no Firestore</button>
             </form>
         </div>
     </div>
@@ -386,7 +421,7 @@
 
     <script>
         window.currentUser = null;
-        window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], usuarios: [] };
+        window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [] };
         let abaAtual = 'dashboard';
 
         const MÓDULOS_SISTEMA = [
@@ -396,6 +431,7 @@
             { id: 'locais', nome: 'Locais de Eventos' },
             { id: 'orgaos', nome: 'Órgãos / Secretarias' },
             { id: 'fornecedores', nome: 'Fornecedores' },
+            { id: 'bases', nome: 'Bases Compartilhadas' },
             { id: 'usuarios', nome: 'Usuários & Permissões' }
         ];
 
@@ -417,8 +453,15 @@
             fornecedores: [
                 { id: 'FOR-001', nome: 'Tech Cloud Solutions PE', cnpj: '12.345.678/0001-90', categoria: 'Infraestrutura / Cloud', responsavel: 'Carlos Eduardo', telefone: '(81) 98888-7777', email: 'contato@techcloudpe.com.br', numeroContrato: 'Contrato nº 012/2025-ATI', valorContratual: 'R$ 2.400.000,00', statusContrato: 'Ativo / Em Execução', escopoServico: 'Suporte, governança cloud privada e sustentação de banco de dados.', endereco: 'Av. Agamenon Magalhães, Recife - PE', ramo: 'Infraestrutura', pontoFocal: 'Carlos Eduardo', eventosParticipados: 'GOV IN PLAY 2025', descricao: 'Parceiro principal em hospedagem cloud.' }
             ],
+            bases: [
+                { id: 'BASE-01', categoria: 'Subgrupo / Papel', sigla: 'GESTOR_TI', nome: 'Gestor de TI', observacao: 'Responsável pela governança tecnológica do órgão' },
+                { id: 'BASE-02', categoria: 'Subgrupo / Papel', sigla: 'FUNC_ATI', nome: 'Funcionários ATI', observacao: 'Colaboradores efetivos e comissionados da ATI-PE' },
+                { id: 'BASE-03', categoria: 'Subgrupo / Papel', sigla: 'DIRETOR', nome: 'Diretores', observacao: 'Membros da diretoria executiva' },
+                { id: 'BASE-04', categoria: 'Subgrupo / Papel', sigla: 'GERENTE', nome: 'Gerentes', observacao: 'Lideranças de equipes e unidades' },
+                { id: 'BASE-05', categoria: 'Subgrupo / Papel', sigla: 'COORDENADOR', nome: 'Coordenadores', observacao: 'Supervisores de projetos e operação' }
+            ],
             usuarios: [
-                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', subgrupoId: 'ATI', perfil: 'admin', senha: '123', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'] }
+                { id: 'arlindo.santos@ati.pe.gov.br', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', subgrupoId: 'ATI', perfil: 'admin', senha: '123', modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] }
             ]
         };
 
@@ -443,9 +486,9 @@
 
             const user = window.currentUser;
             const isAdmin = user.perfil === 'admin';
-            const permitidos = isAdmin ? ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'] : (user.modulosPermitidos || ['dashboard', 'demandas', 'eventos']);
+            const permitidos = isAdmin ? ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] : (user.modulosPermitidos || ['dashboard', 'demandas', 'eventos']);
 
-            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'].forEach(mod => {
+            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'].forEach(mod => {
                 const btnTab = document.getElementById('btn-tab-' + mod);
                 if (btnTab) {
                     btnTab.style.display = permitidos.includes(mod) ? 'inline-flex' : 'none';
@@ -471,7 +514,7 @@
 
         function mudarAba(aba) {
             abaAtual = aba;
-            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'].forEach(a => {
+            ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'].forEach(a => {
                 const el = document.getElementById('aba-' + a);
                 const btn = document.getElementById('btn-tab-' + a);
                 if (el) el.classList.toggle('hidden', a !== abaAtual);
@@ -481,7 +524,7 @@
         }
 
         function iniciarSnapshotFirestore() {
-            const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios'];
+            const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'];
             colecoes.forEach(col => {
                 try {
                     window.firebaseMethods.onSnapshot(window.firebaseMethods.collection(window.firebaseDb, col), snap => {
@@ -492,7 +535,7 @@
                         }
                         renderizarTudo();
                     }, err => {
-                        console.warn('Firestore snapshot falhou:', err);
+                        console.warn('Firestore snapshot falhou para ' + col + ':', err);
                         if (window.dbData[col].length === 0) window.dbData[col] = initialMockData[col] || [];
                         renderizarTudo();
                     });
@@ -507,6 +550,7 @@
         function renderizarTudo() {
             renderUsuarios();
             renderOrgaos();
+            renderBases();
             renderDemandas();
             renderEventos();
             renderLocais();
@@ -564,6 +608,22 @@
                     '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</button></td>' +
                 '</tr>'
             ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
+        }
+
+        function renderBases() {
+            const tbody = document.getElementById('tabela-bases');
+            if (!tbody) return;
+            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
+
+            tbody.innerHTML = window.dbData.bases.map(b => 
+                '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro(\'bases\', \'' + b.id + '\')">' +
+                    '<td class="p-4 font-bold text-blue-900">' + (b.categoria || 'Geral') + '</td>' +
+                    '<td class="p-4 font-mono text-xs text-indigo-800">' + (b.sigla || b.id) + '</td>' +
+                    '<td class="p-4 text-slate-800 font-medium">' + (b.nome || '-') + '</td>' +
+                    '<td class="p-4 text-xs text-slate-600">' + (b.observacao || '-') + '</td>' +
+                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</button></td>' +
+                '</tr>'
+            ).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhuma base compartilhada cadastrada.</td></tr>';
         }
 
         function renderDemandas() {
@@ -734,7 +794,7 @@
                                     '<span class="text-slate-400 text-[10px] font-semibold"><i class="fa-regular fa-calendar-alt mr-1"></i>' + new Date(h.data).toLocaleString('pt-BR') + '</span>' +
                                 '</div>' +
                                 '<p class="text-slate-700 font-medium">' + (h.descricao || 'Sem observações.') + '</p>' +
-                            '</div>'
+                            '</div>' +
                         ).join('') +
                     '</div>' +
                     (isAdmin ? 
@@ -777,7 +837,7 @@
                 for (let k in item) {
                     if (k === 'id' || k === 'senhaHash' || k === 'senha' || k === 'historicoStatus' || k === 'modulosPermitidos') continue;
                     const fieldVal = item[k] !== undefined ? item[k] : '';
-                    const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'escopoServico' || k === 'eventosParticipados';
+                    const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'escopoServico' || k === 'eventosParticipados' || k === 'observacao';
                     
                     editFieldsHtml += '<div class="mb-2"><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">' + (k === 'tipoJuridico' ? 'Tipo Jurídico' : k) + '</label>';
                     
@@ -814,6 +874,13 @@
                             '<option value="Aberto ao Público" ' + (fieldVal === 'Aberto ao Público' ? 'selected' : '') + '>Aberto ao Público</option>' +
                             '<option value="Exclusivo para Grupo Especificado" ' + (fieldVal !== 'Aberto ao Público' ? 'selected' : '') + '>Exclusivo para Grupo Especificado</option>' +
                         '</select>';
+                    } else if (k === 'categoria' && colecao === 'bases') {
+                        editFieldsHtml += '<select data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">' +
+                            '<option value="Subgrupo / Papel" ' + (fieldVal === 'Subgrupo / Papel' ? 'selected' : '') + '>Subgrupo / Papel</option>' +
+                            '<option value="Órgão / Secretaria" ' + (fieldVal === 'Órgão / Secretaria' ? 'selected' : '') + '>Órgão / Secretaria</option>' +
+                            '<option value="Categoria TIC" ' + (fieldVal === 'Categoria TIC' ? 'selected' : '') + '>Categoria TIC</option>' +
+                            '<option value="Geral" ' + (fieldVal === 'Geral' ? 'selected' : '') + '>Geral</option>' +
+                        '</select>';
                     } else if (isLongText) {
                         editFieldsHtml += '<textarea data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">' + fieldVal + '</textarea>';
                     } else {
@@ -822,7 +889,6 @@
                     editFieldsHtml += '</div>';
                 }
 
-                // Adiciona o campo seguro de alteração de senha (privado/mascarado) para usuários
                 if (colecao === 'usuarios') {
                     editFieldsHtml += '<div class="mb-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">' +
                         '<label class="block font-bold text-blue-900 mb-1 uppercase text-[10px] tracking-wider"><i class="fa-solid fa-key mr-1"></i> Nova Senha (deixe em branco para manter a atual)</label>' +
@@ -939,7 +1005,7 @@
             } catch (err) {
                 console.warn('Erro ao atualizar no Firestore:', err);
             }
-            alert('Registro e permissões atualizados com sucesso!');
+            alert('Registro atualizado e sincronizado com sucesso!');
             fecharModal('modal-detalhes');
         };
 
@@ -977,7 +1043,12 @@
             const container = document.getElementById('form-univ-campos');
             document.getElementById('form-univ-titulo').textContent = 'Novo Cadastro: ' + tipo.toUpperCase();
 
-            if (tipo === 'orgao') {
+            if (tipo === 'base') {
+                container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Categoria da Base</label><select id="univ-c1" class="w-full p-2 border rounded bg-white font-semibold text-slate-800"><option value="Subgrupo / Papel">Subgrupo / Papel</option><option value="Órgão / Secretaria">Órgão / Secretaria</option><option value="Categoria TIC">Categoria TIC</option><option value="Geral">Geral</option></select></div>' +
+                    '<div><label class="block font-medium text-slate-700 mb-1">Sigla / Identificador Único</label><input type="text" id="univ-c2" required placeholder="Ex: GER_SUP" class="w-full p-2 border rounded uppercase"></div>' +
+                    '<div><label class="block font-medium text-slate-700 mb-1">Nome / Descrição do Parâmetro</label><input type="text" id="univ-c3" required placeholder="Ex: Gerente Superior" class="w-full p-2 border rounded"></div>' +
+                    '<div><label class="block font-medium text-slate-700 mb-1">Observações / Regras</label><textarea id="univ-c4" rows="3" placeholder="Detalhes ou escopo do parâmetro..." class="w-full p-2 border rounded"></textarea></div>';
+            } else if (tipo === 'orgao') {
                 container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Sigla do Órgão</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded uppercase"></div>' +
                     '<div><label class="block font-medium text-slate-700 mb-1">Nome Completo do Órgão / Secretaria</label><input type="text" id="univ-c2" required class="w-full p-2 border rounded"></div>' +
                     '<div><label class="block font-medium text-slate-700 mb-1">Natureza Jurídica / Tipo de Administração</label><select id="univ-c3" class="w-full p-2 border rounded bg-white font-semibold text-slate-800"><option value="Administração Direta (Secretaria)">Administração Direta (Secretaria)</option><option value="Autarquia">Autarquia</option><option value="Empresa Pública">Empresa Pública</option><option value="Fundação Pública">Fundação Pública</option><option value="Sociedade de Economia Mista">Sociedade de Economia Mista</option><option value="Órgão Constitucional Independente">Órgão Constitucional Independente</option></select></div>' +
@@ -1069,7 +1140,20 @@
             const tipo = document.getElementById('form-univ-tipo').value;
             let novoObj = {};
 
-            if (tipo === 'orgao') {
+            if (tipo === 'base') {
+                const sigla = document.getElementById('univ-c2').value.toUpperCase();
+                novoObj = {
+                    id: sigla,
+                    categoria: document.getElementById('univ-c1').value,
+                    sigla: sigla,
+                    nome: document.getElementById('univ-c3').value,
+                    observacao: document.getElementById('univ-c4').value
+                };
+                window.dbData.bases.push(novoObj);
+                try {
+                    await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "bases", sigla), novoObj);
+                } catch(err) { console.warn('Erro Firestore', err); }
+            } else if (tipo === 'orgao') {
                 const sigla = document.getElementById('univ-c1').value.toUpperCase();
                 novoObj = {
                     id: sigla, sigla,
@@ -1184,7 +1268,7 @@
             }
 
             renderizarTudo();
-            alert('Cadastro de ' + tipo + ' realizado com sucesso!');
+            alert('Cadastro de ' + tipo + ' realizado e sincronizado com sucesso!');
             fecharModal('modal-form-universal');
         };
 
@@ -1274,7 +1358,7 @@
                             subgrupoId: cols[2] || 'ATI',
                             perfil: (cols[3] || 'comum').toLowerCase(),
                             senha: senha,
-                            modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores']
+                            modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases']
                         };
                         window.dbData.usuarios.push(obj);
                         importCount++;
@@ -1285,7 +1369,7 @@
                 }
 
                 renderizarTudo();
-                alert('Importação concluída! ' + importCount + ' registros processados e salvos.');
+                alert('Importação concluída! ' + importCount + ' registros processados e sincronizados.');
                 fecharModal('modal-importacao');
             };
 
@@ -1304,7 +1388,7 @@
                     email: 'arlindo.santos@ati.pe.gov.br',
                     subgrupoId: 'ATI',
                     perfil: 'admin',
-                    modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'usuarios']
+                    modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios']
                 };
                 document.getElementById('user-name-display').textContent = window.currentUser.nome;
                 document.getElementById('user-role-display').textContent = 'ADMIN';
@@ -1361,7 +1445,7 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "usuarios_prgd_v17.csv");
+            link.setAttribute("download", "usuarios_prgd_v18.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1402,7 +1486,7 @@
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v17.0 STABLE</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.0 STABLE</span>
     </footer>
 </body>
 </html>
