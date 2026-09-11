@@ -1,7 +1,7 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v18.4 STABLE                                -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v18.5 STABLE                                -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
-<!-- ATUALIZAÇÃO: Correção definitiva do gatilho de login via clique direto -->
+<!-- ATUALIZAÇÃO: Unificação do escopo modular e bind de eventos no DOM    -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -16,29 +16,6 @@
     <!-- Chart.js para Dashboard Gerencial -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Firebase SDK v10 (Modular) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
-            authDomain: "prgd-ati-pe.firebaseapp.com",
-            projectId: "prgd-ati-pe",
-            storageBucket: "prgd-ati-pe.firebasestorage.app",
-            messagingSenderId: "798768232646",
-            appId: "1:798768232646:web:31b80951f237b4af17bfc7",
-            measurementId: "G-MWES9XN421"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        window.firebaseDb = db;
-        window.firebaseMethods = { 
-            collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot 
-        };
-    </script>
     <style>
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
         .tab-active { background-color: #ffffff; color: #1e3a8a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -67,13 +44,13 @@
                         <input type="password" id="login-senha" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
                     </div>
                 </div>
-                <button type="button" onclick="fazerLoginLocal()" class="w-full mt-6 py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                <button type="button" id="btn-executar-login" class="w-full mt-6 py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-right-to-bracket"></i> Autenticar e Entrar
                 </button>
             </div>
             <!-- Controle de Versão na Tela de Autenticação -->
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.4 STABLE</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v18.5 STABLE</span></p>
             </div>
         </div>
     </div>
@@ -86,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.4 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v18.5 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -97,7 +74,7 @@
                         <p id="user-name-display" class="text-xs font-bold text-white"></p>
                         <p id="user-role-display" class="text-[10px] text-blue-200 uppercase tracking-wider font-bold"></p>
                     </div>
-                    <button onclick="fazerLogout()" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1">
+                    <button type="button" id="btn-executar-logout" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 cursor-pointer">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
@@ -117,33 +94,33 @@
         <!-- Navegação por Abas -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
-                <button id="btn-tab-dashboard" onclick="mudarAba('dashboard')" class="px-4 py-2 rounded-lg transition tab-active">
+                <button type="button" data-tab="dashboard" class="nav-tab px-4 py-2 rounded-lg transition tab-active">
                     <i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard
                 </button>
-                <button id="btn-tab-demandas" onclick="mudarAba('demandas')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                <button type="button" data-tab="demandas" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-list-check mr-1.5"></i> Demandas
                 </button>
-                <button id="btn-tab-eventos" onclick="mudarAba('eventos')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                <button type="button" data-tab="eventos" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-calendar-day mr-1.5"></i> Eventos
                 </button>
-                <button id="btn-tab-locais" onclick="mudarAba('locais')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                <button type="button" data-tab="locais" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais de Eventos
                 </button>
-                <button id="btn-tab-orgaos" onclick="mudarAba('orgaos')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                <button type="button" data-tab="orgaos" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-sitemap mr-1.5"></i> Órgãos / Secretarias
                 </button>
-                <button id="btn-tab-fornecedores" onclick="mudarAba('fornecedores')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                <button type="button" data-tab="fornecedores" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores
                 </button>
-                <button id="btn-tab-bases" onclick="mudarAba('bases')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                <button type="button" data-tab="bases" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-database mr-1.5"></i> Bases Compartilhadas
                 </button>
-                <button id="btn-tab-usuarios" onclick="mudarAba('usuarios')" class="px-4 py-2 rounded-lg transition tab-inactive">
+                <button type="button" data-tab="usuarios" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive">
                     <i class="fa-solid fa-users-gear mr-1.5"></i> Usuários
                 </button>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="exportarRelatorioCSV()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                <button type="button" id="btn-export-csv" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-file-csv"></i> Exportar Dados
                 </button>
             </div>
@@ -190,7 +167,7 @@
         <div id="aba-demandas" class="hidden space-y-4">
             <div class="flex justify-between items-center">
                 <h3 class="text-base font-bold text-slate-800">Solicitações de Governo Digital</h3>
-                <button onclick="abrirModalForm('demanda')" id="btn-nova-demanda" class="btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                <button type="button" data-modal-target="demanda" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-plus"></i> Nova Demanda
                 </button>
             </div>
@@ -216,12 +193,12 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h3 class="text-base font-bold text-slate-800">Agenda Institucional e Eventos Exclusivos</h3>
                 <div class="flex items-center gap-2">
-                    <select id="filtro-eventos" onchange="renderEventos()" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                    <select id="filtro-eventos" class="p-2 border rounded-lg text-xs bg-white font-medium">
                         <option value="todos">Todos os Eventos Permitidos</option>
                         <option value="futuros" selected>Apenas Próximos / Futuros</option>
                         <option value="passados">Apenas Realizados / Passados</option>
                     </select>
-                    <button onclick="abrirModalForm('evento')" id="btn-novo-evento" class="btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button type="button" data-modal-target="evento" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-calendar-plus"></i> Criar Evento
                     </button>
                 </div>
@@ -233,7 +210,7 @@
         <div id="aba-locais" class="hidden space-y-4">
             <div class="flex justify-between items-center">
                 <h3 class="text-base font-bold text-slate-800">Catálogo de Espaços e Auditórios</h3>
-                <button onclick="abrirModalForm('local')" id="btn-novo-local" class="btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                <button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-plus"></i> Novo Local / Auditório
                 </button>
             </div>
@@ -245,10 +222,10 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos, Secretarias e Entidades</h3>
                 <div class="flex gap-2">
-                    <button onclick="abrirModalImportacao('orgaos')" class="btn-admin-only bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button type="button" data-import-target="orgaos" class="btn-abrir-import btn-admin-only bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
                     </button>
-                    <button onclick="abrirModalForm('orgao')" class="btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button type="button" data-modal-target="orgao" class="btn-abrir-form btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria
                     </button>
                 </div>
@@ -275,10 +252,10 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC Detalhados</h3>
                 <div class="flex gap-2">
-                    <button onclick="abrirModalImportacao('fornecedores')" class="btn-admin-only bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button type="button" data-import-target="fornecedores" class="btn-abrir-import btn-admin-only bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
                     </button>
-                    <button onclick="abrirModalForm('fornecedor')" id="btn-novo-fornecedor" class="btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button type="button" data-modal-target="fornecedor" class="btn-abrir-form btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-plus"></i> Novo Fornecedor
                     </button>
                 </div>
@@ -293,7 +270,7 @@
                     <h3 class="text-base font-bold text-slate-800">Gerenciamento de Bases Compartilhadas</h3>
                     <p class="text-xs text-slate-500 mt-0.5">Cadastre e gerencie os parâmetros globais que alimentam os formulários de Órgãos, Subgrupos e Perfis de Atuação.</p>
                 </div>
-                <button onclick="abrirModalForm('base')" class="btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                <button type="button" data-modal-target="base" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-plus"></i> Novo Parâmetro de Base
                 </button>
             </div>
@@ -318,13 +295,13 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários e Permissões</h3>
                 <div class="flex gap-2">
-                    <button onclick="abrirModalImportacao('usuarios')" class="btn-admin-only bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button type="button" data-import-target="usuarios" class="btn-abrir-import btn-admin-only bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-file-import"></i> Importar CSV / Planilha
                     </button>
-                    <button onclick="exportarUsuariosCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button type="button" id="btn-export-usuarios" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-file-export"></i> Exportar Usuários (.csv)
                     </button>
-                    <button onclick="abrirModalForm('usuario')" class="btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-user-plus"></i> Novo Usuário
                     </button>
                 </div>
@@ -353,24 +330,24 @@
         <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 id="detalhe-titulo-modal" class="text-base font-bold text-slate-900">Detalhamento Completo</h3>
-                <button onclick="fecharModal('modal-detalhes')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div id="detalhe-conteudo" class="space-y-3 text-sm text-slate-700 mb-4"></div>
             
             <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl border-slate-300">
                 <div class="flex justify-between items-center mb-3">
                     <p class="text-xs font-bold text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square text-blue-800"></i> Edição Completa e Gerenciamento do Registro</p>
-                    <button type="button" onclick="excluirRegistroUniversal()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-bold transition flex items-center gap-1 shadow-sm">
+                    <button type="button" id="btn-excluir-registro" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-bold transition flex items-center gap-1 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-trash-can"></i> Excluir Registro
                     </button>
                 </div>
-                <form id="form-edicao-admin" onsubmit="salvarEdicaoUniversal(event)" class="space-y-2.5 text-xs">
+                <form id="form-edicao-admin" class="space-y-2.5 text-xs">
                     <input type="hidden" id="edit-colecao">
                     <input type="hidden" id="edit-doc-id">
                     <div id="edit-campos-dinamicos" class="max-h-60 overflow-y-auto pr-1"></div>
                     <div class="flex justify-end gap-2 pt-3 border-t">
-                        <button type="button" onclick="fecharModal('modal-detalhes')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Cancelar</button>
-                        <button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded hover:bg-blue-800 transition shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Todas as Alterações</button>
+                        <button type="button" class="btn-fechar-modal px-3.5 py-1.5 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300 cursor-pointer" data-target="modal-detalhes">Cancelar</button>
+                        <button type="submit" class="px-4 py-1.5 bg-blue-900 text-white font-bold rounded hover:bg-blue-800 transition shadow-sm cursor-pointer"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Todas as Alterações</button>
                     </div>
                 </form>
             </div>
@@ -382,12 +359,12 @@
         <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 id="form-univ-titulo" class="text-base font-bold text-slate-900">Novo Cadastro</h3>
-                <button onclick="fecharModal('modal-form-universal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-form-universal"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="form-univ-body" onsubmit="salvarCadastroUniversal(event)" class="space-y-3 text-sm">
+            <form id="form-univ-body" class="space-y-3 text-sm">
                 <input type="hidden" id="form-univ-tipo">
                 <div id="form-univ-campos"></div>
-                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition">Salvar Sincronizado no Firestore</button>
+                <button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition cursor-pointer">Salvar Sincronizado no Firestore</button>
             </form>
         </div>
     </div>
@@ -397,7 +374,7 @@
         <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 id="import-titulo-modal" class="text-base font-bold text-slate-900">Importar Dados via CSV / Planilha</h3>
-                <button onclick="fecharModal('modal-importacao')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-importacao"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="space-y-4 text-xs">
                 <input type="hidden" id="import-colecao-alvo">
@@ -410,16 +387,33 @@
                     <p class="font-bold mb-0.5"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Formato Esperado:</p>
                     <p id="import-instrucoes-formato" class="font-mono text-[11px]"></p>
                 </div>
-                <button type="button" onclick="processarArquivoCSV()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-1.5 shadow-sm">
+                <button type="button" id="btn-processar-csv" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-cloud-arrow-up"></i> Processar e Importar Registros
                 </button>
             </div>
         </div>
     </div>
 
-    <script>
-        window.currentUser = null;
-        window.dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [] };
+    <!-- Firebase SDK v10 (Modular) & Application Core Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
+            authDomain: "prgd-ati-pe.firebaseapp.com",
+            projectId: "prgd-ati-pe",
+            storageBucket: "prgd-ati-pe.firebasestorage.app",
+            messagingSenderId: "798768232646",
+            appId: "1:798768232646:web:31b80951f237b4af17bfc7",
+            measurementId: "G-MWES9XN421"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [] };
         let abaAtual = 'dashboard';
 
         const MÓDULOS_SISTEMA = [
@@ -469,7 +463,7 @@
             const mainEl = document.getElementById('main-content');
             const loginModal = document.getElementById('modal-login');
 
-            if (!window.currentUser) {
+            if (!currentUser) {
                 if (mainEl) mainEl.classList.add('hidden');
                 if (loginModal) loginModal.classList.remove('hidden');
             } else {
@@ -480,14 +474,13 @@
 
         function atualizarVisibilidadeAbas() {
             verificarAutenticacaoObrigatoria();
-            if (!window.currentUser) return;
+            if (!currentUser) return;
 
-            const user = window.currentUser;
-            const isAdmin = user.perfil === 'admin';
-            const permitidos = isAdmin ? ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] : (user.modulosPermitidos || ['dashboard', 'demandas', 'eventos']);
+            const isAdmin = currentUser.perfil === 'admin';
+            const permitidos = isAdmin ? ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'] : (currentUser.modulosPermitidos || ['dashboard', 'demandas', 'eventos']);
 
             ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'].forEach(mod => {
-                const btnTab = document.getElementById('btn-tab-' + mod);
+                const btnTab = document.querySelector(`[data-tab="${mod}"]`);
                 if (btnTab) {
                     btnTab.style.display = permitidos.includes(mod) ? 'inline-flex' : 'none';
                 }
@@ -501,7 +494,7 @@
 
             const badgePerfil = document.getElementById('badge-perfil-acesso');
             if (badgePerfil) {
-                badgePerfil.textContent = 'PERFIL: ' + (user.perfil || 'COMUM').toUpperCase() + (isAdmin ? ' (ACESSO TOTAL)' : ' (SOMENTE LEITURA)');
+                badgePerfil.textContent = 'PERFIL: ' + (currentUser.perfil || 'COMUM').toUpperCase() + (isAdmin ? ' (ACESSO TOTAL)' : ' (SOMENTE LEITURA)');
                 badgePerfil.className = isAdmin ? 'bg-emerald-200 text-emerald-900 px-2.5 py-0.5 rounded font-bold uppercase' : 'bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded font-bold uppercase';
             }
 
@@ -514,9 +507,9 @@
             abaAtual = aba;
             ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'].forEach(a => {
                 const el = document.getElementById('aba-' + a);
-                const btn = document.getElementById('btn-tab-' + a);
+                const btn = document.querySelector(`[data-tab="${a}"]`);
                 if (el) el.classList.toggle('hidden', a !== abaAtual);
-                if (btn) btn.className = 'px-4 py-2 rounded-lg transition ' + (a === abaAtual ? 'tab-active' : 'tab-inactive');
+                if (btn) btn.className = 'nav-tab px-4 py-2 rounded-lg transition ' + (a === abaAtual ? 'tab-active' : 'tab-inactive');
             });
             if (aba === 'dashboard') renderCharts();
         }
@@ -525,38 +518,38 @@
             const colecoes = ['demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios'];
             colecoes.forEach(col => {
                 try {
-                    window.firebaseMethods.onSnapshot(window.firebaseMethods.collection(window.firebaseDb, col), snap => {
+                    onSnapshot(collection(db, col), snap => {
                         if (!snap.empty) {
                             const docsRemotos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                            const mapExistentes = new Map(window.dbData[col].map(item => [item.id, item]));
+                            const mapExistentes = new Map(dbData[col].map(item => [item.id, item]));
                             docsRemotos.forEach(docRemoto => mapExistentes.set(docRemoto.id, docRemoto));
-                            window.dbData[col] = Array.from(mapExistentes.values());
-                        } else if (window.dbData[col].length === 0) {
-                            window.dbData[col] = initialMockData[col] || [];
+                            dbData[col] = Array.from(mapExistentes.values());
+                        } else if (dbData[col].length === 0) {
+                            dbData[col] = initialMockData[col] || [];
                         }
                         renderizarTudo();
                     }, err => {
                         console.warn('Firestore snapshot falhou para ' + col + ':', err);
-                        if (window.dbData[col].length === 0) window.dbData[col] = initialMockData[col] || [];
+                        if (dbData[col].length === 0) dbData[col] = initialMockData[col] || [];
                         renderizarTudo();
                     });
                 } catch (e) {
                     console.warn('Erro Firestore:', e);
-                    if (window.dbData[col].length === 0) window.dbData[col] = initialMockData[col] || [];
+                    if (dbData[col].length === 0) dbData[col] = initialMockData[col] || [];
                     renderizarTudo();
                 }
             });
         }
 
         function renderizarTudo() {
-            if (!window.dbData.usuarios || window.dbData.usuarios.length === 0) {
-                window.dbData.usuarios = JSON.parse(JSON.stringify(initialMockData.usuarios));
+            if (!dbData.usuarios || dbData.usuarios.length === 0) {
+                dbData.usuarios = JSON.parse(JSON.stringify(initialMockData.usuarios));
             }
-            if (!window.dbData.bases || window.dbData.bases.length === 0) {
-                window.dbData.bases = JSON.parse(JSON.stringify(initialMockData.bases));
+            if (!dbData.bases || dbData.bases.length === 0) {
+                dbData.bases = JSON.parse(JSON.stringify(initialMockData.bases));
             }
-            if (!window.dbData.orgaos || window.dbData.orgaos.length === 0) {
-                window.dbData.orgaos = JSON.parse(JSON.stringify(initialMockData.orgaos));
+            if (!dbData.orgaos || dbData.orgaos.length === 0) {
+                dbData.orgaos = JSON.parse(JSON.stringify(initialMockData.orgaos));
             }
 
             renderUsuarios();
@@ -576,7 +569,7 @@
             selects.forEach(select => {
                 const valAtual = select.value;
                 select.innerHTML = '<option value="">Selecione o Órgão / Secretaria</option>';
-                window.dbData.orgaos.forEach(o => {
+                dbData.orgaos.forEach(o => {
                     const opt = document.createElement('option');
                     opt.value = o.sigla || o.id;
                     opt.textContent = (o.sigla || o.id) + ' - ' + (o.nome || '');
@@ -589,69 +582,80 @@
         function renderUsuarios() {
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
+            const isAdmin = currentUser && currentUser.perfil === 'admin';
 
-            tbody.innerHTML = window.dbData.usuarios.map(u => {
+            tbody.innerHTML = dbData.usuarios.map(u => {
                 const mods = u.perfil === 'admin' ? 'Acesso Total (Admin)' : (u.modulosPermitidos && u.modulosPermitidos.length > 0 ? u.modulosPermitidos.join(', ') : 'Padrão');
-                return '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro(\'usuarios\', \'' + u.id + '\')">' +
-                    '<td class="p-4 font-bold text-slate-800">' + (u.nome || u.email) + '</td>' +
-                    '<td class="p-4 text-slate-600">' + (u.email || u.id) + '</td>' +
-                    '<td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">' + (u.subgrupoId || u.orgao || 'GERAL') + '</span></td>' +
-                    '<td class="p-4"><span class="bg-' + (u.perfil === 'admin' ? 'emerald' : 'amber') + '-100 text-' + (u.perfil === 'admin' ? 'emerald-900' : 'amber-900') + ' text-xs font-bold px-2.5 py-1 rounded uppercase">' + (u.perfil || 'comum') + '</span></td>' +
-                    '<td class="p-4 text-xs font-medium text-slate-500 max-w-xs truncate">' + mods + '</td>' +
-                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar Detalhes') + '</button></td>' +
+                return `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="usuarios" data-id="${u.id}">` +
+                    `<td class="p-4 font-bold text-slate-800">${u.nome || u.email}</td>` +
+                    `<td class="p-4 text-slate-600">${u.email || u.id}</td>` +
+                    `<td class="p-4"><span class="bg-blue-100 text-blue-900 text-xs font-bold px-2 py-0.5 rounded">${u.subgrupoId || u.orgao || 'GERAL'}</span></td>` +
+                    `<td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 text-${u.perfil === 'admin' ? 'emerald-900' : 'amber-900'} text-xs font-bold px-2.5 py-1 rounded uppercase">${u.perfil || 'comum'}</span></td>` +
+                    `<td class="p-4 text-xs font-medium text-slate-500 max-w-xs truncate">${mods}</td>` +
+                    `<td class="p-4 text-center"><button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">${isAdmin ? 'Detalhar / Editar' : 'Visualizar Detalhes'}</button></td>` +
                 '</tr>';
             }).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
+            
+            vincularCliquesTabelas();
         }
 
         function renderOrgaos() {
             const tbody = document.getElementById('tabela-orgaos');
             if (!tbody) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
+            const isAdmin = currentUser && currentUser.perfil === 'admin';
 
-            tbody.innerHTML = window.dbData.orgaos.map(o => 
-                '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro(\'orgaos\', \'' + o.id + '\')">' +
-                    '<td class="p-4 font-bold text-indigo-900">' + (o.sigla || o.id) + '</td>' +
-                    '<td class="p-4 text-slate-800 font-medium">' + (o.nome || '-') + '</td>' +
-                    '<td class="p-4 text-xs"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">' + (o.tipoJuridico || o.naturezaJuridica || 'Secretaria') + '</span></td>' +
-                    '<td class="p-4 text-xs text-slate-600">' + (o.responsavel || '-') + '</td>' +
-                    '<td class="p-4 text-xs text-slate-600">' + (o.email || '-') + '</td>' +
-                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</button></td>' +
+            tbody.innerHTML = dbData.orgaos.map(o => 
+                `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="orgaos" data-id="${o.id}">` +
+                    `<td class="p-4 font-bold text-indigo-900">${o.sigla || o.id}</td>` +
+                    `<td class="p-4 text-slate-800 font-medium">${o.nome || '-'}</td>` +
+                    `<td class="p-4 text-xs"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">${o.tipoJuridico || o.naturezaJuridica || 'Secretaria'}</span></td>` +
+                    `<td class="p-4 text-xs text-slate-600">${o.responsavel || '-'}</td>` +
+                    `<td class="p-4 text-xs text-slate-600">${o.email || '-'}</td>` +
+                    `<td class="p-4 text-center"><button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">${isAdmin ? 'Detalhar / Editar' : 'Visualizar'}</button></td>` +
                 '</tr>'
             ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum órgão registrado.</td></tr>';
+            vincularCliquesTabelas();
         }
 
         function renderBases() {
             const tbody = document.getElementById('tabela-bases');
             if (!tbody) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
+            const isAdmin = currentUser && currentUser.perfil === 'admin';
 
-            tbody.innerHTML = window.dbData.bases.map(b => 
-                '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro(\'bases\', \'' + b.id + '\')">' +
-                    '<td class="p-4 font-bold text-blue-900">' + (b.categoria || 'Geral') + '</td>' +
-                    '<td class="p-4 font-mono text-xs text-indigo-800">' + (b.sigla || b.id) + '</td>' +
-                    '<td class="p-4 text-slate-800 font-medium">' + (b.nome || '-') + '</td>' +
-                    '<td class="p-4 text-xs text-slate-600">' + (b.observacao || '-') + '</td>' +
-                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</button></td>' +
+            tbody.innerHTML = dbData.bases.map(b => 
+                `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="bases" data-id="${b.id}">` +
+                    `<td class="p-4 font-bold text-blue-900">${b.categoria || 'Geral'}</td>` +
+                    `<td class="p-4 font-mono text-xs text-indigo-800">${b.sigla || b.id}</td>` +
+                    `<td class="p-4 text-slate-800 font-medium">${b.nome || '-'}</td>` +
+                    `<td class="p-4 text-xs text-slate-600">${b.observacao || '-'}</td>` +
+                    `<td class="p-4 text-center"><button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">${isAdmin ? 'Detalhar / Editar' : 'Visualizar'}</button></td>` +
                 '</tr>'
             ).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhuma base compartilhada cadastrada.</td></tr>';
+            vincularCliquesTabelas();
         }
 
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
             if (!tbody) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
+            const isAdmin = currentUser && currentUser.perfil === 'admin';
 
-            tbody.innerHTML = window.dbData.demandas.map(d => 
-                '<tr class="hover:bg-slate-50 cursor-pointer" onclick="detalharRegistro(\'demandas\', \'' + d.id + '\')">' +
-                    '<td class="p-4 font-bold text-blue-900">' + (d.orgao || 'Geral') + '</td>' +
-                    '<td class="p-4 font-medium text-slate-900">' + (d.titulo || '-') + '</td>' +
-                    '<td class="p-4 text-xs text-slate-500">' + (d.categoria || '-') + '</td>' +
-                    '<td class="p-4 text-xs font-bold text-' + (d.prioridade === 'Alta' ? 'red' : 'amber') + '-600">' + (d.prioridade || 'Média') + '</td>' +
-                    '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">' + (d.status || 'Pendente') + '</span></td>' +
-                    '<td class="p-4 text-center"><button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</button></td>' +
+            tbody.innerHTML = dbData.demandas.map(d => 
+                `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="demandas" data-id="${d.id}">` +
+                    `<td class="p-4 font-bold text-blue-900">${d.orgao || 'Geral'}</td>` +
+                    `<td class="p-4 font-medium text-slate-900">${d.titulo || '-'}</td>` +
+                    `<td class="p-4 text-xs text-slate-500">${d.categoria || '-'}</td>` +
+                    `<td class="p-4 text-xs font-bold text-${d.prioridade === 'Alta' ? 'red' : 'amber'}-600">${d.prioridade || 'Média'}</td>` +
+                    `<td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">${d.status || 'Pendente'}</span></td>` +
+                    `<td class="p-4 text-center"><button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">${isAdmin ? 'Detalhar / Editar' : 'Visualizar'}</button></td>` +
                 '</tr>'
             ).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma demanda registrada.</td></tr>';
+            vincularCliquesTabelas();
+        }
+
+        function vincularCliquesTabelas() {
+            document.querySelectorAll('.tr-detalhe').forEach(tr => {
+                tr.onclick = () => detalharRegistro(tr.getAttribute('data-colecao'), tr.getAttribute('data-id'));
+            });
         }
 
         function renderEventos() {
@@ -659,14 +663,14 @@
             if (!grid) return;
             const filtro = document.getElementById('filtro-eventos')?.value || 'todos';
             const agora = new Date().toISOString();
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
+            const isAdmin = currentUser && currentUser.perfil === 'admin';
 
-            let lista = window.dbData.eventos.filter(e => {
+            let lista = dbData.eventos.filter(e => {
                 if (!e.visibilidade || e.visibilidade === 'Aberto ao Público') return true;
-                if (!window.currentUser) return false;
+                if (!currentUser) return false;
                 
-                const userOrg = (window.currentUser.subgrupoId || window.currentUser.orgao || '').toUpperCase();
-                const userEmail = (window.currentUser.email || '').toLowerCase();
+                const userOrg = (currentUser.subgrupoId || currentUser.orgao || '').toUpperCase();
+                const userEmail = (currentUser.email || '').toLowerCase();
                 const grupoAlvo = (e.grupoDestinatario || e.visibilidade || '').toUpperCase();
                 
                 if (isAdmin) return true;
@@ -682,97 +686,109 @@
                 const dtEnd = e.dataFim;
                 const ePassado = dtStart < agora;
                 
-                return '<div onclick="detalharRegistro(\'eventos\', \'' + e.id + '\')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between cursor-pointer hover:border-amber-400 transition">' +
+                return `<div class="card-detalhe bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between cursor-pointer hover:border-amber-400 transition" data-colecao="eventos" data-id="${e.id}">` +
                     '<div>' +
                         '<div class="flex justify-between items-start mb-2 gap-1">' +
-                            '<span class="bg-' + (ePassado ? 'slate' : 'amber') + '-100 text-' + (ePassado ? 'slate' : 'amber') + '-800 text-[11px] font-bold px-2 py-0.5 rounded">' + (ePassado ? 'Realizado' : 'Próximo Evento') + '</span>' +
-                            '<span class="bg-' + (e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple') + '-100 text-' + (e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple') + '-900 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">' +
-                                '<i class="fa-solid fa-' + (e.visibilidade === 'Aberto ao Público' ? 'globe' : 'lock') + '"></i> ' + (e.visibilidade || 'Público') +
+                            `<span class="bg-${ePassado ? 'slate' : 'amber'}-100 text-${ePassado ? 'slate' : 'amber'}-800 text-[11px] font-bold px-2 py-0.5 rounded">${ePassado ? 'Realizado' : 'Próximo Evento'}</span>` +
+                            `<span class="bg-${e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple'}-100 text-${e.visibilidade === 'Aberto ao Público' ? 'emerald' : 'purple'}-900 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">` +
+                                `<i class="fa-solid fa-${e.visibilidade === 'Aberto ao Público' ? 'globe' : 'lock'}"></i> ${e.visibilidade || 'Público'}` +
                             '</span>' +
                         '</div>' +
-                        '<h4 class="font-bold text-slate-800 text-base mt-1">' + (e.titulo || '-') + '</h4>' +
-                        '<p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Palestrante: ' + (e.palestrante || 'Não informado') + '</p>' +
+                        `<h4 class="font-bold text-slate-800 text-base mt-1">${e.titulo || '-'}</h4>` +
+                        `<p class="text-xs text-indigo-900 font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> Palestrante: ${e.palestrante || 'Não informado'}</p>` +
                         '<div class="bg-slate-50 p-2.5 rounded-lg border my-2 text-[11px] space-y-1">' +
-                            '<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> <strong>Início:</strong> ' + (dtStart ? new Date(dtStart).toLocaleString('pt-BR') : '-') + '</p>' +
-                            (dtEnd ? '<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-red-500 mr-1"></i> <strong>Fim:</strong> ' + new Date(dtEnd).toLocaleString('pt-BR') + '</p>' : '') +
-                            '<p class="text-slate-600"><i class="fa-solid fa-certificate text-blue-600 mr-1"></i> <strong>Certificado:</strong> <span class="font-bold text-slate-800">' + (e.geracaoCertificado || 'Não') + '</span></p>' +
+                            `<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-amber-600 mr-1"></i> <strong>Início:</strong> ${dtStart ? new Date(dtStart).toLocaleString('pt-BR') : '-'}</p>` +
+                            (dtEnd ? `<p class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-red-500 mr-1"></i> <strong>Fim:</strong> ${new Date(dtEnd).toLocaleString('pt-BR')}</p>` : '') +
+                            `<p class="text-slate-600"><i class="fa-solid fa-certificate text-blue-600 mr-1"></i> <strong>Certificado:</strong> <span class="font-bold text-slate-800">${e.geracaoCertificado || 'Não'}</span></p>` +
                         '</div>' +
-                        '<p class="text-xs text-slate-500 line-clamp-2">' + (e.descricao || 'Sem descrição.') + '</p>' +
+                        `<p class="text-xs text-slate-500 line-clamp-2">${e.descricao || 'Sem descrição.'}</p>` +
                     '</div>' +
                     '<div class="border-t pt-3 mt-3 flex justify-between items-center">' +
-                        '<span class="text-xs text-indigo-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>' + (e.local || 'Local não informado') + '</span>' +
-                        '<span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</span>' +
+                        `<span class="text-xs text-indigo-700 font-medium"><i class="fa-solid fa-location-dot mr-1"></i>${e.local || 'Local não informado'}</span>` +
+                        `<span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">${isAdmin ? 'Detalhar / Editar' : 'Visualizar'}</span>` +
                     '</div>' +
                 '</div>';
             }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum evento localizado com este filtro ou você não possui permissão de grupo.</p>';
+
+            document.querySelectorAll('#grid-eventos .card-detalhe').forEach(card => {
+                card.onclick = () => detalharRegistro(card.getAttribute('data-colecao'), card.getAttribute('data-id'));
+            });
         }
 
         function renderLocais() {
             const grid = document.getElementById('grid-locais');
             if (!grid) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
+            const isAdmin = currentUser && currentUser.perfil === 'admin';
 
-            grid.innerHTML = window.dbData.locais.map(l => 
-                '<div onclick="detalharRegistro(\'locais\', \'' + l.id + '\')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-purple-500 transition flex flex-col justify-between">' +
+            grid.innerHTML = dbData.locais.map(l => 
+                `<div class="card-detalhe bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-purple-500 transition flex flex-col justify-between" data-colecao="locais" data-id="${l.id}">` +
                     '<div>' +
                         '<div class="flex justify-between items-start">' +
-                            '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">' + (l.tipoEspaco || 'Auditório') + '</span>' +
-                            '<span class="text-xs font-bold ' + (l.natureza === 'Privado' ? 'text-amber-600' : 'text-emerald-600') + '">' + (l.natureza || 'Público') + '</span>' +
+                            `<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded">${l.tipoEspaco || 'Auditório'}</span>` +
+                            `<span class="text-xs font-bold ${l.natureza === 'Privado' ? 'text-amber-600' : 'text-emerald-600'}">${l.natureza || 'Público'}</span>` +
                         '</div>' +
-                        '<h4 class="font-bold text-slate-800 text-base mt-2">' + (l.nome || l.id) + '</h4>' +
-                        '<p class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>' + (l.capacidade || '0') + ' sentadas</strong></p>' +
-                        '<p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-money-bill-wave mr-1"></i> Aluguel: <strong>' + (l.valorAluguel ? 'R$ ' + l.valorAluguel : 'Gratuito / Público') + '</strong></p>' +
+                        `<h4 class="font-bold text-slate-800 text-base mt-2">${l.nome || l.id}</h4>` +
+                        `<p class="text-xs text-slate-500"><i class="fa-solid fa-users mr-1"></i> Capacidade: <strong>${l.capacidade || '0'} sentadas</strong></p>` +
+                        `<p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-money-bill-wave mr-1"></i> Aluguel: <strong>${l.valorAluguel ? 'R$ ' + l.valorAluguel : 'Gratuito / Público'}</strong></p>` +
                     '</div>' +
                     '<div class="mt-3 border-t pt-2 flex justify-between items-center text-xs text-slate-500">' +
-                        '<span><i class="fa-solid fa-snowflake mr-1"></i>' + (l.climatizacao || 'Sim') + '</span>' +
-                        '<span><i class="fa-solid fa-square-parking mr-1"></i>' + (l.estacionamento || 'Sim') + '</span>' +
-                        '<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</span>' +
+                        `<span><i class="fa-solid fa-snowflake mr-1"></i>${l.climatizacao || 'Sim'}</span>` +
+                        `<span><i class="fa-solid fa-square-parking mr-1"></i>${l.estacionamento || 'Sim'}</span>` +
+                        `<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">${isAdmin ? 'Detalhar / Editar' : 'Visualizar'}</span>` +
                     '</div>' +
                 '</div>'
             ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local de eventos cadastrado.</p>';
+
+            document.querySelectorAll('#grid-locais .card-detalhe').forEach(card => {
+                card.onclick = () => detalharRegistro(card.getAttribute('data-colecao'), card.getAttribute('data-id'));
+            });
         }
 
         function renderFornecedores() {
             const grid = document.getElementById('grid-fornecedores');
             if (!grid) return;
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
+            const isAdmin = currentUser && currentUser.perfil === 'admin';
 
-            grid.innerHTML = window.dbData.fornecedores.map(f => 
-                '<div onclick="detalharRegistro(\'fornecedores\', \'' + f.id + '\')" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-emerald-500 transition">' +
-                    '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">' + (f.categoria || 'Geral') + '</span>' +
-                    '<h4 class="font-bold text-slate-800 mt-2">' + (f.nome || f.razaoSocial || '-') + '</h4>' +
-                    '<p class="text-xs text-slate-500"><i class="fa-solid fa-id-card mr-1"></i> CNPJ: ' + (f.cnpj || '-') + '</p>' +
-                    '<p class="text-xs text-slate-500"><i class="fa-solid fa-briefcase mr-1"></i> Ramo: ' + (f.ramo || '-') + '</p>' +
-                    '<p class="text-xs text-slate-500"><i class="fa-solid fa-user-tie mr-1"></i> Ponto Focal: ' + (f.pontoFocal || f.responsavel || '-') + '</p>' +
-                    '<div class="mt-3 border-t pt-2 text-right"><span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">' + (isAdmin ? 'Detalhar / Editar' : 'Visualizar') + '</span></div>' +
+            grid.innerHTML = dbData.fornecedores.map(f => 
+                `<div class="card-detalhe bg-white p-5 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-emerald-500 transition" data-colecao="fornecedores" data-id="${f.id}">` +
+                    `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">${f.categoria || 'Geral'}</span>` +
+                    `<h4 class="font-bold text-slate-800 mt-2">${f.nome || f.razaoSocial || '-'}</h4>` +
+                    `<p class="text-xs text-slate-500"><i class="fa-solid fa-id-card mr-1"></i> CNPJ: ${f.cnpj || '-'}</p>` +
+                    `<p class="text-xs text-slate-500"><i class="fa-solid fa-briefcase mr-1"></i> Ramo: ${f.ramo || '-'}</p>` +
+                    `<p class="text-xs text-slate-500"><i class="fa-solid fa-user-tie mr-1"></i> Ponto Focal: ${f.pontoFocal || f.responsavel || '-'}</p>` +
+                    `<div class="mt-3 border-t pt-2 text-right"><span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">${isAdmin ? 'Detalhar / Editar' : 'Visualizar'}</span></div>` +
                 '</div>'
             ).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor cadastrado.</p>';
+
+            document.querySelectorAll('#grid-fornecedores .card-detalhe').forEach(card => {
+                card.onclick = () => detalharRegistro(card.getAttribute('data-colecao'), card.getAttribute('data-id'));
+            });
         }
 
         function renderDashboardKPIs() {
-            document.getElementById('dash-tot-demandas').textContent = window.dbData.demandas.length;
-            document.getElementById('dash-tot-eventos').textContent = window.dbData.eventos.length;
-            document.getElementById('dash-tot-locais').textContent = window.dbData.locais.length;
-            document.getElementById('dash-tot-orgaos').textContent = window.dbData.orgaos.length;
-            document.getElementById('dash-tot-fornecedores').textContent = window.dbData.fornecedores.length;
+            document.getElementById('dash-tot-demandas').textContent = dbData.demandas.length;
+            document.getElementById('dash-tot-eventos').textContent = dbData.eventos.length;
+            document.getElementById('dash-tot-locais').textContent = dbData.locais.length;
+            document.getElementById('dash-tot-orgaos').textContent = dbData.orgaos.length;
+            document.getElementById('dash-tot-fornecedores').textContent = dbData.fornecedores.length;
         }
 
-        window.detalharRegistro = function(colecao, docId) {
-            const item = window.dbData[colecao].find(i => i.id === docId);
+        function detalharRegistro(colecao, docId) {
+            const item = dbData[colecao].find(i => i.id === docId);
             if (!item) return;
 
-            const isAdmin = window.currentUser && window.currentUser.perfil === 'admin';
+            const isAdmin = currentUser && currentUser.perfil === 'admin';
             document.getElementById('detalhe-titulo-modal').textContent = 'Detalhamento (' + colecao.toUpperCase() + ')';
             
             let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-4">';
             for (let k in item) {
                 if (k !== 'senhaHash' && k !== 'senha' && k !== 'historicoStatus' && k !== 'modulosPermitidos') {
-                    htmlContent += '<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">' + k + '</span><span class="font-semibold text-slate-800">' + item[k] + '</span></div>';
+                    htmlContent += `<div class="p-2 bg-slate-50 border rounded"><span class="text-slate-400 text-[10px] uppercase font-bold block">${k}</span><span class="font-semibold text-slate-800">${item[k]}</span></div>`;
                 }
             }
             if (colecao === 'usuarios') {
                 const userPerms = item.modulosPermitidos || ['dashboard', 'demandas', 'eventos'];
-                htmlContent += '<div class="p-2 bg-slate-50 border rounded sm:col-span-2"><span class="text-slate-400 text-[10px] uppercase font-bold block">Módulos de Acesso Permitidos</span><span class="font-semibold text-indigo-900">' + userPerms.join(', ') + '</span></div>';
+                htmlContent += `<div class="p-2 bg-slate-50 border rounded sm:col-span-2"><span class="text-slate-400 text-[10px] uppercase font-bold block">Módulos de Acesso Permitidos</span><span class="font-semibold text-indigo-900">${userPerms.join(', ')}</span></div>`;
             }
             htmlContent += '</div>';
 
@@ -782,7 +798,7 @@
                         '<i class="fa-solid fa-id-badge text-amber-700"></i> Inscrição & Credenciamento do Evento' +
                     '</h4>' +
                     '<p class="text-xs text-slate-700 mb-3 font-medium">Você é um usuário autenticado no sistema PRGD.</p>' +
-                    (item.linkInscricao ? '<a href="' + item.linkInscricao + '" target="_blank" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-sm"><i class="fa-solid fa-pen-to-square"></i> Realizar Inscrição Agora</a>' : '<p class="text-xs font-bold text-slate-500">Inscrição Direta via Agência ATI / Formulário em Breve</p>') +
+                    (item.linkInscricao ? `<a href="${item.linkInscricao}" target="_blank" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-sm"><i class="fa-solid fa-pen-to-square"></i> Realizar Inscrição Agora</a>` : '<p class="text-xs font-bold text-slate-500">Inscrição Direta via Agência ATI / Formulário em Breve</p>') +
                 '</div>';
             }
 
@@ -799,13 +815,13 @@
                     '</h4>' +
                     '<div class="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1">' +
                         item.historicoStatus.map(h => 
-                            '<div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 text-xs">' +
-                                '<div class="flex justify-between items-center mb-1">' +
-                                    '<span class="bg-blue-900 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">' + h.status + '</span>' +
-                                    '<span class="text-slate-400 text-[10px] font-semibold"><i class="fa-regular fa-calendar-alt mr-1"></i>' + new Date(h.data).toLocaleString('pt-BR') + '</span>' +
-                                '</div>' +
-                                '<p class="text-slate-700 font-medium">' + (h.descricao || 'Sem observações.') + '</p>' +
-                            '</div>' +
+                            `<div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100 text-xs">` +
+                                `<div class="flex justify-between items-center mb-1">` +
+                                    `<span class="bg-blue-900 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">${h.status}</span>` +
+                                    `<span class="text-slate-400 text-[10px] font-semibold"><i class="fa-regular fa-calendar-alt mr-1"></i>${new Date(h.data).toLocaleString('pt-BR')}</span>` +
+                                `</div>` +
+                                `<p class="text-slate-700 font-medium">${h.descricao || 'Sem observações.'}</p>` +
+                            `</div>`
                         ).join('') +
                     '</div>' +
                     (isAdmin ? 
@@ -828,7 +844,7 @@
                                     '<input type="text" id="demanda-nova-obs" placeholder="Ex: Reunião realizada com a equipe técnica..." class="w-full p-2 border rounded bg-white">' +
                                 '</div>' +
                             '</div>' +
-                            '<button type="button" onclick="adicionarAcompanhamentoDemanda(\'' + docId + '\')" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded transition shadow-sm flex items-center justify-center gap-1">' +
+                            `<button type="button" id="btn-add-acompanhamento" data-docid="${docId}" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded transition shadow-sm flex items-center justify-center gap-1 cursor-pointer">` +
                                 '<i class="fa-solid fa-check-double"></i> Registrar Acompanhamento e Salvar Histórico' +
                             '</button>' +
                         '</div>'
@@ -840,6 +856,11 @@
 
             document.getElementById('detalhe-conteudo').innerHTML = htmlContent;
 
+            const btnAddAcomp = document.getElementById('btn-add-acompanhamento');
+            if (btnAddAcomp) {
+                btnAddAcomp.onclick = () => adicionarAcompanhamentoDemanda(docId);
+            }
+
             if (isAdmin) {
                 document.getElementById('edit-colecao').value = colecao;
                 document.getElementById('edit-doc-id').value = docId;
@@ -850,52 +871,52 @@
                     const fieldVal = item[k] !== undefined ? item[k] : '';
                     const isLongText = String(fieldVal).length > 40 || k === 'descricao' || k === 'endereco' || k === 'escopoServico' || k === 'eventosParticipados' || k === 'observacao';
                     
-                    editFieldsHtml += '<div class="mb-2"><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">' + (k === 'tipoJuridico' ? 'Tipo Jurídico' : k) + '</label>';
+                    editFieldsHtml += `<div class="mb-2"><label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider">${k === 'tipoJuridico' ? 'Tipo Jurídico' : k}</label>`;
                     
                     if (k === 'perfil') {
-                        editFieldsHtml += '<select data-field="perfil" class="edit-dinamico-input w-full p-2 border rounded bg-white font-bold text-slate-800">' +
-                            '<option value="comum" ' + (fieldVal === 'comum' ? 'selected' : '') + '>COMUM (Somente Leitura)</option>' +
-                            '<option value="admin" ' + (fieldVal === 'admin' ? 'selected' : '') + '>ADMINISTRADOR (Acesso Total + Escrita)</option>' +
-                        '</select>';
+                        editFieldsHtml += `<select data-field="perfil" class="edit-dinamico-input w-full p-2 border rounded bg-white font-bold text-slate-800">` +
+                            `<option value="comum" ${fieldVal === 'comum' ? 'selected' : ''}>COMUM (Somente Leitura)</option>` +
+                            `<option value="admin" ${fieldVal === 'admin' ? 'selected' : ''}>ADMINISTRADOR (Acesso Total + Escrita)</option>` +
+                        `</select>`;
                     } else if (k === 'subgrupoId' || k === 'orgao') {
-                        editFieldsHtml += '<select data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">';
-                        window.dbData.orgaos.forEach(o => {
+                        editFieldsHtml += `<select data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">`;
+                        dbData.orgaos.forEach(o => {
                             const optVal = o.sigla || o.id;
                             const optText = (o.sigla || o.id) + ' - ' + (o.nome || '');
-                            editFieldsHtml += '<option value="' + optVal + '" ' + (fieldVal === optVal ? 'selected' : '') + '>' + optText + '</option>';
+                            editFieldsHtml += `<option value="${optVal}" ${fieldVal === optVal ? 'selected' : ''}>${optText}</option>`;
                         });
-                        editFieldsHtml += '<option value="GERAL" ' + (fieldVal === 'GERAL' ? 'selected' : '') + '>GERAL / EXTERNO</option>';
-                        editFieldsHtml += '</select>';
+                        editFieldsHtml += `<option value="GERAL" ${fieldVal === 'GERAL' ? 'selected' : ''}>GERAL / EXTERNO</option>`;
+                        editFieldsHtml += `</select>`;
                     } else if (k === 'tipoJuridico' || k === 'naturezaJuridica') {
-                        editFieldsHtml += '<select data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">' +
-                            '<option value="Administração Direta (Secretaria)" ' + (fieldVal.includes('Direta') || fieldVal.includes('Secretaria') ? 'selected' : '') + '>Administração Direta (Secretaria)</option>' +
-                            '<option value="Autarquia" ' + (fieldVal === 'Autarquia' ? 'selected' : '') + '>Autarquia</option>' +
-                            '<option value="Empresa Pública" ' + (fieldVal === 'Empresa Pública' ? 'selected' : '') + '>Empresa Pública</option>' +
-                            '<option value="Fundação Pública" ' + (fieldVal.includes('Fundação') ? 'selected' : '') + '>Fundação Pública</option>' +
-                            '<option value="Sociedade de Economia Mista" ' + (fieldVal.includes('Mista') ? 'selected' : '') + '>Sociedade de Economia Mista</option>' +
-                            '<option value="Órgão Constitucional Independente" ' + (fieldVal.includes('Independente') ? 'selected' : '') + '>Órgão Constitucional Independente</option>' +
-                        '</select>';
+                        editFieldsHtml += `<select data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">` +
+                            `<option value="Administração Direta (Secretaria)" ${fieldVal.includes('Direta') || fieldVal.includes('Secretaria') ? 'selected' : ''}>Administração Direta (Secretaria)</option>` +
+                            `<option value="Autarquia" ${fieldVal === 'Autarquia' ? 'selected' : ''}>Autarquia</option>` +
+                            `<option value="Empresa Pública" ${fieldVal === 'Empresa Pública' ? 'selected' : ''}>Empresa Pública</option>` +
+                            `<option value="Fundação Pública" ${fieldVal.includes('Fundação') ? 'selected' : ''}>Fundação Pública</option>` +
+                            `<option value="Sociedade de Economia Mista" ${fieldVal.includes('Mista') ? 'selected' : ''}>Sociedade de Economia Mista</option>` +
+                            `<option value="Órgão Constitucional Independente" ${fieldVal.includes('Independente') ? 'selected' : ''}>Órgão Constitucional Independente</option>` +
+                        `</select>`;
                     } else if (k === 'geracaoCertificado') {
-                        editFieldsHtml += '<select data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">' +
-                            '<option value="Sim" ' + (fieldVal === 'Sim' ? 'selected' : '') + '>Sim (Gera Certificado)</option>' +
-                            '<option value="Não" ' + (fieldVal === 'Não' ? 'selected' : '') + '>Não (Não gera certificado)</option>' +
-                        '</select>';
+                        editFieldsHtml += `<select data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">` +
+                            `<option value="Sim" ${fieldVal === 'Sim' ? 'selected' : ''}>Sim (Gera Certificado)</option>` +
+                            `<option value="Não" ${fieldVal === 'Não' ? 'selected' : ''}>Não (Não gera certificado)</option>` +
+                        `</select>`;
                     } else if (k === 'visibilidade') {
-                        editFieldsHtml += '<select data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">' +
-                            '<option value="Aberto ao Público" ' + (fieldVal === 'Aberto ao Público' ? 'selected' : '') + '>Aberto ao Público</option>' +
-                            '<option value="Exclusivo para Grupo Especificado" ' + (fieldVal !== 'Aberto ao Público' ? 'selected' : '') + '>Exclusivo para Grupo Especificado</option>' +
-                        '</select>';
+                        editFieldsHtml += `<select data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">` +
+                            `<option value="Aberto ao Público" ${fieldVal === 'Aberto ao Público' ? 'selected' : ''}>Aberto ao Público</option>` +
+                            `<option value="Exclusivo para Grupo Especificado" ${fieldVal !== 'Aberto ao Público' ? 'selected' : ''}>Exclusivo para Grupo Especificado</option>` +
+                        `</select>`;
                     } else if (k === 'categoria' && colecao === 'bases') {
-                        editFieldsHtml += '<select data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">' +
-                            '<option value="Subgrupo / Papel" ' + (fieldVal === 'Subgrupo / Papel' ? 'selected' : '') + '>Subgrupo / Papel</option>' +
-                            '<option value="Órgão / Secretaria" ' + (fieldVal === 'Órgão / Secretaria' ? 'selected' : '') + '>Órgão / Secretaria</option>' +
-                            '<option value="Categoria TIC" ' + (fieldVal === 'Categoria TIC' ? 'selected' : '') + '>Categoria TIC</option>' +
-                            '<option value="Geral" ' + (fieldVal === 'Geral' ? 'selected' : '') + '>Geral</option>' +
-                        '</select>';
+                        editFieldsHtml += `<select data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">` +
+                            `<option value="Subgrupo / Papel" ${fieldVal === 'Subgrupo / Papel' ? 'selected' : ''}>Subgrupo / Papel</option>` +
+                            `<option value="Órgão / Secretaria" ${fieldVal === 'Órgão / Secretaria' ? 'selected' : ''}>Órgão / Secretaria</option>` +
+                            `<option value="Categoria TIC" ${fieldVal === 'Categoria TIC' ? 'selected' : ''}>Categoria TIC</option>` +
+                            `<option value="Geral" ${fieldVal === 'Geral' ? 'selected' : ''}>Geral</option>` +
+                        `</select>`;
                     } else if (isLongText) {
-                        editFieldsHtml += '<textarea data-field="' + k + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">' + fieldVal + '</textarea>';
+                        editFieldsHtml += `<textarea data-field="${k}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium" rows="3">${fieldVal}</textarea>`;
                     } else {
-                        editFieldsHtml += '<input type="text" data-field="' + k + '" value="' + fieldVal + '" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">';
+                        editFieldsHtml += `<input type="text" data-field="${k}" value="${fieldVal}" class="edit-dinamico-input w-full p-2 border rounded bg-white font-medium">`;
                     }
                     editFieldsHtml += '</div>';
                 }
@@ -911,10 +932,10 @@
                         '<label class="block font-bold text-slate-800 mb-2 uppercase text-[11px]"><i class="fa-solid fa-user-lock text-amber-700 mr-1"></i> Permissão de Visualização dos Módulos:</label>' +
                         '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">' +
                             MÓDULOS_SISTEMA.map(m => 
-                                '<label class="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">' +
-                                    '<input type="checkbox" value="' + m.id + '" class="edit-checkbox-modulo rounded text-blue-900 focus:ring-blue-600" ' + (userPerms.includes(m.id) ? 'checked' : '') + '>' +
-                                    m.nome +
-                                '</label>'
+                                `<label class="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">` +
+                                    `<input type="checkbox" value="${m.id}" class="edit-checkbox-modulo rounded text-blue-900 focus:ring-blue-600" ${userPerms.includes(m.id) ? 'checked' : ''}>` +
+                                    `${m.nome}` +
+                                `</label>`
                             ).join('') +
                         '</div>' +
                     '</div>';
@@ -927,15 +948,15 @@
             }
 
             document.getElementById('modal-detalhes').classList.remove('hidden');
-        };
+        }
 
-        window.adicionarAcompanhamentoDemanda = async function(docId) {
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
+        async function adicionarAcompanhamentoDemanda(docId) {
+            if (!currentUser || currentUser.perfil !== 'admin') {
                 alert('Apenas administradores podem registrar novos acompanhamentos.');
                 return;
             }
 
-            const demanda = window.dbData.demandas.find(d => d.id === docId);
+            const demanda = dbData.demandas.find(d => d.id === docId);
             if (!demanda) return;
 
             const novoStatus = document.getElementById('demanda-novo-status').value;
@@ -960,8 +981,8 @@
             renderizarTudo();
 
             try {
-                const docRef = window.firebaseMethods.doc(window.firebaseDb, 'demandas', docId);
-                await window.firebaseMethods.updateDoc(docRef, {
+                const docRef = doc(db, 'demandas', docId);
+                await updateDoc(docRef, {
                     status: novoStatus,
                     historicoStatus: demanda.historicoStatus
                 });
@@ -971,18 +992,18 @@
 
             alert('Novo status e histórico de acompanhamento registrados com sucesso!');
             detalharRegistro('demandas', docId);
-        };
+        }
 
-        window.salvarEdicaoUniversal = async function(e) {
+        async function salvarEdicaoUniversal(e) {
             e.preventDefault();
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
+            if (!currentUser || currentUser.perfil !== 'admin') {
                 alert('Apenas administradores possuem permissão de edição.');
                 return;
             }
 
             const colecao = document.getElementById('edit-colecao').value;
             const docId = document.getElementById('edit-doc-id').value;
-            const item = window.dbData[colecao].find(i => i.id === docId);
+            const item = dbData[colecao].find(i => i.id === docId);
             if (!item) return;
 
             const updatedData = {};
@@ -1011,17 +1032,17 @@
             renderizarTudo();
 
             try {
-                const docRef = window.firebaseMethods.doc(window.firebaseDb, colecao, docId);
-                await window.firebaseMethods.updateDoc(docRef, updatedData);
+                const docRef = doc(db, colecao, docId);
+                await updateDoc(docRef, updatedData);
             } catch (err) {
                 console.warn('Erro ao atualizar no Firestore:', err);
             }
             alert('Registro atualizado e sincronizado com sucesso!');
             fecharModal('modal-detalhes');
-        };
+        }
 
-        window.excluirRegistroUniversal = async function() {
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
+        async function excluirRegistroUniversal() {
+            if (!currentUser || currentUser.perfil !== 'admin') {
                 alert('Apenas administradores podem excluir registros.');
                 return;
             }
@@ -1031,21 +1052,21 @@
 
             if (!confirm('Tem certeza que deseja excluir este registro?')) return;
 
-            window.dbData[colecao] = window.dbData[colecao].filter(i => i.id !== docId);
+            dbData[colecao] = dbData[colecao].filter(i => i.id !== docId);
             renderizarTudo();
 
             try {
-                const docRef = window.firebaseMethods.doc(window.firebaseDb, colecao, docId);
-                await window.firebaseMethods.deleteDoc(docRef);
+                const docRef = doc(db, colecao, docId);
+                await deleteDoc(docRef);
             } catch (err) {
                 console.warn('Erro ao excluir:', err);
             }
             alert('Registro excluído com sucesso!');
             fecharModal('modal-detalhes');
-        };
+        }
 
-        window.abrirModalForm = function(tipo) {
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
+        function abrirModalForm(tipo) {
+            if (!currentUser || currentUser.perfil !== 'admin') {
                 alert('Apenas administradores possuem permissão para cadastrar novos registros.');
                 return;
             }
@@ -1093,11 +1114,21 @@
                     '<div><label class="block font-medium text-slate-700 mb-1">Local / Espaço</label><input type="text" id="univ-c5" class="w-full p-2 border rounded"></div>' +
                     '<div class="grid grid-cols-2 gap-2">' +
                         '<div><label class="block font-medium text-slate-700 mb-1">Vai Gerar Certificado?</label><select id="univ-c6" class="w-full p-2 border rounded bg-white font-medium"><option value="Sim">Sim</option><option value="Não">Não</option></select></div>' +
-                        '<div><label class="block font-medium text-slate-700 mb-1">Público Alvo / Visibilidade</label><select id="univ-c7" onchange="toggleGrupoDestinatario(this.value)" class="w-full p-2 border rounded bg-white font-medium"><option value="Aberto ao Público">Aberto ao Público Geral</option><option value="Exclusivo para Grupo Especificado">Restrito por Grupo / Órgão / Pessoas</option></select></div>' +
+                        '<div><label class="block font-medium text-slate-700 mb-1">Público Alvo / Visibilidade</label><select id="univ-c7" id="univ-select-visib" class="w-full p-2 border rounded bg-white font-medium"><option value="Aberto ao Público">Aberto ao Público Geral</option><option value="Exclusivo para Grupo Especificado">Restrito por Grupo / Órgão / Pessoas</option></select></div>' +
                     '</div>' +
-                    '<div id="box-grupo-destinatario" class="hidden bg-slate-100 p-2.5 rounded-lg border border-slate-300"><label class="block font-semibold text-slate-800 mb-1">Identificação dos Grupos / Órgãos ou E-mails Autorizados</label><input type="text" id="univ-c8" placeholder="Ex: ATI, SEFAZ, arlindo.santos@ati.pe.gov.br" class="w-full p-2 border rounded bg-white"></div>' +
+                    '<div id="box-grupo-destinatario" class="hidden bg-slate-100 p-2.5 rounded-lg border border-slate-300 mt-2"><label class="block font-semibold text-slate-800 mb-1">Identificação dos Grupos / Órgãos ou E-mails Autorizados</label><input type="text" id="univ-c8" placeholder="Ex: ATI, SEFAZ, arlindo.santos@ati.pe.gov.br" class="w-full p-2 border rounded bg-white"></div>' +
                     '<div><label class="block font-medium text-slate-700 mb-1">Link de Inscrição</label><input type="text" id="univ-c9" class="w-full p-2 border rounded"></div>' +
                     '<div><label class="block font-medium text-slate-700 mb-1">Descrição e Detalhamento</label><textarea id="univ-c10" rows="3" class="w-full p-2 border rounded"></textarea></div>';
+                
+                setTimeout(() => {
+                    const selVisib = document.getElementById('univ-c7');
+                    if (selVisib) {
+                        selVisib.onchange = (ev) => {
+                            const box = document.getElementById('box-grupo-destinatario');
+                            if (box) box.classList.toggle('hidden', ev.target.value === 'Aberto ao Público');
+                        };
+                    }
+                }, 100);
             } else if (tipo === 'local') {
                 container.innerHTML = '<div><label class="block font-medium text-slate-700 mb-1">Nome do Espaço / Auditório</label><input type="text" id="univ-c1" required class="w-full p-2 border rounded"></div>' +
                     '<div><label class="block font-medium text-slate-700 mb-1">Tipo de Espaço</label><select id="univ-c2" class="w-full p-2 border rounded"><option value="Auditório">Auditório</option><option value="Casa de Eventos">Casa de Eventos</option><option value="Centro de Convenções">Centro de Convenções</option><option value="Sala de Reunião VIP">Sala de Reunião VIP</option></select></div>' +
@@ -1118,10 +1149,10 @@
                         '<label class="block font-bold text-blue-900 mb-2 text-xs uppercase"><i class="fa-solid fa-eye text-blue-700 mr-1"></i> Selecione os Módulos que o Usuário Pode Visualizar:</label>' +
                         '<div class="grid grid-cols-2 gap-2">' +
                             MÓDULOS_SISTEMA.map(m => 
-                                '<label class="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">' +
-                                    '<input type="checkbox" value="' + m.id + '" class="novo-checkbox-modulo rounded text-blue-900 focus:ring-blue-600" checked>' +
-                                    m.nome +
-                                '</label>'
+                                `<label class="flex items-center gap-1.5 text-xs text-slate-700 font-semibold cursor-pointer">` +
+                                    `<input type="checkbox" value="${m.id}" class="novo-checkbox-modulo rounded text-blue-900 focus:ring-blue-600" checked>` +
+                                    `${m.nome}` +
+                                `</label>`
                             ).join('') +
                         '</div>' +
                     '</div>';
@@ -1134,16 +1165,11 @@
                 preencherSelectOrgaos();
             }
             document.getElementById('modal-form-universal').classList.remove('hidden');
-        };
+        }
 
-        window.toggleGrupoDestinatario = function(val) {
-            const box = document.getElementById('box-grupo-destinatario');
-            if (box) box.classList.toggle('hidden', val === 'Aberto ao Público');
-        };
-
-        window.salvarCadastroUniversal = async function(e) {
+        async function salvarCadastroUniversal(e) {
             e.preventDefault();
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
+            if (!currentUser || currentUser.perfil !== 'admin') {
                 alert('Apenas administradores podem cadastrar novos registros.');
                 return;
             }
@@ -1160,9 +1186,9 @@
                     nome: document.getElementById('univ-c3').value,
                     observacao: document.getElementById('univ-c4').value
                 };
-                window.dbData.bases.push(novoObj);
+                dbData.bases.push(novoObj);
                 try {
-                    await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "bases", sigla), novoObj);
+                    await setDoc(doc(db, "bases", sigla), novoObj);
                 } catch(err) { console.warn('Erro Firestore', err); }
             } else if (tipo === 'orgao') {
                 const sigla = document.getElementById('univ-c1').value.toUpperCase();
@@ -1176,9 +1202,9 @@
                     telefone: document.getElementById('univ-c6')?.value || '',
                     endereco: document.getElementById('univ-c7')?.value || ''
                 };
-                window.dbData.orgaos.push(novoObj);
+                dbData.orgaos.push(novoObj);
                 try {
-                    await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "orgaos", sigla), novoObj);
+                    await setDoc(doc(db, "orgaos", sigla), novoObj);
                 } catch(err) { console.warn('Erro Firestore', err); }
             } else if (tipo === 'fornecedor') {
                 novoObj = {
@@ -1199,9 +1225,9 @@
                     escopoServico: document.getElementById('univ-c10')?.value || '',
                     endereco: document.getElementById('univ-c11')?.value || ''
                 };
-                window.dbData.fornecedores.push(novoObj);
+                dbData.fornecedores.push(novoObj);
                 try {
-                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "fornecedores"), novoObj);
+                    await addDoc(collection(db, "fornecedores"), novoObj);
                 } catch(err) { console.warn('Erro Firestore', err); }
             } else if (tipo === 'evento') {
                 const visib = document.getElementById('univ-c7').value;
@@ -1219,9 +1245,9 @@
                     linkInscricao: document.getElementById('univ-c9').value,
                     descricao: document.getElementById('univ-c10').value
                 };
-                window.dbData.eventos.push(novoObj);
+                dbData.eventos.push(novoObj);
                 try {
-                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "eventos"), novoObj);
+                    await addDoc(collection(db, "eventos"), novoObj);
                 } catch(err) { console.warn('Erro Firestore', err); }
             } else if (tipo === 'local') {
                 novoObj = {
@@ -1239,9 +1265,9 @@
                     responsavel: document.getElementById('univ-c11').value,
                     endereco: document.getElementById('univ-c12').value
                 };
-                window.dbData.locais.push(novoObj);
+                dbData.locais.push(novoObj);
                 try {
-                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "locais"), novoObj);
+                    await addDoc(collection(db, "locais"), novoObj);
                 } catch(err) { console.warn('Erro Firestore', err); }
             } else if (tipo === 'usuario') {
                 const email = document.getElementById('univ-c2').value.toLowerCase();
@@ -1257,11 +1283,11 @@
                     modulosPermitidos
                 };
                 
-                window.dbData.usuarios = window.dbData.usuarios.filter(u => u.id !== email && u.email !== email);
-                window.dbData.usuarios.push(novoObj);
+                dbData.usuarios = dbData.usuarios.filter(u => u.id !== email && u.email !== email);
+                dbData.usuarios.push(novoObj);
 
                 try {
-                    await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "usuarios", email), novoObj);
+                    await setDoc(doc(db, "usuarios", email), novoObj);
                 } catch(err) { console.warn('Erro Firestore', err); }
             } else if (tipo === 'demanda') {
                 novoObj = {
@@ -1275,19 +1301,19 @@
                         { data: new Date().toISOString(), status: 'Pendente', descricao: document.getElementById('univ-c4')?.value || 'Abertura de demanda cadastrada.' }
                     ]
                 };
-                window.dbData.demandas.push(novoObj);
+                dbData.demandas.push(novoObj);
                 try {
-                    await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "demandas"), novoObj);
+                    await addDoc(collection(db, "demandas"), novoObj);
                 } catch(err) { console.warn('Erro Firestore', err); }
             }
 
             renderizarTudo();
             alert('Cadastro de ' + tipo + ' realizado e sincronizado com sucesso!');
             fecharModal('modal-form-universal');
-        };
+        }
 
-        window.abrirModalImportacao = function(colecao) {
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
+        function abrirModalImportacao(colecao) {
+            if (!currentUser || currentUser.perfil !== 'admin') {
                 alert('Apenas administradores podem importar planilhas.');
                 return;
             }
@@ -1302,10 +1328,10 @@
             
             document.getElementById('import-instrucoes-formato').textContent = formatoText;
             document.getElementById('modal-importacao').classList.remove('hidden');
-        };
+        }
 
-        window.processarArquivoCSV = function() {
-            if (!window.currentUser || window.currentUser.perfil !== 'admin') {
+        function processarArquivoCSV() {
+            if (!currentUser || currentUser.perfil !== 'admin') {
                 alert('Apenas administradores podem importar dados via CSV.');
                 return;
             }
@@ -1341,10 +1367,10 @@
                             responsavel: cols[3] || '',
                             email: cols[4] || ''
                         };
-                        window.dbData.orgaos.push(obj);
+                        dbData.orgaos.push(obj);
                         importCount++;
                         try {
-                            await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "orgaos", sigla), obj);
+                            await setDoc(doc(db, "orgaos", sigla), obj);
                         } catch(err) { console.warn(err); }
                     } else if (colecao === 'fornecedores' && cols.length >= 2) {
                         const obj = {
@@ -1357,10 +1383,10 @@
                             email: cols[5] || '',
                             numeroContrato: cols[6] || ''
                         };
-                        window.dbData.fornecedores.push(obj);
+                        dbData.fornecedores.push(obj);
                         importCount++;
                         try {
-                            await window.firebaseMethods.addDoc(window.firebaseMethods.collection(window.firebaseDb, "fornecedores"), obj);
+                            await addDoc(collection(db, "fornecedores"), obj);
                         } catch(err) { console.warn(err); }
                     } else if (colecao === 'usuarios' && cols.length >= 2) {
                         const email = (cols[1] || '').toLowerCase();
@@ -1374,11 +1400,11 @@
                             senha: senha,
                             modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases']
                         };
-                        window.dbData.usuarios = window.dbData.usuarios.filter(u => u.id !== email && u.email !== email);
-                        window.dbData.usuarios.push(obj);
+                        dbData.usuarios = dbData.usuarios.filter(u => u.id !== email && u.email !== email);
+                        dbData.usuarios.push(obj);
                         importCount++;
                         try {
-                            await window.firebaseMethods.setDoc(window.firebaseMethods.doc(window.firebaseDb, "usuarios", email), obj);
+                            await setDoc(doc(db, "usuarios", email), obj);
                         } catch(err) { console.warn(err); }
                     }
                 }
@@ -1389,9 +1415,9 @@
             };
 
             reader.readAsText(file, 'UTF-8');
-        };
+        }
 
-        window.fazerLoginLocal = function() {
+        function fazerLoginLocal() {
             try {
                 const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
                 const senhaInput = document.getElementById('login-senha').value;
@@ -1401,14 +1427,12 @@
                     return;
                 }
 
-                // Garante que a base de usuários esteja populada para evitar falhas
-                if (!window.dbData.usuarios || window.dbData.usuarios.length === 0) {
-                    window.dbData.usuarios = JSON.parse(JSON.stringify(initialMockData.usuarios));
+                if (!dbData.usuarios || dbData.usuarios.length === 0) {
+                    dbData.usuarios = JSON.parse(JSON.stringify(initialMockData.usuarios));
                 }
 
-                // Validação master para o admin padrão
                 if (emailInput === 'arlindo.santos@ati.pe.gov.br' && senhaInput === '123') {
-                    window.currentUser = {
+                    currentUser = {
                         id: 'arlindo.santos@ati.pe.gov.br',
                         nome: 'Arlindo Santos',
                         email: 'arlindo.santos@ati.pe.gov.br',
@@ -1418,7 +1442,7 @@
                         modulosPermitidos: ['dashboard', 'demandas', 'eventos', 'locais', 'orgaos', 'fornecedores', 'bases', 'usuarios']
                     };
                 } else {
-                    const userFound = window.dbData.usuarios.find(u => (u.email || u.id || '').toLowerCase() === emailInput);
+                    const userFound = dbData.usuarios.find(u => (u.email || u.id || '').toLowerCase() === emailInput);
 
                     if (!userFound) {
                         alert('Acesso negado: E-mail não localizado na base de usuários cadastrados.');
@@ -1431,31 +1455,30 @@
                         return;
                     }
 
-                    window.currentUser = userFound;
+                    currentUser = userFound;
                 }
 
-                // Atualiza exibição de nome e perfil na barra superior
                 const nameDisplay = document.getElementById('user-name-display');
                 const roleDisplay = document.getElementById('user-role-display');
-                if (nameDisplay) nameDisplay.textContent = window.currentUser.nome || window.currentUser.email;
-                if (roleDisplay) roleDisplay.textContent = (window.currentUser.perfil || 'COMUM').toUpperCase();
+                if (nameDisplay) nameDisplay.textContent = currentUser.nome || currentUser.email;
+                if (roleDisplay) roleDisplay.textContent = (currentUser.perfil || 'COMUM').toUpperCase();
 
                 atualizarVisibilidadeAbas();
-                alert('Autenticado com sucesso! Bem-vindo(a), ' + (window.currentUser.nome || window.currentUser.email) + '.');
+                alert('Autenticado com sucesso! Bem-vindo(a), ' + (currentUser.nome || currentUser.email) + '.');
             } catch (err) {
                 console.error('Erro crítico no login:', err);
                 alert('Ocorreu um erro ao processar o login: ' + err.message);
             }
-        };
+        }
 
-        window.fazerLogout = function() {
-            window.currentUser = null;
+        function fazerLogout() {
+            currentUser = null;
             verificarAutenticacaoObrigatoria();
-        };
+        }
 
-        window.exportarUsuariosCSV = function() {
+        function exportarUsuariosCSV() {
             let csv = "Nome;Email;Orgao;Perfil;ModulosPermitidos\n";
-            window.dbData.usuarios.forEach(u => {
+            dbData.usuarios.forEach(u => {
                 const mods = u.modulosPermitidos ? u.modulosPermitidos.join(',') : '';
                 csv += (u.nome || '') + ';' + (u.email || u.id) + ';' + (u.subgrupoId || u.orgao || '') + ';' + (u.perfil || '') + ';"' + mods + '"\n';
             });
@@ -1466,9 +1489,7 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        };
-
-        window.exportarRelatorioCSV = function() { exportarUsuariosCSV(); };
+        }
 
         function renderCharts() {
             const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
@@ -1495,15 +1516,44 @@
             }
         }
 
-        window.onload = () => {
+        // --- BIND DE EVENTOS GLOBAIS NO DOM CARREGADO ---
+        document.addEventListener('DOMContentLoaded', () => {
             renderizarTudo();
             iniciarSnapshotFirestore();
             verificarAutenticacaoObrigatoria();
-        };
+
+            document.getElementById('btn-executar-login').onclick = fazerLoginLocal;
+            document.getElementById('btn-executar-logout').onclick = fazerLogout;
+            document.getElementById('btn-export-csv').onclick = exportarUsuariosCSV;
+            document.getElementById('btn-export-usuarios').onclick = exportarUsuariosCSV;
+            document.getElementById('btn-processar-csv').onclick = processarArquivoCSV;
+            document.getElementById('btn-excluir-registro').onclick = excluirRegistroUniversal;
+            document.getElementById('form-edicao-admin').onsubmit = salvarEdicaoUniversal;
+            document.getElementById('form-univ-body').onsubmit = salvarCadastroUniversal;
+
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.onclick = () => mudarAba(btn.getAttribute('data-tab'));
+            });
+
+            document.querySelectorAll('.btn-abrir-form').forEach(btn => {
+                btn.onclick = () => abrirModalForm(btn.getAttribute('data-modal-target'));
+            });
+
+            document.querySelectorAll('.btn-abrir-import').forEach(btn => {
+                btn.onclick = () => abrirModalImportacao(btn.getAttribute('data-import-target'));
+            });
+
+            document.querySelectorAll('.btn-fechar-modal').forEach(btn => {
+                btn.onclick = () => fecharModal(btn.getAttribute('data-target'));
+            });
+
+            const filtroEv = document.getElementById('filtro-eventos');
+            if (filtroEv) filtroEv.onchange = renderEventos;
+        });
     </script>
 
     <footer class="max-w-7xl mx-auto px-4 py-6 text-xs text-slate-400 text-center border-t border-slate-200 mt-8">
-        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.4 STABLE</span>
+        PRGD - Plataforma de Relacionamento do Governo Digital · ATI-PE <span class="font-bold text-blue-900">v18.5 STABLE</span>
     </footer>
 </body>
 </html>
