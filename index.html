@@ -43,8 +43,9 @@
                         <input type="password" id="login-senha" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
                     </div>
                 </div>
+                <div id="login-msg" class="hidden mt-4 p-3 rounded-lg text-xs font-medium" role="alert" aria-live="polite"></div>
                 <button type="button" id="btn-executar-login" class="w-full mt-6 py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-right-to-bracket"></i> Autenticar e Entrar
+                    <i class="fa-solid fa-right-to-bracket"></i><span id="login-btn-text">Autenticar e Entrar</span>
                 </button>
                 <button type="button" id="btn-esqueci-senha" class="w-full mt-2 py-2 text-xs text-blue-900 hover:underline cursor-pointer">Esqueci minha senha</button>
             </div>
@@ -674,51 +675,78 @@
             fecharModal('modal-detalhes');
         }
 
-        async function fazerLoginLocal(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const senha = document.getElementById('login-senha').value;
-            try {
-                await signInWithEmailAndPassword(auth, email, senha);
-                // onAuthStateChanged carrega o perfil e inicia os listeners.
-            } catch(err) {
-                alert('Erro de autenticação: ' + (err.code === 'auth/invalid-credential' ? 'e-mail ou senha inválidos.' : err.message));
-            }
+        function mostrarMensagemLogin(texto, tipo='erro') {
+            const el = document.getElementById('login-msg');
+            if (!el) { alert(texto); return; }
+            el.textContent = texto;
+            el.className = 'mt-4 p-3 rounded-lg text-xs font-medium ' + (tipo === 'sucesso' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200');
+            el.classList.remove('hidden');
         }
 
-        async function carregarPerfilFirebase(user) {
-            // Mantém a autenticação Firebase da v22.0: primeiro lê somente o perfil
-            // correspondente ao UID autenticado. Não altera credenciais nem sessão.
-            const ref = doc(db, 'usuarios', user.uid);
-            const snap = await getDoc(ref);
-            if (snap.exists()) {
-                return { uid:user.uid, id:snap.id, ...snap.data() };
-            }
+        function traduzirErroLogin(err) {
+            const code = String(err?.code || '');
+            const mapa = {
+                'auth/invalid-credential': 'E-mail ou senha incorretos. Confira os dados e tente novamente.',
+                'auth/wrong-password': 'Senha incorreta. Verifique a senha e tente novamente.',
+                'auth/user-not-found': 'Usuário não encontrado no Firebase Authentication. Confirme o e-mail.',
+                'auth/invalid-email': 'O e-mail informado não é válido.',
+                'auth/user-disabled': 'Este usuário está desativado no Firebase Authentication.',
+                'auth/too-many-requests': 'Muitas tentativas de acesso. Aguarde alguns minutos e tente novamente.',
+                'auth/network-request-failed': 'Não foi possível conectar ao Firebase. Verifique sua internet.',
+                'auth/operation-not-allowed': 'O login por e-mail e senha não está habilitado no Firebase Authentication.',
+                'auth/internal-error': 'O Firebase retornou um erro interno. Tente novamente.'
+            };
+            return mapa[code] || ('Não foi possível entrar. Código: ' + (code || 'erro desconhecido') + '.');
+        }
 
-            // Compatibilidade com perfis antigos cujo ID era o próprio e-mail.
-            // As regras v23.1 permitem esta leitura somente quando o e-mail do
-            // documento corresponde ao e-mail autenticado.
+        async function fazerLoginLocal(e) {
+            if (e?.preventDefault) e.preventDefault();
+            const emailEl = document.getElementById('login-email');
+            const senhaEl = document.getElementById('login-senha');
+            const btn = document.getElementById('btn-executar-login');
+            const btnText = document.getElementById('login-btn-text');
+            const email = (emailEl?.value || '').trim().toLowerCase();
+            const senha = senhaEl?.value || '';
+            document.getElementById('login-msg')?.classList.add('hidden');
+            if (!email) { mostrarMensagemLogin('Informe o e-mail institucional.'); emailEl?.focus(); return; }
+            if (!senha) { mostrarMensagemLogin('Informe a senha.'); senhaEl?.focus(); return; }
+            if (btn) { btn.disabled = true; btn.classList.add('opacity-70','cursor-wait'); }
+            if (btnText) btnText.textContent = 'Autenticando...';
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithEmailAndPassword(auth, email, senha);
+            } catch(err) {
+                console.error('Falha no login Firebase:', err);
+                mostrarMensagemLogin(traduzirErroLogin(err));
+            } finally {
+                if (btn) { btn.disabled = false; btn.classList.remove('opacity-70','cursor-wait'); }
+                if (btnText) btnText.textContent = 'Autenticar e Entrar';
+            }
+        }
+        async function carregarPerfilFirebase(user) {
+            // A autenticação não depende da existência de um documento no Firestore.
+            // Se o perfil estiver ausente ou sem permissão, a sessão permanece ativa.
+            const ref = doc(db, 'usuarios', user.uid);
+            try {
+                const snap = await getDoc(ref);
+                if (snap.exists()) return { uid:user.uid, id:snap.id, ...snap.data() };
+            } catch (e) {
+                console.warn('Perfil por UID não pôde ser lido; mantendo autenticação:', e?.code || e?.message);
+            }
             try {
                 const legadoRef = doc(db, 'usuarios', String(user.email || '').toLowerCase());
                 const legadoSnap = await getDoc(legadoRef);
                 if (legadoSnap.exists()) {
                     const legado = legadoSnap.data();
                     const perfil = { ...legado, uid:user.uid, email:user.email };
-                    await setDoc(ref, perfil, { merge:true });
+                    try { await setDoc(ref, perfil, { merge:true }); } catch (e) { console.warn('Perfil legado não migrado:', e?.code || e?.message); }
                     return { ...perfil, id:user.uid };
                 }
             } catch (e) {
-                console.warn('Perfil legado não migrado:', e.message);
+                console.warn('Perfil legado não pôde ser lido:', e?.code || e?.message);
             }
-
-            // Usuário autenticado sem perfil: entra como comum, sem derrubar a sessão.
-            return {
-                uid:user.uid, id:user.uid, email:user.email, nome:user.email,
-                perfil:'comum', orgao:'GERAL', tags:[], grupos:[],
-                modulosPermitidos:['dashboard','demandas','eventos']
-            };
+            return { uid:user.uid, id:user.uid, email:user.email, nome:user.email, perfil:'comum', orgao:'GERAL', tags:[], grupos:[], modulosPermitidos:['dashboard','demandas','eventos'] };
         }
-
         function exportarUsuariosCSV() {
             let csv = "Nome;Email;Orgao;Perfil;Tags;Modulos\n";
             dbData.usuarios.forEach(u => { csv += (u.nome||'') + ';' + (u.email||u.id) + ';' + (u.orgao||'') + ';' + (u.perfil||'') + ';"' + (u.tags||[]).join(',') + '";"' + (u.modulosPermitidos||[]).join(',') + '"\n'; });
@@ -737,6 +765,7 @@
         function configurarInterface() {
             const byId = id => document.getElementById(id);
             byId('btn-executar-login')?.addEventListener('click', fazerLoginLocal);
+            byId('login-senha')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); fazerLoginLocal(e); } });
             byId('btn-executar-logout')?.addEventListener('click', async () => { await signOut(auth); });
             byId('btn-export-csv')?.addEventListener('click', exportarUsuariosCSV);
             byId('btn-esqueci-senha')?.addEventListener('click', async()=>{ const email=byId('login-email').value.trim().toLowerCase(); if(!email){alert('Informe o e-mail.');return;} try{await sendPasswordResetEmail(auth,email);alert('Se o e-mail estiver cadastrado, o Firebase enviará as instruções de redefinição.');}catch(e){alert('Não foi possível enviar a redefinição: '+e.message);} });
@@ -783,9 +812,9 @@
                 if (currentUser.perfil === 'admin') await restaurarDadosIsolados();
                 renderizarTudo();
             } catch(err) {
-                console.error(err);
-                alert('Não foi possível carregar o perfil do usuário. Verifique o documento usuarios/{UID} no Firestore.');
-                await signOut(auth);
+                console.error('Falha ao inicializar a aplicação após login:', err);
+                verificarAutenticacaoObrigatoria();
+                mostrarMensagemLogin('Login realizado, mas houve uma falha ao carregar os dados. Atualize a página e tente novamente.');
             }
         });
 

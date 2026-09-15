@@ -1,4 +1,4 @@
-# PRGD v23.1 — CLOUD CORRIGIDO
+# PRGD v23.2 — CLOUD CORRIGIDO
 
 Esta versão retoma a autenticação estável da v22.0 e preserva os recursos de detalhamento, eventos, grupos e inscrições da v23.0.
 
@@ -17,3 +17,12 @@ firebase deploy --only hosting,firestore:rules
 ```
 
 Depois da publicação, faça um hard refresh no navegador (Ctrl+F5).
+
+
+## Correção de login v23.2
+- Login Firebase mantido sem alteração de credenciais.
+- Mensagem visível para senha incorreta/e-mail incorreto e principais erros do Firebase Auth.
+- Botão mostra estado “Autenticando...” durante a tentativa.
+- Falhas de leitura do perfil Firestore não encerram mais a sessão autenticada.
+- Enter no campo de senha também executa o login.
+- Não foi necessário alterar a arquitetura de autenticação.
