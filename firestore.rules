@@ -1,39 +1,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    function signedIn() {
-      return request.auth != null;
-    }
-
-    function isAdmin() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
-        && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.perfil == "admin";
-    }
-
-    function myProfile() {
-      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
-    }
-
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) && profile().perfil == 'admin'; }
     function canRead(data) {
       return isAdmin()
         || data.publico == true
-        || !data.restrito
-        || !(data.gruposPermitidos is list)
-        || data.gruposPermitidos.size() == 0
-        || data.gruposPermitidos.hasAny(myProfile().grupos)
-        || (data.orgaosPermitidos is list && data.orgaosPermitidos.hasAny([myProfile().orgao]))
-        || data.orgao == myProfile().orgao;
+        || !(data.restrito == true)
+        || (data.gruposPermitidos is list && data.gruposPermitidos.size() == 0)
+        || (data.gruposPermitidos is list && profile().grupos is list && data.gruposPermitidos.hasAny(profile().grupos))
+        || (data.tagsPermitidas is list && profile().tags is list && data.tagsPermitidas.hasAny(profile().tags))
+        || (data.orgao == profile().orgao)
+        || (data.orgaosPermitidos is list && data.orgaosPermitidos.hasAny([profile().orgao]));
     }
-
     match /usuarios/{uid} {
       allow read: if signedIn() && (isAdmin() || request.auth.uid == uid);
-      allow create: if isAdmin();
+      allow create: if isAdmin() && request.resource.data.uid == uid;
       allow update: if isAdmin() || request.auth.uid == uid;
       allow delete: if isAdmin();
     }
-
     match /{collection}/{id} {
       allow read: if signedIn() && canRead(resource.data);
       allow create, update, delete: if isAdmin();

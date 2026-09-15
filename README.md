@@ -1,100 +1,22 @@
-# PRGD v21.0 — Cloud Multidispositivo
+# PRGD v22.0 — Cloud Multidispositivo
 
-## O que foi corrigido
+Versão reconstruída sobre a base PRGD v20 fornecida, preservando a navegação e os módulos e corrigindo a autenticação/sincronização.
 
-1. **Usuários agora existem de verdade no Firebase Authentication**
-   - O cadastro feito pelo módulo Usuários cria a conta no Firebase Authentication.
-   - Também cria o perfil correspondente em `usuarios/{uid}` no Firestore.
-   - O usuário pode entrar de outro computador, outro navegador ou outro dispositivo usando o mesmo e-mail e senha.
+## Principais correções
+- Firebase Authentication real para login em qualquer dispositivo.
+- Perfil de usuário vinculado a `usuarios/{UID}`.
+- Criação de usuário pelo próprio aplicativo usando uma segunda instância Firebase Auth, sem derrubar a sessão do administrador.
+- Listeners Firestore iniciados somente após autenticação.
+- Usuários comuns não tentam ler a coleção inteira de usuários.
+- Delegação de eventos para que botões de tabelas continuem funcionando após atualizações em tempo real.
+- Edição/detalhamento/exclusão preservados.
+- Formulários ampliados para fornecedores e locais de eventos.
 
-2. **Perfil separado da autenticação**
-   - Firebase Authentication = identidade/senha.
-   - Firestore `usuarios/{uid}` = nome, órgão, perfil, grupos e módulos.
-   - Isso elimina a dependência de dados gravados apenas no navegador.
+## Firebase
+1. Authentication > Sign-in method > habilite Email/Password.
+2. Garanta que exista pelo menos um usuário administrador no Authentication.
+3. Crie `usuarios/{UID_DO_ADMIN}` com `perfil: "admin"`, e campos como `nome`, `email`, `orgao`, `modulosPermitidos` e `tags`.
+4. Publique hosting e regras: `firebase deploy --only hosting,firestore:rules`.
 
-3. **Permissões por grupo**
-   - Usuários possuem `grupos`.
-   - Registros podem possuir `gruposPermitidos`, `orgaosPermitidos` e `restrito`.
-   - Administrador visualiza tudo.
-   - Usuários comuns visualizam registros públicos, registros sem restrição e registros pertinentes ao seu órgão/grupo.
-
-4. **Redefinição de senha**
-   - O administrador não altera a senha de outro usuário diretamente pelo navegador.
-   - A aplicação envia o fluxo oficial de redefinição do Firebase por e-mail.
-
-5. **Fornecedores muito mais detalhados**
-   - O que faz
-   - Produto/serviço principal
-   - Outros produtos/serviços
-   - Valor/faixa de referência
-   - Modelo comercial
-   - Contato principal e cargo
-   - Telefone e e-mail
-   - Site
-   - LinkedIn, Instagram e outras redes
-   - Eventos já realizados/participados
-   - Experiência/referências
-   - Certificações
-   - Observações
-
-6. **Locais de eventos com ficha técnica**
-   - Capacidade
-   - Metragem
-   - Valor
-   - Endereço
-   - Contatos
-   - Estacionamento
-   - Climatização
-   - Som/PA
-   - Cadeiras e mesas
-   - Palco
-   - Iluminação cênica
-   - Cozinha
-   - Cantina/alimentação
-   - Stands
-   - Acessibilidade
-   - Internet/Wi-Fi
-   - Gerador/energia reserva
-   - Banheiros
-   - Segurança
-   - Carga e descarga
-   - Montagem/desmontagem
-   - Restrições e observações
-
-## Arquivos
-
-- `index.html` — aplicação
-- `firebase.json` — configuração Hosting/Firestore
-- `firestore.rules` — regras de segurança
-
-## Publicação
-
-Na pasta do projeto:
-
-```bash
-firebase login
-firebase use prgd-ati-pe
-firebase deploy --only hosting,firestore:rules
-```
-
-## Importante antes do primeiro uso
-
-No Firebase Console:
-
-1. Authentication → Sign-in method → habilite **E-mail/Senha**.
-2. Confirme que o usuário administrador já existe no Authentication.
-3. No Firestore, crie o documento `usuarios/{UID_DO_ADMINISTRADOR}` com:
-   - `email`
-   - `nome`
-   - `perfil: "admin"`
-   - `orgao`
-   - `grupos: ["ADMIN"]`
-   - `modulosPermitidos`: lista dos módulos
-
-O UID deve ser o UID mostrado no Firebase Authentication. Não use o e-mail como ID para o novo modelo.
-
-## Observação sobre a versão anterior
-
-A versão anterior gravava um cadastro em `usuarios` no Firestore, mas o botão "Novo Usuário" não criava a conta correspondente no Firebase Authentication. Por isso um usuário novo podia aparecer na tabela e, mesmo assim, não conseguir autenticar.
-
-Também havia um fallback local com senha fixa na aplicação. Essa versão remove essa prática: a autenticação passa a depender exclusivamente do Firebase Authentication.
+## Observação importante
+O código não contém uma chave de serviço/Admin SDK. A criação do usuário é feita pelo SDK Web em uma segunda instância de Auth; as regras do Firestore continuam controlando a gravação do perfil. Para ambiente corporativo de produção, uma Cloud Function/Admin SDK pode ser adotada posteriormente para endurecer essa operação.
