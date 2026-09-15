@@ -1,27 +1,19 @@
-# PRGD v23.5 — Login e migração de perfil corrigidos
+# PRGD v23.6 — Login Firebase unificado
 
-Esta versão preserva os módulos da v23.x e corrige o fluxo após a autenticação.
+## Correção desta versão
+A v23.5 ainda mantinha um código de autenticação Firebase Compat separado do SDK modular. Isso podia autenticar a senha em uma instância e deixar o PRGD aguardando a sessão em outra.
 
-## Correções
-- Mantém a autenticação Firebase por e-mail e senha.
-- Após senha correta, libera a aplicação imediatamente após a validação do usuário.
-- Procura primeiro o perfil em `usuarios/{UID}`.
-- Se não existir, procura automaticamente o cadastro legado em `usuarios/{email}`.
-- Migra o perfil legado para `usuarios/{UID}`.
-- Regras do Firestore permitem que o próprio usuário crie seu documento UID somente com seu e-mail autenticado.
-- Uma falha de leitura/renderização do Firestore não devolve o usuário para a tela de login.
-- Mensagens de sessão informam a etapa do carregamento.
+A v23.6 elimina completamente essa duplicidade. Existe agora uma única instância modular do Firebase Authentication, usada pelo formulário de login, pelo `onAuthStateChanged`, pelo logout, pela recuperação de senha e pela criação de usuários.
 
-## Firebase
-Verifique no console do Firebase:
-1. Authentication > Sign-in method > E-mail/Senha habilitado.
-2. Authentication > Users: o usuário deve existir.
-3. Authentication > Settings > Authorized domains: o domínio publicado deve estar autorizado.
+Também foi preservada a migração de perfis antigos `usuarios/{email}` para `usuarios/{UID}` e a abertura da aplicação mesmo quando uma leitura secundária do Firestore falhar.
 
 ## Publicação
 ```bash
 firebase deploy --only hosting,firestore:rules
 ```
-Depois, faça `Ctrl+F5` no navegador.
+Depois faça `Ctrl+F5`.
 
-Versão: **23.5**
+## Firebase
+- Authentication > Sign-in method: E-mail/Senha habilitado.
+- Authentication > Users: o usuário precisa existir.
+- Não é necessário recriar um usuário que já exista.
