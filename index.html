@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v23.4 FIREBASE CLOUD MULTIDISPOSITIVO -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v23.5 FIREBASE CLOUD MULTIDISPOSITIVO -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -53,7 +53,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v23.4 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v23.5 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -66,7 +66,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v23.4 CLOUD SYNC</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v23.5 CLOUD SYNC</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -228,7 +228,7 @@
         import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v23.4: módulo principal carregado');
+        console.info('PRGD v23.5: módulo principal carregado');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -742,28 +742,65 @@
             }
         }
         async function carregarPerfilFirebase(user) {
-            // A autenticação não depende da existência de um documento no Firestore.
-            // Se o perfil estiver ausente ou sem permissão, a sessão permanece ativa.
-            const ref = doc(db, 'usuarios', user.uid);
+            const uid = user.uid;
+            const email = String(user.email || '').trim().toLowerCase();
+            const ref = doc(db, 'usuarios', uid);
+
+            // 1) Perfil novo: usuarios/{UID}
             try {
                 const snap = await getDoc(ref);
-                if (snap.exists()) return { uid:user.uid, id:snap.id, ...snap.data() };
-            } catch (e) {
-                console.warn('Perfil por UID não pôde ser lido; mantendo autenticação:', e?.code || e?.message);
-            }
-            try {
-                const legadoRef = doc(db, 'usuarios', String(user.email || '').toLowerCase());
-                const legadoSnap = await getDoc(legadoRef);
-                if (legadoSnap.exists()) {
-                    const legado = legadoSnap.data();
-                    const perfil = { ...legado, uid:user.uid, email:user.email };
-                    try { await setDoc(ref, perfil, { merge:true }); } catch (e) { console.warn('Perfil legado não migrado:', e?.code || e?.message); }
-                    return { ...perfil, id:user.uid };
+                if (snap.exists()) {
+                    return { uid, id:snap.id, ...snap.data(), email: snap.data().email || email };
                 }
             } catch (e) {
-                console.warn('Perfil legado não pôde ser lido:', e?.code || e?.message);
+                console.warn('Perfil por UID não pôde ser lido:', e?.code || e?.message);
             }
-            return { uid:user.uid, id:user.uid, email:user.email, nome:user.email, perfil:'comum', orgao:'GERAL', tags:[], grupos:[], modulosPermitidos:['dashboard','demandas','eventos'] };
+
+            // 2) Compatibilidade com a estrutura antiga: usuarios/{email}.
+            // Se existir, migramos automaticamente para usuarios/{UID}.
+            if (email) {
+                try {
+                    const legadoRef = doc(db, 'usuarios', email);
+                    const legadoSnap = await getDoc(legadoRef);
+                    if (legadoSnap.exists()) {
+                        const legado = legadoSnap.data() || {};
+                        const perfil = {
+                            ...legado,
+                            uid,
+                            email,
+                            nome: legado.nome || email,
+                            perfil: legado.perfil || 'comum',
+                            orgao: legado.orgao || 'GERAL',
+                            tags: Array.isArray(legado.tags) ? legado.tags : [],
+                            grupos: Array.isArray(legado.grupos) ? legado.grupos : [],
+                            modulosPermitidos: Array.isArray(legado.modulosPermitidos) ? legado.modulosPermitidos : ['dashboard','demandas','eventos']
+                        };
+                        try {
+                            await setDoc(ref, perfil, { merge:true });
+                            console.info('PRGD v23.5: perfil legado migrado para UID', uid);
+                        } catch (migErr) {
+                            console.error('PRGD v23.5: não foi possível migrar o perfil legado:', migErr);
+                            // Mesmo sem migração, usamos o perfil legado nesta sessão.
+                        }
+                        return { ...perfil, id:uid };
+                    }
+                } catch (e) {
+                    console.warn('Perfil legado não pôde ser lido:', e?.code || e?.message);
+                }
+            }
+
+            // 3) Usuário autenticado sem cadastro de perfil: acesso comum mínimo.
+            return {
+                uid,
+                id:uid,
+                email,
+                nome:email,
+                perfil:'comum',
+                orgao:'GERAL',
+                tags:[],
+                grupos:[],
+                modulosPermitidos:['dashboard','demandas','eventos']
+            };
         }
         function exportarUsuariosCSV() {
             let csv = "Nome;Email;Orgao;Perfil;Tags;Modulos\n";
@@ -818,23 +855,49 @@
                 document.getElementById('modal-login')?.classList.remove('hidden');
                 return;
             }
+
+            // A autenticação foi aceita pelo Firebase. A partir daqui o login não deve
+            // voltar para a tela de autenticação por causa de falha de dados.
+            const loginModal = document.getElementById('modal-login');
+            const mainEl = document.getElementById('main-content');
+            const sessionInfo = document.getElementById('session-info');
+            if (sessionInfo) sessionInfo.textContent = 'Autenticado. Carregando perfil e permissões...';
+
             try {
                 currentUser = await carregarPerfilFirebase(user);
                 document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
                 document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
-                verificarAutenticacaoObrigatoria();
+
+                // Libera a aplicação imediatamente após autenticar e carregar o perfil.
+                if (mainEl) mainEl.classList.remove('hidden');
+                if (loginModal) loginModal.classList.add('hidden');
                 atualizarVisibilidadeAbas();
-                iniciarSnapshotFirestore();
-                if (currentUser.perfil === 'admin') await restaurarDadosIsolados();
-                renderizarTudo();
+
+                if (sessionInfo) sessionInfo.textContent = 'Sessão autenticada e sincronizada com Firestore Cloud';
+
+                // As operações de dados são secundárias ao login: uma falha de leitura
+                // de uma coleção não pode expulsar ou bloquear o usuário.
+                try { iniciarSnapshotFirestore(); } catch (e) { console.warn('Snapshots não iniciados:', e); }
+                if (currentUser.perfil === 'admin') {
+                    try { await restaurarDadosIsolados(); } catch (e) { console.warn('Carga inicial não executada:', e); }
+                }
+                try { renderizarTudo(); } catch (e) { console.warn('Renderização inicial parcial:', e); }
             } catch(err) {
-                console.error('Falha ao inicializar a aplicação após login:', err);
-                verificarAutenticacaoObrigatoria();
-                mostrarMensagemLogin('Login realizado, mas houve uma falha ao carregar os dados. Atualize a página e tente novamente.');
+                console.error('Falha ao carregar perfil após autenticação:', err);
+                // Mesmo que o Firestore falhe, mantém a sessão autenticada.
+                currentUser = {
+                    uid:user.uid, id:user.uid, email:user.email || '', nome:user.email || 'Usuário',
+                    perfil:'comum', orgao:'GERAL', tags:[], grupos:[],
+                    modulosPermitidos:['dashboard','demandas','eventos']
+                };
+                if (mainEl) mainEl.classList.remove('hidden');
+                if (loginModal) loginModal.classList.add('hidden');
+                if (sessionInfo) sessionInfo.textContent = 'Sessão autenticada; perfil padrão aplicado';
+                try { atualizarVisibilidadeAbas(); } catch(e) {}
             }
         });
 
-        /* ===================== PRGD v23.3 - DETALHAMENTO / EVENTOS / GRUPOS ===================== */
+        /* ===================== PRGD v23.5 - DETALHAMENTO / EVENTOS / GRUPOS ===================== */
         const OPCOES_LOCAL = {
             estacionamento:['Não possui','Próprio','Terceirizado','Vagas limitadas','Vagas amplas'],
             climatizacao:['Não possui','Ar-condicionado','Climatização central','Ventiladores','Climatização parcial'],

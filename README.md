@@ -1,21 +1,27 @@
-# PRGD v23.3 — LOGIN DEFINITIVO
+# PRGD v23.5 — Login e migração de perfil corrigidos
 
-Correção focada no problema em que o botão de login não disparava nenhuma ação.
+Esta versão preserva os módulos da v23.x e corrige o fluxo após a autenticação.
 
-## O que foi corrigido
-- Tela de login transformada em formulário HTML real (`login-form`).
-- Login executado pelo evento `submit`, inclusive ao pressionar Enter.
-- Mantido Firebase Authentication e o mesmo projeto Firebase.
-- Mensagens claras para senha/e-mail incorretos, usuário inexistente, usuário desativado, excesso de tentativas, rede e demais erros Firebase.
-- Botão mostra “Autenticando...” durante o processo.
-- Versão visível corrigida para v23.3 em todos os pontos da aplicação.
-- Demais funcionalidades da v23 foram preservadas.
+## Correções
+- Mantém a autenticação Firebase por e-mail e senha.
+- Após senha correta, libera a aplicação imediatamente após a validação do usuário.
+- Procura primeiro o perfil em `usuarios/{UID}`.
+- Se não existir, procura automaticamente o cadastro legado em `usuarios/{email}`.
+- Migra o perfil legado para `usuarios/{UID}`.
+- Regras do Firestore permitem que o próprio usuário crie seu documento UID somente com seu e-mail autenticado.
+- Uma falha de leitura/renderização do Firestore não devolve o usuário para a tela de login.
+- Mensagens de sessão informam a etapa do carregamento.
+
+## Firebase
+Verifique no console do Firebase:
+1. Authentication > Sign-in method > E-mail/Senha habilitado.
+2. Authentication > Users: o usuário deve existir.
+3. Authentication > Settings > Authorized domains: o domínio publicado deve estar autorizado.
 
 ## Publicação
-Na pasta onde está este `firebase.json`:
-
 ```bash
 firebase deploy --only hosting,firestore:rules
 ```
+Depois, faça `Ctrl+F5` no navegador.
 
-Depois faça Ctrl+F5. Se o navegador continuar mostrando v23.1, a implantação não está usando esta pasta/arquivo.
+Versão: **23.5**

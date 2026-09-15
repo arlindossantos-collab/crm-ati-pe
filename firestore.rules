@@ -24,7 +24,7 @@ service cloud.firestore {
 
     match /usuarios/{uid} {
       allow read: if signedIn() && (isAdmin() || request.auth.uid == uid || (resource.data.email is string && resource.data.email == request.auth.token.email));
-      allow create: if isAdmin() && request.resource.data.uid == uid;
+      allow create: if (isAdmin() && request.resource.data.uid == uid) || (signedIn() && request.auth.uid == uid && request.resource.data.uid == uid && request.resource.data.email == request.auth.token.email);
       allow update: if isAdmin()
         || (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome']));
       allow delete: if isAdmin();
