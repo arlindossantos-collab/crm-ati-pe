@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v23.3 FIREBASE CLOUD MULTIDISPOSITIVO -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v23.4 FIREBASE CLOUD MULTIDISPOSITIVO -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -12,6 +12,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase Compat: fallback robusto para o formulário de login -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <!-- Chart.js para Dashboard Gerencial -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -33,7 +36,7 @@
                     <h3 class="text-lg font-bold text-slate-900">Acesso Restrito PRGD</h3>
                     <p class="text-xs text-slate-500 mt-1">Informe suas credenciais para acessar o sistema sincronizado.</p>
                 </div>
-                <form id="login-form" class="space-y-4 text-sm">
+                <form id="login-form" class="space-y-4 text-sm" onsubmit="return window.__prgdLoginFallback ? window.__prgdLoginFallback(event) : false;">
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">E-mail Institucional</label>
                         <input type="email" id="login-email" autocomplete="username" required placeholder="arlindo.santos@ati.pe.gov.br" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
@@ -50,7 +53,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v23.3 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v23.4 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +66,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v23.3 CLOUD SYNC</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v23.4 CLOUD SYNC</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -207,6 +210,17 @@
         </div>
     </div>
 
+    <script>
+    (function(){
+      const cfg={apiKey:"AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",authDomain:"prgd-ati-pe.firebaseapp.com",projectId:"prgd-ati-pe",storageBucket:"prgd-ati-pe.firebasestorage.app",messagingSenderId:"798768232646",appId:"1:798768232646:web:31b80951f237b4af17bfc7",measurementId:"G-MWES9XN421"};
+      let ready=false, auth=null;
+      function msg(t){const el=document.getElementById('login-msg'); if(el){el.textContent=t;el.className='mt-4 p-3 rounded-lg text-xs font-medium bg-red-50 text-red-700 border border-red-200';el.classList.remove('hidden');}}
+      function err(e){const c=String(e&&e.code||''); const m={'auth/invalid-credential':'E-mail ou senha incorretos. Confira os dados e tente novamente.','auth/wrong-password':'Senha incorreta. Verifique a senha e tente novamente.','auth/user-not-found':'Usuário não encontrado no Firebase Authentication.','auth/invalid-email':'O e-mail informado não é válido.','auth/user-disabled':'Este usuário está desativado no Firebase Authentication.','auth/too-many-requests':'Muitas tentativas. Aguarde alguns minutos e tente novamente.','auth/network-request-failed':'Falha de conexão com o Firebase.','auth/operation-not-allowed':'O login por e-mail e senha não está habilitado no Firebase Authentication.','auth/unauthorized-domain':'Este domínio não está autorizado no Firebase Authentication.'}; return m[c]||('Falha no login Firebase: '+(c||e.message||'erro desconhecido'));}
+      try{ if(!firebase.apps.length) firebase.initializeApp(cfg); auth=firebase.auth(); ready=true; window.__PRGD_LOGIN_FIREBASE_READY=true; }catch(e){ console.error(e); window.__PRGD_LOGIN_FIREBASE_READY=false; }
+      window.__prgdLoginFallback=async function(ev){ if(ev&&ev.preventDefault)ev.preventDefault(); const email=(document.getElementById('login-email')?.value||'').trim().toLowerCase(), senha=document.getElementById('login-senha')?.value||'', btn=document.getElementById('btn-executar-login'), txt=document.getElementById('login-btn-text'); if(!email){msg('Informe o e-mail institucional.');return false;} if(!senha){msg('Informe a senha.');return false;} if(!ready){msg('O módulo de autenticação não carregou. Recarregue a página (Ctrl+F5).');return false;} if(btn)btn.disabled=true;if(txt)txt.textContent='Autenticando...'; try{await auth.signInWithEmailAndPassword(email,senha);}catch(e){console.error(e);msg(err(e));}finally{if(btn)btn.disabled=false;if(txt)txt.textContent='Autenticar e Entrar';} return false;};
+    })();
+    </script>
+
     <!-- Script Principal com Gravação Direta na Nuvem -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -214,6 +228,7 @@
         import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
+        console.info('PRGD v23.4: módulo principal carregado');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -696,7 +711,8 @@
                 'auth/too-many-requests': 'Muitas tentativas de acesso. Aguarde alguns minutos e tente novamente.',
                 'auth/network-request-failed': 'Não foi possível conectar ao Firebase. Verifique sua internet.',
                 'auth/operation-not-allowed': 'O login por e-mail e senha não está habilitado no Firebase Authentication.',
-                'auth/internal-error': 'O Firebase retornou um erro interno. Tente novamente.'
+                'auth/internal-error': 'O Firebase retornou um erro interno. Tente novamente.',
+                'auth/unauthorized-domain': 'Este domínio não está autorizado no Firebase Authentication. Adicione o domínio em Authentication > Settings > Authorized domains.'
             };
             return mapa[code] || ('Não foi possível entrar. Código: ' + (code || 'erro desconhecido') + '.');
         }
@@ -766,7 +782,6 @@
 
         function configurarInterface() {
             const byId = id => document.getElementById(id);
-            byId('login-form')?.addEventListener('submit', fazerLoginLocal);
             byId('btn-executar-logout')?.addEventListener('click', async () => { await signOut(auth); });
             byId('btn-export-csv')?.addEventListener('click', exportarUsuariosCSV);
             byId('btn-esqueci-senha')?.addEventListener('click', async()=>{ const email=byId('login-email').value.trim().toLowerCase(); if(!email){alert('Informe o e-mail.');return;} try{await sendPasswordResetEmail(auth,email);alert('Se o e-mail estiver cadastrado, o Firebase enviará as instruções de redefinição.');}catch(e){alert('Não foi possível enviar a redefinição: '+e.message);} });
