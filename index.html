@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v23.7 FIXED & UNIFIED                       -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v23.8 USER TRACKING & DYNAMIC MODULES       -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -50,7 +50,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v23.7 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v23.8 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v23.7 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v23.8 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -180,7 +180,7 @@
                     <button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Órgão</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Módulos</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Órgão</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Módulos</th><th class="p-4">Criação / Edição</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
                 <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários</h4><p class="text-xs text-slate-500">Crie grupos para controlar quem visualiza e participa dos eventos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3 py-2 rounded-lg font-semibold"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
                 <div id="lista-grupos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -207,14 +207,14 @@
         </div>
     </div>
 
-    <!-- Script Principal Consolidado sem Duplicidades -->
+    <!-- Script Principal com Cores em Tags, Rastreabilidade e Restrição de Módulos -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, runTransaction, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v23.7: módulo principal carregado sem duplicidades');
+        console.info('PRGD v23.8: rastreabilidade e restrição de módulos ativa');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -251,14 +251,14 @@
         ];
 
         const TAGS_DISPONIVEIS = [
-            { nome: 'Internos ATI', cor: 'bg-blue-100 text-blue-800 border-blue-300' },
-            { nome: 'Externos', cor: 'bg-purple-100 text-purple-800 border-purple-300' },
-            { nome: 'Terceirizados', cor: 'bg-amber-100 text-amber-800 border-amber-300' },
-            { nome: 'Fornecedores', cor: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-            { nome: 'Gerentes', cor: 'bg-indigo-100 text-indigo-800 border-indigo-300' },
-            { nome: 'Coordenadores', cor: 'bg-cyan-100 text-cyan-800 border-cyan-300' },
-            { nome: 'Diretores', cor: 'bg-rose-100 text-rose-800 border-rose-300' },
-            { nome: 'Convidados', cor: 'bg-slate-100 text-slate-800 border-slate-300' }
+            { nome: 'Internos ATI', cor: 'bg-blue-100 text-blue-900 border-blue-300' },
+            { nome: 'Externos', cor: 'bg-purple-100 text-purple-900 border-purple-300' },
+            { nome: 'Terceirizados', cor: 'bg-amber-100 text-amber-900 border-amber-300' },
+            { nome: 'Fornecedores', cor: 'bg-emerald-100 text-emerald-900 border-emerald-300' },
+            { nome: 'Gerentes', cor: 'bg-indigo-100 text-indigo-900 border-indigo-300' },
+            { nome: 'Coordenadores', cor: 'bg-cyan-100 text-cyan-900 border-cyan-300' },
+            { nome: 'Diretores', cor: 'bg-rose-100 text-rose-900 border-rose-300' },
+            { nome: 'Convidados', cor: 'bg-pink-100 text-pink-900 border-pink-300' }
         ];
 
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -330,7 +330,7 @@
             });
 
             const gruposUser = currentUser.grupos || [];
-            eventosVisiveisCache = {};
+            let eventosVisiveisCache = {};
             const eventSources = [
                 onSnapshot(query(collection(db,'eventos'), where('eventoPublico','==',true)), snap => {
                     atualizarEventosVisiveis(snap.docs.map(d => ({ id: d.id, ...d.data()})));
@@ -378,10 +378,10 @@
             }
         }
 
-        let eventosVisiveisCache = {};
         function atualizarEventosVisiveis(lista) {
-            lista.forEach(e => eventosVisiveisCache[e.id] = e);
-            dbData.eventos = Object.values(eventosVisiveisCache);
+            let cache = {};
+            lista.forEach(e => cache[e.id] = e);
+            dbData.eventos = Object.values(cache);
             renderEventos();
             carregarMinhasInscricoes();
         }
@@ -422,17 +422,26 @@
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
             const us = dbData.usuarios.filter(u => !filtroTagAtual || (u.tags || []).includes(filtroTagAtual));
-            tbody.innerHTML = us.map(u => `
-                <tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="usuarios" data-id="${esc(u.id)}">
+            tbody.innerHTML = us.map(u => {
+                const tagsHtml = (u.tags || []).map(tName => {
+                    const tObj = TAGS_DISPONIVEIS.find(t => t.nome === tName) || { cor: 'bg-slate-100 text-slate-800' };
+                    return `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${tObj.cor} mr-1 mb-1">${esc(tName)}</span>`;
+                }).join('') || '<span class="text-slate-400 text-xs">Sem tags</span>';
+
+                const criado = u.criadoEm ? new Date(u.criadoEm).toLocaleDateString('pt-BR') : '-';
+                const editado = u.atualizadoEm ? new Date(u.atualizadoEm).toLocaleDateString('pt-BR') : 'Nunca';
+
+                return `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="usuarios" data-id="${esc(u.id)}">
                     <td class="p-4 font-bold">${esc(u.nome || u.email)}</td>
                     <td class="p-4 text-slate-600">${esc(u.email || u.id)}</td>
                     <td class="p-4">${esc(u.orgao || '')}</td>
-                    <td class="p-4">${esc((u.tags || []).join(', '))}</td>
-                    <td class="p-4">${esc(u.perfil || 'comum')}</td>
-                    <td class="p-4 text-xs">${esc((u.grupos || []).map(id => (dbData.grupos || []).find(g => g.id === id)?.nome || id).join(', '))}</td>
+                    <td class="p-4">${tagsHtml}</td>
+                    <td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 text-${u.perfil === 'admin' ? 'emerald' : 'amber'}-900 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td>
+                    <td class="p-4 text-xs">${esc((u.modulosPermitidos || []).join(', '))}</td>
+                    <td class="p-4 text-[11px] text-slate-500">Criado: ${criado}<br>Editado: ${editado}</td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Editar</button></td>
-                </tr>
-            `).join('');
+                </tr>`;
+            }).join('');
         }
 
         function renderOrgaos() {
@@ -595,10 +604,15 @@
                 obj.grupos=getChecked(form,'grupos');
                 obj.tags=getChecked(form,'tags');
                 obj.modulosPermitidos=getChecked(form,'modulosPermitidos');
+                obj.atualizadoEm = new Date().toISOString(); // Rastreabilidade de edição
             } else {
                 form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el=>{if(el.name)obj[el.name]=el.value;});
             }
-            try{await setDoc(doc(db,colecao,String(id)),obj,{merge:true});alert('Alterações salvas na nuvem com sucesso!');fecharModal('modal-detalhes');}catch(err){alert('Erro ao salvar: '+err.message);}
+            try{
+                await setDoc(doc(db,colecao,String(id)),obj,{merge:true});
+                alert('Alterações salvas na nuvem com sucesso!');
+                fecharModal('modal-detalhes');
+            }catch(err){alert('Erro ao salvar: '+err.message);}
         }
 
         let leituraInscricoesEmAndamento=false;
@@ -629,8 +643,7 @@
 
         async function cancelarInscricao(eventId){
             if(!confirm('Deseja cancelar sua inscrição?'))return;const er=doc(db,'eventos',String(eventId)),ir=doc(db,'inscricoes',String(eventId)+'_'+currentUser.uid);
-            try{await runTransaction(db,async tx=>{const [ev,ins]=await Promise.all([tx.get(er),tx.get(ir)]);if(!ins.exists())throw new Error('Inscrição não encontrada.');const qtd=Math.max(0,Number(ev.data()?.inscritosCount||0)-1);tx.delete(ir);tx.update(er,{inscritosCount:qtd});});alert('Inscrição cancelada com sucesso.');}catch(e){alert(e.message);}
-        }
+            try{await runTransaction(db,async tx=>{const [ev,ins]=await Promise.all([tx.get(er),tx.get(ir)]);if(!ins.exists())throw new Error('Inscrição não encontrada.');const qtd=Math.max(0,Number(ev.data()?.inscritosCount||0)-1);tx.delete(ir);tx.update(er,{inscritosCount:qtd});});alert('Inscrição cancelada com sucesso.');}catch(e){alert(e.message);}}
 
         async function criarGrupo(){
             if(currentUser?.perfil!=='admin')return;const nome=prompt('Nome do grupo:');if(!nome?.trim())return;const descricao=prompt('Descrição do grupo (opcional):')||'';
@@ -664,7 +677,8 @@
                             orgao: legado.orgao || 'GERAL',
                             tags: Array.isArray(legado.tags) ? legado.tags : [],
                             grupos: Array.isArray(legado.grupos) ? legado.grupos : [],
-                            modulosPermitidos: Array.isArray(legado.modulosPermitidos) ? legado.modulosPermitidos : ['dashboard','demandas','eventos']
+                            modulosPermitidos: Array.isArray(legado.modulosPermitidos) ? legado.modulosPermitidos : ['dashboard','demandas','eventos'],
+                            criadoEm: legado.criadoEm || new Date().toISOString()
                         };
                         try { await setDoc(ref, perfil, { merge:true }); } catch (migErr) { console.error('Erro ao migrar perfil legado:', migErr); }
                         return { ...perfil, id:uid };
@@ -674,13 +688,14 @@
 
             return {
                 uid, id:uid, email, nome:email, perfil:'comum', orgao:'GERAL', tags:[], grupos:[],
-                modulosPermitidos:['dashboard','demandas','eventos']
+                modulosPermitidos:['dashboard','demandas','eventos'],
+                criadoEm: new Date().toISOString()
             };
         }
 
         function exportarUsuariosCSV() {
-            let csv = "Nome;Email;Orgao;Perfil;Tags;Modulos\n";
-            dbData.usuarios.forEach(u => { csv += (u.nome||'') + ';' + (u.email||u.id) + ';' + (u.orgao||'') + ';' + (u.perfil||'') + ';"' + (u.tags||[]).join(',') + '";"' + (u.modulosPermitidos||[]).join(',') + '"\n'; });
+            let csv = "Nome;Email;Orgao;Perfil;Tags;Modulos;CriadoEm\n";
+            dbData.usuarios.forEach(u => { csv += (u.nome||'') + ';' + (u.email||u.id) + ';' + (u.orgao||'') + ';' + (u.perfil||'') + ';"' + (u.tags||[]).join(',') + '";"' + (u.modulosPermitidos||[]).join(',') + '";"' + (u.criadoEm||'') + '"\n'; });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", "usuarios_prgd.csv");
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
@@ -785,7 +800,17 @@
                     const tags = Array.from(document.querySelectorAll('.form-check-tag:checked')).map(x => x.value);
                     const grupos = getChecked(document.getElementById('form-univ-body'), 'grupos');
                     const cred = await createUserWithEmailAndPassword(creatorAuth, email, senha);
-                    await setDoc(doc(db, 'usuarios', cred.user.uid), { uid: cred.user.uid, nome: val('uc-1'), email, orgao: val('uc-3'), perfil: val('uc-4') || 'comum', modulosPermitidos: mod, tags, grupos, criadoEm: new Date().toISOString() });
+                    await setDoc(doc(db, 'usuarios', cred.user.uid), { 
+                        uid: cred.user.uid, 
+                        nome: val('uc-1'), 
+                        email, 
+                        orgao: val('uc-3'), 
+                        perfil: val('uc-4') || 'comum', 
+                        modulosPermitidos: mod, 
+                        tags, 
+                        grupos, 
+                        criadoEm: new Date().toISOString() 
+                    });
                     await signOut(creatorAuth);
                 } else if (tipo === 'evento') {
                     await addDoc(collection(db, 'eventos'), { id: 'EV-' + Date.now(), titulo: val('uc-1'), palestrante: val('uc-2'), categoria: val('uc-cat'), dataInicio: val('uc-3'), dataFim: val('uc-fim'), localEvento: val('uc-local'), limiteVagas: Number(val('uc-vagas') || 0), inscritosCount: 0, linkInscricao: val('uc-link'), imagemCard: val('uc-img'), descricao: val('uc-4'), textoCard: val('uc-card'), gruposPermitidos: getChecked(document.getElementById('form-univ-body'), 'gruposPermitidos'), eventoPublico: document.getElementById('uc-publico')?.checked || false, visibilidade: document.getElementById('uc-publico')?.checked ? 'Público' : 'Restrito por grupos', status: 'Publicado' });
@@ -891,7 +916,8 @@
                 currentUser = {
                     uid: user.uid, id: user.uid, email: user.email || '', nome: user.email || 'Usuário',
                     perfil: 'comum', orgao: 'GERAL', tags: [], grupos: [],
-                    modulosPermitidos: ['dashboard', 'demandas', 'eventos']
+                    modulosPermitidos: ['dashboard', 'demandas', 'eventos'],
+                    criadoEm: new Date().toISOString()
                 };
                 if (mainEl) mainEl.classList.remove('hidden');
                 if (loginModal) loginModal.classList.add('hidden');
@@ -900,7 +926,7 @@
             }
         });
 
-        console.info('PRGD v23.7: pronto.');
+        console.info('PRGD v23.8: pronto.');
     </script>
 </body>
 </html>
