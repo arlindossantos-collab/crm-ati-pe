@@ -1,28 +1,21 @@
-# PRGD v23.2 — CLOUD CORRIGIDO
+# PRGD v23.3 — LOGIN DEFINITIVO
 
-Esta versão retoma a autenticação estável da v22.0 e preserva os recursos de detalhamento, eventos, grupos e inscrições da v23.0.
+Correção focada no problema em que o botão de login não disparava nenhuma ação.
 
-## Correção principal
-- Login continua usando Firebase Authentication e `signInWithEmailAndPassword`.
-- Perfil é lido primeiro por `usuarios/{UID}`.
-- Perfis antigos cujo documento usava o e-mail como ID podem ser migrados automaticamente para `usuarios/{UID}`.
-- A sessão não é encerrada apenas porque o perfil ainda não existe.
-- Não foi alterada a criação de usuários via Firebase Authentication.
+## O que foi corrigido
+- Tela de login transformada em formulário HTML real (`login-form`).
+- Login executado pelo evento `submit`, inclusive ao pressionar Enter.
+- Mantido Firebase Authentication e o mesmo projeto Firebase.
+- Mensagens claras para senha/e-mail incorretos, usuário inexistente, usuário desativado, excesso de tentativas, rede e demais erros Firebase.
+- Botão mostra “Autenticando...” durante o processo.
+- Versão visível corrigida para v23.3 em todos os pontos da aplicação.
+- Demais funcionalidades da v23 foram preservadas.
 
 ## Publicação
-No diretório desta versão:
+Na pasta onde está este `firebase.json`:
 
 ```bash
 firebase deploy --only hosting,firestore:rules
 ```
 
-Depois da publicação, faça um hard refresh no navegador (Ctrl+F5).
-
-
-## Correção de login v23.2
-- Login Firebase mantido sem alteração de credenciais.
-- Mensagem visível para senha incorreta/e-mail incorreto e principais erros do Firebase Auth.
-- Botão mostra estado “Autenticando...” durante a tentativa.
-- Falhas de leitura do perfil Firestore não encerram mais a sessão autenticada.
-- Enter no campo de senha também executa o login.
-- Não foi necessário alterar a arquitetura de autenticação.
+Depois faça Ctrl+F5. Se o navegador continuar mostrando v23.1, a implantação não está usando esta pasta/arquivo.
