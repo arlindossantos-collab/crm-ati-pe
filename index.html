@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v23.0 FIREBASE CLOUD MULTIDISPOSITIVO -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v23.1 FIREBASE CLOUD MULTIDISPOSITIVO -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -49,7 +49,7 @@
                 <button type="button" id="btn-esqueci-senha" class="w-full mt-2 py-2 text-xs text-blue-900 hover:underline cursor-pointer">Esqueci minha senha</button>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v23.0 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v23.1 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -62,7 +62,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v23.0 CLOUD SYNC</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v23.1 CLOUD SYNC</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -230,7 +230,7 @@
         setPersistence(auth, browserLocalPersistence).catch(console.warn);
 
         let currentUser = null;
-        let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [] };
+        let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
         let abaAtual = 'dashboard';
         let filtroEventoAtual = 'todos';
         let filtroTagAtual = '';
@@ -687,21 +687,36 @@
         }
 
         async function carregarPerfilFirebase(user) {
+            // Mantém a autenticação Firebase da v22.0: primeiro lê somente o perfil
+            // correspondente ao UID autenticado. Não altera credenciais nem sessão.
             const ref = doc(db, 'usuarios', user.uid);
-            const snap = await new Promise((resolve, reject) => {
-                const unsub = onSnapshot(ref, s => { unsub(); resolve(s); }, reject);
-            });
-            if (!snap.exists()) {
-                // Migração segura de perfil legado por e-mail, se existir.
-                const legado = dbData.usuarios.find(u => String(u.email||'').toLowerCase() === String(user.email||'').toLowerCase());
-                if (legado && user.uid) {
-                    const perfil = { ...legado, uid:user.uid }; delete perfil.id;
-                    await setDoc(ref, perfil, { merge:true });
-                    return { ...perfil, uid:user.uid };
-                }
-                return { uid:user.uid, email:user.email, nome:user.email, perfil:'comum', orgao:'GERAL', tags:[], grupos:[], modulosPermitidos:['dashboard','demandas','eventos'] };
+            const snap = await getDoc(ref);
+            if (snap.exists()) {
+                return { uid:user.uid, id:snap.id, ...snap.data() };
             }
-            return { uid:user.uid, ...snap.data() };
+
+            // Compatibilidade com perfis antigos cujo ID era o próprio e-mail.
+            // As regras v23.1 permitem esta leitura somente quando o e-mail do
+            // documento corresponde ao e-mail autenticado.
+            try {
+                const legadoRef = doc(db, 'usuarios', String(user.email || '').toLowerCase());
+                const legadoSnap = await getDoc(legadoRef);
+                if (legadoSnap.exists()) {
+                    const legado = legadoSnap.data();
+                    const perfil = { ...legado, uid:user.uid, email:user.email };
+                    await setDoc(ref, perfil, { merge:true });
+                    return { ...perfil, id:user.uid };
+                }
+            } catch (e) {
+                console.warn('Perfil legado não migrado:', e.message);
+            }
+
+            // Usuário autenticado sem perfil: entra como comum, sem derrubar a sessão.
+            return {
+                uid:user.uid, id:user.uid, email:user.email, nome:user.email,
+                perfil:'comum', orgao:'GERAL', tags:[], grupos:[],
+                modulosPermitidos:['dashboard','demandas','eventos']
+            };
         }
 
         function exportarUsuariosCSV() {
@@ -750,8 +765,6 @@
             const closeBtn=ev.target.closest?.('.btn-fechar-modal');
             if(closeBtn){ fecharModal(closeBtn.dataset.target); return; }
         });
-        verificarAutenticacaoObrigatoria();
-
         onAuthStateChanged(auth, async user => {
             currentUser = user;
             pararSnapshots();
@@ -776,7 +789,7 @@
             }
         });
 
-        /* ===================== PRGD v23.0 - DETALHAMENTO / EVENTOS / GRUPOS ===================== */
+        /* ===================== PRGD v23.1 - DETALHAMENTO / EVENTOS / GRUPOS ===================== */
         const OPCOES_LOCAL = {
             estacionamento:['Não possui','Próprio','Terceirizado','Vagas limitadas','Vagas amplas'],
             climatizacao:['Não possui','Ar-condicionado','Climatização central','Ventiladores','Climatização parcial'],
