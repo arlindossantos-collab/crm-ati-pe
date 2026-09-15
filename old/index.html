@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v20.0 FIREBASE DIRECT SYNC & FULL PERSISTENCE -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v22.0 FIREBASE CLOUD MULTIDISPOSITIVO -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -46,9 +46,10 @@
                 <button type="button" id="btn-executar-login" class="w-full mt-6 py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-right-to-bracket"></i> Autenticar e Entrar
                 </button>
+                <button type="button" id="btn-esqueci-senha" class="w-full mt-2 py-2 text-xs text-blue-900 hover:underline cursor-pointer">Esqueci minha senha</button>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v20.0 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v22.0 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -61,7 +62,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v20.0 CLOUD SYNC</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v22.0 CLOUD SYNC</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -205,7 +206,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -220,6 +221,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const creatorApp = initializeApp(firebaseConfig, "prgdUserCreator");
+        const creatorAuth = getAuth(creatorApp);
         setPersistence(auth, browserLocalPersistence).catch(console.warn);
 
         let currentUser = null;
@@ -276,15 +279,18 @@
         };
 
         async function restaurarDadosIsolados() {
+            // Dados iniciais são apenas uma carga de demonstração. Não sobrescrevemos
+            // usuários nem dados existentes; e somente o administrador pode executá-la.
+            if (!currentUser || currentUser.perfil !== 'admin') return;
             try {
                 for (const [colecao, itens] of Object.entries(initialMockData)) {
+                    if (colecao === 'usuarios') continue;
                     for (const item of itens) {
-                        await setDoc(doc(db, colecao, String(item.id)), item, { merge: true });
+                        const ref = doc(db, colecao, String(item.id));
+                        await setDoc(ref, item, { merge: true });
                     }
                 }
-            } catch (err) {
-                console.warn("Aviso de sincronização:", err);
-            }
+            } catch (err) { console.warn('Carga inicial não executada:', err.message); }
         }
 
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -338,19 +344,31 @@
             if (aba === 'usuarios') renderUsuarios();
         }
 
+        let snapshotUnsubs = [];
+        function pararSnapshots() { snapshotUnsubs.forEach(fn => { try { fn(); } catch(e){} }); snapshotUnsubs = []; }
+
         function iniciarSnapshotFirestore() {
-            MÓDULOS_SISTEMA.map(m=>m.id).forEach(col => {
-                onSnapshot(collection(db, col), snap => {
-                    if (!snap.empty) {
-                        dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    } else if (dbData[col].length === 0) {
-                        dbData[col] = initialMockData[col] || [];
-                    }
+            pararSnapshots();
+            if (!currentUser) return;
+            const colecoes = ['demandas','eventos','locais','orgaos','fornecedores','bases'];
+            if (currentUser.perfil === 'admin') colecoes.push('usuarios');
+            colecoes.forEach(col => {
+                const unsub = onSnapshot(collection(db, col), snap => {
+                    dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     renderizarTudo();
-                }, err => {
-                    console.warn("Erro no snapshot de " + col + ":", err.message);
-                });
+                }, err => console.warn('Firestore '+col+':', err.message));
+                snapshotUnsubs.push(unsub);
             });
+            // O perfil do usuário comum é lido diretamente pelo UID.
+            if (currentUser.uid) {
+                const unsubProfile = onSnapshot(doc(db,'usuarios',currentUser.uid), snap => {
+                    if (snap.exists()) {
+                        currentUser = { ...currentUser, ...snap.data(), uid: currentUser.uid };
+                        renderizarTudo();
+                    }
+                }, err => console.warn('Firestore perfil:', err.message));
+                snapshotUnsubs.push(unsubProfile);
+            }
         }
 
         function renderizarTudo() {
@@ -493,7 +511,7 @@
 
         function vincularCliquesTabelas() {
             document.querySelectorAll('.tr-detalhe').forEach(el => {
-                el.onclick = () => detalharRegistro(el.getAttribute('data-colecao'), el.getAttribute('data-id'));
+                el.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); detalharRegistro(el.getAttribute('data-colecao'), el.getAttribute('data-id')); };
             });
         }
 
@@ -554,14 +572,10 @@
             if (colecao === 'usuarios') {
                 objAtualizado.modulosPermitidos = checkboxesModulos;
                 objAtualizado.tags = checkboxesTags;
+                // A senha de outro usuário não pode ser alterada pelo cliente com updatePassword.
+                // Para redefinição, o usuário deve utilizar o fluxo de recuperação por e-mail.
                 const novaSenha = document.getElementById('nova-senha-input')?.value;
-                if (novaSenha && auth.currentUser) {
-                    try {
-                        await updatePassword(auth.currentUser, novaSenha);
-                    } catch (err) {
-                        console.warn("Aviso na atualização de senha Auth:", err.message);
-                    }
-                }
+                if (novaSenha) console.info('A senha não é alterada por este formulário; use a recuperação por e-mail do Firebase.');
             }
 
             try {
@@ -594,6 +608,24 @@
                 container.innerHTML = '<div><label class="block mb-1 font-medium">Sigla</label><input type="text" id="uc-1" required class="w-full p-2 border rounded uppercase"></div><div><label class="block mb-1 font-medium">Nome</label><input type="text" id="uc-2" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Tipo</label><input type="text" id="uc-3" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Responsável</label><input type="text" id="uc-4" class="w-full p-2 border rounded"></div>';
             } else if (tipo === 'evento') {
                 container.innerHTML = '<div><label class="block mb-1 font-medium">Título do Evento</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Palestrante / Responsável</label><input type="text" id="uc-2" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Data de Início</label><input type="datetime-local" id="uc-3" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Descrição</label><textarea id="uc-4" class="w-full p-2 border rounded"></textarea></div>';
+            } else if (tipo === 'local') {
+                container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block mb-1 font-medium">Nome do Local</label><input id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Tipo de Espaço</label><input id="uc-2" class="w-full p-2 border rounded"></div>
+                <div><label class="block mb-1 font-medium">Capacidade</label><input id="uc-3" type="number" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">m²</label><input id="uc-4" type="number" class="w-full p-2 border rounded"></div>
+                <div><label class="block mb-1 font-medium">Valor do aluguel</label><input id="uc-5" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Estacionamento</label><input id="uc-6" class="w-full p-2 border rounded"></div>
+                <div><label class="block mb-1 font-medium">Climatização</label><input id="uc-7" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Som / PA</label><input id="uc-8" class="w-full p-2 border rounded"></div>
+                <div><label class="block mb-1 font-medium">Cadeiras / Mesas</label><input id="uc-9" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Palco / Iluminação</label><input id="uc-10" class="w-full p-2 border rounded"></div>
+                <div><label class="block mb-1 font-medium">Cozinha / Cafeteria</label><input id="uc-11" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Espaço para estandes</label><input id="uc-12" class="w-full p-2 border rounded"></div>
+                <div class="md:col-span-2"><label class="block mb-1 font-medium">Endereço / Contato / Site</label><input id="uc-13" class="w-full p-2 border rounded"></div><div class="md:col-span-2"><label class="block mb-1 font-medium">Observações</label><textarea id="uc-14" class="w-full p-2 border rounded"></textarea></div></div>`;
+            } else if (tipo === 'fornecedor') {
+                container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="block mb-1 font-medium">Razão Social / Nome</label><input id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Nome Fantasia</label><input id="uc-2" class="w-full p-2 border rounded"></div>
+                <div><label class="block mb-1 font-medium">CNPJ</label><input id="uc-3" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Categoria</label><input id="uc-4" class="w-full p-2 border rounded"></div>
+                <div class="md:col-span-2"><label class="block mb-1 font-medium">O que faz / especialidades</label><textarea id="uc-5" class="w-full p-2 border rounded"></textarea></div>
+                <div><label class="block mb-1 font-medium">Produto / serviço principal</label><input id="uc-6" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Faixa de valor</label><input id="uc-7" class="w-full p-2 border rounded"></div>
+                <div><label class="block mb-1 font-medium">Contato principal</label><input id="uc-8" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Telefone / E-mail</label><input id="uc-9" class="w-full p-2 border rounded"></div>
+                <div><label class="block mb-1 font-medium">Site</label><input id="uc-10" class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Instagram / LinkedIn / Redes</label><input id="uc-11" class="w-full p-2 border rounded"></div>
+                <div class="md:col-span-2"><label class="block mb-1 font-medium">Eventos dos quais participou</label><textarea id="uc-12" class="w-full p-2 border rounded"></textarea></div><div class="md:col-span-2"><label class="block mb-1 font-medium">Experiência com Governo / Referências</label><textarea id="uc-13" class="w-full p-2 border rounded"></textarea></div><div class="md:col-span-2"><label class="block mb-1 font-medium">Observações</label><textarea id="uc-14" class="w-full p-2 border rounded"></textarea></div></div>`;
             } else {
                 container.innerHTML = '<div><label class="block mb-1 font-medium">Nome / Título</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Descrição / Detalhes</label><input type="text" id="uc-2" class="w-full p-2 border rounded"></div>';
             }
@@ -603,31 +635,30 @@
         async function salvarCadastroUniversal(e) {
             e.preventDefault();
             const tipo = document.getElementById('form-univ-tipo').value;
-            const c1 = document.getElementById('uc-1')?.value || '';
-            const c2 = document.getElementById('uc-2')?.value || '';
-            const c3 = document.getElementById('uc-3')?.value || '';
-            const c4 = document.getElementById('uc-4')?.value || '';
-
-            if (tipo === 'usuario') {
-                const email = c2.toLowerCase().trim();
-                const modulos = Array.from(document.querySelectorAll('.form-check-modulo:checked')).map(cb => cb.value);
-                const tags = Array.from(document.querySelectorAll('.form-check-tag:checked')).map(cb => cb.value);
-                
-                const obj = { id: email, nome: c1, email, orgao: c3, perfil: c4, modulosPermitidos: modulos, tags };
-                await setDoc(doc(db, 'usuarios', email), obj);
-            } else if (tipo === 'orgao') {
-                const obj = { id: c1.toUpperCase().trim(), sigla: c1.toUpperCase().trim(), nome: c2, tipoJuridico: c3, responsavel: c4 };
-                await setDoc(doc(db, 'orgaos', obj.id), obj);
-            } else if (tipo === 'evento') {
-                const obj = { id: 'EV-' + Date.now(), titulo: c1, palestrante: c2, dataInicio: c3, descricao: c4, visibilidade: 'Público' };
-                await addDoc(collection(db, 'eventos'), obj);
-            } else {
-                const obj = { id: 'OBJ-' + Date.now(), nome: c1, descricao: c2 };
-                await addDoc(collection(db, tipo + 's'), obj);
-            }
-
-            alert('Salvo e sincronizado na nuvem com sucesso!');
-            fecharModal('modal-form-universal');
+            const val = id => document.getElementById(id)?.value || '';
+            try {
+                if (tipo === 'usuario') {
+                    if (!currentUser || currentUser.perfil !== 'admin') throw new Error('Somente administradores podem criar usuários.');
+                    const email=val('uc-2').toLowerCase().trim(), senha=val('uc-senha');
+                    if(senha.length<6) throw new Error('A senha inicial deve ter pelo menos 6 caracteres.');
+                    const modulos=Array.from(document.querySelectorAll('.form-check-modulo:checked')).map(x=>x.value);
+                    const tags=Array.from(document.querySelectorAll('.form-check-tag:checked')).map(x=>x.value);
+                    const cred=await createUserWithEmailAndPassword(creatorAuth,email,senha);
+                    await setDoc(doc(db,'usuarios',cred.user.uid),{uid:cred.user.uid,nome:val('uc-1'),email,orgao:val('uc-3'),perfil:val('uc-4')||'comum',modulosPermitidos:modulos,tags,criadoEm:new Date().toISOString()});
+                    await signOut(creatorAuth);
+                } else if(tipo==='orgao') {
+                    const sigla=val('uc-1').toUpperCase().trim(); await setDoc(doc(db,'orgaos',sigla),{id:sigla,sigla,nome:val('uc-2'),tipoJuridico:val('uc-3'),responsavel:val('uc-4')},{merge:true});
+                } else if(tipo==='evento') {
+                    await addDoc(collection(db,'eventos'),{id:'EV-'+Date.now(),titulo:val('uc-1'),palestrante:val('uc-2'),dataInicio:val('uc-3'),descricao:val('uc-4'),visibilidade:'Público'});
+                } else if(tipo==='local') {
+                    await addDoc(collection(db,'locais'),{id:'LOC-'+Date.now(),nome:val('uc-1'),tipoEspaco:val('uc-2'),capacidade:val('uc-3'),metrosQuadrados:val('uc-4'),valorAluguel:val('uc-5'),estacionamento:val('uc-6'),climatizacao:val('uc-7'),somPA:val('uc-8'),cadeirasMesas:val('uc-9'),palcoIluminacao:val('uc-10'),cozinhaCafeteria:val('uc-11'),espacoEstandes:val('uc-12'),enderecoContatoSite:val('uc-13'),observacoes:val('uc-14')});
+                } else if(tipo==='fornecedor') {
+                    await addDoc(collection(db,'fornecedores'),{id:'FOR-'+Date.now(),nome:val('uc-1'),nomeFantasia:val('uc-2'),cnpj:val('uc-3'),categoria:val('uc-4'),especialidades:val('uc-5'),produtoServicoPrincipal:val('uc-6'),faixaValor:val('uc-7'),contatoPrincipal:val('uc-8'),telefoneEmail:val('uc-9'),site:val('uc-10'),redesSociais:val('uc-11'),eventosParticipou:val('uc-12'),experienciaGoverno:val('uc-13'),observacoes:val('uc-14')});
+                } else {
+                    const col=tipo+'s'; await addDoc(collection(db,col),{id:'OBJ-'+Date.now(),nome:val('uc-1'),descricao:val('uc-2')});
+                }
+                alert('Cadastro salvo e sincronizado na nuvem com sucesso!'); fecharModal('modal-form-universal');
+            } catch(err) { alert('Não foi possível salvar: '+err.message); }
         }
 
         async function excluirRegistroUniversal() {
@@ -644,20 +675,29 @@
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const senha = document.getElementById('login-senha').value;
             try {
-                const cred = await signInWithEmailAndPassword(auth, email, senha);
-                const userDoc = dbData.usuarios.find(u => (u.email || u.id) === email);
-                currentUser = userDoc || { email: cred.user.email, perfil: 'admin', orgao: 'ATI', modulosPermitidos: MÓDULOS_SISTEMA.map(m=>m.id) };
-                await restaurarDadosIsolados();
-                atualizarVisibilidadeAbas();
+                await signInWithEmailAndPassword(auth, email, senha);
+                // onAuthStateChanged carrega o perfil e inicia os listeners.
             } catch(err) {
-                if (email === 'arlindo.santos@ati.pe.gov.br' && senha === '123') {
-                    currentUser = { email, nome: 'Arlindo Santos', perfil: 'admin', orgao: 'ATI', modulosPermitidos: MÓDULOS_SISTEMA.map(m=>m.id) };
-                    await restaurarDadosIsolados();
-                    atualizarVisibilidadeAbas();
-                } else {
-                    alert('Erro de autenticação: ' + err.message);
-                }
+                alert('Erro de autenticação: ' + (err.code === 'auth/invalid-credential' ? 'e-mail ou senha inválidos.' : err.message));
             }
+        }
+
+        async function carregarPerfilFirebase(user) {
+            const ref = doc(db, 'usuarios', user.uid);
+            const snap = await new Promise((resolve, reject) => {
+                const unsub = onSnapshot(ref, s => { unsub(); resolve(s); }, reject);
+            });
+            if (!snap.exists()) {
+                // Migração segura de perfil legado por e-mail, se existir.
+                const legado = dbData.usuarios.find(u => String(u.email||'').toLowerCase() === String(user.email||'').toLowerCase());
+                if (legado && user.uid) {
+                    const perfil = { ...legado, uid:user.uid }; delete perfil.id;
+                    await setDoc(ref, perfil, { merge:true });
+                    return { ...perfil, uid:user.uid };
+                }
+                return { uid:user.uid, email:user.email, nome:user.email, perfil:'comum', orgao:'GERAL', tags:[], grupos:[], modulosPermitidos:['dashboard','demandas','eventos'] };
+            }
+            return { uid:user.uid, ...snap.data() };
         }
 
         function exportarUsuariosCSV() {
@@ -670,59 +710,66 @@
 
         function renderCharts() {
             const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
-            if (ctx1) new Chart(ctx1, { type: 'bar', data: { labels: ['Infra', 'Web', 'Gov'], datasets: [{ data: [15, 22, 9], backgroundColor: '#1e3a8a' }] } });
+            if (ctx1 && typeof Chart !== 'undefined') new Chart(ctx1, { type: 'bar', data: { labels: ['Infra', 'Web', 'Gov'], datasets: [{ data: [15, 22, 9], backgroundColor: '#1e3a8a' }] } });
             const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
-            if (ctx2) new Chart(ctx2, { type: 'doughnut', data: { labels: ['Pendentes', 'Em Andamento'], datasets: [{ data: [4, 18], backgroundColor: ['#f59e0b', '#3b82f6'] }] } });
+            if (ctx2 && typeof Chart !== 'undefined') new Chart(ctx2, { type: 'doughnut', data: { labels: ['Pendentes', 'Em Andamento'], datasets: [{ data: [4, 18], backgroundColor: ['#f59e0b', '#3b82f6'] }] } });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            restaurarDadosIsolados();
-            renderizarTudo();
-            iniciarSnapshotFirestore();
-            verificarAutenticacaoObrigatoria();
-
-            onAuthStateChanged(auth, async user => {
-                if (user) {
-                    const userDoc = dbData.usuarios.find(u => (u.email || u.id) === user.email);
-                    currentUser = userDoc || { email: user.email, perfil: 'admin', orgao: 'ATI', modulosPermitidos: MÓDULOS_SISTEMA.map(m=>m.id) };
-                    await restaurarDadosIsolados();
-                    atualizarVisibilidadeAbas();
-                }
+        function configurarInterface() {
+            const byId = id => document.getElementById(id);
+            byId('btn-executar-login')?.addEventListener('click', fazerLoginLocal);
+            byId('btn-executar-logout')?.addEventListener('click', async () => { await signOut(auth); });
+            byId('btn-export-csv')?.addEventListener('click', exportarUsuariosCSV);
+            byId('btn-esqueci-senha')?.addEventListener('click', async()=>{ const email=byId('login-email').value.trim().toLowerCase(); if(!email){alert('Informe o e-mail.');return;} try{await sendPasswordResetEmail(auth,email);alert('Se o e-mail estiver cadastrado, o Firebase enviará as instruções de redefinição.');}catch(e){alert('Não foi possível enviar a redefinição: '+e.message);} });
+            byId('form-univ-body')?.addEventListener('submit', salvarCadastroUniversal);
+            byId('form-edicao-admin')?.addEventListener('submit', salvarEdicaoAdmin);
+            byId('btn-excluir-registro')?.addEventListener('click', excluirRegistroUniversal);
+            byId('filtro-tag-usuario')?.addEventListener('change', e => { filtroTagAtual=e.target.value; renderUsuarios(); });
+            ['todos','futuros','realizados'].forEach(tipo => {
+                const b=byId('filtro-evento-'+tipo);
+                b?.addEventListener('click',()=>{ filtroEventoAtual=tipo; renderEventos(); });
             });
+            document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>mudarAba(b.dataset.tab)));
+            document.querySelectorAll('.btn-abrir-form').forEach(b=>b.addEventListener('click',()=>abrirModalForm(b.dataset.modalTarget)));
+            document.querySelectorAll('.btn-fechar-modal').forEach(b=>b.addEventListener('click',()=>fecharModal(b.dataset.target)));
+        }
 
-            document.getElementById('btn-executar-login').onclick = fazerLoginLocal;
-            document.getElementById('btn-executar-logout').onclick = () => { signOut(auth); currentUser = null; verificarAutenticacaoObrigatoria(); };
-            document.getElementById('btn-export-csv').onclick = exportarUsuariosCSV;
-            document.getElementById('form-univ-body').onsubmit = salvarCadastroUniversal;
-            document.getElementById('form-edicao-admin').onsubmit = salvarEdicaoAdmin;
-            document.getElementById('btn-excluir-registro').onclick = excluirRegistroUniversal;
+        configurarInterface();
+        // Delegação de eventos: mantém os botões das tabelas funcionais após cada atualização do Firestore.
+        document.addEventListener('click', ev => {
+            const row=ev.target.closest?.('.tr-detalhe');
+            if(row){ detalharRegistro(row.dataset.colecao,row.dataset.id); return; }
+            const tab=ev.target.closest?.('[data-tab]');
+            if(tab){ mudarAba(tab.dataset.tab); return; }
+            const formBtn=ev.target.closest?.('.btn-abrir-form');
+            if(formBtn){ abrirModalForm(formBtn.dataset.modalTarget); return; }
+            const closeBtn=ev.target.closest?.('.btn-fechar-modal');
+            if(closeBtn){ fecharModal(closeBtn.dataset.target); return; }
+        });
+        verificarAutenticacaoObrigatoria();
 
-            const btnTodos = document.getElementById('filtro-evento-todos');
-            const btnFuturos = document.getElementById('filtro-evento-futuros');
-            const btnRealizados = document.getElementById('filtro-evento-realizados');
-
-            const atualizarEstilosFiltroEventos = (ativo) => {
-                [btnTodos, btnFuturos, btnRealizados].forEach(b => {
-                    b.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-950 transition';
-                });
-                ativo.className = 'px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition font-bold';
-            };
-
-            btnTodos.onclick = () => { filtroEventoAtual = 'todos'; atualizarEstilosFiltroEventos(btnTodos); renderEventos(); };
-            btnFuturos.onclick = () => { filtroEventoAtual = 'futuros'; atualizarEstilosFiltroEventos(btnFuturos); renderEventos(); };
-            btnRealizados.onclick = () => { filtroEventoAtual = 'realizados'; atualizarEstilosFiltroEventos(btnRealizados); renderEventos(); };
-
-            document.getElementById('filtro-tag-usuario').onchange = (e) => {
-                filtroTagAtual = e.target.value;
-                renderUsuarios();
-            };
-
-            MÓDULOS_SISTEMA.forEach(m => {
-                const b = document.querySelector(`[data-tab="${m.id}"]`);
-                if (b) b.onclick = () => mudarAba(m.id);
-            });
-            document.querySelectorAll('.btn-abrir-form').forEach(b => b.onclick = () => abrirModalForm(b.getAttribute('data-modal-target')));
-            document.querySelectorAll('.btn-fechar-modal').forEach(b => b.onclick = () => fecharModal(b.getAttribute('data-target')));
+        onAuthStateChanged(auth, async user => {
+            currentUser = user;
+            pararSnapshots();
+            if (!user) {
+                document.getElementById('main-content')?.classList.add('hidden');
+                document.getElementById('modal-login')?.classList.remove('hidden');
+                return;
+            }
+            try {
+                currentUser = await carregarPerfilFirebase(user);
+                document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
+                document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
+                verificarAutenticacaoObrigatoria();
+                atualizarVisibilidadeAbas();
+                iniciarSnapshotFirestore();
+                if (currentUser.perfil === 'admin') await restaurarDadosIsolados();
+                renderizarTudo();
+            } catch(err) {
+                console.error(err);
+                alert('Não foi possível carregar o perfil do usuário. Verifique o documento usuarios/{UID} no Firestore.');
+                await signOut(auth);
+            }
         });
     </script>
 </body>

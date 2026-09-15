@@ -3,25 +3,75 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
     function profile() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
-    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) && profile().perfil == 'admin'; }
-    function canRead(data) {
-      return isAdmin()
-        || data.publico == true
-        || !(data.restrito == true)
-        || (data.gruposPermitidos is list && data.gruposPermitidos.size() == 0)
-        || (data.gruposPermitidos is list && profile().grupos is list && data.gruposPermitidos.hasAny(profile().grupos))
-        || (data.tagsPermitidas is list && profile().tags is list && data.tagsPermitidas.hasAny(profile().tags))
-        || (data.orgao == profile().orgao)
-        || (data.orgaosPermitidos is list && data.orgaosPermitidos.hasAny([profile().orgao]));
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        && profile().perfil == 'admin';
     }
+    function canReadEvent(data) {
+      return isAdmin()
+        || data.eventoPublico == true
+        || !('gruposPermitidos' in data)
+        || data.gruposPermitidos.size() == 0
+        || (data.gruposPermitidos is list && profile().grupos is list && data.gruposPermitidos.hasAny(profile().grupos));
+    }
+    function eventCountChangeOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['inscritosCount'])
+        && request.resource.data.inscritosCount is number
+        && request.resource.data.inscritosCount >= 0
+        && request.resource.data.inscritosCount <= (resource.data.limiteVagas is number && resource.data.limiteVagas > 0 ? resource.data.limiteVagas : 2147483647);
+    }
+
     match /usuarios/{uid} {
       allow read: if signedIn() && (isAdmin() || request.auth.uid == uid);
       allow create: if isAdmin() && request.resource.data.uid == uid;
-      allow update: if isAdmin() || request.auth.uid == uid;
+      allow update: if isAdmin()
+        || (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome']));
       allow delete: if isAdmin();
     }
+
+    match /grupos/{id} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /eventos/{id} {
+      allow read: if signedIn() && canReadEvent(resource.data);
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin()
+        || (signedIn() && eventCountChangeOnly()
+            && (
+              (request.resource.data.inscritosCount == resource.data.inscritosCount + 1
+                && exists(/databases/$(database)/documents/inscricoes/$(id + '_' + request.auth.uid)))
+              ||
+              (request.resource.data.inscritosCount == resource.data.inscritosCount - 1
+                && exists(/databases/$(database)/documents/inscricoes/$(id + '_' + request.auth.uid)))
+            ));
+    }
+
+    match /inscricoes/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.eventId is string
+        && exists(/databases/$(database)/documents/eventos/$(request.resource.data.eventId))
+        && canReadEvent(get(/databases/$(database)/documents/eventos/$(request.resource.data.eventId)).data);
+      allow delete: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update: if false;
+    }
+
     match /{collection}/{id} {
-      allow read: if signedIn() && canRead(resource.data);
+      allow read: if signedIn() && (
+        isAdmin()
+        || resource.data.publico == true
+        || !('restrito' in resource.data)
+        || resource.data.restrito != true
+        || (resource.data.gruposPermitidos is list && resource.data.gruposPermitidos.size() == 0)
+        || (resource.data.gruposPermitidos is list && profile().grupos is list && resource.data.gruposPermitidos.hasAny(profile().grupos))
+        || (resource.data.tagsPermitidas is list && profile().tags is list && resource.data.tagsPermitidas.hasAny(profile().tags))
+        || resource.data.orgao == profile().orgao
+        || (resource.data.orgaosPermitidos is list && resource.data.orgaosPermitidos.hasAny([profile().orgao]))
+      );
       allow create, update, delete: if isAdmin();
     }
   }

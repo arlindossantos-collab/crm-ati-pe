@@ -1,22 +1,77 @@
-# PRGD v22.0 — Cloud Multidispositivo
+# PRGD v23.0 — CLOUD DETALHADO
 
-Versão reconstruída sobre a base PRGD v20 fornecida, preservando a navegação e os módulos e corrigindo a autenticação/sincronização.
+Versão evolutiva da PRGD v22.0. **A autenticação existente foi preservada**: Firebase Authentication, criação de usuários pelo fluxo atual e persistência de sessão não foram redesenhados.
 
-## Principais correções
-- Firebase Authentication real para login em qualquer dispositivo.
-- Perfil de usuário vinculado a `usuarios/{UID}`.
-- Criação de usuário pelo próprio aplicativo usando uma segunda instância Firebase Auth, sem derrubar a sessão do administrador.
-- Listeners Firestore iniciados somente após autenticação.
-- Usuários comuns não tentam ler a coleção inteira de usuários.
-- Delegação de eventos para que botões de tabelas continuem funcionando após atualizações em tempo real.
-- Edição/detalhamento/exclusão preservados.
-- Formulários ampliados para fornecedores e locais de eventos.
+## Principais melhorias
 
-## Firebase
-1. Authentication > Sign-in method > habilite Email/Password.
-2. Garanta que exista pelo menos um usuário administrador no Authentication.
-3. Crie `usuarios/{UID_DO_ADMIN}` com `perfil: "admin"`, e campos como `nome`, `email`, `orgao`, `modulosPermitidos` e `tags`.
-4. Publique hosting e regras: `firebase deploy --only hosting,firestore:rules`.
+- Edição estruturada dos módulos, sem transformar tudo em campos de texto genéricos.
+- Locais de eventos com opções marcáveis para estacionamento, climatização, som/PA, mobiliário, palco/iluminação, cozinha/cafeteria e estandes.
+- Banheiros e acessibilidade com Sim/Não e campo **Outros**.
+- Fornecedores com categorias e faixas de valor selecionáveis, além dos campos detalhados já existentes.
+- Eventos com ficha completa, imagem de card por URL, texto de divulgação, link de inscrição, link de divulgação, local, categoria, contatos, limite de vagas e status.
+- Grupos de usuários no Firestore (`grupos`).
+- Usuários podem pertencer a vários grupos.
+- Eventos podem ser públicos para usuários autenticados ou restritos a grupos.
+- Inscrição interna no evento com controle de vagas.
+- Comprovante visual de inscrição com código.
+- Cancelamento de inscrição.
+- Contador de vagas/inscritos.
+- Todos os cards continuam abrindo o detalhamento e edição administrativa.
+- Regras Firestore específicas para grupos, eventos e inscrições.
 
-## Observação importante
-O código não contém uma chave de serviço/Admin SDK. A criação do usuário é feita pelo SDK Web em uma segunda instância de Auth; as regras do Firestore continuam controlando a gravação do perfil. Para ambiente corporativo de produção, uma Cloud Function/Admin SDK pode ser adotada posteriormente para endurecer essa operação.
+## Publicação
+
+1. No console do Firebase, mantenha o provedor **Email/Password** habilitado.
+2. Não altere a configuração de autenticação usada pela v22.
+3. Substitua os arquivos publicados pelos desta versão.
+4. Publique Hosting + regras:
+
+```bash
+firebase deploy --only hosting,firestore:rules
+```
+
+## Modelo de dados adicional
+
+### `grupos/{id}`
+- `nome`
+- `descricao`
+- `ativo`
+- `criadoEm`
+
+### `usuarios/{UID}`
+Além dos campos existentes, pode possuir:
+- `grupos: ["GRP-..."]`
+
+### `eventos/{id}`
+Campos novos/recomendados:
+- `eventoPublico`
+- `gruposPermitidos`
+- `limiteVagas`
+- `inscritosCount`
+- `linkInscricao`
+- `linkDivulgacao`
+- `imagemCard`
+- `textoCard`
+- `categoria`
+- `localEvento`
+- `contatoEvento`
+- `status`
+
+### `inscricoes/{eventoId_UID}`
+- `eventId`
+- `uid`
+- `nome`
+- `email`
+- `eventoTitulo`
+- `inscritoEm`
+
+## Sugestões para próxima evolução
+
+1. Gerador automático de card em formato Instagram/WhatsApp/LinkedIn a partir dos dados do evento.
+2. Exportação da lista de inscritos para Excel/CSV pelo administrador.
+3. Lista de presença com QR Code para cada inscrição.
+4. Certificado automático após o evento.
+5. Busca e filtros avançados em Locais e Fornecedores.
+6. Histórico de alterações dos cadastros (quem alterou, quando e o que mudou).
+7. Galeria de fotos dos locais e dos eventos usando Firebase Storage.
+8. Workflow de aprovação/publicação de eventos antes de ficarem visíveis aos grupos.
