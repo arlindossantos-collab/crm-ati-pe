@@ -1,4 +1,4 @@
-# PRGD v29.0 — Plataforma de Relacionamento do Governo Digital (ATI-PE)
+# PRGD v31.0 — Plataforma de Relacionamento do Governo Digital (ATI-PE)
 
 ## 1. Visão Geral do Projeto
 *   **Nome do Sistema:** PRGD - Plataforma de Relacionamento do Governo Digital
@@ -20,11 +20,11 @@
 
 #### Escopo Positivo (O que a aplicação faz)
 *   **Autenticação e Permissões Unificadas:** Login seguro por e-mail e senha, migração automática de perfis legados, distinção estrita entre perfis `admin` e `comum`, e isolamento de acesso por grupos de usuários.
-*   **Módulo de Eventos Avançado (v29.0):**
-    *   *Upload e Capa Prioritária:* O cadastro de eventos coloca o upload de imagem e URL de capa em primeiro plano, renderizando-a perfeitamente na parte superior dos cards visuais.
-    *   *Segmentação por Grupos:* Criação de eventos públicos institucionais ou restritos a grupos específicos de usuários.
-    *   *Inscrições Validadas por E-mail:* Modal interativo de confirmação de dados vinculado rigidamente ao e-mail autenticado do usuário (`currentUser.email`), prevenção contra duplicidade por UID/e-mail, simulação de envio de comprovante, geração de código único e botão direto para inserção na Agenda do Google.
-    *   *Links e Materiais:* Suporte a links externos de inscrição e repositórios de apoio.
+*   **Módulo de Eventos Avançado (v31.0):**
+    *   *Filtro Padrão por Data:* Ao acessar o módulo de eventos, o sistema exibe automaticamente por padrão apenas os **eventos futuros**. Eventos passados ficam restritos exclusivamente à aba/botão **Realizados**.
+    *   *Remoção de Links em Eventos Realizados:* Para eventos finalizados, links de inscrição e botões de chamada são removidos, exibindo apenas o status de encerramento e detalhes.
+    *   *Design Diferenciado:* Cards de eventos passados contam com paleta de cores sóbria (tons de cinza/slate) para distingui-los visualmente dos eventos ativos.
+    *   *Inscrições Validadas por E-mail:* Modal interativo de confirmação vinculado ao e-mail autenticado do usuário (`currentUser.email`), prevenção contra duplicidade por UID/e-mail, comprovante com código único e inserção na Agenda do Google.
 *   **Gestão Administrativa Total:** O administrador possui controle completo para cadastrar, editar, excluir registros em qualquer módulo, remover inscrições e **extrair relatórios gerenciais em CSV** (por evento individual ou consolidados de todas as inscrições).
 *   **Trilha de Auditoria Completa:** Registro automático de data/hora de **Criação/Edição** e identificação do autor (`Criado/Editado por`) em todas as operações dos módulos.
 
