@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APPLICATION: PRGD v24.2 BULK CSV & GROUP FIX                -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v24.3 BULK CSV ORGAOS & USERS               -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -50,7 +50,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v24.2 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v24.3 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v24.2 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v24.3 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -153,7 +153,15 @@
 
         <!-- ABA ÓRGÃOS -->
         <div id="aba-orgaos" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos, Secretarias e Entidades</h3><button type="button" data-modal-target="orgao" class="btn-abrir-form btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria</button></div>
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos, Secretarias e Entidades</h3>
+                <div class="flex items-center gap-2">
+                    <label class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                        <i class="fa-solid fa-file-arrow-up"></i> Importar CSV <input type="file" id="input-import-orgaos-csv" accept=".csv" class="hidden">
+                    </label>
+                    <button type="button" data-modal-target="orgao" class="btn-abrir-form btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria</button>
+                </div>
+            </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Sigla</th><th class="p-4">Nome do Órgão / Secretaria</th><th class="p-4">Tipo Jurídico</th><th class="p-4">Contato / Site / Redes</th><th class="p-4">Responsável TIC</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-orgaos" class="divide-y text-sm"></tbody></table></div>
         </div>
 
@@ -188,7 +196,7 @@
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Órgão</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Módulos</th><th class="p-4">Criação / Edição</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários (Acesso Restrito a Eventos)</h4><p class="text-xs text-slate-500">Crie grupos para controlar quais usuários enxergam os eventos restritos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
+                <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários (Acesso Restrito a Eventos)</h4><p class="text-xs text-slate-500">Crie grupos para controlar quais usuários enxergam os eventos restritos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3 py-2 rounded-lg font-semibold cursor-pointer"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
                 <div id="lista-grupos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
             </div>
         </div>
@@ -213,14 +221,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v24.2 -->
+    <!-- Script Principal v24.3 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, runTransaction, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v24.2: importação CSV e correções de grupos aplicadas');
+        console.info('PRGD v24.3: importação CSV de órgãos e usuários ativa');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -799,6 +807,49 @@
             leitor.readAsText(arquivo, 'UTF-8');
         }
 
+        async function importarCsvOrgaos(e) {
+            const arquivo = e.target.files[0];
+            if (!arquivo) return;
+            const leitor = new FileReader();
+            leitor.onload = async function(evt) {
+                const conteudo = evt.target.result;
+                const linhas = conteudo.split(/\r\n|\n/);
+                let importados = 0;
+                for (let i = 1; i < linhas.length; i++) {
+                    const linha = linhas[i].trim();
+                    if (!linha) continue;
+                    const cols = linha.split(';');
+                    const sigla = cols[0]?.trim().toUpperCase() || '';
+                    const nome = cols[1]?.trim() || '';
+                    const tipoJuridico = cols[2]?.trim() || '';
+                    const responsavel = cols[3]?.trim() || '';
+                    const email = cols[4]?.trim() || '';
+                    const site = normalizarUrl(cols[5]?.trim() || '');
+                    const redesSociais = cols[6]?.trim() || '';
+                    const endereco = cols[7]?.trim() || '';
+                    if (sigla && nome) {
+                        try {
+                            await setDoc(doc(db, 'orgaos', sigla), {
+                                id: sigla,
+                                sigla,
+                                nome,
+                                tipoJuridico,
+                                responsavel,
+                                email,
+                                site,
+                                redesSociais,
+                                endereco
+                            }, { merge: true });
+                            importados++;
+                        } catch(err) { console.warn('Erro ao importar órgão:', sigla, err); }
+                    }
+                }
+                alert(`Importação concluída! ${importados} órgãos adicionados/atualizados.`);
+                e.target.value = '';
+            };
+            leitor.readAsText(arquivo, 'UTF-8');
+        }
+
         async function carregarPerfilFirebase(user) {
             const uid = user.uid;
             const email = String(user.email || '').trim().toLowerCase();
@@ -1076,6 +1127,7 @@
             byId('btn-executar-logout')?.addEventListener('click', async () => { await signOut(auth); });
             byId('btn-export-csv')?.addEventListener('click', exportarUsuariosCSV);
             byId('input-import-csv')?.addEventListener('change', importarCsvUsuarios);
+            byId('input-import-orgaos-csv')?.addEventListener('change', importarCsvOrgaos);
             byId('btn-esqueci-senha')?.addEventListener('click', async () => {
                 const email = byId('login-email').value.trim().toLowerCase();
                 if (!email) { alert('Informe o e-mail.'); return; }
@@ -1156,7 +1208,7 @@
             }
         });
 
-        console.info('PRGD v24.2: pronto.');
+        console.info('PRGD v24.3: pronto.');
     </script>
 </body>
 </html>
