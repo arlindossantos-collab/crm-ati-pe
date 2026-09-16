@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v25.0 ULTIMATE ADVANCED FILTERS & COUNTERS -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v26.0 FULL AUDIT TRAIL (CREATED & EDITED BY)-->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -50,7 +50,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v25.0 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v26.0 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v25.0 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v26.0 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -129,7 +129,7 @@
                 </div>
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                     <h4 class="text-sm font-bold text-slate-700 mb-3"><i class="fa-solid fa-shield-halved text-emerald-600 mr-2"></i> Integridade e Sincronização Cloud</h4>
-                    <p class="text-xs text-slate-600 leading-relaxed">Todos os registros são validados e salvos diretamente no Firestore Cloud em tempo real, garantindo redundância, controle granular por grupos e histórico imutável de alterações.</p>
+                    <p class="text-xs text-slate-600 leading-relaxed">Todos os registros contam com trilha de auditoria completa (Criação/Edição e Autor), garantindo governança total sobre as informações sincronizadas no Firestore Cloud em tempo real.</p>
                 </div>
             </div>
         </div>
@@ -140,7 +140,7 @@
                 <div class="flex items-center gap-3">
                     <h3 class="text-base font-bold text-slate-800">Demandas (<span id="count-demandas">0</span>)</h3>
                     <div class="flex items-center gap-2">
-                        <input type="text" id="busca-demandas" placeholder="Buscar demanda, órgão, solicitante..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                        <input type="text" id="busca-demandas" placeholder="Buscar demanda, órgão, solicitante..." class="p-2 border rounded-lg text-xs bg-white w-56 focus:ring-2 focus:ring-blue-600 focus:outline-none">
                         <select id="filtro-demanda-status" class="p-2 border rounded-lg text-xs bg-white font-medium">
                             <option value="">Todos os Status</option>
                             <option value="Pendente">Pendente</option>
@@ -151,7 +151,7 @@
                 </div>
                 <button type="button" data-modal-target="demanda" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Demanda</button>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[800px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Órgão / Solicitante</th><th class="p-4">Título da Demanda</th><th class="p-4">Área Solicitante</th><th class="p-4">Responsável ATI</th><th class="p-4">Prioridade / Status</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-demandas" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Órgão / Solicitante</th><th class="p-4">Título da Demanda</th><th class="p-4">Área / Resp. ATI</th><th class="p-4">Prioridade / Status</th><th class="p-4">Criação / Edição</th><th class="p-4">Criado / Editado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-demandas" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA EVENTOS -->
@@ -205,7 +205,7 @@
                     <button type="button" data-modal-target="orgao" class="btn-abrir-form btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Órgão</button>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Sigla</th><th class="p-4">Nome do Órgão / Secretaria</th><th class="p-4">Tipo Jurídico</th><th class="p-4">Contato / Site / Redes</th><th class="p-4">Responsável TIC</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-orgaos" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Sigla</th><th class="p-4">Nome do Órgão / Secretaria</th><th class="p-4">Tipo Jurídico</th><th class="p-4">Contato / Site</th><th class="p-4">Criação / Edição</th><th class="p-4">Criado / Editado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-orgaos" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA FORNECEDORES -->
@@ -229,7 +229,7 @@
                 </div>
                 <button type="button" data-modal-target="base" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Parâmetro de Base</button>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria / Domínio</th><th class="p-4">Identificador / Sigla</th><th class="p-4">Nome / Descrição</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[800px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria / Domínio</th><th class="p-4">Identificador / Sigla</th><th class="p-4">Nome / Descrição</th><th class="p-4">Criação / Edição</th><th class="p-4">Criado / Editado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA USUÁRIOS -->
@@ -252,7 +252,7 @@
                     <button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Órgão</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Módulos</th><th class="p-4">Criação / Edição</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Órgão</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Edição</th><th class="p-4">Criado / Editado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
                 <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários (Acesso Restrito a Eventos)</h4><p class="text-xs text-slate-500">Crie grupos para controlar quais usuários enxergam os eventos restritos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
                 <div id="lista-grupos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -279,14 +279,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v25.0 -->
+    <!-- Script Principal v26.0 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, runTransaction, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v25.0: contadores, filtros avançados e tipos jurídicos coloridos ativos');
+        console.info('PRGD v26.0: trilha de auditoria completa ativa em todos os módulos');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -314,7 +314,6 @@
         let filtroTipoJuridicoAtual = '';
         let filtroDemandaStatusAtual = '';
 
-        // Buscas textuais
         let buscaDemandasVal = '';
         let buscaEventosVal = '';
         let buscaLocaisVal = '';
@@ -381,6 +380,16 @@
                 if (isNaN(d.getTime())) return dataStr;
                 return d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
             } catch(e) { return dataStr; }
+        }
+
+        function renderAuditInfo(item) {
+            const criado = item.criadoEm ? new Date(item.criadoEm).toLocaleDateString('pt-BR') : '-';
+            const editado = item.atualizadoEm ? new Date(item.atualizadoEm).toLocaleDateString('pt-BR') : 'Nunca';
+            const autor = item.criadoPor || item.editadoPor || 'Sistema';
+            return {
+                dataHtml: `<span class="text-[11px] text-slate-600">Criado: ${criado}<br>Editado: ${editado}</span>`,
+                autorHtml: `<span class="text-[11px] font-semibold text-slate-700">${esc(autor)}</span>`
+            };
         }
 
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -582,8 +591,7 @@
                     return `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${tObj.cor} mr-1 mb-1">${esc(tName)}</span>`;
                 }).join('') || '<span class="text-slate-400 text-xs">Sem tags</span>';
 
-                const criado = u.criadoEm ? new Date(u.criadoEm).toLocaleDateString('pt-BR') : '-';
-                const editado = u.atualizadoEm ? new Date(u.atualizadoEm).toLocaleDateString('pt-BR') : 'Nunca';
+                const audit = renderAuditInfo(u);
 
                 return `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="usuarios" data-id="${esc(u.id)}">
                     <td class="p-4 font-bold">${esc(u.nome || u.email)}</td>
@@ -591,8 +599,8 @@
                     <td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td>
                     <td class="p-4">${tagsHtml}</td>
                     <td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 text-${u.perfil === 'admin' ? 'emerald' : 'amber'}-900 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td>
-                    <td class="p-4 text-xs">${esc((u.modulosPermitidos || []).join(', '))}</td>
-                    <td class="p-4 text-[11px] text-slate-500">Criado: ${criado}<br>Editado: ${editado}</td>
+                    <td class="p-4">${audit.dataHtml}</td>
+                    <td class="p-4">${audit.autorHtml}</td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Editar</button></td>
                 </tr>`;
             }).join('') || '<tr><td colspan="8" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado para este filtro.</td></tr>';
@@ -613,6 +621,7 @@
             tbody.innerHTML = filtered.map(o => {
                 const siteFmt = normalizarUrl(o.site);
                 const corTipo = obterCorTipoJuridico(o.tipoJuridico);
+                const audit = renderAuditInfo(o);
                 return `
                 <tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="orgaos" data-id="${esc(o.id)}">
                     <td class="p-4 font-bold text-indigo-900">${esc(o.sigla || o.id)}</td>
@@ -621,9 +630,10 @@
                     <td class="p-4 text-xs text-slate-600">
                         ${siteFmt ? `<div><i class="fa-solid fa-globe mr-1"></i> <a href="${esc(siteFmt)}" target="_blank" class="text-blue-600 hover:underline">${esc(o.site)}</a></div>` : ''}
                         ${o.redesSociais ? `<div><i class="fa-solid fa-share-nodes mr-1"></i> ${esc(o.redesSociais)}</div>` : ''}
-                        ${o.endereco ? `<div><i class="fa-solid fa-location-dot mr-1"></i> ${esc(o.endereco)}</div>` : 'Endereço não informado'}
+                        <div>Resp. TIC: ${esc(o.responsavel || '-')}</div>
                     </td>
-                    <td class="p-4">${esc(o.responsavel || '-')} (${esc(o.email || '')})</td>
+                    <td class="p-4">${audit.dataHtml}</td>
+                    <td class="p-4">${audit.autorHtml}</td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td>
                 </tr>
             `}).join('');
@@ -637,7 +647,17 @@
                 return !txt || (b.categoria || '').toLowerCase().includes(txt) || (b.sigla || '').toLowerCase().includes(txt) || (b.nome || '').toLowerCase().includes(txt);
             });
             document.getElementById('count-bases').textContent = filtered.length;
-            tbody.innerHTML = filtered.map(b => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="bases" data-id="${b.id}"><td class="p-4">${b.categoria}</td><td class="p-4 font-mono">${b.sigla}</td><td class="p-4">${b.nome}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
+            tbody.innerHTML = filtered.map(b => {
+                const audit = renderAuditInfo(b);
+                return `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="bases" data-id="${b.id}">
+                    <td class="p-4">${esc(b.categoria)}</td>
+                    <td class="p-4 font-mono">${esc(b.sigla)}</td>
+                    <td class="p-4">${esc(b.nome)}</td>
+                    <td class="p-4">${audit.dataHtml}</td>
+                    <td class="p-4">${audit.autorHtml}</td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td>
+                </tr>`;
+            }).join('');
         }
 
         function renderDemandas() {
@@ -651,16 +671,19 @@
             });
             document.getElementById('count-demandas').textContent = filtered.length;
 
-            tbody.innerHTML = filtered.map(d => `
+            tbody.innerHTML = filtered.map(d => {
+                const audit = renderAuditInfo(d);
+                return `
                 <tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="demandas" data-id="${esc(d.id)}">
                     <td class="p-4 font-bold">${esc(d.orgao)}<div class="text-[11px] font-normal text-slate-500">Sol.: ${esc(d.solicitante || 'Não informado')}</div></td>
                     <td class="p-4 font-semibold">${esc(d.titulo)}<div class="text-[11px] font-normal text-slate-500 truncate max-w-xs">${esc(d.descricao || '')}</div></td>
-                    <td class="p-4 text-xs text-slate-700">${esc(d.areaSolicitante || 'Geral')}</td>
                     <td class="p-4 text-xs text-indigo-900 font-semibold">${esc(d.responsavelAti || 'Não atribuído')}<div class="text-[10px] text-slate-500 font-normal">${esc(d.areaAti || 'ATI')}</div></td>
                     <td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-[10px]">${esc(d.prioridade || 'Normal')}</span><span class="bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded text-[10px] ml-1">${esc(d.status || 'Pendente')}</span></td>
+                    <td class="p-4">${audit.dataHtml}</td>
+                    <td class="p-4">${audit.autorHtml}</td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td>
                 </tr>
-            `).join('');
+            `;}).join('');
         }
 
         function renderEventos() {
@@ -690,6 +713,7 @@
                 const minha = !!(dbData.minhasInscricoes || []).some(i => i.id === inscId);
                 const linkForms = normalizarUrl(e.linkInscricao);
                 const bannerImg = normalizarUrl(e.imagemCard);
+                const audit = renderAuditInfo(e);
 
                 return `<article class="bg-white rounded-2xl border shadow-sm overflow-hidden flex flex-col">
                     ${bannerImg ? `<img src="${esc(bannerImg)}" class="w-full h-44 object-cover" alt="Banner do evento">` : `<div class="w-full h-32 bg-blue-900 text-white flex items-center justify-center font-bold text-lg">${esc(e.titulo)}</div>`}
@@ -702,6 +726,7 @@
                             <div><i class="fa-solid fa-calendar mr-1"></i> ${formatarData(e.dataInicio)}</div>
                             <div><i class="fa-solid fa-location-dot mr-1"></i> ${esc(e.localEvento || 'Local não informado')}</div>
                             ${vagas ? `<div><i class="fa-solid fa-users mr-1"></i> ${inscritos}/${vagas} vagas preenchidas</div>` : '<div><i class="fa-solid fa-users mr-1"></i> Vagas livres</div>'}
+                            <div class="pt-2 border-t mt-2 flex justify-between text-[11px] text-slate-500"><span>${audit.dataHtml}</span><span>Por: ${audit.autorHtml}</span></div>
                         </div>
                         <div class="mt-auto pt-4 flex flex-wrap gap-2">
                             ${!minha && !lotado && !real ? `<button type="button" data-inscrever-evento="${esc(e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-bold cursor-pointer">Inscrever-me</button>` : ''}
@@ -723,7 +748,19 @@
                 return !txt || (l.nome || '').toLowerCase().includes(txt) || (l.tipoEspaco || '').toLowerCase().includes(txt) || (l.endereco || '').toLowerCase().includes(txt) || (l.contato || '').toLowerCase().includes(txt);
             });
             document.getElementById('count-locais').textContent = filtered.length;
-            grid.innerHTML = filtered.map(l => `<div class="bg-white p-5 rounded-2xl border shadow-sm cursor-pointer tr-detalhe hover:border-purple-400" data-colecao="locais" data-id="${esc(l.id)}"><h4 class="font-bold text-lg">${esc(l.nome)}</h4><p class="text-xs text-slate-500 mt-1">${esc(l.tipoEspaco || 'Espaço')} • ${esc(l.capacidade || 0)} pessoas • ${esc(l.metrosQuadrados || '?')} m² • <b>${formatarMoeda(l.valorAluguel)}</b></p><p class="text-xs text-blue-900 font-bold mt-4">Detalhar / Editar →</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local.</p>';
+            grid.innerHTML = filtered.map(l => {
+                const audit = renderAuditInfo(l);
+                return `<div class="bg-white p-5 rounded-2xl border shadow-sm cursor-pointer tr-detalhe hover:border-purple-400 flex flex-col justify-between" data-colecao="locais" data-id="${esc(l.id)}">
+                    <div>
+                        <h4 class="font-bold text-lg">${esc(l.nome)}</h4>
+                        <p class="text-xs text-slate-500 mt-1">${esc(l.tipoEspaco || 'Espaço')} • ${esc(l.capacidade || 0)} pessoas • ${esc(l.metrosQuadrados || '?')} m² • <b>${formatarMoeda(l.valorAluguel)}</b></p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t text-[11px] text-slate-500 flex justify-between items-center">
+                        <div>${audit.dataHtml}</div>
+                        <div>Por: ${audit.autorHtml}</div>
+                    </div>
+                </div>`;
+            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local.</p>';
         }
 
         function renderFornecedores() {
@@ -734,7 +771,21 @@
                 return !txt || (f.nome || '').toLowerCase().includes(txt) || (f.cnpj || '').toLowerCase().includes(txt) || (f.categoria || '').toLowerCase().includes(txt) || (f.especialidades || '').toLowerCase().includes(txt);
             });
             document.getElementById('count-fornecedores').textContent = filtered.length;
-            grid.innerHTML = filtered.map(f => `<div class="bg-white p-5 rounded-2xl border shadow-sm cursor-pointer tr-detalhe hover:border-emerald-400" data-colecao="fornecedores" data-id="${esc(f.id)}"><h4 class="font-bold text-lg">${esc(f.nome)}</h4><p class="text-xs text-slate-500 mt-1">${esc(f.categoria || 'Fornecedor')} • CNPJ ${esc(f.cnpj || '-')}</p><p class="text-xs font-semibold text-emerald-800 mt-1">${esc(f.faixaValor || '')}</p><p class="text-xs text-slate-600 mt-2 line-clamp-3">${esc(f.especialidades || f.produtoServicoPrincipal || '')}</p><p class="text-xs text-blue-900 font-bold mt-4">Detalhar / Editar →</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor.</p>';
+            grid.innerHTML = filtered.map(f => {
+                const audit = renderAuditInfo(f);
+                return `<div class="bg-white p-5 rounded-2xl border shadow-sm cursor-pointer tr-detalhe hover:border-emerald-400 flex flex-col justify-between" data-colecao="fornecedores" data-id="${esc(f.id)}">
+                    <div>
+                        <h4 class="font-bold text-lg">${esc(f.nome)}</h4>
+                        <p class="text-xs text-slate-500 mt-1">${esc(f.categoria || 'Fornecedor')} • CNPJ ${esc(f.cnpj || '-')}</p>
+                        <p class="text-xs font-semibold text-emerald-800 mt-1">${esc(f.faixaValor || '')}</p>
+                        <p class="text-xs text-slate-600 mt-2 line-clamp-3">${esc(f.especialidades || f.produtoServicoPrincipal || '')}</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t text-[11px] text-slate-500 flex justify-between items-center">
+                        <div>${audit.dataHtml}</div>
+                        <div>Por: ${audit.autorHtml}</div>
+                    </div>
+                </div>`;
+            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor.</p>';
         }
 
         function renderGrupos() {
@@ -758,7 +809,6 @@
         function renderCharts() {
             if (typeof Chart === 'undefined') return;
 
-            // Gráfico 1: Categorias de demandas
             const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
             if (ctx1) {
                 if (chartCatInstance) chartCatInstance.destroy();
@@ -769,7 +819,6 @@
                 chartCatInstance = new Chart(ctx1, { type: 'bar', data: { labels, datasets: [{ data: dataVals, backgroundColor: '#1e3a8a' }] }, options: { plugins: { legend: { display: false } } } });
             }
 
-            // Gráfico 2: Status
             const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
             if (ctx2) {
                 if (chartStatusInstance) chartStatusInstance.destroy();
@@ -783,7 +832,6 @@
                 chartStatusInstance = new Chart(ctx2, { type: 'doughnut', data: { labels: ['Pendentes', 'Em Andamento', 'Concluídos'], datasets: [{ data: [pend, and, conc], backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'] }] } });
             }
 
-            // Gráfico 3: Tipos Jurídicos de Órgãos
             const ctx3 = document.getElementById('chartTiposOrgaos')?.getContext('2d');
             if (ctx3) {
                 if (chartTiposInstance) chartTiposInstance.destroy();
@@ -861,7 +909,17 @@
         async function salvarEdicaoAdmin(e){
             e.preventDefault(); if(currentUser?.perfil!=='admin'){alert('Somente administradores podem editar cadastros.');return;}
             const colecao=document.getElementById('edit-colecao').value,id=document.getElementById('edit-doc-id').value,form=e.target;
-            const obj={};
+            const itemAntigo = dbData[colecao]?.find(i=>String(i.id)===String(id)) || {};
+            const agora = new Date().toISOString();
+            const autorAtual = currentUser.nome || currentUser.email || 'Admin';
+
+            const obj={
+                atualizadoEm: agora,
+                editadoPor: autorAtual,
+                criadoEm: itemAntigo.criadoEm || agora,
+                criadoPor: itemAntigo.criadoPor || autorAtual
+            };
+
             if(colecao==='demandas'){
                 ['titulo','orgao','solicitante','areaSolicitante','responsavelAti','areaAti','categoria','prioridade','status','descricao'].forEach(k=>obj[k]=form.querySelector(`[name="${k}"]`)?.value||'');
             } else if(colecao==='orgaos'){
@@ -885,7 +943,6 @@
                 obj.grupos=getChecked(form,'grupos');
                 obj.tags=getChecked(form,'tags');
                 obj.modulosPermitidos=getChecked(form,'modulosPermitidos');
-                obj.atualizadoEm = new Date().toISOString();
             } else {
                 form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el=>{if(el.name)obj[el.name]=el.value;});
             }
@@ -950,6 +1007,8 @@
                 const conteudo = evt.target.result;
                 const linhas = conteudo.split(/\r\n|\n/);
                 let importados = 0;
+                const autor = currentUser?.nome || currentUser?.email || 'Sistema';
+                const agora = new Date().toISOString();
                 for (let i = 1; i < linhas.length; i++) {
                     const linha = linhas[i].trim();
                     if (!linha) continue;
@@ -970,7 +1029,10 @@
                                 modulosPermitidos: ['dashboard', 'demandas', 'eventos'],
                                 tags: [],
                                 grupos: [],
-                                criadoEm: new Date().toISOString()
+                                criadoEm: agora,
+                                atualizadoEm: agora,
+                                criadoPor: autor,
+                                editadoPor: autor
                             });
                             importados++;
                         } catch(err) { console.warn('Erro ao importar linha:', email, err); }
@@ -990,6 +1052,8 @@
                 const conteudo = evt.target.result;
                 const linhas = conteudo.split(/\r\n|\n/);
                 let importados = 0;
+                const autor = currentUser?.nome || currentUser?.email || 'Sistema';
+                const agora = new Date().toISOString();
                 
                 const cabecalho = (linhas[0] || '').trim();
                 const ehExportacaoGeral = cabecalho.startsWith('colecao;id;dados');
@@ -1006,6 +1070,10 @@
                         if (colecao === 'orgaos' && id && jsonStr) {
                             try {
                                 const dadosObj = JSON.parse(jsonStr);
+                                dadosObj.criadoEm = dadosObj.criadoEm || agora;
+                                dadosObj.atualizadoEm = agora;
+                                dadosObj.criadoPor = dadosObj.criadoPor || autor;
+                                dadosObj.editadoPor = autor;
                                 await setDoc(doc(db, 'orgaos', id), dadosObj, { merge: true });
                                 importados++;
                             } catch(err) { console.warn('Erro ao restaurar órgão exportado:', id, err); }
@@ -1032,7 +1100,11 @@
                                 email,
                                 site,
                                 redesSociais,
-                                endereco
+                                endereco,
+                                criadoEm: agora,
+                                atualizadoEm: agora,
+                                criadoPor: autor,
+                                editadoPor: autor
                             }, { merge: true });
                             importados++;
                         } catch(err) { console.warn('Erro ao importar órgão:', sigla, err); }
@@ -1183,6 +1255,9 @@
             e.preventDefault();
             const tipo = document.getElementById('form-univ-tipo').value;
             const val = id => document.getElementById(id)?.value || '';
+            const agora = new Date().toISOString();
+            const autor = currentUser?.nome || currentUser?.email || 'Sistema';
+
             try {
                 if (tipo === 'usuario') {
                     if (!currentUser || currentUser.perfil !== 'admin') throw new Error('Somente administradores podem criar usuários.');
@@ -1201,7 +1276,10 @@
                         modulosPermitidos: mod, 
                         tags, 
                         grupos, 
-                        criadoEm: new Date().toISOString() 
+                        criadoEm: agora,
+                        atualizadoEm: agora,
+                        criadoPor: autor,
+                        editadoPor: autor
                     });
                     await signOut(creatorAuth);
                 } else if (tipo === 'demanda') {
@@ -1217,7 +1295,10 @@
                         prioridade: val('uc-prio'),
                         status: 'Em Andamento',
                         descricao: val('uc-desc'),
-                        criadoEm: new Date().toISOString()
+                        criadoEm: agora,
+                        atualizadoEm: agora,
+                        criadoPor: autor,
+                        editadoPor: autor
                     });
                 } else if (tipo === 'orgao') {
                     const sigla = val('uc-1').toUpperCase().trim();
@@ -1230,7 +1311,11 @@
                         email: val('uc-email'),
                         site: normalizarUrl(val('uc-site')),
                         redesSociais: val('uc-redes'),
-                        endereco: val('uc-end')
+                        endereco: val('uc-end'),
+                        criadoEm: agora,
+                        atualizadoEm: agora,
+                        criadoPor: autor,
+                        editadoPor: autor
                     }, { merge: true });
                 } else if (tipo === 'evento') {
                     await addDoc(collection(db, 'eventos'), { 
@@ -1250,7 +1335,11 @@
                         gruposPermitidos: getChecked(document.getElementById('form-univ-body'), 'gruposPermitidos'), 
                         eventoPublico: document.getElementById('uc-publico')?.checked || false, 
                         visibilidade: document.getElementById('uc-publico')?.checked ? 'Público' : 'Restrito por grupos', 
-                        status: 'Publicado' 
+                        status: 'Publicado',
+                        criadoEm: agora,
+                        atualizadoEm: agora,
+                        criadoPor: autor,
+                        editadoPor: autor
                     });
                 } else if (tipo === 'local') {
                     const f = document.getElementById('form-univ-body');
@@ -1268,7 +1357,11 @@
                         site: normalizarUrl(val('uc-site')), 
                         banheiro: banVal, 
                         acessibilidade: val('uc-acess'), 
-                        observacoes: val('uc-obs') 
+                        observacoes: val('uc-obs'),
+                        criadoEm: agora,
+                        atualizadoEm: agora,
+                        criadoPor: autor,
+                        editadoPor: autor
                     };
                     document.querySelectorAll('[data-local-opt]').forEach((sel, i) => {
                         const outroOpt = document.getElementById('uc-out-' + i)?.value.trim();
@@ -1293,11 +1386,23 @@
                         redesSociais: val('uc-11'), 
                         eventosParticipou: val('uc-12'), 
                         experienciaGoverno: val('uc-13'), 
-                        observacoes: val('uc-14') 
+                        observacoes: val('uc-14'),
+                        criadoEm: agora,
+                        atualizadoEm: agora,
+                        criadoPor: autor,
+                        editadoPor: autor
                     });
                 } else {
                     const col = tipo + 's';
-                    await addDoc(collection(db, col), { id: 'OBJ-' + Date.now(), nome: val('uc-1'), descricao: val('uc-2') });
+                    await addDoc(collection(db, col), { 
+                        id: 'OBJ-' + Date.now(), 
+                        nome: val('uc-1'), 
+                        descricao: val('uc-2'),
+                        criadoEm: agora,
+                        atualizadoEm: agora,
+                        criadoPor: autor,
+                        editadoPor: autor
+                    });
                 }
                 alert('Salvo e sincronizado na nuvem com sucesso!');
                 fecharModal('modal-form-universal');
@@ -1332,7 +1437,6 @@
             byId('form-edicao-admin')?.addEventListener('submit', salvarEdicaoAdmin);
             byId('btn-excluir-registro')?.addEventListener('click', excluirRegistroUniversal);
 
-            // Listeners de buscas e filtros
             byId('busca-demandas')?.addEventListener('input', e => { buscaDemandasVal = e.target.value.toLowerCase().trim(); renderDemandas(); });
             byId('filtro-demanda-status')?.addEventListener('change', e => { filtroDemandaStatusAtual = e.target.value; renderDemandas(); });
             
@@ -1415,7 +1519,7 @@
             }
         });
 
-        console.info('PRGD v25.0: pronto.');
+        console.info('PRGD v26.0: pronto.');
     </script>
 </body>
 </html>
