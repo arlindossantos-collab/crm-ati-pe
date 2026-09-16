@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v24.5 UNIVERSAL CSV IMPORT                  -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v25.0 ULTIMATE ADVANCED FILTERS & COUNTERS -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -50,7 +50,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v24.5 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v25.0 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v24.5 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v25.0 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -89,17 +89,17 @@
             <span id="badge-perfil-acesso" class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold uppercase"></span>
         </div>
 
-        <!-- Navegação por Abas -->
+        <!-- Navegação por Abas com Contadores Dinâmicos -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
-                <button type="button" data-tab="dashboard" class="nav-tab px-4 py-2 rounded-lg transition tab-active"><i class="fa-solid fa-chart-pie mr-1.5"></i> Dashboard</button>
-                <button type="button" data-tab="demandas" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-list-check mr-1.5"></i> Demandas</button>
-                <button type="button" data-tab="eventos" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-calendar-day mr-1.5"></i> Eventos</button>
-                <button type="button" data-tab="locais" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-building-circle-check mr-1.5"></i> Locais de Eventos</button>
-                <button type="button" data-tab="orgaos" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-sitemap mr-1.5"></i> Órgãos / Secretarias</button>
-                <button type="button" data-tab="fornecedores" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-handshake mr-1.5"></i> Fornecedores</button>
-                <button type="button" data-tab="bases" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-database mr-1.5"></i> Bases Compartilhadas</button>
-                <button type="button" data-tab="usuarios" class="nav-tab px-4 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-users-gear mr-1.5"></i> Usuários & Tags</button>
+                <button type="button" data-tab="dashboard" class="nav-tab px-3.5 py-2 rounded-lg transition tab-active"><i class="fa-solid fa-chart-pie mr-1"></i> Dashboard</button>
+                <button type="button" data-tab="demandas" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-list-check mr-1"></i> Demandas <span id="cnt-tab-demandas" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+                <button type="button" data-tab="eventos" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-calendar-day mr-1"></i> Eventos <span id="cnt-tab-eventos" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+                <button type="button" data-tab="locais" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-building-circle-check mr-1"></i> Locais <span id="cnt-tab-locais" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+                <button type="button" data-tab="orgaos" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-sitemap mr-1"></i> Órgãos <span id="cnt-tab-orgaos" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+                <button type="button" data-tab="fornecedores" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-handshake mr-1"></i> Fornecedores <span id="cnt-tab-fornecedores" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+                <button type="button" data-tab="bases" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-database mr-1"></i> Bases <span id="cnt-tab-bases" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+                <button type="button" data-tab="usuarios" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-users-gear mr-1"></i> Usuários <span id="cnt-tab-usuarios" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
             </div>
             <div class="flex items-center gap-2">
                 <button type="button" id="btn-export-csv" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
@@ -117,49 +117,92 @@
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Órgãos Cadastrados</p><h3 id="dash-tot-orgaos" class="text-3xl font-bold text-indigo-600 mt-1">0</h3></div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Fornecedores TIC</p><h3 id="dash-tot-fornecedores" class="text-3xl font-bold text-emerald-600 mt-1">0</h3></div>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="text-sm font-bold text-slate-700 mb-4">Demandas por Categoria</h4><canvas id="chartCategorias" class="max-h-64"></canvas></div>
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="text-sm font-bold text-slate-700 mb-4">Status das Solicitações</h4><canvas id="chartStatus" class="max-h-64"></canvas></div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="text-sm font-bold text-slate-700 mb-4">Demandas por Categoria</h4><canvas id="chartCategorias" class="max-h-56"></canvas></div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="text-sm font-bold text-slate-700 mb-4">Status das Solicitações</h4><canvas id="chartStatus" class="max-h-56"></canvas></div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="text-sm font-bold text-slate-700 mb-4">Tipos Jurídicos de Órgãos</h4><canvas id="chartTiposOrgaos" class="max-h-56"></canvas></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h4 class="text-sm font-bold text-slate-700 mb-3"><i class="fa-solid fa-chart-line text-blue-600 mr-2"></i> Visão Executiva do Governo Digital</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">A plataforma PRGD centraliza o relacionamento interinstitucional da ATI-PE com todos os órgãos do Estado. Utilize os filtros avançados em cada aba para auditar responsabilidades, gerenciar demandas e programar eventos setoriais com agilidade e segurança.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h4 class="text-sm font-bold text-slate-700 mb-3"><i class="fa-solid fa-shield-halved text-emerald-600 mr-2"></i> Integridade e Sincronização Cloud</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">Todos os registros são validados e salvos diretamente no Firestore Cloud em tempo real, garantindo redundância, controle granular por grupos e histórico imutável de alterações.</p>
+                </div>
             </div>
         </div>
 
         <!-- ABA DEMANDAS -->
         <div id="aba-demandas" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Solicitações de Governo Digital Detalhadas</h3><button type="button" data-modal-target="demanda" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Demanda</button></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-slate-800">Demandas (<span id="count-demandas">0</span>)</h3>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="busca-demandas" placeholder="Buscar demanda, órgão, solicitante..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                        <select id="filtro-demanda-status" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                            <option value="">Todos os Status</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" data-modal-target="demanda" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Demanda</button>
+            </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[800px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Órgão / Solicitante</th><th class="p-4">Título da Demanda</th><th class="p-4">Área Solicitante</th><th class="p-4">Responsável ATI</th><th class="p-4">Prioridade / Status</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-demandas" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA EVENTOS -->
         <div id="aba-eventos" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h3 class="text-base font-bold text-slate-800">Agenda Institucional e Eventos Exclusivos</h3>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h3 class="text-base font-bold text-slate-800">Eventos (<span id="count-eventos">0</span>)</h3>
+                    <input type="text" id="busca-eventos" placeholder="Buscar evento, palestrante, local..." class="p-2 border rounded-lg text-xs bg-white w-56 focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     <div class="inline-flex bg-slate-200 p-1 rounded-lg text-xs font-semibold">
                         <button type="button" id="filtro-evento-todos" class="px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition">Todos</button>
                         <button type="button" id="filtro-evento-futuros" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Futuros</button>
                         <button type="button" id="filtro-evento-realizados" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Realizados</button>
                     </div>
-                    <button type="button" data-modal-target="evento" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Criar Evento</button>
                 </div>
+                <button type="button" data-modal-target="evento" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Criar Evento</button>
             </div>
             <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
         <!-- ABA LOCAIS -->
         <div id="aba-locais" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Catálogo de Espaços e Auditórios</h3><button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Local / Auditório</button></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-slate-800">Locais (<span id="count-locais">0</span>)</h3>
+                    <input type="text" id="busca-locais" placeholder="Buscar local, endereço, contato..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                </div>
+                <button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Local / Auditório</button>
+            </div>
             <div id="grid-locais" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
         <!-- ABA ÓRGÃOS -->
         <div id="aba-orgaos" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-800">Cadastro de Órgãos, Secretarias e Entidades</h3>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h3 class="text-base font-bold text-slate-800">Órgãos (<span id="count-orgaos">0</span>)</h3>
+                    <input type="text" id="busca-orgaos" placeholder="Buscar sigla, nome, responsável..." class="p-2 border rounded-lg text-xs bg-white w-56 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    <select id="filtro-tipo-juridico" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="">Filtrar por Tipo Jurídico</option>
+                        <option value="Secretaria Estadual">Secretaria Estadual</option>
+                        <option value="Autarquia">Autarquia</option>
+                        <option value="Fundação Pública">Fundação Pública</option>
+                        <option value="Empresa Pública">Empresa Pública</option>
+                        <option value="Órgão Autônomo">Órgão Autônomo</option>
+                    </select>
+                </div>
                 <div class="flex items-center gap-2">
                     <label class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-file-arrow-up"></i> Importar CSV <input type="file" id="input-import-orgaos-csv" accept=".csv" class="hidden">
                     </label>
-                    <button type="button" data-modal-target="orgao" class="btn-abrir-form btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Órgão/Secretaria</button>
+                    <button type="button" data-modal-target="orgao" class="btn-abrir-form btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Órgão</button>
                 </div>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Sigla</th><th class="p-4">Nome do Órgão / Secretaria</th><th class="p-4">Tipo Jurídico</th><th class="p-4">Contato / Site / Redes</th><th class="p-4">Responsável TIC</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-orgaos" class="divide-y text-sm"></tbody></table></div>
@@ -167,27 +210,42 @@
 
         <!-- ABA FORNECEDORES -->
         <div id="aba-fornecedores" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Parceiros e Fornecedores TIC Detalhados</h3><button type="button" data-modal-target="fornecedor" class="btn-abrir-form btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Fornecedor</button></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-slate-800">Fornecedores (<span id="count-fornecedores">0</span>)</h3>
+                    <input type="text" id="busca-fornecedores" placeholder="Buscar fornecedor, CNPJ, serviço..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                </div>
+                <button type="button" data-modal-target="fornecedor" class="btn-abrir-form btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Fornecedor</button>
+            </div>
             <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
         <!-- ABA BASES -->
         <div id="aba-bases" class="hidden space-y-4">
-            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-slate-800">Gerenciamento de Bases Compartilhadas</h3><button type="button" data-modal-target="base" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Parâmetro de Base</button></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-slate-800">Bases (<span id="count-bases">0</span>)</h3>
+                    <input type="text" id="busca-bases" placeholder="Buscar categoria, sigla, nome..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                </div>
+                <button type="button" data-modal-target="base" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Parâmetro de Base</button>
+            </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[700px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria / Domínio</th><th class="p-4">Identificador / Sigla</th><th class="p-4">Nome / Descrição</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA USUÁRIOS -->
         <div id="aba-usuarios" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h3 class="text-base font-bold text-slate-800">Base Unificada de Usuários e Gestão por Órgãos</h3>
-                <div class="flex flex-wrap items-center gap-2">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h3 class="text-base font-bold text-slate-800">Usuários (<span id="count-usuarios">0</span>)</h3>
+                    <input type="text" id="busca-usuarios" placeholder="Buscar nome ou e-mail..." class="p-2 border rounded-lg text-xs bg-white w-48 focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     <select id="filtro-orgao-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
                         <option value="">Filtrar por Órgão / Secretaria</option>
                     </select>
                     <select id="filtro-tag-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
                         <option value="">Filtrar por Tag / Categoria</option>
                     </select>
+                </div>
+                <div class="flex items-center gap-2">
                     <label class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-file-arrow-up"></i> Importar CSV <input type="file" id="input-import-csv" accept=".csv" class="hidden">
                     </label>
@@ -221,14 +279,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v24.5 -->
+    <!-- Script Principal v25.0 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, runTransaction, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v24.5: importação universal CSV ativa');
+        console.info('PRGD v25.0: contadores, filtros avançados e tipos jurídicos coloridos ativos');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -253,6 +311,17 @@
         let filtroEventoAtual = 'todos';
         let filtroTagAtual = '';
         let filtroOrgaoUsuarioAtual = '';
+        let filtroTipoJuridicoAtual = '';
+        let filtroDemandaStatusAtual = '';
+
+        // Buscas textuais
+        let buscaDemandasVal = '';
+        let buscaEventosVal = '';
+        let buscaLocaisVal = '';
+        let buscaOrgaosVal = '';
+        let buscaFornecedoresVal = '';
+        let buscaBasesVal = '';
+        let buscaUsuariosVal = '';
 
         const MÓDULOS_SISTEMA = [
             { id: 'dashboard', nome: 'Dashboard' },
@@ -277,6 +346,17 @@
         ];
 
         const OPCOES_TIPO_JURIDICO = ['Secretaria Estadual', 'Autarquia', 'Fundação Pública', 'Empresa Pública', 'Órgão Autônomo', 'Outros'];
+
+        function obterCorTipoJuridico(tipo) {
+            switch(String(tipo).trim()) {
+                case 'Secretaria Estadual': return 'bg-blue-100 text-blue-900 border-blue-300';
+                case 'Autarquia': return 'bg-purple-100 text-purple-900 border-purple-300';
+                case 'Fundação Pública': return 'bg-emerald-100 text-emerald-900 border-emerald-300';
+                case 'Empresa Pública': return 'bg-amber-100 text-amber-900 border-amber-300';
+                case 'Órgão Autônomo': return 'bg-indigo-100 text-indigo-900 border-indigo-300';
+                default: return 'bg-slate-100 text-slate-800 border-slate-300';
+            }
+        }
 
         function normalizarUrl(url) {
             if (!url) return '';
@@ -347,7 +427,7 @@
                 const el = document.getElementById('aba-' + mod.id);
                 const btn = document.querySelector(`[data-tab="${mod.id}"]`);
                 if (el) el.classList.toggle('hidden', mod.id !== abaAtual);
-                if (btn) btn.className = 'nav-tab px-4 py-2 rounded-lg transition ' + (mod.id === abaAtual ? 'tab-active' : 'tab-inactive');
+                if (btn) btn.className = 'nav-tab px-3.5 py-2 rounded-lg transition ' + (mod.id === abaAtual ? 'tab-active' : 'tab-inactive');
             });
             if (aba === 'dashboard') renderCharts();
             if (aba === 'eventos') renderEventos();
@@ -429,7 +509,17 @@
         }
 
         function renderizarTudo() {
-            renderUsuarios(); renderOrgaos(); renderBases(); renderDemandas(); renderEventos(); renderLocais(); renderFornecedores(); renderDashboardKPIs(); preencherSelectOrgaos(); atualizarVisibilidadeAbas(); preencherFiltrosUsuarios(); renderGrupos();
+            renderUsuarios(); renderOrgaos(); renderBases(); renderDemandas(); renderEventos(); renderLocais(); renderFornecedores(); renderDashboardKPIs(); preencherSelectOrgaos(); atualizarVisibilidadeAbas(); preencherFiltrosUsuarios(); renderGrupos(); atualizarContadoresAbas();
+        }
+
+        function atualizarContadoresAbas() {
+            document.getElementById('cnt-tab-demandas').textContent = dbData.demandas.length;
+            document.getElementById('cnt-tab-eventos').textContent = dbData.eventos.length;
+            document.getElementById('cnt-tab-locais').textContent = dbData.locais.length;
+            document.getElementById('cnt-tab-orgaos').textContent = dbData.orgaos.length;
+            document.getElementById('cnt-tab-fornecedores').textContent = dbData.fornecedores.length;
+            document.getElementById('cnt-tab-bases').textContent = dbData.bases.length;
+            document.getElementById('cnt-tab-usuarios').textContent = dbData.usuarios.length;
         }
 
         function preencherSelectOrgaos() {
@@ -480,8 +570,11 @@
             const us = dbData.usuarios.filter(u => {
                 const matchTag = !filtroTagAtual || (u.tags || []).includes(filtroTagAtual);
                 const matchOrgao = !filtroOrgaoUsuarioAtual || u.orgao === filtroOrgaoUsuarioAtual;
-                return matchTag && matchOrgao;
+                const matchBusca = !buscaUsuariosVal || (u.nome || '').toLowerCase().includes(buscaUsuariosVal) || (u.email || '').toLowerCase().includes(buscaUsuariosVal);
+                return matchTag && matchOrgao && matchBusca;
             });
+
+            document.getElementById('count-usuarios').textContent = us.length;
 
             tbody.innerHTML = us.map(u => {
                 const tagsHtml = (u.tags || []).map(tName => {
@@ -508,13 +601,23 @@
         function renderOrgaos() {
             const tbody = document.getElementById('tabela-orgaos');
             if (!tbody) return;
-            tbody.innerHTML = dbData.orgaos.map(o => {
+            const filtered = dbData.orgaos.filter(o => {
+                const matchTipo = !filtroTipoJuridicoAtual || o.tipoJuridico === filtroTipoJuridicoAtual;
+                const txt = buscaOrgaosVal;
+                const matchBusca = !txt || (o.sigla || '').toLowerCase().includes(txt) || (o.nome || '').toLowerCase().includes(txt) || (o.responsavel || '').toLowerCase().includes(txt);
+                return matchTipo && matchBusca;
+            });
+
+            document.getElementById('count-orgaos').textContent = filtered.length;
+
+            tbody.innerHTML = filtered.map(o => {
                 const siteFmt = normalizarUrl(o.site);
+                const corTipo = obterCorTipoJuridico(o.tipoJuridico);
                 return `
                 <tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="orgaos" data-id="${esc(o.id)}">
                     <td class="p-4 font-bold text-indigo-900">${esc(o.sigla || o.id)}</td>
                     <td class="p-4 font-medium">${esc(o.nome)}</td>
-                    <td class="p-4"><span class="bg-purple-100 text-purple-900 font-semibold px-2 py-0.5 rounded text-xs">${esc(o.tipoJuridico || 'Não informado')}</span></td>
+                    <td class="p-4"><span class="font-semibold px-2.5 py-1 rounded-full text-xs border ${corTipo}">${esc(o.tipoJuridico || 'Não informado')}</span></td>
                     <td class="p-4 text-xs text-slate-600">
                         ${siteFmt ? `<div><i class="fa-solid fa-globe mr-1"></i> <a href="${esc(siteFmt)}" target="_blank" class="text-blue-600 hover:underline">${esc(o.site)}</a></div>` : ''}
                         ${o.redesSociais ? `<div><i class="fa-solid fa-share-nodes mr-1"></i> ${esc(o.redesSociais)}</div>` : ''}
@@ -529,13 +632,26 @@
         function renderBases() {
             const tbody = document.getElementById('tabela-bases');
             if (!tbody) return;
-            tbody.innerHTML = dbData.bases.map(b => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="bases" data-id="${b.id}"><td class="p-4">${b.categoria}</td><td class="p-4 font-mono">${b.sigla}</td><td class="p-4">${b.nome}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
+            const filtered = dbData.bases.filter(b => {
+                const txt = buscaBasesVal;
+                return !txt || (b.categoria || '').toLowerCase().includes(txt) || (b.sigla || '').toLowerCase().includes(txt) || (b.nome || '').toLowerCase().includes(txt);
+            });
+            document.getElementById('count-bases').textContent = filtered.length;
+            tbody.innerHTML = filtered.map(b => `<tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="bases" data-id="${b.id}"><td class="p-4">${b.categoria}</td><td class="p-4 font-mono">${b.sigla}</td><td class="p-4">${b.nome}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2 py-1 rounded">Detalhar</button></td></tr>`).join('');
         }
 
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
             if (!tbody) return;
-            tbody.innerHTML = dbData.demandas.map(d => `
+            const filtered = dbData.demandas.filter(d => {
+                const matchStatus = !filtroDemandaStatusAtual || d.status === filtroDemandaStatusAtual;
+                const txt = buscaDemandasVal;
+                const matchBusca = !txt || (d.titulo || '').toLowerCase().includes(txt) || (d.orgao || '').toLowerCase().includes(txt) || (d.solicitante || '').toLowerCase().includes(txt) || (d.responsavelAti || '').toLowerCase().includes(txt);
+                return matchStatus && matchBusca;
+            });
+            document.getElementById('count-demandas').textContent = filtered.length;
+
+            tbody.innerHTML = filtered.map(d => `
                 <tr class="hover:bg-slate-50 cursor-pointer tr-detalhe" data-colecao="demandas" data-id="${esc(d.id)}">
                     <td class="p-4 font-bold">${esc(d.orgao)}<div class="text-[11px] font-normal text-slate-500">Sol.: ${esc(d.solicitante || 'Não informado')}</div></td>
                     <td class="p-4 font-semibold">${esc(d.titulo)}<div class="text-[11px] font-normal text-slate-500 truncate max-w-xs">${esc(d.descricao || '')}</div></td>
@@ -556,8 +672,13 @@
             const filtrados = visiveis.filter(e => {
                 const fim = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
                 const real = fim < agora;
-                return filtroEventoAtual === 'todos' || (filtroEventoAtual === 'futuros' && !real) || (filtroEventoAtual === 'realizados' && real);
+                const matchTab = filtroEventoAtual === 'todos' || (filtroEventoAtual === 'futuros' && !real) || (filtroEventoAtual === 'realizados' && real);
+                const txt = buscaEventosVal;
+                const matchBusca = !txt || (e.titulo || '').toLowerCase().includes(txt) || (e.palestrante || '').toLowerCase().includes(txt) || (e.localEvento || '').toLowerCase().includes(txt);
+                return matchTab && matchBusca;
             });
+
+            document.getElementById('count-eventos').textContent = filtrados.length;
 
             grid.innerHTML = filtrados.map(e => {
                 const fim = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
@@ -597,13 +718,23 @@
         function renderLocais() {
             const grid = document.getElementById('grid-locais');
             if (!grid) return;
-            grid.innerHTML = dbData.locais.map(l => `<div class="bg-white p-5 rounded-2xl border shadow-sm cursor-pointer tr-detalhe hover:border-purple-400" data-colecao="locais" data-id="${esc(l.id)}"><h4 class="font-bold text-lg">${esc(l.nome)}</h4><p class="text-xs text-slate-500 mt-1">${esc(l.tipoEspaco || 'Espaço')} • ${esc(l.capacidade || 0)} pessoas • ${esc(l.metrosQuadrados || '?')} m² • <b>${formatarMoeda(l.valorAluguel)}</b></p><p class="text-xs text-blue-900 font-bold mt-4">Detalhar / Editar →</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local.</p>';
+            const filtered = dbData.locais.filter(l => {
+                const txt = buscaLocaisVal;
+                return !txt || (l.nome || '').toLowerCase().includes(txt) || (l.tipoEspaco || '').toLowerCase().includes(txt) || (l.endereco || '').toLowerCase().includes(txt) || (l.contato || '').toLowerCase().includes(txt);
+            });
+            document.getElementById('count-locais').textContent = filtered.length;
+            grid.innerHTML = filtered.map(l => `<div class="bg-white p-5 rounded-2xl border shadow-sm cursor-pointer tr-detalhe hover:border-purple-400" data-colecao="locais" data-id="${esc(l.id)}"><h4 class="font-bold text-lg">${esc(l.nome)}</h4><p class="text-xs text-slate-500 mt-1">${esc(l.tipoEspaco || 'Espaço')} • ${esc(l.capacidade || 0)} pessoas • ${esc(l.metrosQuadrados || '?')} m² • <b>${formatarMoeda(l.valorAluguel)}</b></p><p class="text-xs text-blue-900 font-bold mt-4">Detalhar / Editar →</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local.</p>';
         }
 
         function renderFornecedores() {
             const grid = document.getElementById('grid-fornecedores');
             if (!grid) return;
-            grid.innerHTML = dbData.fornecedores.map(f => `<div class="bg-white p-5 rounded-2xl border shadow-sm cursor-pointer tr-detalhe hover:border-emerald-400" data-colecao="fornecedores" data-id="${esc(f.id)}"><h4 class="font-bold text-lg">${esc(f.nome)}</h4><p class="text-xs text-slate-500 mt-1">${esc(f.categoria || 'Fornecedor')} • CNPJ ${esc(f.cnpj || '-')}</p><p class="text-xs font-semibold text-emerald-800 mt-1">${esc(f.faixaValor || '')}</p><p class="text-xs text-slate-600 mt-2 line-clamp-3">${esc(f.especialidades || f.produtoServicoPrincipal || '')}</p><p class="text-xs text-blue-900 font-bold mt-4">Detalhar / Editar →</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor.</p>';
+            const filtered = dbData.fornecedores.filter(f => {
+                const txt = buscaFornecedoresVal;
+                return !txt || (f.nome || '').toLowerCase().includes(txt) || (f.cnpj || '').toLowerCase().includes(txt) || (f.categoria || '').toLowerCase().includes(txt) || (f.especialidades || '').toLowerCase().includes(txt);
+            });
+            document.getElementById('count-fornecedores').textContent = filtered.length;
+            grid.innerHTML = filtered.map(f => `<div class="bg-white p-5 rounded-2xl border shadow-sm cursor-pointer tr-detalhe hover:border-emerald-400" data-colecao="fornecedores" data-id="${esc(f.id)}"><h4 class="font-bold text-lg">${esc(f.nome)}</h4><p class="text-xs text-slate-500 mt-1">${esc(f.categoria || 'Fornecedor')} • CNPJ ${esc(f.cnpj || '-')}</p><p class="text-xs font-semibold text-emerald-800 mt-1">${esc(f.faixaValor || '')}</p><p class="text-xs text-slate-600 mt-2 line-clamp-3">${esc(f.especialidades || f.produtoServicoPrincipal || '')}</p><p class="text-xs text-blue-900 font-bold mt-4">Detalhar / Editar →</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor.</p>';
         }
 
         function renderGrupos() {
@@ -618,6 +749,50 @@
             document.getElementById('dash-tot-locais').textContent = dbData.locais.length;
             document.getElementById('dash-tot-orgaos').textContent = dbData.orgaos.length;
             document.getElementById('dash-tot-fornecedores').textContent = dbData.fornecedores.length;
+        }
+
+        let chartCatInstance = null;
+        let chartStatusInstance = null;
+        let chartTiposInstance = null;
+
+        function renderCharts() {
+            if (typeof Chart === 'undefined') return;
+
+            // Gráfico 1: Categorias de demandas
+            const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
+            if (ctx1) {
+                if (chartCatInstance) chartCatInstance.destroy();
+                const counts = {};
+                dbData.demandas.forEach(d => { const c = d.categoria || 'Geral'; counts[c] = (counts[c] || 0) + 1; });
+                const labels = Object.keys(counts).length ? Object.keys(counts) : ['Infra', 'Web', 'Gov'];
+                const dataVals = Object.keys(counts).length ? Object.values(counts) : [15, 22, 9];
+                chartCatInstance = new Chart(ctx1, { type: 'bar', data: { labels, datasets: [{ data: dataVals, backgroundColor: '#1e3a8a' }] }, options: { plugins: { legend: { display: false } } } });
+            }
+
+            // Gráfico 2: Status
+            const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
+            if (ctx2) {
+                if (chartStatusInstance) chartStatusInstance.destroy();
+                let pend = 0, and = 0, conc = 0;
+                dbData.demandas.forEach(d => {
+                    if (d.status === 'Pendente') pend++;
+                    else if (d.status === 'Concluído') conc++;
+                    else and++;
+                });
+                if (pend === 0 && and === 0 && conc === 0) { pend = 4; and = 18; conc = 5; }
+                chartStatusInstance = new Chart(ctx2, { type: 'doughnut', data: { labels: ['Pendentes', 'Em Andamento', 'Concluídos'], datasets: [{ data: [pend, and, conc], backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'] }] } });
+            }
+
+            // Gráfico 3: Tipos Jurídicos de Órgãos
+            const ctx3 = document.getElementById('chartTiposOrgaos')?.getContext('2d');
+            if (ctx3) {
+                if (chartTiposInstance) chartTiposInstance.destroy();
+                const tCounts = {};
+                dbData.orgaos.forEach(o => { const tj = o.tipoJuridico || 'Não informado'; tCounts[tj] = (tCounts[tj] || 0) + 1; });
+                const labels = Object.keys(tCounts).length ? Object.keys(tCounts) : ['Secretarias', 'Autarquias', 'Empresas'];
+                const dataVals = Object.keys(tCounts).length ? Object.values(tCounts) : [10, 5, 2];
+                chartTiposInstance = new Chart(ctx3, { type: 'pie', data: { labels, datasets: [{ data: dataVals, backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#64748b', '#ec4899'] }] } });
+            }
         }
 
         const OPCOES_LOCAL = {
@@ -816,7 +991,6 @@
                 const linhas = conteudo.split(/\r\n|\n/);
                 let importados = 0;
                 
-                // Verifica se é um arquivo de exportação unificada (colecao;id;dados)
                 const cabecalho = (linhas[0] || '').trim();
                 const ehExportacaoGeral = cabecalho.startsWith('colecao;id;dados');
 
@@ -919,13 +1093,6 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", "prgd_exportacao_geral.csv");
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        }
-
-        function renderCharts() {
-            const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
-            if (ctx1 && typeof Chart !== 'undefined') new Chart(ctx1, { type: 'bar', data: { labels: ['Infra', 'Web', 'Gov'], datasets: [{ data: [15, 22, 9], backgroundColor: '#1e3a8a' }] } });
-            const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
-            if (ctx2 && typeof Chart !== 'undefined') new Chart(ctx2, { type: 'doughnut', data: { labels: ['Pendentes', 'Em Andamento'], datasets: [{ data: [4, 18], backgroundColor: ['#f59e0b', '#3b82f6'] }] } });
         }
 
         function mostrarMensagemLogin(texto, tipo='erro') {
@@ -1164,6 +1331,21 @@
             byId('form-univ-body')?.addEventListener('submit', salvarCadastroUniversal);
             byId('form-edicao-admin')?.addEventListener('submit', salvarEdicaoAdmin);
             byId('btn-excluir-registro')?.addEventListener('click', excluirRegistroUniversal);
+
+            // Listeners de buscas e filtros
+            byId('busca-demandas')?.addEventListener('input', e => { buscaDemandasVal = e.target.value.toLowerCase().trim(); renderDemandas(); });
+            byId('filtro-demanda-status')?.addEventListener('change', e => { filtroDemandaStatusAtual = e.target.value; renderDemandas(); });
+            
+            byId('busca-eventos')?.addEventListener('input', e => { buscaEventosVal = e.target.value.toLowerCase().trim(); renderEventos(); });
+            byId('busca-locais')?.addEventListener('input', e => { buscaLocaisVal = e.target.value.toLowerCase().trim(); renderLocais(); });
+            
+            byId('busca-orgaos')?.addEventListener('input', e => { buscaOrgaosVal = e.target.value.toLowerCase().trim(); renderOrgaos(); });
+            byId('filtro-tipo-juridico')?.addEventListener('change', e => { filtroTipoJuridicoAtual = e.target.value; renderOrgaos(); });
+
+            byId('busca-fornecedores')?.addEventListener('input', e => { buscaFornecedoresVal = e.target.value.toLowerCase().trim(); renderFornecedores(); });
+            byId('busca-bases')?.addEventListener('input', e => { buscaBasesVal = e.target.value.toLowerCase().trim(); renderBases(); });
+
+            byId('busca-usuarios')?.addEventListener('input', e => { buscaUsuariosVal = e.target.value.toLowerCase().trim(); renderUsuarios(); });
             byId('filtro-tag-usuario')?.addEventListener('change', e => { filtroTagAtual = e.target.value; renderUsuarios(); });
             byId('filtro-orgao-usuario')?.addEventListener('change', e => { filtroOrgaoUsuarioAtual = e.target.value; renderUsuarios(); });
             
@@ -1184,7 +1366,7 @@
             const ins = ev.target.closest?.('[data-inscrever-evento]');
             if (ins) { ins.stopPropagation(); inscreverEvento(ins.dataset.inscreverEvento); return; }
             const cancel = ev.target.closest?.('[data-cancelar-evento]');
-            if (cancel) { cancel.stopPropagation(); cancelarInscricao(cancel.dataset.cancelarEvento); return; }
+            if (cancel) { cancel.stopPropagation(); cancelarInscricao(cancel.dataset.cancelarEventos); return; }
             const ng = ev.target.closest?.('#btn-novo-grupo');
             if (ng) { criarGrupo(); return; }
             const eg = ev.target.closest?.('[data-editar-grupo]');
@@ -1233,7 +1415,7 @@
             }
         });
 
-        console.info('PRGD v24.5: pronto.');
+        console.info('PRGD v25.0: pronto.');
     </script>
 </body>
 </html>
