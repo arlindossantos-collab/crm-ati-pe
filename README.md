@@ -1,4 +1,4 @@
-# PRGD v28.0 — Plataforma de Relacionamento do Governo Digital (ATI-PE)
+# PRGD v29.0 — Plataforma de Relacionamento do Governo Digital (ATI-PE)
 
 ## 1. Visão Geral do Projeto
 *   **Nome do Sistema:** PRGD - Plataforma de Relacionamento do Governo Digital
@@ -20,10 +20,10 @@
 
 #### Escopo Positivo (O que a aplicação faz)
 *   **Autenticação e Permissões Unificadas:** Login seguro por e-mail e senha, migração automática de perfis legados, distinção estrita entre perfis `admin` e `comum`, e isolamento de acesso por grupos de usuários.
-*   **Módulo de Eventos Avançado:**
-    *   *Capas Padrão:* Suporte a upload de imagem otimizada e URLs para capas de eventos exibidas no topo externo dos cards.
+*   **Módulo de Eventos Avançado (v29.0):**
+    *   *Upload e Capa Prioritária:* O cadastro de eventos coloca o upload de imagem e URL de capa em primeiro plano, renderizando-a perfeitamente na parte superior dos cards visuais.
     *   *Segmentação por Grupos:* Criação de eventos públicos institucionais ou restritos a grupos específicos de usuários.
-    *   *Inscrições Validadas:* Modal interativo de confirmação de dados do participante, prevenção rígida contra inscrições duplicadas pelo mesmo login/UID, simulação de envio de confirmação por e-mail, geração de código único de inscrição e botão de integração direta com a Agenda do Google.
+    *   *Inscrições Validadas por E-mail:* Modal interativo de confirmação de dados vinculado rigidamente ao e-mail autenticado do usuário (`currentUser.email`), prevenção contra duplicidade por UID/e-mail, simulação de envio de comprovante, geração de código único e botão direto para inserção na Agenda do Google.
     *   *Links e Materiais:* Suporte a links externos de inscrição e repositórios de apoio.
 *   **Gestão Administrativa Total:** O administrador possui controle completo para cadastrar, editar, excluir registros em qualquer módulo, remover inscrições e **extrair relatórios gerenciais em CSV** (por evento individual ou consolidados de todas as inscrições).
 *   **Trilha de Auditoria Completa:** Registro automático de data/hora de **Criação/Edição** e identificação do autor (`Criado/Editado por`) em todas as operações dos módulos.
