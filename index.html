@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v24.4 STABLE BULK IMPORT FIX               -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v24.5 UNIVERSAL CSV IMPORT                  -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -50,7 +50,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v24.4 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v24.5 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v24.4 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v24.5 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -221,14 +221,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v24.4 -->
+    <!-- Script Principal v24.5 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, runTransaction, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v24.4: importação CSV de órgãos corrigida e ativa');
+        console.info('PRGD v24.5: importação universal CSV ativa');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -816,41 +816,55 @@
                 const linhas = conteudo.split(/\r\n|\n/);
                 let importados = 0;
                 
+                // Verifica se é um arquivo de exportação unificada (colecao;id;dados)
+                const cabecalho = (linhas[0] || '').trim();
+                const ehExportacaoGeral = cabecalho.startsWith('colecao;id;dados');
+
                 for (let i = 1; i < linhas.length; i++) {
                     const linha = linhas[i].trim();
                     if (!linha) continue;
-                    
                     const cols = linha.split(';');
-                    const sigla = cols[0]?.trim().toUpperCase() || '';
-                    const nome = cols[1]?.trim() || '';
-                    
-                    if (!sigla || sigla === 'SIGLA' || !nome) continue;
 
-                    const tipoJuridico = cols[2]?.trim() || '';
-                    const responsavel = cols[3]?.trim() || '';
-                    const email = cols[4]?.trim() || '';
-                    const site = normalizarUrl(cols[5]?.trim() || '');
-                    const redesSociais = cols[6]?.trim() || '';
-                    const endereco = cols[7]?.trim() || '';
+                    if (ehExportacaoGeral) {
+                        const colecao = cols[0]?.trim();
+                        const id = cols[1]?.trim();
+                        const jsonStr = cols.slice(2).join(';');
+                        if (colecao === 'orgaos' && id && jsonStr) {
+                            try {
+                                const dadosObj = JSON.parse(jsonStr);
+                                await setDoc(doc(db, 'orgaos', id), dadosObj, { merge: true });
+                                importados++;
+                            } catch(err) { console.warn('Erro ao restaurar órgão exportado:', id, err); }
+                        }
+                    } else {
+                        const sigla = cols[0]?.trim().toUpperCase() || '';
+                        const nome = cols[1]?.trim() || '';
+                        if (!sigla || sigla === 'SIGLA' || !nome) continue;
 
-                    try {
-                        await setDoc(doc(db, 'orgaos', sigla), {
-                            id: sigla,
-                            sigla,
-                            nome,
-                            tipoJuridico,
-                            responsavel,
-                            email,
-                            site,
-                            redesSociais,
-                            endereco
-                        }, { merge: true });
-                        importados++;
-                    } catch(err) { 
-                        console.warn('Erro ao importar órgão:', sigla, err); 
+                        const tipoJuridico = cols[2]?.trim() || '';
+                        const responsavel = cols[3]?.trim() || '';
+                        const email = cols[4]?.trim() || '';
+                        const site = normalizarUrl(cols[5]?.trim() || '');
+                        const redesSociais = cols[6]?.trim() || '';
+                        const endereco = cols[7]?.trim() || '';
+
+                        try {
+                            await setDoc(doc(db, 'orgaos', sigla), {
+                                id: sigla,
+                                sigla,
+                                nome,
+                                tipoJuridico,
+                                responsavel,
+                                email,
+                                site,
+                                redesSociais,
+                                endereco
+                            }, { merge: true });
+                            importados++;
+                        } catch(err) { console.warn('Erro ao importar órgão:', sigla, err); }
                     }
                 }
-                alert(`Importação concluída! ${importados} órgãos adicionados/atualizados.`);
+                alert(`Importação concluída! ${importados} órgãos adicionados/atualizados com sucesso.`);
                 e.target.value = '';
             };
             leitor.readAsText(arquivo, 'UTF-8');
@@ -895,10 +909,15 @@
         }
 
         function exportarUsuariosCSV() {
-            let csv = "Nome;Email;Orgao;Perfil;Tags;Modulos;CriadoEm\n";
-            dbData.usuarios.forEach(u => { csv += (u.nome||'') + ';' + (u.email||u.id) + ';' + (u.orgao||'') + ';' + (u.perfil||'') + ';"' + (u.tags||[]).join(',') + '";"' + (u.modulosPermitidos||[]).join(',') + '";"' + (u.criadoEm||'') + '"\n'; });
+            let csv = "colecao;id;dados\n";
+            ['demandas','eventos','locais','orgaos','fornecedores','bases','usuarios','grupos'].forEach(col => {
+                (dbData[col] || []).forEach(item => {
+                    const idVal = item.id || item.sigla || 'ID-' + Math.random();
+                    csv += `${col};${idVal};${JSON.stringify(item)}\n`;
+                });
+            });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", "usuarios_prgd.csv");
+            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", "prgd_exportacao_geral.csv");
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
@@ -1214,7 +1233,7 @@
             }
         });
 
-        console.info('PRGD v24.4: pronto.');
+        console.info('PRGD v24.5: pronto.');
     </script>
 </body>
 </html>
