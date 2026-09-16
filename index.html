@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v34.0 FIX ID EVENTO & INSCRIÇÃO CLOUD       -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v35.0 FIX SNAPSHOT EVENTOS & INSCRIÇÃO CLOUD -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -50,7 +50,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v34.0 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v35.0 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v34.0 FIX</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v35.0 FIX</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -274,14 +274,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v34.0 -->
+    <!-- Script Principal v35.0 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, runTransaction, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v34.0: Correção robusta de ID de evento na inscrição');
+        console.info('PRGD v35.0: Correção de fusão de snapshots de eventos e transação de inscrição');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -485,8 +485,17 @@
         let snapshotUnsubs = [];
         function pararSnapshots() { snapshotUnsubs.forEach(fn => { try { fn(); } catch(e){} }); snapshotUnsubs = []; }
 
+        let eventosCacheMap = {};
+        function atualizarEventosVisiveis(lista) {
+            lista.forEach(e => eventosCacheMap[e.id] = e);
+            dbData.eventos = Object.values(eventosCacheMap);
+            renderEventos();
+            carregarMinhasInscricoes();
+        }
+
         function iniciarSnapshotFirestore() {
             pararSnapshots();
+            eventosCacheMap = {};
             if (!currentUser) return;
             const colecoes = ['demandas','locais','orgaos','fornecedores','bases'];
             if (currentUser.perfil === 'admin') colecoes.push('usuarios');
@@ -544,14 +553,6 @@
                 carregarMinhasInscricoes();
             }, err => console.warn('Firestore inscrições:', err.message));
             snapshotUnsubs.push(unsubIns);
-        }
-
-        function atualizarEventosVisiveis(lista) {
-            let cache = {};
-            lista.forEach(e => cache[e.id] = e);
-            dbData.eventos = Object.values(cache);
-            renderEventos();
-            carregarMinhasInscricoes();
         }
 
         function renderizarTudo() {
@@ -1115,30 +1116,32 @@
             m.querySelector('#fechar-comprovante').onclick=()=>m.remove();
         }
 
-        // CORREÇÃO ROBUSTA DA TRANSAÇÃO DE INSCRIÇÃO (v34.0)
+        // TRANSAÇÃO DE INSCRIÇÃO ROBUSTA (v35.0)
         async function inscreverEventoFinal(eventId, dadosUsuario){
             if(!currentUser?.uid)return;
-            const refEvento = doc(db, 'eventos', String(eventId));
-            const inscricaoDocId = String(eventId) + '_' + currentUser.uid;
+            
+            const eventoLocal = dbData.eventos.find(x => String(x.id) === String(eventId) || String(x.titulo) === String(eventId));
+            const documentoIdReal = eventoLocal ? eventoLocal.id : eventId;
+
+            const refEvento = doc(db, 'eventos', String(documentoIdReal));
+            const inscricaoDocId = String(documentoIdReal) + '_' + currentUser.uid;
             const refInsc = doc(db, 'inscricoes', inscricaoDocId);
 
             try{
                 await runTransaction(db, async tx => {
                     let ev = await tx.get(refEvento);
                     
-                    // Fallback automático caso o ID no botão seja diferente do ID real no Firestore
-                    if (!ev.exists()) {
-                        const eventoLocal = dbData.eventos.find(x => String(x.id) === String(eventId) || String(x.titulo) === String(eventId));
-                        if (eventoLocal && eventoLocal.id) {
-                            const refAlternativa = doc(db, 'eventos', String(eventoLocal.id));
-                            const evAlt = await tx.get(refAlternativa);
-                            if (evAlt.exists()) {
-                                ev = evAlt;
-                            }
+                    if (!ev.exists() && eventoLocal) {
+                        const refAlternativa = doc(db, 'eventos', String(eventoLocal.id));
+                        const evAlt = await tx.get(refAlternativa);
+                        if (evAlt.exists()) {
+                            ev = evAlt;
                         }
                     }
 
-                    if (!ev.exists()) throw new Error('Evento não encontrado na base de dados.');
+                    if (!ev.exists()) {
+                        throw new Error('Evento não encontrado na base de dados.');
+                    }
                     
                     const ins = await tx.get(refInsc);
                     if (ins.exists()) throw new Error('Você já está inscrito neste evento.');
@@ -1150,7 +1153,7 @@
 
                     tx.set(refInsc, {
                         id: inscricaoDocId,
-                        eventId: String(eventId),
+                        eventId: String(documentoIdReal),
                         uid: currentUser.uid,
                         nome: dadosUsuario.nome,
                         email: dadosUsuario.email,
@@ -1162,8 +1165,8 @@
                     tx.update(ev.ref, { inscritosCount: qtd + 1 });
                 });
 
-                const evento = dbData.eventos.find(x => String(x.id) === String(eventId)) || {}; 
-                dbData.minhasInscricoes = [...(dbData.minhasInscricoes || []), { id: inscricaoDocId, eventId: String(eventId), uid: currentUser.uid }]; 
+                const evento = dbData.eventos.find(x => String(x.id) === String(documentoIdReal)) || {}; 
+                dbData.minhasInscricoes = [...(dbData.minhasInscricoes || []), { id: inscricaoDocId, eventId: String(documentoIdReal), uid: currentUser.uid }]; 
                 renderEventos(); 
                 mostrarComprovanteInscricao(evento, inscricaoDocId, dadosUsuario);
             } catch(e) {
@@ -1575,7 +1578,7 @@
             }
         });
 
-        console.info('PRGD v34.0: pronto.');
+        console.info('PRGD v35.0: pronto.');
     </script>
 </body>
 </html>
