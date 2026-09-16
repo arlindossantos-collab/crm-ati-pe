@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v33.0 FIX LOCALSTORAGE QUOTA EXCEEDED       -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v34.0 FIX ID EVENTO & INSCRIÇÃO CLOUD       -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -50,7 +50,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v33.0 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v34.0 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v33.0 STABLE</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v34.0 FIX</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -274,14 +274,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v33.0 -->
+    <!-- Script Principal v34.0 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, runTransaction, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v33.0: Correção de cota do localStorage via inMemoryPersistence');
+        console.info('PRGD v34.0: Correção robusta de ID de evento na inscrição');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -299,7 +299,6 @@
         const creatorApp = initializeApp(firebaseConfig, "prgdUserCreator");
         const creatorAuth = getAuth(creatorApp);
         
-        // CORREÇÃO CRÍTICA: Utiliza inMemoryPersistence para evitar esgotar a cota do localStorage do navegador
         setPersistence(auth, inMemoryPersistence).catch(console.warn);
 
         let currentUser = null;
@@ -1116,34 +1115,60 @@
             m.querySelector('#fechar-comprovante').onclick=()=>m.remove();
         }
 
+        // CORREÇÃO ROBUSTA DA TRANSAÇÃO DE INSCRIÇÃO (v34.0)
         async function inscreverEventoFinal(eventId, dadosUsuario){
             if(!currentUser?.uid)return;
-            const refEvento=doc(db,'eventos',String(eventId)), inscricaoDocId = String(eventId)+'_'+currentUser.uid, refInsc=doc(db,'inscricoes',inscricaoDocId);
+            const refEvento = doc(db, 'eventos', String(eventId));
+            const inscricaoDocId = String(eventId) + '_' + currentUser.uid;
+            const refInsc = doc(db, 'inscricoes', inscricaoDocId);
+
             try{
-                await runTransaction(db,async tx=>{
-                    const [ev,ins]=await Promise.all([tx.get(refEvento),tx.get(refInsc)]);
-                    if(!ev.exists())throw new Error('Evento não encontrado.');
-                    if(ins.exists())throw new Error('Você já está inscrito neste evento.');
-                    const e=ev.data(),lim=Number(e.limiteVagas||0),qtd=Number(e.inscritosCount||0);
-                    if(lim>0&&qtd>=lim)throw new Error('As vagas deste evento já estão esgotadas.');
-                    tx.set(refInsc,{
-                        id:inscricaoDocId,
-                        eventId:String(eventId),
-                        uid:currentUser.uid,
-                        nome:dadosUsuario.nome,
-                        email:dadosUsuario.email,
-                        orgao:dadosUsuario.orgao,
-                        telefone:dadosUsuario.telefone,
-                        inscritoEm:new Date().toISOString(),
-                        eventoTitulo:e.titulo||''
+                await runTransaction(db, async tx => {
+                    let ev = await tx.get(refEvento);
+                    
+                    // Fallback automático caso o ID no botão seja diferente do ID real no Firestore
+                    if (!ev.exists()) {
+                        const eventoLocal = dbData.eventos.find(x => String(x.id) === String(eventId) || String(x.titulo) === String(eventId));
+                        if (eventoLocal && eventoLocal.id) {
+                            const refAlternativa = doc(db, 'eventos', String(eventoLocal.id));
+                            const evAlt = await tx.get(refAlternativa);
+                            if (evAlt.exists()) {
+                                ev = evAlt;
+                            }
+                        }
+                    }
+
+                    if (!ev.exists()) throw new Error('Evento não encontrado na base de dados.');
+                    
+                    const ins = await tx.get(refInsc);
+                    if (ins.exists()) throw new Error('Você já está inscrito neste evento.');
+
+                    const e = ev.data();
+                    const lim = Number(e.limiteVagas || 0);
+                    const qtd = Number(e.inscritosCount || 0);
+                    if (lim > 0 && qtd >= lim) throw new Error('As vagas deste evento já estão esgotadas.');
+
+                    tx.set(refInsc, {
+                        id: inscricaoDocId,
+                        eventId: String(eventId),
+                        uid: currentUser.uid,
+                        nome: dadosUsuario.nome,
+                        email: dadosUsuario.email,
+                        orgao: dadosUsuario.orgao,
+                        telefone: dadosUsuario.telefone,
+                        inscritoEm: new Date().toISOString(),
+                        eventoTitulo: e.titulo || ''
                     });
-                    tx.update(refEvento,{inscritosCount:qtd+1});
+                    tx.update(ev.ref, { inscritosCount: qtd + 1 });
                 });
-                const evento=dbData.eventos.find(x=>String(x.id)===String(eventId))||{}; 
-                dbData.minhasInscricoes=[...(dbData.minhasInscricoes||[]),{id:inscricaoDocId,eventId:String(eventId),uid:currentUser.uid}]; 
+
+                const evento = dbData.eventos.find(x => String(x.id) === String(eventId)) || {}; 
+                dbData.minhasInscricoes = [...(dbData.minhasInscricoes || []), { id: inscricaoDocId, eventId: String(eventId), uid: currentUser.uid }]; 
                 renderEventos(); 
-                mostrarComprovanteInscricao(evento,inscricaoDocId,dadosUsuario);
-            }catch(e){alert(traduzirErroSistema(e));}
+                mostrarComprovanteInscricao(evento, inscricaoDocId, dadosUsuario);
+            } catch(e) {
+                alert(traduzirErroSistema(e));
+            }
         }
 
         async function cancelarInscricao(eventId){
@@ -1317,7 +1342,6 @@
             if (btnText) btnText.textContent = 'Autenticando...';
             
             try {
-                // Utiliza persistência em memória para evitar estouro de cota no localStorage
                 await setPersistence(auth, inMemoryPersistence);
                 await signInWithEmailAndPassword(auth, email, senha);
             } catch(err) {
@@ -1551,7 +1575,7 @@
             }
         });
 
-        console.info('PRGD v33.0: pronto.');
+        console.info('PRGD v34.0: pronto.');
     </script>
 </body>
 </html>
