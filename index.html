@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v32.0 FIX INSCRIÇÃO EVENTOS & MODAL          -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v33.0 FIX LOCALSTORAGE QUOTA EXCEEDED       -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -31,7 +31,7 @@
                 <div class="text-center mb-6">
                     <div class="inline-block bg-blue-900 text-white font-black text-2xl px-4 py-2 rounded-xl mb-3 shadow">PRGD</div>
                     <h3 class="text-lg font-bold text-slate-900">Acesso Restrito PRGD</h3>
-                    <p class="text-xs text-slate-500 mt-1">Informe suas credenciais para acessar o sistema sincronizado.</p>
+                    <p class="text-xs text-slate-500 mt-1">Informe suas credenciais para acessar o sistema.</p>
                 </div>
                 <form id="login-form" class="space-y-4 text-sm">
                     <div>
@@ -50,7 +50,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v32.0 CLOUD</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v33.0 CLOUD</span></p>
             </div>
         </div>
     </div>
@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v32.0 FIX</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v33.0 STABLE</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -274,14 +274,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v32.0 -->
+    <!-- Script Principal v33.0 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, runTransaction, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v32.0: Correção definitiva do botão de inscrição de eventos ativada');
+        console.info('PRGD v33.0: Correção de cota do localStorage via inMemoryPersistence');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -298,7 +298,9 @@
         const auth = getAuth(app);
         const creatorApp = initializeApp(firebaseConfig, "prgdUserCreator");
         const creatorAuth = getAuth(creatorApp);
-        setPersistence(auth, browserLocalPersistence).catch(console.warn);
+        
+        // CORREÇÃO CRÍTICA: Utiliza inMemoryPersistence para evitar esgotar a cota do localStorage do navegador
+        setPersistence(auth, inMemoryPersistence).catch(console.warn);
 
         let currentUser = null;
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
@@ -344,7 +346,7 @@
         function traduzirErroSistema(err) {
             const msg = String(err?.message || err || '');
             if (msg.includes('longer than') || msg.includes('bytes')) {
-                return 'A imagem selecionada é muito pesada para o banco de dados. O limite máximo permitido para a capa é de 500 KB.';
+                return 'A imagem selecionada é muito pesada para o banco de dados. Limite máximo: 500 KB.';
             }
             if (msg.includes('permission-denied') || msg.includes('Missing or insufficient permissions')) {
                 return 'Permissão negada. Você não tem autorização para realizar esta operação.';
@@ -366,7 +368,7 @@
 
                 const tamanhoMaximoBytes = 500 * 1024;
                 if (file.size > tamanhoMaximoBytes) {
-                    alert(`A imagem é muito grande (${(file.size / 1024).toFixed(1)} KB). O tamanho máximo permitido é de 500 KB.`);
+                    alert(`A imagem é muito grande (${(file.size / 1024).toFixed(1)} KB). O limite máximo permitido é de 500 KB.`);
                     fileInput.value = '';
                     return;
                 }
@@ -1039,13 +1041,9 @@
             }catch(err){console.warn('Não foi possível verificar inscrições:',err.message)}finally{leituraInscricoesEmAndamento=false;}
         }
 
-        // CORREÇÃO DEFINITIVA DO BOTÃO DE INSCRIÇÃO (v32.0)
         function abrirModalInscricao(eventId) {
             const evento = dbData.eventos.find(e => String(e.id) === String(eventId));
-            if (!evento) {
-                alert('Evento não encontrado.');
-                return;
-            }
+            if (!evento) { alert('Evento não encontrado.'); return; }
 
             const emailLogado = (currentUser?.email || '').trim().toLowerCase();
             const jaInscrito = (dbData.inscricoes || []).some(i => i.eventId === String(eventId) && (i.uid === currentUser.uid || (i.email && i.email.trim().toLowerCase() === emailLogado)));
@@ -1319,7 +1317,8 @@
             if (btnText) btnText.textContent = 'Autenticando...';
             
             try {
-                await setPersistence(auth, browserLocalPersistence);
+                // Utiliza persistência em memória para evitar estouro de cota no localStorage
+                await setPersistence(auth, inMemoryPersistence);
                 await signInWithEmailAndPassword(auth, email, senha);
             } catch(err) {
                 mostrarMensagemLogin(traduzirErroSistema(err));
@@ -1487,7 +1486,6 @@
 
         configurarInterface();
 
-        // DELEGAÇÃO GLOBAL REFORÇADA PARA O BOTÃO DE INSCRIÇÃO (v32.0)
         document.addEventListener('click', ev => {
             const btnInscricao = ev.target.closest?.('[data-acao-inscricao]');
             if (btnInscricao) {
@@ -1553,7 +1551,7 @@
             }
         });
 
-        console.info('PRGD v32.0: pronto.');
+        console.info('PRGD v33.0: pronto.');
     </script>
 </body>
 </html>
