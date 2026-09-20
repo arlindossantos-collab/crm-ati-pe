@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v39.0                                      -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v40.0                                      -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -32,7 +32,8 @@
             <div>
                 <div class="text-center mb-6">
                     <div class="inline-block bg-blue-900 text-white font-black text-2xl px-4 py-2 rounded-xl mb-3 shadow">PRGD</div>
-                    <h3 class="text-lg font-bold text-slate-900">Acesso Restrito PRGD</h3>
+                    <!-- Nome atualizado v40.0 -->
+                    <h3 class="text-lg font-bold text-slate-900">Portal de Relacionamento do Governo Digital</h3>
                     <p class="text-xs text-slate-500 mt-1">Informe suas credenciais para acessar o sistema.</p>
                 </div>
                 <form id="login-form" class="space-y-4 text-sm">
@@ -52,7 +53,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v39.0</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v40.0</span></p>
             </div>
         </div>
     </div>
@@ -65,7 +66,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v39.0</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v40.0</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -91,7 +92,7 @@
             <span id="badge-perfil-acesso" class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold uppercase"></span>
         </div>
 
-        <!-- Navegação por Abas (Reordenada v39.0) -->
+        <!-- Navegação por Abas -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
                 <button type="button" data-tab="dashboard" class="nav-tab px-3.5 py-2 rounded-lg transition tab-active"><i class="fa-solid fa-chart-pie mr-1"></i> Dashboard</button>
@@ -143,10 +144,10 @@
                 </div>
                 <button type="button" data-modal-target="demanda" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Demanda</button>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[950px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Cliente / Solicitante</th><th class="p-4">Título da Demanda</th><th class="p-4">Resp. GRGD</th><th class="p-4">Prioridade / Status</th><th class="p-4">Criação / Edição</th><th class="p-4">Criado / Editado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-demandas" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[950px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Cliente / Solicitante</th><th class="p-4">Título da Demanda</th><th class="p-4">Resp. GRGD</th><th class="p-4">Prioridade / Status</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-demandas" class="divide-y text-sm"></tbody></table></div>
         </div>
 
-        <!-- ABA CLIENTES (Renomeada de Órgãos - v39.0) -->
+        <!-- ABA CLIENTES -->
         <div id="aba-clientes" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -168,7 +169,7 @@
                     <button type="button" data-modal-target="cliente" class="btn-abrir-form btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Cliente</button>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[1100px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Sigla / Nome</th><th class="p-4">Tipo / Resp. Cliente</th><th class="p-4">Gestor NSI</th><th class="p-4">Equipe NSI</th><th class="p-4">Criação / Edição</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-clientes" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[1100px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Sigla / Nome</th><th class="p-4">Tipo / Resp. Cliente</th><th class="p-4">Gestor NSI</th><th class="p-4">Equipe NSI (3 Membros)</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-clientes" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA EVENTOS -->
@@ -202,7 +203,7 @@
                 </div>
                 <button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Local / Auditório</button>
             </div>
-            <div id="grid-locais" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome / Espaço</th><th class="p-4">Capacidade / Área</th><th class="p-4">Valor Aluguel</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-locais" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA FORNECEDORES -->
@@ -214,7 +215,7 @@
                 </div>
                 <button type="button" data-modal-target="fornecedor" class="btn-abrir-form btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Fornecedor</button>
             </div>
-            <div id="grid-fornecedores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Razão Social / Nome</th><th class="p-4">CNPJ / Categoria</th><th class="p-4">Serviço Principal</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-fornecedores" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA USUÁRIOS -->
@@ -237,14 +238,14 @@
                     <button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Cliente</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Edição</th><th class="p-4">Criado / Editado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Cliente</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
                 <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários (Acesso Restrito a Eventos)</h4><p class="text-xs text-slate-500">Crie grupos para controlar quais usuários enxergam os eventos restritos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
                 <div id="lista-grupos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
             </div>
         </div>
 
-        <!-- ABA BASES (Movida para o final - v39.0) -->
+        <!-- ABA BASES -->
         <div id="aba-bases" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div>
@@ -256,7 +257,7 @@
             <div class="flex gap-2 items-center">
                 <input type="text" id="busca-bases" placeholder="Buscar categoria, sigla, nome..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[800px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria / Domínio</th><th class="p-4">Identificador / Sigla</th><th class="p-4">Valor / Opção</th><th class="p-4">Criação / Edição</th><th class="p-4">Criado / Editado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[800px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria / Domínio</th><th class="p-4">Identificador / Sigla</th><th class="p-4">Valor / Opção</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
         </div>
     </main>
 
@@ -283,14 +284,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v39.0 -->
+    <!-- Script Principal v40.0 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, runTransaction, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v39.0: Repositório de Bases Dinâmicas integrado');
+        console.info('PRGD v40.0: Auditoria padronizada, NSI 3 membros, QR Code e Contagem Fidedigna');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -311,7 +312,7 @@
         setPersistence(auth, inMemoryPersistence).catch(console.warn);
 
         let currentUser = null;
-        let dbData = { demandas: [], eventos: [], locais: [], clientes: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
+        let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
         let abaAtual = 'dashboard';
         let filtroEventoAtual = 'futuros';
         let filtroTagAtual = '';
@@ -327,7 +328,6 @@
         let buscaBasesVal = '';
         let buscaUsuariosVal = '';
 
-        // Sequência de módulos atualizada (v39.0: Bases no final e Clientes no lugar de Órgãos)
         const MÓDULOS_SISTEMA = [
             { id: 'dashboard', nome: 'Dashboard' },
             { id: 'demandas', nome: 'Demandas' },
@@ -352,7 +352,6 @@
 
         const OPCOES_TIPO_JURIDICO = ['Secretaria Estadual', 'Autarquia', 'Fundação Pública', 'Empresa Pública', 'Órgão Autônomo', 'Outros'];
 
-        // Função para buscar opções dinâmicas cadastradas na aba Bases
         function obterOpcoesBase(categoriaDominio, fallbackPadrao = []) {
             const cadastradas = (dbData.bases || [])
                 .filter(b => String(b.categoria || '').trim().toLowerCase() === String(categoriaDominio).trim().toLowerCase())
@@ -456,12 +455,13 @@
             } catch(e) { return dataStr; }
         }
 
+        // Função padronizada de auditoria presente em TODOS os módulos (v40.0)
         function renderAuditInfo(item) {
             const criado = item.criadoEm ? new Date(item.criadoEm).toLocaleDateString('pt-BR') : '-';
-            const editado = item.atualizadoEm ? new Date(item.atualizadoEm).toLocaleDateString('pt-BR') : 'Nunca';
-            const autor = item.criadoPor || item.editadoPor || 'Sistema';
+            const modificado = item.atualizadoEm ? new Date(item.atualizadoEm).toLocaleDateString('pt-BR') : 'Nunca';
+            const autor = item.editadoPor || item.criadoPor || 'Sistema';
             return {
-                dataHtml: `<span class="text-[11px] text-slate-600">Criado: ${criado}<br>Editado: ${editado}</span>`,
+                dataHtml: `<span class="text-[11px] text-slate-600">Criação: ${criado}<br>Modificação: ${modificado}</span>`,
                 autorHtml: `<span class="text-[11px] font-semibold text-slate-700">${esc(autor)}</span>`
             };
         }
@@ -514,6 +514,8 @@
             });
             if (aba === 'dashboard') renderCharts();
             if (aba === 'eventos') renderEventos();
+            if (aba === 'locais') renderLocais();
+            if (aba === 'fornecedores') renderFornecedores();
             if (aba === 'usuarios') { renderGrupos(); renderUsuarios(); }
             if (aba === 'bases') renderBases();
         }
@@ -534,13 +536,10 @@
             eventosCacheMap = {};
             if (!currentUser) return;
             const colecoes = ['demandas','locais','orgaos','fornecedores','bases','usuarios'];
-            if (currentUser.perfil === 'admin') {}
             
             colecoes.forEach(col => {
                 const unsub = onSnapshot(collection(db, col), snap => {
                     dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    // Sincroniza alias "orgaos" para "clientes" no escopo interno
-                    if (col === 'orgaos') dbData.clientes = dbData.orgaos;
                     renderizarTudo();
                 }, err => console.warn('Firestore '+col+':', err.message));
                 snapshotUnsubs.push(unsub);
@@ -678,7 +677,7 @@
             }).join('') || '<tr><td colspan="8" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
-        // Renderização da aba Clientes (antiga Órgãos)
+        // Renderização de Clientes com os 3 membros da Equipe NSI (v40.0)
         function renderClientes() {
             const tbody = document.getElementById('tabela-clientes');
             if (!tbody) return;
@@ -692,6 +691,19 @@
             tbody.innerHTML = filtered.map(o => {
                 const corTipo = obterCorTipoJuridico(o.tipoJuridico);
                 const audit = renderAuditInfo(o);
+
+                // Montagem da Equipe NSI com até 3 membros
+                let equipeNsiHtml = '-';
+                const membros = [
+                    { nome: o.equipe1Nome, email: o.equipe1Email, tel: o.equipe1Tel },
+                    { nome: o.equipe2Nome, email: o.equipe2Email, tel: o.equipe2Tel },
+                    { nome: o.equipe3Nome, email: o.equipe3Email, tel: o.equipe3Tel }
+                ].filter(m => m.nome);
+
+                if (membros.length > 0) {
+                    equipeNsiHtml = membros.map((m, idx) => `<div class="mb-1 text-[11px]"><b class="text-indigo-900">Membro ${idx+1}:</b> ${esc(m.nome)} (${esc(m.email || '-')}, ${esc(m.tel || '-')})</div>`).join('');
+                }
+
                 return `<tr class="hover:bg-slate-50">
                     <td class="p-4">
                         <div class="font-bold text-indigo-900 text-base">${esc(o.sigla || o.id)}</div>
@@ -699,25 +711,24 @@
                     </td>
                     <td class="p-4">
                         <div><span class="font-semibold px-2 py-0.5 rounded-full text-[10px] border ${corTipo}">${esc(o.tipoJuridico || 'Não informado')}</span></div>
-                        <div class="text-xs text-slate-700 mt-1"><b>Resp. Cliente:</b> ${esc(o.responsavel || '-')}</div>
+                        <div class="text-xs text-slate-700 mt-1"><b>Responsável do Cliente:</b> ${esc(o.responsavel || '-')}</div>
+                        <div class="text-[11px] text-slate-500">E-mail: ${esc(o.email || '-')}</div>
                     </td>
                     <td class="p-4 text-xs">
                         <div class="font-bold text-slate-800">${esc(o.gestorNsiNome || '-')}</div>
                         <div class="text-slate-600">${esc(o.gestorNsiEmail || '')}</div>
                         <div class="text-slate-500">${esc(o.gestorNsiTel || '')}</div>
                     </td>
-                    <td class="p-4 text-xs">
-                        <div class="font-bold text-slate-800">${esc(o.equipeNsiNome || '-')}</div>
-                        <div class="text-slate-600">${esc(o.equipeNsiEmail || '')}</div>
-                        <div class="text-slate-500">${esc(o.equipeNsiTel || '')}</div>
+                    <td class="p-4 text-xs max-w-xs">
+                        ${equipeNsiHtml}
                     </td>
                     <td class="p-4">${audit.dataHtml}</td>
+                    <td class="p-4">${audit.autorHtml}</td>
                     <td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded cursor-pointer hover:bg-slate-200 tr-detalhe font-semibold text-blue-900" data-colecao="orgaos" data-id="${esc(o.id)}">Detalhes</button></td>
                 </tr>`;
             }).join('');
         }
 
-        // Renderização do Repositório de Bases Dinâmicas (v39.0)
         function renderBases() {
             const tbody = document.getElementById('tabela-bases');
             if (!tbody) return;
@@ -739,7 +750,6 @@
             }).join('') || '<tr><td colspan="6" class="text-slate-400 text-sm text-center py-6">Nenhuma base cadastrada.</td></tr>';
         }
 
-        // Renderização de Demandas com RESP. GRGD (v39.0)
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
             if (!tbody) return;
@@ -771,7 +781,6 @@
             }).join('');
         }
 
-        // Renderização de Eventos com Dropdowns dinâmicos alimentados pela aba Bases (v39.0)
         function renderEventos() {
             const grid = document.getElementById('grid-eventos');
             if (!grid) return;
@@ -805,9 +814,12 @@
                 const fim = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
                 const real = fim < agora;
                 const vagas = Number(e.limiteVagas || 0);
-                const inscritos = Number(e.inscritosCount || 0);
-                const lotado = vagas > 0 && inscritos >= vagas;
-                const minha = !!(dbData.inscricoes || []).some(i => i.eventId === String(e.id) && i.uid === currentUser?.uid);
+                
+                // Contagem fidedigna calculada dinamicamente com base na coleção "inscricoes" (v40.0)
+                const inscritosReal = (dbData.inscricoes || []).filter(i => String(i.eventId) === String(e.id)).length;
+                const lotado = vagas > 0 && inscritosReal >= vagas;
+                const minha = !!(dbData.inscricoes || []).some(i => String(i.eventId) === String(e.id) && i.uid === currentUser?.uid);
+                
                 const linkExterno = real ? '' : normalizarUrl(e.linkInscricao || e.linkDivulgacao);
                 const bannerImg = normalizarUrl(e.imagemCard);
                 const audit = renderAuditInfo(e);
@@ -831,7 +843,7 @@
                         <div class="mt-3 text-xs space-y-1.5 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
                             <div><i class="fa-solid fa-calendar text-blue-800 mr-1.5"></i> ${formatarData(e.dataInicio)}</div>
                             <div><i class="fa-solid fa-location-dot text-purple-700 mr-1.5"></i> ${esc(e.localEvento || 'Local não informado')}</div>
-                            <div><i class="fa-solid fa-users text-emerald-700 mr-1.5"></i> ${vagas ? `${inscritos}/${vagas} vagas preenchidas` : `${inscritos} inscritos`}</div>
+                            <div><i class="fa-solid fa-users text-emerald-700 mr-1.5"></i> ${vagas ? `${inscritosReal}/${vagas} vagas preenchidas` : `${inscritosReal} inscritos`}</div>
                             <div class="text-[11px] text-slate-600"><b>Realização:</b> ${esc(e.realizador || 'ATI-PE')} | <b>Demandante:</b> ${esc(e.demandanteEvento || '-')}</div>
                             <div class="text-[11px] text-slate-600"><b>Emite Certificado:</b> <span class="font-bold ${e.emiteCertificado === 'Sim' ? 'text-emerald-700' : 'text-slate-500'}">${esc(e.emiteCertificado || 'Não')}</span></div>
                         </div>
@@ -841,7 +853,8 @@
                         <div class="pt-3 border-t mt-3 flex justify-between text-[11px] text-slate-500"><span>${audit.dataHtml}</span><span>Por: ${audit.autorHtml}</span></div>
 
                         <div class="mt-auto pt-4 flex flex-wrap gap-2 items-center">
-                            ${!minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrever-me</button>` : ''}
+                            <!-- Botão renomeado para "Inscrições" (v40.0) -->
+                            ${!minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrições</button>` : ''}
                             ${minha && !real ? `<button type="button" data-cancelar-evento="${esc(e.id)}" class="bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer">Cancelar inscrição</button>` : ''}
                             ${lotado && !minha && !real ? '<span class="bg-red-100 text-red-700 text-xs px-3 py-2 rounded-xl font-bold">Vagas esgotadas</span>' : ''}
                             ${real ? '<span class="text-xs font-bold text-slate-500 italic">Evento finalizado</span>' : ''}
@@ -858,51 +871,45 @@
         }
 
         function renderLocais() {
-            const grid = document.getElementById('grid-locais');
-            if (!grid) return;
+            const tbody = document.getElementById('tabela-locais');
+            if (!tbody) return;
             const filtered = dbData.locais.filter(l => {
                 const txt = buscaLocaisVal;
                 return !txt || (l.nome || '').toLowerCase().includes(txt) || (l.tipoEspaco || '').toLowerCase().includes(txt) || (l.endereco || '').toLowerCase().includes(txt) || (l.contato || '').toLowerCase().includes(txt);
             });
             document.getElementById('count-locais').textContent = filtered.length;
-            grid.innerHTML = filtered.map(l => {
+            tbody.innerHTML = filtered.map(l => {
                 const audit = renderAuditInfo(l);
-                return `<div class="bg-white p-5 rounded-2xl border shadow-sm hover:border-purple-400 flex flex-col justify-between">
-                    <div>
-                        <h4 class="font-bold text-lg">${esc(l.nome)}</h4>
-                        <p class="text-xs text-slate-500 mt-1">${esc(l.tipoEspaco || 'Espaço')} • ${esc(l.capacidade || 0)} pessoas • ${esc(l.metrosQuadrados || '?')} m² • <b>${formatarMoeda(l.valorAluguel)}</b></p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t text-[11px] text-slate-500 flex justify-between items-center">
-                        <div>${audit.dataHtml}</div>
-                        <div><button class="text-xs bg-slate-100 px-2.5 py-1 rounded cursor-pointer hover:bg-slate-200 tr-detalhe font-semibold text-blue-900" data-colecao="locais" data-id="${esc(l.id)}">Detalhes</button></div>
-                    </div>
-                </div>`;
-            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum local.</p>';
+                return `<tr class="hover:bg-slate-50">
+                    <td class="p-4 font-bold text-purple-900">${esc(l.nome)}<div class="text-xs font-normal text-slate-500">${esc(l.tipoEspaco || 'Espaço')}</div></td>
+                    <td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas • ${esc(l.metrosQuadrados || '?')} m²</td>
+                    <td class="p-4 font-semibold">${formatarMoeda(l.valorAluguel)}</td>
+                    <td class="p-4">${audit.dataHtml}</td>
+                    <td class="p-4">${audit.autorHtml}</td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded cursor-pointer hover:bg-slate-200 tr-detalhe font-semibold text-blue-900" data-colecao="locais" data-id="${esc(l.id)}">Detalhes</button></td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="6" class="text-slate-400 text-sm text-center py-6">Nenhum local cadastrado.</td></tr>';
         }
 
         function renderFornecedores() {
-            const grid = document.getElementById('grid-fornecedores');
-            if (!grid) return;
+            const tbody = document.getElementById('tabela-fornecedores');
+            if (!tbody) return;
             const filtered = dbData.fornecedores.filter(f => {
                 const txt = buscaFornecedoresVal;
                 return !txt || (f.nome || '').toLowerCase().includes(txt) || (f.cnpj || '').toLowerCase().includes(txt) || (f.categoria || '').toLowerCase().includes(txt) || (f.especialidades || '').toLowerCase().includes(txt);
             });
             document.getElementById('count-fornecedores').textContent = filtered.length;
-            grid.innerHTML = filtered.map(f => {
+            tbody.innerHTML = filtered.map(f => {
                 const audit = renderAuditInfo(f);
-                return `<div class="bg-white p-5 rounded-2xl border shadow-sm hover:border-emerald-400 flex flex-col justify-between">
-                    <div>
-                        <h4 class="font-bold text-lg">${esc(f.nome)}</h4>
-                        <p class="text-xs text-slate-500 mt-1">${esc(f.categoria || 'Fornecedor')} • CNPJ ${esc(f.cnpj || '-')}</p>
-                        <p class="text-xs font-semibold text-emerald-800 mt-1">${esc(f.faixaValor || '')}</p>
-                        <p class="text-xs text-slate-600 mt-2 line-clamp-3">${esc(f.especialidades || f.produtoServicoPrincipal || '')}</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t text-[11px] text-slate-500 flex justify-between items-center">
-                        <div>${audit.dataHtml}</div>
-                        <div><button class="text-xs bg-slate-100 px-2.5 py-1 rounded cursor-pointer hover:bg-slate-200 tr-detalhe font-semibold text-blue-900" data-colecao="fornecedores" data-id="${esc(f.id)}">Detalhes</button></div>
-                    </div>
-                </div>`;
-            }).join('') || '<p class="text-slate-400 text-sm col-span-3">Nenhum fornecedor.</p>';
+                return `<tr class="hover:bg-slate-50">
+                    <td class="p-4 font-bold text-emerald-900">${esc(f.nome)}<div class="text-xs font-normal text-slate-500">${esc(f.nomeFantasia || '')}</div></td>
+                    <td class="p-4 text-xs">CNPJ: ${esc(f.cnpj || '-')}<br><span class="font-semibold text-emerald-800">${esc(f.categoria || '')}</span></td>
+                    <td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || f.especialidades || '-')}</td>
+                    <td class="p-4">${audit.dataHtml}</td>
+                    <td class="p-4">${audit.autorHtml}</td>
+                    <td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded cursor-pointer hover:bg-slate-200 tr-detalhe font-semibold text-blue-900" data-colecao="fornecedores" data-id="${esc(f.id)}">Detalhes</button></td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="6" class="text-slate-400 text-sm text-center py-6">Nenhum fornecedor cadastrado.</td></tr>';
         }
 
         function renderGrupos() {
@@ -1021,8 +1028,8 @@
                     ${common('Sigla','sigla')} 
                     ${common('Nome do Cliente','nome','text','md:col-span-2')} 
                     <div><label class="block font-bold text-[11px] uppercase mb-1">Tipo Jurídico</label><select name="tipoJuridico" class="w-full p-2 border rounded-lg text-xs bg-white"><option value="">Selecione</option>${OPCOES_TIPO_JURIDICO.map(tj=>`<option ${item.tipoJuridico===tj?'selected':''}>${tj}</option>`).join('')}</select></div> 
-                    ${common('Responsável TIC do Cliente','responsavel')} 
-                    ${common('E-mail TIC','email','email')} 
+                    ${common('Responsável do Cliente (sem TIC)','responsavel')} 
+                    ${common('E-mail','email','email')} 
                     ${common('Site Institucional','site')} 
                     ${common('Redes Sociais','redesSociais')} 
                     ${common('Endereço Físico','endereco','text','md:col-span-2')}
@@ -1032,10 +1039,18 @@
                     ${common('E-mail Gestor NSI','gestorNsiEmail','email')}
                     ${common('Telefone Gestor NSI','gestorNsiTel')}
 
-                    <div class="md:col-span-2 border-t pt-2 mt-2 font-bold text-indigo-900 uppercase text-xs">Equipe NSI</div>
-                    ${common('Nome da Equipe / Contato','equipeNsiNome')}
-                    ${common('E-mail da Equipe NSI','equipeNsiEmail','email')}
-                    ${common('Telefone da Equipe NSI','equipeNsiTel')}
+                    <div class="md:col-span-2 border-t pt-2 mt-2 font-bold text-indigo-900 uppercase text-xs">Equipe NSI (3 Membros)</div>
+                    ${common('Membro 1 - Nome','equipe1Nome')}
+                    ${common('Membro 1 - E-mail','equipe1Email','email')}
+                    ${common('Membro 1 - Tel','equipe1Tel')}
+                    
+                    ${common('Membro 2 - Nome','equipe2Nome')}
+                    ${common('Membro 2 - E-mail','equipe2Email','email')}
+                    ${common('Membro 2 - Tel','equipe2Tel')}
+
+                    ${common('Membro 3 - Nome','equipe3Nome')}
+                    ${common('Membro 3 - E-mail','equipe3Email','email')}
+                    ${common('Membro 3 - Tel','equipe3Tel')}
                 </div>`;
                 return;
             }
@@ -1151,7 +1166,7 @@
                 ['titulo','orgao','solicitante','responsavelGrgd','categoria','prioridade','status','descricao'].forEach(k=>obj[k]=form.querySelector(`[name="${k}"]`)?.value||'');
                 obj.historicoAcoes = itemAntigo.historicoAcoes || [];
             } else if(colecao==='orgaos'){
-                ['sigla','nome','tipoJuridico','responsavel','email','site','redesSociais','endereco','gestorNsiNome','gestorNsiEmail','gestorNsiTel','equipeNsiNome','equipeNsiEmail','equipeNsiTel'].forEach(k=>obj[k]=form.querySelector(`[name="${k}"]`)?.value||'');
+                ['sigla','nome','tipoJuridico','responsavel','email','site','redesSociais','endereco','gestorNsiNome','gestorNsiEmail','gestorNsiTel','equipe1Nome','equipe1Email','equipe1Tel','equipe2Nome','equipe2Email','equipe2Tel','equipe3Nome','equipe3Email','equipe3Tel'].forEach(k=>obj[k]=form.querySelector(`[name="${k}"]`)?.value||'');
                 if(obj.site) obj.site = normalizarUrl(obj.site);
             } else if(colecao==='locais'){
                 ['nome','tipoEspaco','capacidade','metrosQuadrados','valorAluguel','endereco','contato','site','observacoes'].forEach(k=>obj[k]=form.querySelector(`[name="${k}"]`)?.value||''); obj.banheiro=getRadioOrOther(form,'banheiro'); obj.acessibilidade=getRadioOrOther(form,'acessibilidade');
@@ -1316,8 +1331,12 @@
 
                     const e = ev.data();
                     const lim = Number(e.limiteVagas || 0);
-                    const qtd = Number(e.inscritosCount || 0);
-                    if (lim > 0 && qtd >= lim) throw new Error('As vagas deste evento já estão esgotadas.');
+                    
+                    // Contagem fidedigna em transação baseada na coleção real de inscrições
+                    const inscricoesSnap = await getDocs(query(collection(db, 'inscricoes'), where('eventId', '==', String(docIdReal))));
+                    const qtdReal = inscricoesSnap.size;
+
+                    if (lim > 0 && qtdReal >= lim) throw new Error('As vagas deste evento já estão esgotadas.');
 
                     tx.set(refInsc, {
                         id: inscricaoDocId,
@@ -1330,7 +1349,7 @@
                         inscritoEm: new Date().toISOString(),
                         eventoTitulo: e.titulo || ''
                     });
-                    tx.update(docRefReal, { inscritosCount: qtd + 1 });
+                    tx.update(docRefReal, { inscritosCount: qtdReal + 1 });
                 });
 
                 dbData.minhasInscricoes = [...(dbData.minhasInscricoes || []), { id: inscricaoDocId, eventId: String(docIdReal), uid: currentUser.uid }]; 
@@ -1349,9 +1368,10 @@
                 await runTransaction(db,async tx=>{
                     const [ev,ins]=await Promise.all([tx.get(er),tx.get(ir)]);
                     if(!ins.exists())throw new Error('Inscrição não encontrada.');
-                    const qtd=Math.max(0,Number(ev.data()?.inscritosCount||0)-1);
+                    const inscricoesSnap = await getDocs(query(collection(db, 'inscricoes'), where('eventId', '==', String(eventId))));
+                    const qtdReal = Math.max(0, inscricoesSnap.size - 1);
                     tx.delete(ir);
-                    tx.update(er,{inscritosCount:qtd});
+                    tx.update(er,{inscritosCount: qtdReal});
                 });
                 dbData.minhasInscricoes = (dbData.minhasInscricoes||[]).filter(i => i.id !== inscricaoDocId);
                 renderEventos();
@@ -1359,16 +1379,20 @@
             }catch(e){alert(traduzirErroSistema(e));}
         }
 
+        // Função corrigida e robusta para exibir a Ficha de Presença QR Code (v40.0)
         window.abrirFichaPresencaQR = function(eventId) {
             const evento = dbData.eventos.find(e => String(e.id) === String(eventId));
-            if (!evento) return;
+            if (!evento) {
+                alert('Evento não localizado.');
+                return;
+            }
 
             let m = document.getElementById('modal-ficha-presenca');
             if (m) m.remove();
 
             m = document.createElement('div');
             m.id = 'modal-ficha-presenca';
-            m.className = 'fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] flex items-center justify-center p-4';
+            m.className = 'fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[90] flex items-center justify-center p-4';
             document.body.appendChild(m);
 
             const urlCheckin = window.location.href.split('#')[0] + '?checkin=' + eventId;
@@ -1379,7 +1403,7 @@
                     <button type="button" class="text-slate-400 hover:text-slate-600 cursor-pointer" id="fechar-modal-qr"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
                 <p class="text-xs text-slate-600 mb-4">Aponte a câmera do celular para registrar presença no evento <b>${esc(evento.titulo)}</b>.</p>
-                <div id="qrcode-container" class="bg-white p-4 inline-block border rounded-xl shadow-sm my-2 flex justify-center"></div>
+                <div id="qrcode-container" class="bg-white p-4 inline-block border rounded-xl shadow-sm my-2 flex justify-center min-w-[180px] min-h-[180px]"></div>
                 <div class="mt-4 pt-3 border-t">
                     <p class="text-[11px] text-slate-500 mb-2 truncate">Link direto: <a href="${urlCheckin}" target="_blank" class="text-blue-600 underline">${urlCheckin}</a></p>
                     <button type="button" id="btn-fechar-qr" class="w-full py-2 bg-purple-900 text-white rounded-lg text-xs font-bold cursor-pointer">Fechar</button>
@@ -1388,6 +1412,7 @@
 
             m.querySelector('#fechar-modal-qr').onclick = () => m.remove();
             m.querySelector('#btn-fechar-qr').onclick = () => m.remove();
+            m.onclick = (e) => { if(e.target === m) m.remove(); };
 
             setTimeout(() => {
                 const qrEl = document.getElementById('qrcode-container');
@@ -1523,7 +1548,7 @@
                     const sigla = cols[0]?.trim().toUpperCase() || '', nome = cols[1]?.trim() || '';
                     if (!sigla || sigla === 'SIGLA' || !nome) continue;
                     try {
-                        await setDoc(doc(db, 'orgaos', sigla), { id: sigla, sigla, nome, tipoJuridico: cols[2]?.trim() || '', responsavel: cols[3]?.trim() || '', email: cols[4]?.trim() || '', site: normalizarUrl(cols[5]?.trim() || ''), redesSociais: cols[6]?.trim() || '', endereco: cols[7]?.trim() || '', gestorNsiNome: cols[8]?.trim() || '', gestorNsiEmail: cols[9]?.trim() || '', gestorNsiTel: cols[10]?.trim() || '', equipeNsiNome: cols[11]?.trim() || '', equipeNsiEmail: cols[12]?.trim() || '', equipeNsiTel: cols[13]?.trim() || '', criadoEm: agora, atualizadoEm: agora, criadoPor: autor, editadoPor: autor }, { merge: true });
+                        await setDoc(doc(db, 'orgaos', sigla), { id: sigla, sigla, nome, tipoJuridico: cols[2]?.trim() || '', responsavel: cols[3]?.trim() || '', email: cols[4]?.trim() || '', site: normalizarUrl(cols[5]?.trim() || ''), redesSociais: cols[6]?.trim() || '', endereco: cols[7]?.trim() || '', gestorNsiNome: cols[8]?.trim() || '', gestorNsiEmail: cols[9]?.trim() || '', gestorNsiTel: cols[10]?.trim() || '', criadoEm: agora, atualizadoEm: agora, criadoPor: autor, editadoPor: autor }, { merge: true });
                         importados++;
                     } catch(err) {}
                 }
@@ -1632,8 +1657,8 @@
                     <div><label class="block mb-1 font-medium">Sigla</label><input id="uc-1" required class="w-full p-2 border rounded uppercase"></div>
                     <div class="md:col-span-2"><label class="block mb-1 font-medium">Nome do Cliente / Secretaria</label><input id="uc-2" required class="w-full p-2 border rounded"></div>
                     <div><label class="block mb-1 font-medium">Tipo Jurídico</label><select id="uc-3" class="w-full p-2 border rounded bg-white"><option value="">Selecione</option>${OPCOES_TIPO_JURIDICO.map(tj=>`<option>${tj}</option>`).join('')}</select></div>
-                    <div><label class="block mb-1 font-medium">Responsável TIC do Cliente</label><input id="uc-4" class="w-full p-2 border rounded"></div>
-                    <div><label class="block mb-1 font-medium">E-mail TIC</label><input type="email" id="uc-email" class="w-full p-2 border rounded"></div>
+                    <div><label class="block mb-1 font-medium">Responsável do Cliente (sem TIC)</label><input id="uc-4" class="w-full p-2 border rounded"></div>
+                    <div><label class="block mb-1 font-medium">E-mail</label><input type="email" id="uc-email" class="w-full p-2 border rounded"></div>
                     <div><label class="block mb-1 font-medium">Site Institucional</label><input type="text" id="uc-site" class="w-full p-2 border rounded" placeholder="dominio.pe.gov.br"></div>
                     <div><label class="block mb-1 font-medium">Redes Sociais</label><input type="text" id="uc-redes" class="w-full p-2 border rounded" placeholder="@instagram"></div>
                     <div class="md:col-span-2"><label class="block mb-1 font-medium">Endereço Físico</label><input type="text" id="uc-end" class="w-full p-2 border rounded"></div>
@@ -1643,10 +1668,18 @@
                     <div><label class="block mb-1 font-medium">E-mail Gestor NSI</label><input type="email" id="uc-gemail" class="w-full p-2 border rounded"></div>
                     <div><label class="block mb-1 font-medium">Telefone Gestor NSI</label><input id="uc-gtel" class="w-full p-2 border rounded"></div>
 
-                    <div class="md:col-span-2 border-t pt-2 mt-2 font-bold text-indigo-900 uppercase text-xs">Equipe NSI</div>
-                    <div><label class="block mb-1 font-medium">Nome Equipe NSI</label><input id="uc-enome" class="w-full p-2 border rounded"></div>
-                    <div><label class="block mb-1 font-medium">E-mail Equipe NSI</label><input type="email" id="uc-eemail" class="w-full p-2 border rounded"></div>
-                    <div><label class="block mb-1 font-medium">Telefone Equipe NSI</label><input id="uc-etel" class="w-full p-2 border rounded"></div>
+                    <div class="md:col-span-2 border-t pt-2 mt-2 font-bold text-indigo-900 uppercase text-xs">Equipe NSI (3 Membros)</div>
+                    <div><label class="block mb-1 font-medium">Membro 1 - Nome</label><input id="uc-e1name" class="w-full p-2 border rounded"></div>
+                    <div><label class="block mb-1 font-medium">Membro 1 - E-mail</label><input type="email" id="uc-e1mail" class="w-full p-2 border rounded"></div>
+                    <div><label class="block mb-1 font-medium">Membro 1 - Tel</label><input id="uc-e1tel" class="w-full p-2 border rounded"></div>
+
+                    <div><label class="block mb-1 font-medium">Membro 2 - Nome</label><input id="uc-e2name" class="w-full p-2 border rounded"></div>
+                    <div><label class="block mb-1 font-medium">Membro 2 - E-mail</label><input type="email" id="uc-e2mail" class="w-full p-2 border rounded"></div>
+                    <div><label class="block mb-1 font-medium">Membro 2 - Tel</label><input id="uc-e2tel" class="w-full p-2 border rounded"></div>
+
+                    <div><label class="block mb-1 font-medium">Membro 3 - Nome</label><input id="uc-e3name" class="w-full p-2 border rounded"></div>
+                    <div><label class="block mb-1 font-medium">Membro 3 - E-mail</label><input type="email" id="uc-e3mail" class="w-full p-2 border rounded"></div>
+                    <div><label class="block mb-1 font-medium">Membro 3 - Tel</label><input id="uc-e3tel" class="w-full p-2 border rounded"></div>
                 </div>`;
             } else if (tipo === 'evento') {
                 const opcoesTiposEvento = obterOpcoesBase('Tipo de Evento', ['Capacitação', 'Encontro de Gestores', 'Palestra', 'Apresentação', 'Workshop', 'Seminário']);
@@ -1707,7 +1740,7 @@
                     await addDoc(collection(db, 'demandas'), { id: 'DEM-' + Date.now(), titulo: val('uc-1'), orgao: val('uc-2'), solicitante: val('uc-sol'), responsavelGrgd: val('uc-grgd'), categoria: val('uc-cat'), prioridade: val('uc-prio'), status: 'Em Andamento', descricao: val('uc-desc'), historicoAcoes: [{ data: agora, autor: autor, texto: 'Demanda criada no sistema.' }], criadoEm: agora, atualizadoEm: agora, criadoPor: autor, editadoPor: autor });
                 } else if (tipo === 'cliente') {
                     const sigla = val('uc-1').toUpperCase().trim();
-                    await setDoc(doc(db, 'orgaos', sigla), { id: sigla, sigla, nome: val('uc-2'), tipoJuridico: val('uc-3'), responsavel: val('uc-4'), email: val('uc-email'), site: normalizarUrl(val('uc-site')), redesSociais: val('uc-redes'), endereco: val('uc-end'), gestorNsiNome: val('uc-gnome'), gestorNsiEmail: val('uc-gemail'), gestorNsiTel: val('uc-gtel'), equipeNsiNome: val('uc-enome'), equipeNsiEmail: val('uc-eemail'), equipeNsiTel: val('uc-etel'), criadoEm: agora, atualizadoEm: agora, criadoPor: autor, editadoPor: autor }, { merge: true });
+                    await setDoc(doc(db, 'orgaos', sigla), { id: sigla, sigla, nome: val('uc-2'), tipoJuridico: val('uc-3'), responsavel: val('uc-4'), email: val('uc-email'), site: normalizarUrl(val('uc-site')), redesSociais: val('uc-redes'), endereco: val('uc-end'), gestorNsiNome: val('uc-gnome'), gestorNsiEmail: val('uc-gemail'), gestorNsiTel: val('uc-gtel'), equipe1Nome: val('uc-e1name'), equipe1Email: val('uc-e1mail'), equipe1Tel: val('uc-e1tel'), equipe2Nome: val('uc-e2name'), equipe2Email: val('uc-e2mail'), equipe2Tel: val('uc-e2tel'), equipe3Nome: val('uc-e3name'), equipe3Email: val('uc-e3mail'), equipe3Tel: val('uc-e3tel'), criadoEm: agora, atualizadoEm: agora, criadoPor: autor, editadoPor: autor }, { merge: true });
                 } else if (tipo === 'evento') {
                     await addDoc(collection(db, 'eventos'), { id: 'EV-' + Date.now(), titulo: val('uc-1'), tipoEvento: val('uc-tipoev'), palestrante: val('uc-2'), dataInicio: val('uc-3'), dataFim: val('uc-fim'), localEvento: val('uc-local'), realizador: val('uc-realizador'), demandanteEvento: val('uc-demandante'), emiteCertificado: val('uc-certificado'), limiteVagas: Number(val('uc-vagas') || 0), inscritosCount: 0, linkInscricao: normalizarUrl(val('uc-link')), imagemCard: normalizarUrl(val('uc-img')), descricao: val('uc-4'), textoCard: val('uc-card'), gruposPermitidos: getChecked(document.getElementById('form-univ-body'), 'gruposPermitidos'), eventoPublico: document.getElementById('uc-publico')?.checked || false, visibilidade: document.getElementById('uc-publico')?.checked ? 'Público' : 'Restrito por grupos', status: 'Publicado', criadoEm: agora, atualizadoEm: agora, criadoPor: autor, editadoPor: autor });
                 } else if (tipo === 'local') {
@@ -1859,7 +1892,7 @@
             }
         });
 
-        console.info('PRGD v39.0: pronto.');
+        console.info('PRGD v40.0: pronto.');
     </script>
 </body>
 </html>
