@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v40.0                                      -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.40                                     -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -32,7 +32,7 @@
             <div>
                 <div class="text-center mb-6">
                     <div class="inline-block bg-blue-900 text-white font-black text-2xl px-4 py-2 rounded-xl mb-3 shadow">PRGD</div>
-                    <!-- Nome atualizado v40.0 -->
+                    <!-- Nome atualizado v0.40 -->
                     <h3 class="text-lg font-bold text-slate-900">Portal de Relacionamento do Governo Digital</h3>
                     <p class="text-xs text-slate-500 mt-1">Informe suas credenciais para acessar o sistema.</p>
                 </div>
@@ -53,7 +53,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v40.0</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.40</span></p>
             </div>
         </div>
     </div>
@@ -66,7 +66,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v40.0</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.40</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -284,14 +284,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v40.0 -->
+    <!-- Script Principal v0.40 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, runTransaction, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v40.0: Auditoria padronizada, NSI 3 membros, QR Code e Contagem Fidedigna');
+        console.info('PRGD v0.40: Auditoria padronizada, NSI 3 membros, QR Code e Contagem Fidedigna');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -455,7 +455,7 @@
             } catch(e) { return dataStr; }
         }
 
-        // Função padronizada de auditoria presente em TODOS os módulos (v40.0)
+        // Função padronizada de auditoria presente em TODOS os módulos (v0.40)
         function renderAuditInfo(item) {
             const criado = item.criadoEm ? new Date(item.criadoEm).toLocaleDateString('pt-BR') : '-';
             const modificado = item.atualizadoEm ? new Date(item.atualizadoEm).toLocaleDateString('pt-BR') : 'Nunca';
@@ -677,7 +677,7 @@
             }).join('') || '<tr><td colspan="8" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
-        // Renderização de Clientes com os 3 membros da Equipe NSI (v40.0)
+        // Renderização de Clientes com os 3 membros da Equipe NSI (v0.40)
         function renderClientes() {
             const tbody = document.getElementById('tabela-clientes');
             if (!tbody) return;
@@ -815,7 +815,7 @@
                 const real = fim < agora;
                 const vagas = Number(e.limiteVagas || 0);
                 
-                // Contagem fidedigna calculada dinamicamente com base na coleção "inscricoes" (v40.0)
+                // Contagem fidedigna calculada dinamicamente com base na coleção "inscricoes" (v0.40)
                 const inscritosReal = (dbData.inscricoes || []).filter(i => String(i.eventId) === String(e.id)).length;
                 const lotado = vagas > 0 && inscritosReal >= vagas;
                 const minha = !!(dbData.inscricoes || []).some(i => String(i.eventId) === String(e.id) && i.uid === currentUser?.uid);
@@ -853,7 +853,7 @@
                         <div class="pt-3 border-t mt-3 flex justify-between text-[11px] text-slate-500"><span>${audit.dataHtml}</span><span>Por: ${audit.autorHtml}</span></div>
 
                         <div class="mt-auto pt-4 flex flex-wrap gap-2 items-center">
-                            <!-- Botão renomeado para "Inscrições" (v40.0) -->
+                            <!-- Botão renomeado para "Inscrições" (v0.40) -->
                             ${!minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrições</button>` : ''}
                             ${minha && !real ? `<button type="button" data-cancelar-evento="${esc(e.id)}" class="bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer">Cancelar inscrição</button>` : ''}
                             ${lotado && !minha && !real ? '<span class="bg-red-100 text-red-700 text-xs px-3 py-2 rounded-xl font-bold">Vagas esgotadas</span>' : ''}
@@ -1379,7 +1379,7 @@
             }catch(e){alert(traduzirErroSistema(e));}
         }
 
-        // Função corrigida e robusta para exibir a Ficha de Presença QR Code (v40.0)
+        // Função corrigida e robusta para exibir a Ficha de Presença QR Code (v0.40)
         window.abrirFichaPresencaQR = function(eventId) {
             const evento = dbData.eventos.find(e => String(e.id) === String(eventId));
             if (!evento) {
@@ -1892,7 +1892,7 @@
             }
         });
 
-        console.info('PRGD v40.0: pronto.');
+        console.info('PRGD v0.40: pronto.');
     </script>
 </body>
 </html>
