@@ -1,6 +1,6 @@
 # PRGD — Plataforma de Relacionamento do Governo Digital
 
-**Versão da aplicação:** v0.41  
+**Versão da aplicação:** v0.40  
 **Identificação:** PRGD  
 **Plataforma:** Web responsiva  
 **Idioma da interface:** Português do Brasil (`pt-BR`)  
@@ -36,8 +36,6 @@ Além desses módulos, existem recursos transversais de:
 - sincronização em tempo real com Firestore;
 - auditoria de criação e alteração;
 - edição detalhada de registros;
-- histórico de versões anteriores dos registros editados;
-- gestão avançada de demandas com filtros, ordenação e múltiplas visões;
 - exclusão de registros;
 - importação de clientes por CSV;
 - importação de usuários por CSV;
@@ -52,7 +50,7 @@ Além desses módulos, existem recursos transversais de:
 - geração de QR Code para ficha de presença;
 - repositório de bases dinâmicas para alimentar campos do sistema.
 
-A versão declarada no código-fonte é **v0.41**.
+A versão declarada no código-fonte é **v0.40**.
 
 ---
 
@@ -64,7 +62,7 @@ A versão declarada no código-fonte é **v0.41**.
 |---|---|
 | Nome | PRGD — Plataforma de Relacionamento do Governo Digital |
 | Sigla | PRGD |
-| Versão | v0.41 |
+| Versão | v0.40 |
 | Tipo | Aplicação Web de gestão |
 | Arquitetura | SPA/Single Page Application em HTML + JavaScript |
 | Frontend | HTML5, CSS, JavaScript ES Modules |
@@ -115,7 +113,7 @@ O PRGD permite manter, em uma única aplicação:
                        │
                        ▼
 ┌─────────────────────────────────────────────┐
-│              FRONTEND PRGD v0.41            │
+│              FRONTEND PRGD v0.40            │
 │                                             │
 │ HTML5 + JavaScript ES Modules               │
 │ Tailwind CSS + Font Awesome                 │
@@ -362,197 +360,63 @@ Os gráficos são reconstruídos quando o Dashboard é renderizado.
 
 # 6.2 Demandas
 
-O módulo de Demandas foi o principal componente atualizado na versão **v0.41**. A evolução mantém o cadastro e o histórico existentes e acrescenta recursos para organização operacional das atividades, visualização em calendário e controle de versões.
+O módulo de Demandas é destinado ao registro e acompanhamento de solicitações.
 
 ## Listagem
 
-A visão em tabela apresenta:
+A tabela apresenta:
 
-- Solicitante;
-- Órgão / Cliente;
-- Demanda;
+- Cliente / Solicitante;
+- Título da Demanda;
 - Responsável GRGD;
 - Prioridade;
 - Status;
-- Observações / último andamento;
-- Criação / modificação;
+- Data de criação;
+- Data de modificação;
+- Usuário que modificou;
 - Ações.
-
-A coluna de observações apresenta a última ação registrada em `historicoAcoes`, ou, quando não houver histórico, a descrição da demanda.
 
 ## Pesquisa
 
-Permite pesquisar simultaneamente por:
+Permite pesquisar por:
 
-- título da demanda;
+- título;
 - cliente/órgão;
 - solicitante;
 - responsável GRGD.
 
-A pesquisa é aplicada no frontend em tempo real.
+## Filtro
 
-## Filtros
+Filtro por status:
 
-A v0.41 acrescenta dois filtros específicos:
-
-### Status
-
-- Todos os Status;
+- Pendente;
 - Em Andamento;
-- Pausado;
-- Cancelado;
 - Concluído.
-
-### Prioridade
-
-- Todas as Prioridades;
-- Baixa;
-- Média;
-- Alta.
-
-Os filtros são combinados com a pesquisa textual.
-
-## Ordenação
-
-A lista de demandas pode ser ordenada por:
-
-- **Mais Recentes** — data de criação decrescente;
-- **Mais Antigas** — data de criação crescente;
-- **Maior Prioridade** — Alta, Média e Baixa.
-
-## Visões
-
-A v0.41 disponibiliza duas formas de visualização:
-
-### Tabela
-
-É a visão administrativa detalhada, com dados, auditoria, observações e ações.
-
-### Calendário & Backlog
-
-Organiza as demandas em uma estrutura operacional visual composta por:
-
-- Backlog;
-- Segunda-feira;
-- Terça-feira;
-- Quarta-feira;
-- Quinta-feira;
-- Sexta-feira.
-
-A seleção da visão é feita pelo alternador **Tabela / Calendário & Backlog**.
-
-## Backlog
-
-Demandas sem `diaSemana` definido permanecem no:
-
-```text
-BACKLOG (Atividades Fixas / Pendentes)
-```
-
-O sistema apresenta a quantidade de itens do backlog e os renderiza como post-its.
-
-## Calendário semanal
-
-Quando a demanda possui `diaSemana`, ela é distribuída automaticamente na coluna correspondente:
-
-```text
-segunda
-terca
-quarta
-quinta
-sexta
-```
-
-A semana apresentada no módulo é de segunda a sexta-feira.
-
-## Post-its
-
-As demandas do calendário e do backlog são apresentadas como cartões compactos.
-
-Cada post-it exibe:
-
-- título;
-- prioridade;
-- descrição resumida;
-- solicitante;
-- responsáveis GRGD.
-
-Os cartões utilizam a mesma demanda filtrada da visão de tabela e podem ser selecionados para acesso aos detalhes do registro.
-
-## Responsáveis GRGD
-
-O campo `responsavelGrgd` passou a aceitar múltiplos responsáveis.
-
-Na interface de cadastro e edição, os responsáveis podem ser informados separados por vírgula.
-
-Exemplo:
-
-```text
-Arlindo Santos, Maria Silva
-```
-
-A interface apresenta os responsáveis como badges, permitindo identificação visual de cada participante.
 
 ## Cadastro
 
-Na criação de uma nova demanda, a v0.41 utiliza:
+Campos:
 
 - Título da Demanda;
-- Cliente / Órgão;
-- Solicitante;
+- Cliente / Órgão Solicitante;
+- Quem Solicitou;
 - Responsável GRGD;
-- Prioridade;
-- Dia para o Calendário;
 - Categoria;
-- Descrição da Solicitação / Escrita.
+- Prioridade;
+- Descrição detalhada.
 
-A demanda é criada com:
+Prioridades disponíveis:
+
+- Baixa;
+- Normal;
+- Alta;
+- Urgente.
+
+A demanda é criada com status inicial:
 
 ```text
-status = Em Andamento
+Em Andamento
 ```
-
-e recebe auditoria de criação.
-
-## Dia para o calendário
-
-O campo `diaSemana` determina se a demanda ficará no calendário ou no backlog.
-
-Valores implementados:
-
-```text
-""         → Backlog
-segunda    → Segunda-feira
-terca      → Terça-feira
-quarta     → Quarta-feira
-quinta     → Quinta-feira
-sexta      → Sexta-feira
-```
-
-## Detalhamento e edição
-
-O detalhamento de uma demanda passou a apresentar de forma estruturada:
-
-- Solicitante;
-- Órgão;
-- Responsável GRGD;
-- Status;
-- Prioridade;
-- Categoria;
-- Título;
-- Descrição.
-
-Na edição, também podem ser alterados:
-
-- `titulo`;
-- `orgao`;
-- `solicitante`;
-- `responsavelGrgd`;
-- `categoria`;
-- `prioridade`;
-- `status`;
-- `descricao`;
-- `diaSemana`.
 
 ## Histórico de ações
 
@@ -566,29 +430,11 @@ O histórico registra:
 
 - data;
 - autor;
-- texto do andamento.
+- texto da ação.
 
-A v0.41 mantém o recurso de inclusão de novos andamentos diretamente pela interface de observações.
+O usuário administrador pode adicionar novas ações ao histórico.
 
-## Versionamento das edições
-
-A v0.41 acrescenta armazenamento das versões anteriores de um registro editado por administrador.
-
-O campo utilizado é:
-
-```text
-versoesAnteriores[]
-```
-
-A cada edição administrativa, o sistema preserva uma cópia do registro anterior contendo:
-
-```text
-versaoSalvaEm
-salvoPor
-dados
-```
-
-O objetivo é manter rastreabilidade das alterações sem substituir o registro atual.
+---
 
 # 6.3 Clientes
 
@@ -879,7 +725,7 @@ Vagas esgotadas
 
 ## Contagem real
 
-A versão v0.41 busca calcular a ocupação a partir da coleção real:
+A versão v0.40 busca calcular a ocupação a partir da coleção real:
 
 ```text
 inscricoes
@@ -1025,7 +871,7 @@ checkin
 
 nem uma coleção específica de presença/check-in, nem uma rotina que grave a presença do participante ao acessar a URL.
 
-Portanto, no estado v0.41 analisado, o QR Code funciona como mecanismo de geração do endereço de check-in, mas o fluxo completo de registro automático de presença não está implementado no arquivo analisado.
+Portanto, no estado v0.40 analisado, o QR Code funciona como mecanismo de geração do endereço de check-in, mas o fluxo completo de registro automático de presença não está implementado no arquivo analisado.
 
 ---
 
@@ -1469,7 +1315,7 @@ criadoEm
 
 ## 9.4 `demandas`
 
-Campos observados na v0.41:
+Campos:
 
 ```text
 id
@@ -1481,52 +1327,14 @@ categoria
 prioridade
 status
 descricao
-diaSemana
 historicoAcoes[]
-versoesAnteriores[]
 criadoEm
 atualizadoEm
 criadoPor
 editadoPor
 ```
 
-### `responsavelGrgd`
-
-Campo textual que pode conter múltiplos responsáveis separados por vírgula.
-
-### `diaSemana`
-
-Campo utilizado pela visão Calendário & Backlog:
-
-```text
-segunda
-terca
-quarta
-quinta
-sexta
-```
-
-Valor vazio significa que a demanda permanece no backlog.
-
-### `historicoAcoes[]`
-
-Mantém os andamentos registrados na demanda:
-
-```text
-data
-autor
-texto
-```
-
-### `versoesAnteriores[]`
-
-Mantém snapshots das versões anteriores durante edições administrativas:
-
-```text
-versaoSalvaEm
-salvoPor
-dados
-```
+---
 
 ## 9.5 `orgaos`
 
@@ -1979,26 +1787,12 @@ Exportar Dados
 
 # 18. Pesquisa e filtros
 
-O sistema implementa pesquisa e filtros em tempo real no frontend.
+O sistema implementa pesquisa em tempo real no frontend.
 
 ## Demandas
 
-A v0.41 implementa:
-
-- texto por título;
-- texto por cliente/órgão;
-- texto por solicitante;
-- texto por responsável GRGD;
-- filtro por status;
-- filtro por prioridade;
-- ordenação por data mais recente;
-- ordenação por data mais antiga;
-- ordenação por maior prioridade.
-
-Além disso, a listagem pode ser alternada entre:
-
-- Tabela;
-- Calendário & Backlog.
+- texto;
+- status.
 
 ## Clientes
 
@@ -2027,6 +1821,8 @@ Além disso, a listagem pode ser alternada entre:
 ## Bases
 
 - texto.
+
+---
 
 # 19. UX/UI
 
@@ -2380,7 +2176,7 @@ A interface é então renderizada novamente.
 
 # 32. Escopo positivo
 
-O escopo positivo da versão v0.41 compreende:
+O escopo positivo da versão v0.40 compreende:
 
 - autenticação;
 - recuperação de senha;
@@ -2391,17 +2187,7 @@ O escopo positivo da versão v0.41 compreende:
 - indicadores;
 - gráficos;
 - gestão de demandas;
-- pesquisa de demandas;
-- filtros de status e prioridade em demandas;
-- ordenação de demandas;
-- visão tabular de demandas;
-- visão Calendário & Backlog;
-- backlog de atividades;
-- calendário semanal de segunda a sexta-feira;
-- post-its de demandas;
-- múltiplos responsáveis GRGD;
-- histórico de andamentos;
-- versionamento de registros editados;
+- histórico de demandas;
 - gestão de clientes;
 - gestão de equipes NSI;
 - gestão de eventos;
@@ -2428,6 +2214,8 @@ O escopo positivo da versão v0.41 compreende:
 - edição administrativa;
 - exclusão administrativa;
 - interface responsiva.
+
+---
 
 # 33. Escopo negativo / não escopo identificado
 
@@ -2754,15 +2542,6 @@ PRGD
 | Gráficos | Sim |
 | Demandas | Sim |
 | Histórico de demandas | Sim |
-| Filtro de status de demandas | Sim |
-| Filtro de prioridade de demandas | Sim |
-| Ordenação de demandas | Sim |
-| Visão Calendário & Backlog | Sim |
-| Backlog de demandas | Sim |
-| Calendário semanal (segunda a sexta) | Sim |
-| Post-its de demandas | Sim |
-| Múltiplos responsáveis GRGD | Sim |
-| Versionamento de registros editados | Sim |
 | Clientes | Sim |
 | Equipe NSI até 3 membros | Sim |
 | Eventos | Sim |
@@ -2925,26 +2704,6 @@ O sistema deve atualizar a interface a partir de snapshots do Firestore.
 
 ---
 
-## RF24 — Filtrar demandas
-
-O sistema deve permitir filtrar demandas por status e prioridade, combinando os filtros com a pesquisa textual.
-
-## RF25 — Ordenar demandas
-
-O sistema deve permitir ordenar demandas por data mais recente, data mais antiga e maior prioridade.
-
-## RF26 — Visualizar demandas em calendário e backlog
-
-O sistema deve permitir alternar entre a visão tabular e a visão Calendário & Backlog, distribuindo as demandas por dia da semana ou mantendo-as no backlog quando não houver `diaSemana`.
-
-## RF27 — Gerenciar múltiplos responsáveis GRGD
-
-O sistema deve permitir informar múltiplos responsáveis GRGD separados por vírgula e apresentá-los visualmente como badges.
-
-## RF28 — Manter versões anteriores
-
-O sistema deve preservar uma cópia dos dados anteriores durante uma edição administrativa, registrando data, responsável pela gravação e dados da versão anterior.
-
 # 42. Requisitos não funcionais
 
 ## RNF01 — Responsividade
@@ -2996,18 +2755,9 @@ A interface utiliza padrões brasileiros de:
 ## Demandas
 
 - [ ] Cadastro funciona.
-- [ ] Pesquisa funciona por título, cliente, solicitante e responsável GRGD.
+- [ ] Pesquisa funciona.
 - [ ] Filtro por status funciona.
-- [ ] Filtro por prioridade funciona.
-- [ ] Ordenação por data funciona.
-- [ ] Ordenação por prioridade funciona.
-- [ ] Visão em tabela funciona.
-- [ ] Visão Calendário & Backlog funciona.
-- [ ] Demandas sem dia definido aparecem no backlog.
-- [ ] Demandas com `diaSemana` aparecem no dia correspondente.
-- [ ] Responsáveis GRGD múltiplos são apresentados corretamente.
-- [ ] Histórico de andamentos funciona.
-- [ ] Versionamento das edições administrativas funciona.
+- [ ] Histórico funciona.
 - [ ] Auditoria aparece.
 
 ## Clientes
@@ -3148,37 +2898,45 @@ Adicionar:
 
 # 45. Conclusão técnica
 
-A versão **v0.41** mantém a arquitetura geral da PRGD baseada em frontend JavaScript e serviços Firebase e concentra sua evolução no módulo de Demandas.
+A versão v0.40 representa uma aplicação web integrada de relacionamento e gestão, com uma arquitetura relativamente compacta baseada em frontend JavaScript e serviços Firebase.
 
-A atualização introduz uma camada operacional mais completa para planejamento e acompanhamento das atividades, incluindo:
+O sistema já contempla um conjunto amplo de funcionalidades operacionais:
 
-- filtros combinados;
-- ordenação;
-- visão tabular;
-- Calendário & Backlog;
-- distribuição de segunda a sexta-feira;
-- post-its;
-- múltiplos responsáveis GRGD;
-- histórico de andamentos;
-- versionamento das edições administrativas.
+- gestão de relacionamento;
+- gestão de demandas;
+- gestão de clientes;
+- gestão de eventos;
+- inscrições;
+- gestão de locais;
+- fornecedores;
+- usuários;
+- grupos;
+- bases dinâmicas;
+- auditoria;
+- relatórios;
+- sincronização em tempo real.
 
-As demais áreas do sistema — autenticação, Dashboard, Clientes, Eventos, Inscrições, Locais, Fornecedores, Usuários, Grupos e Bases — permanecem com a estrutura funcional documentada anteriormente, sem alterações estruturais identificadas nesta versão.
+O desenho de segurança está concentrado nas Firestore Rules, com distinção entre administrador, usuário autenticado, próprio usuário, grupos e eventos públicos/restritos.
 
-O documento continua descrevendo exclusivamente funcionalidades observáveis no código analisado. Recursos como check-in efetivo de presença, certificados, Firebase Storage, notificações automáticas e workflow formal de demandas continuam fora do escopo implementado quando não há evidência de implementação completa no HTML analisado.
+A análise do código também demonstra uma preocupação explícita com consistência de inscrições, auditoria, contagem real de participantes, controle de acesso por grupos e modularização da interface.
+
+Ao mesmo tempo, existem fronteiras claras no escopo atual, especialmente em relação a check-in efetivo de presença, emissão de certificados, armazenamento dedicado de imagens, notificações e workflows avançados.
+
+Este documento descreve o estado da aplicação **conforme o HTML `index.html` e o arquivo `firestore(1).rules` analisados**, sem assumir como implementadas funcionalidades que não foram encontradas nesses arquivos.
 
 ---
 
 ## 46. Arquivos principais analisados
 
 ```text
-index(2).html
-README (13).md
+index.html
+firestore(1).rules
 ```
 
 ### Aplicação
 
 ```text
-PRGD v0.41
+PRGD v0.40
 Plataforma de Relacionamento do Governo Digital
 ```
 
@@ -3209,20 +2967,17 @@ bases
 
 | Versão | Descrição |
 |---|---|
-| v0.40 | Versão anterior documentada |
-| v0.41 | Atualização do módulo de Demandas com filtros, ordenação, Calendário & Backlog, post-its, múltiplos responsáveis GRGD e versionamento de edições |
+| v0.40 | Versão analisada neste documento |
 
-A aplicação identifica explicitamente a versão como:
+O próprio HTML identifica a aplicação como:
 
 ```text
-PRGD v0.41
+PRGD v0.40
 ```
 
 ---
 
 **Documento:** README.md  
 **Sistema:** PRGD — Plataforma de Relacionamento do Governo Digital  
-**Versão documentada:** v0.41  
-**Base da atualização:** `index(2).html`  
-**Base documental anterior:** `README (13).md`
-
+**Versão documentada:** v0.40  
+**Base documental:** `index.html` + `firestore(1).rules`
