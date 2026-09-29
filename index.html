@@ -166,8 +166,16 @@
                 </div>
             </div>
 
-            <!-- VISÃO 1: TABELA (Coluna Detalhes logo ao lado de Demanda) -->
-            <div id="container-visao-tabela" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+            <!-- VISÃO 1: TABELA -->
+            <div id="container-visao-tabela" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4">
+                <!-- Legenda de Prioridades acima do cabeçalho da tabela -->
+                <div class="flex items-center gap-4 mb-3 text-xs font-semibold text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200 w-fit">
+                    <span class="text-slate-700 font-bold"><i class="fa-solid fa-circle-info text-blue-900 mr-1"></i> Legenda de Prioridade:</span>
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block shadow-sm"></span> <span>Alta</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-400 inline-block shadow-sm"></span> <span>Média</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block shadow-sm"></span> <span>Baixa</span></div>
+                </div>
+
                 <table class="w-full text-left border-collapse min-w-[1050px]">
                     <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
                         <tr>
@@ -175,7 +183,7 @@
                             <th class="p-4">Demanda</th>
                             <th class="p-4">Detalhes</th>
                             <th class="p-4">Resp. GRGD</th>
-                            <th class="p-4">Prioridade</th>
+                            <th class="p-4 text-center">Prioridade</th>
                             <th class="p-4">Status</th>
                             <th class="p-4">Criação / Modificação</th>
                             <th class="p-4 text-center">Ações</th>
@@ -369,7 +377,7 @@
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.42: Módulo de Demandas com cores fixas por usuário, colunas reordenadas e alertas de prazo');
+        console.info('PRGD v0.42: Módulo de Demandas com bolinhas de prioridade e legenda');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -466,12 +474,17 @@
             }).join('') + `</div>`;
         }
 
-        function obterCorPrioridade(prio) {
+        // Retorna a bolinha com cor correspondente à prioridade (Vermelho=Alta, Amarelo=Média, Verde=Baixa)
+        function renderizarBolinhaPrioridade(prio) {
             const p = String(prio || '').trim().toLowerCase();
-            if (p.includes('baixa')) return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-            if (p.includes('média') || p.includes('media')) return 'bg-amber-100 text-amber-800 border-amber-300';
-            if (p.includes('alta')) return 'bg-red-100 text-red-800 border-red-300';
-            return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+            let corClasse = 'bg-emerald-500'; // padrão Baixa (verde)
+            let nomePrio = 'Baixa';
+            if (p.includes('alta')) { corClasse = 'bg-red-500'; nomePrio = 'Alta'; }
+            else if (p.includes('média') || p.includes('media')) { corClasse = 'bg-amber-400'; nomePrio = 'Média'; }
+            
+            return `<div class="flex items-center justify-center" title="Prioridade: ${nomePrio}">
+                <span class="w-4 h-4 rounded-full ${corClasse} inline-block shadow-sm border border-white"></span>
+            </div>`;
         }
 
         function obterCorStatusDemanda(status) {
@@ -481,24 +494,6 @@
             if (s.includes('cancelado')) return 'bg-slate-200 text-slate-700 border-slate-300';
             if (s.includes('concluído') || s.includes('concluido')) return 'bg-emerald-100 text-emerald-800 border-emerald-300';
             return 'bg-blue-100 text-blue-800 border-blue-300';
-        }
-
-        // Alerta dinâmico de proximidade da data final
-        function obterClassePrazoLimite(dataLimiteStr, status) {
-            if (!dataLimiteStr) return 'border-slate-200 bg-white';
-            const s = String(status || '').toLowerCase();
-            if (s.includes('concluído') || s.includes('cancelado')) return 'border-slate-200 bg-slate-50 opacity-75';
-            
-            const hoje = new Date();
-            hoje.setHours(0,0,0,0);
-            const limite = new Date(dataLimiteStr);
-            limite.setHours(0,0,0,0);
-            
-            const diffDias = Math.ceil((limite - hoje) / (1000 * 60 * 60 * 24));
-            
-            if (diffDias < 0) return 'border-red-400 bg-red-50 text-red-900 shadow-sm'; // Vencido
-            if (diffDias <= 2) return 'border-amber-400 bg-amber-50 text-amber-900 shadow-sm'; // Próximo do fim (2 dias)
-            return 'border-slate-200 bg-white';
         }
 
         function normalizarUrl(url) {
@@ -720,19 +715,17 @@
 
             document.getElementById('count-demandas').textContent = filtered.length;
 
-            // 1. Tabela com coluna Detalhes reposicionada logo ao lado de Demanda
             tbody.innerHTML = filtered.map(d => {
                 const audit = renderAuditInfo(d);
-                const corPrio = obterCorPrioridade(d.prioridade);
+                const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
                 const corStatus = obterCorStatusDemanda(d.status);
                 const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
                 
                 // Último andamento para tooltip no ícone de histórico
                 const historico = d.historicoAcoes || [];
                 const ultimoAndamento = historico.length > 0 ? historico[historico.length - 1].texto : 'Nenhum andamento registrado.';
-                const classePrazo = obterClassePrazoLimite(d.dataLimite, d.status);
 
-                return `<tr class="hover:bg-slate-50 ${classePrazo}">
+                return `<tr class="hover:bg-slate-50 border-slate-200">
                     <td class="p-4 font-bold text-slate-800">${esc(d.solicitante || 'Não informado')}<div class="text-[11px] font-normal text-slate-500">${esc(d.orgao || '')}</div></td>
                     <td class="p-4 font-semibold text-blue-900">
                         ${esc(d.titulo)}
@@ -742,7 +735,7 @@
                         <span class="text-xs text-slate-700 line-clamp-2 max-w-xs" title="${esc(d.descricao || '')}">${esc(d.descricao || 'Sem detalhes')}</span>
                     </td>
                     <td class="p-4">${badgesResp}</td>
-                    <td class="p-4"><span class="font-bold px-2 py-0.5 rounded text-[10px] border uppercase ${corPrio}">${esc(d.prioridade || 'Baixa')}</span></td>
+                    <td class="p-4 text-center">${bolinhaPrio}</td>
                     <td class="p-4"><span class="font-bold px-2 py-0.5 rounded text-[10px] border ${corStatus}">${esc(d.status || 'Em Andamento')}</span></td>
                     <td class="p-4">
                         <div class="text-xs text-slate-700">${audit.dataHtml}</div>
@@ -794,12 +787,12 @@
 
         function criarPostItHtml(d) {
             const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
-            const prioClass = obterCorPrioridade(d.prioridade);
+            const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
             return `<div class="post-it p-2.5 rounded-lg border bg-blue-50 border-blue-200 text-blue-900 shadow-sm cursor-pointer flex flex-col justify-between gap-2" data-colecao="demandas" data-id="${esc(d.id)}">
                 <div>
                     <div class="flex justify-between items-start gap-1">
                         <span class="font-bold text-xs leading-tight line-clamp-2">${esc(d.titulo)}</span>
-                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase ${prioClass}">${esc(d.prioridade || 'Baixa')}</span>
+                        ${bolinhaPrio}
                     </div>
                     ${d.horario ? `<div class="text-[10px] font-semibold text-slate-600 mt-1"><i class="fa-regular fa-clock"></i> ${esc(d.horario)}</div>` : ''}
                     <p class="text-[11px] opacity-80 mt-1 line-clamp-2">${esc(d.descricao || '')}</p>
@@ -943,7 +936,7 @@
                         <div><b>Órgão:</b> ${esc(item.orgao || '-')}</div>
                         <div><b>Responsável GRGD:</b> ${renderizarBadgesResponsaveis(item.responsavelGrgd)}</div>
                         <div><b>Status:</b> <span class="px-2 py-0.5 rounded font-bold ${obterCorStatusDemanda(item.status)}">${esc(item.status || '-')}</span></div>
-                        <div><b>Prioridade:</b> <span class="px-2 py-0.5 rounded font-bold uppercase ${obterCorPrioridade(item.prioridade)}">${esc(item.prioridade || '-')}</span></div>
+                        <div><b>Prioridade:</b> <span class="uppercase">${esc(item.prioridade || '-')}</span></div>
                         <div><b>Data Limite:</b> ${formatarData(item.dataLimite || '')} ${item.horario ? 'às '+item.horario : ''}</div>
                         <div class="col-span-2"><b>Título da Demanda:</b> ${esc(item.titulo || '-')}</div>
                         <div class="col-span-2"><b>Detalhes:</b> ${esc(item.descricao || '-')}</div>
@@ -1000,7 +993,6 @@
             } catch(e) { alert(traduzirErroSistema(e)); }
         }
 
-        // Correção definitiva do erro Maximum call stack size exceeded via serialização JSON limpa
         async function salvarEdicaoAdmin(e){
             e.preventDefault(); if(currentUser?.perfil !== 'admin'){ alert('Somente administradores.'); return; }
             const colecao = document.getElementById('edit-colecao').value;
@@ -1010,7 +1002,6 @@
             const agora = new Date().toISOString();
             const autorAtual = currentUser.nome || currentUser.email || 'Admin';
 
-            // Cópia limpa sem referências circulares do DOM
             const dadosLimpos = JSON.parse(JSON.stringify(itemAntigo));
             const versoesAnteriores = itemAntigo.versoesAnteriores || [];
             if (Object.keys(itemAntigo).length > 0) {
