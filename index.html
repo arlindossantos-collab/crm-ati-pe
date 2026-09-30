@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.48 - FUNCIONALIDADE "MOVER PARA" DIRETA   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.48 - CORREÇÃO DE ATUALIZAÇÃO DE CARDS    -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -383,7 +383,7 @@
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.48: Funcionalidade "Mover para" implementada com sucesso');
+        console.info('PRGD v0.48: Funcionalidade "Mover para" ajustada com segurança para atualizar apenas o documento existente');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -613,14 +613,14 @@
             if (!currentUser) return;
             ['demandas','locais','orgaos','fornecedores','bases','usuarios'].forEach(col => {
                 const unsub = onSnapshot(collection(db, col), snap => {
-                    dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    dbData[col] = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
                     renderizarTudo();
                 }, err => console.warn('Firestore '+col+':', err.message));
                 snapshotUnsubs.push(unsub);
             });
 
             snapshotUnsubs.push(onSnapshot(query(collection(db,'eventos'), where('eventoPublico','==',true)), snap => {
-                atualizarEventosVisiveis(snap.docs.map(d => ({ id: d.id, ...d.data()})));
+                atualizarEventosVisiveis(snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data()})));
             }));
             if (currentUser.uid) {
                 snapshotUnsubs.push(onSnapshot(doc(db,'usuarios',currentUser.uid), snap => {
@@ -628,11 +628,11 @@
                 }));
             }
             snapshotUnsubs.push(onSnapshot(collection(db,'grupos'), snap => {
-                dbData.grupos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                dbData.grupos = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
                 renderGrupos(); renderUsuarios();
             }));
             snapshotUnsubs.push(onSnapshot(collection(db,'inscricoes'), snap => {
-                dbData.inscricoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                dbData.inscricoes = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
                 renderEventos();
             }));
         }
@@ -690,7 +690,7 @@
             document.getElementById('count-usuarios').textContent = us.length;
             tbody.innerHTML = us.map(u => {
                 const audit = renderAuditInfo(u);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.id)}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button></td></tr>`;
             }).join('') || '<tr><td colspan="7" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
@@ -701,7 +701,7 @@
             document.getElementById('count-clientes').textContent = filtered.length;
             tbody.innerHTML = filtered.map(o => {
                 const audit = renderAuditInfo(o);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-indigo-900">${esc(o.sigla || o.id)}<div class="text-xs text-slate-600 font-medium">${esc(o.nome)}</div></td><td class="p-4"><div>${esc(o.tipoJuridico || '-')}</div><div class="text-xs text-slate-700"><b>Resp:</b> ${esc(o.responsavel || '-')}</div></td><td class="p-4 text-xs"><b>${esc(o.gestorNsiNome || '-')}</b><div class="text-slate-500">${esc(o.gestorNsiEmail || '')}</div></td><td class="p-4 text-xs">Até 3 membros</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="orgaos" data-id="${esc(o.id)}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-indigo-900">${esc(o.sigla || o.id)}<div class="text-xs text-slate-600 font-medium">${esc(o.nome)}</div></td><td class="p-4"><div>${esc(o.tipoJuridico || '-')}</div><div class="text-xs text-slate-700"><b>Resp:</b> ${esc(o.responsavel || '-')}</div></td><td class="p-4 text-xs"><b>${esc(o.gestorNsiNome || '-')}</b><div class="text-slate-500">${esc(o.gestorNsiEmail || '')}</div></td><td class="p-4 text-xs">Até 3 membros</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="orgaos" data-id="${esc(o.firestoreId)}">Detalhes</button></td></tr>`;
             }).join('');
         }
 
@@ -711,7 +711,7 @@
             document.getElementById('count-bases').textContent = dbData.bases.length;
             tbody.innerHTML = dbData.bases.map(b => {
                 const audit = renderAuditInfo(b);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-blue-900">${esc(b.categoria)}</td><td class="p-4 font-mono text-xs">${esc(b.sigla || '-')}</td><td class="p-4 font-bold">${esc(b.nome)}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="bases" data-id="${b.id}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-blue-900">${esc(b.categoria)}</td><td class="p-4 font-mono text-xs">${esc(b.sigla || '-')}</td><td class="p-4 font-bold">${esc(b.nome)}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="bases" data-id="${b.firestoreId}">Detalhes</button></td></tr>`;
             }).join('');
         }
 
@@ -767,12 +767,12 @@
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <button type="button" class="text-xs bg-white/85 text-blue-900 hover:bg-white p-1.5 rounded cursor-pointer transition relative group shadow-sm border border-black/10" data-abrir-observacoes="${esc(d.id)}">
+                            <button type="button" class="text-xs bg-white/85 text-blue-900 hover:bg-white p-1.5 rounded cursor-pointer transition relative group shadow-sm border border-black/10" data-abrir-observacoes="${esc(d.firestoreId)}">
                                 <i class="fa-solid fa-comments"></i>
                                 <span class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block w-48 p-1.5 bg-slate-900 text-white text-[10px] rounded shadow-lg z-20 text-center">Último andamento: ${esc(ultimoAndamento)}</span>
                             </button>
-                            <button type="button" class="text-xs bg-white/85 hover:bg-white text-slate-800 px-2.5 py-1 rounded cursor-pointer font-semibold tr-detalhe border border-black/10 shadow-sm" data-colecao="demandas" data-id="${esc(d.id)}" title="Detalhes"><i class="fa-solid fa-eye mr-1"></i> Detalhes</button>
-                            <button type="button" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 p-1.5 rounded cursor-pointer transition btn-excluir-demanda-direta border border-red-200 shadow-sm" data-id="${esc(d.id)}" title="Excluir demanda"><i class="fa-solid fa-xmark text-sm font-bold"></i></button>
+                            <button type="button" class="text-xs bg-white/85 hover:bg-white text-slate-800 px-2.5 py-1 rounded cursor-pointer font-semibold tr-detalhe border border-black/10 shadow-sm" data-colecao="demandas" data-id="${esc(d.firestoreId)}" title="Detalhes"><i class="fa-solid fa-eye mr-1"></i> Detalhes</button>
+                            <button type="button" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 p-1.5 rounded cursor-pointer transition btn-excluir-demanda-direta border border-red-200 shadow-sm" data-id="${esc(d.firestoreId)}" title="Excluir demanda"><i class="fa-solid fa-xmark text-sm font-bold"></i></button>
                         </div>
                     </td>
                 </tr>`;
@@ -833,7 +833,7 @@
                     
                     <div class="flex items-center justify-between gap-1 pt-1 bg-white/60 p-1 rounded border border-black/5">
                         <span class="text-[10px] font-bold text-slate-700">Mover para:</span>
-                        <select class="select-mover-dia text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-id="${esc(d.id)}">
+                        <select class="select-mover-dia text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}">
                             <option value="" ${!diaAtual ? 'selected' : ''}>Backlog</option>
                             <option value="segunda" ${diaAtual === 'segunda' ? 'selected' : ''}>Segunda</option>
                             <option value="terca" ${diaAtual === 'terca' ? 'selected' : ''}>Terça</option>
@@ -841,7 +841,7 @@
                             <option value="quinta" ${diaAtual === 'quinta' ? 'selected' : ''}>Quinta</option>
                             <option value="sexta" ${diaAtual === 'sexta' ? 'selected' : ''}>Sexta</option>
                         </select>
-                        <button type="button" class="text-[10px] bg-blue-900 hover:bg-blue-800 text-white px-2 py-1 rounded font-bold cursor-pointer tr-detalhe shadow-sm" data-colecao="demandas" data-id="${esc(d.id)}" title="Abrir Detalhes completos"><i class="fa-solid fa-eye"></i></button>
+                        <button type="button" class="text-[10px] bg-blue-900 hover:bg-blue-800 text-white px-2 py-1 rounded font-bold cursor-pointer tr-detalhe shadow-sm" data-colecao="demandas" data-id="${esc(d.firestoreId)}" title="Abrir Detalhes completos"><i class="fa-solid fa-eye"></i></button>
                     </div>
                 </div>
             </div>`;
@@ -864,14 +864,14 @@
             const tbody = document.getElementById('tabela-locais');
             if (!tbody) return;
             document.getElementById('count-locais').textContent = dbData.locais.length;
-            tbody.innerHTML = dbData.locais.map(l => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="locais" data-id="${esc(l.id)}">Detalhes</button></td></tr>`).join('');
+            tbody.innerHTML = dbData.locais.map(l => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="locais" data-id="${esc(l.firestoreId)}">Detalhes</button></td></tr>`).join('');
         }
 
         function renderFornecedores() {
             const tbody = document.getElementById('tabela-fornecedores');
             if (!tbody) return;
             document.getElementById('count-fornecedores').textContent = dbData.fornecedores.length;
-            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.id)}">Detalhes</button></td></tr>`).join('');
+            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.firestoreId)}">Detalhes</button></td></tr>`).join('');
         }
 
         function renderGrupos() {
@@ -994,13 +994,13 @@
                 }, 100);
                 return;
             }
-            c.innerHTML = Object.entries(item).filter(([k])=>k!=='id').map(([k,v])=>`<div><label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label><input type="text" name="${esc(k)}" value="${esc(Array.isArray(v)?v.join(', '):v)}" class="w-full p-2 border rounded-lg text-xs bg-white"></div>`).join('');
+            c.innerHTML = Object.entries(item).filter(([k])=>k!=='id' && k!=='firestoreId').map(([k,v])=>`<div><label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label><input type="text" name="${esc(k)}" value="${esc(Array.isArray(v)?v.join(', '):v)}" class="w-full p-2 border rounded-lg text-xs bg-white"></div>`).join('');
         }
 
-        function detalharRegistro(colecao,id){
-            const item = dbData[colecao]?.find(i=>String(i.id)===String(id)); if(!item) return;
+        function detalharRegistro(colecao,firestoreId){
+            const item = dbData[colecao]?.find(i=>String(i.firestoreId)===String(firestoreId)); if(!item) return;
             document.getElementById('detalhe-titulo-modal').textContent = 'Detalhar / Editar (' + colecao.toUpperCase() + ')';
-            document.getElementById('edit-colecao').value = colecao; document.getElementById('edit-doc-id').value = id;
+            document.getElementById('edit-colecao').value = colecao; document.getElementById('edit-doc-id').value = firestoreId;
             document.getElementById('dashboard-detalhe-evento-container').classList.add('hidden');
             montarEdicaoEstruturada(colecao, item);
             
@@ -1018,18 +1018,18 @@
                     </div>
                 `;
             } else {
-                document.getElementById('detalhe-conteudo').innerHTML = Object.entries(item).map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
+                document.getElementById('detalhe-conteudo').innerHTML = Object.entries(item).filter(([k])=>k!=='firestoreId').map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
             }
 
             document.getElementById('detalhe-area-admin').classList.toggle('hidden', currentUser?.perfil !== 'admin');
             document.getElementById('modal-detalhes').classList.remove('hidden');
         }
 
-        function abrirModalObservacoes(demandaId) {
-            const d = dbData.demandas.find(x => String(x.id) === String(demandaId));
+        function abrirModalObservacoes(firestoreId) {
+            const d = dbData.demandas.find(x => String(x.firestoreId) === String(firestoreId));
             if (!d) return;
 
-            document.getElementById('obs-demanda-id').value = d.id;
+            document.getElementById('obs-demanda-id').value = d.firestoreId;
             document.getElementById('obs-demanda-titulo').textContent = `Demanda: ${d.titulo} (${d.solicitante || 'Geral'})`;
 
             const listaEl = document.getElementById('obs-historico-lista');
@@ -1050,11 +1050,11 @@
         }
 
         async function salvarNovaObservacao() {
-            const id = document.getElementById('obs-demanda-id').value;
+            const firestoreId = document.getElementById('obs-demanda-id').value;
             const texto = document.getElementById('obs-novo-texto').value.trim();
             if (!texto) { alert('Digite o texto do andamento ou status.'); return; }
 
-            const d = dbData.demandas.find(x => String(x.id) === String(id));
+            const d = dbData.demandas.find(x => String(x.firestoreId) === String(firestoreId));
             if (!d) return;
 
             const agora = new Date().toISOString();
@@ -1062,7 +1062,7 @@
             const novoHistorico = [...(d.historicoAcoes || []), { data: agora, autor, texto }];
 
             try {
-                await setDoc(doc(db, 'demandas', String(id)), { historicoAcoes: novoHistorico, atualizadoEm: agora, editadoPor: autor }, { merge: true });
+                await setDoc(doc(db, 'demandas', String(firestoreId)), { historicoAcoes: novoHistorico, atualizadoEm: agora, editadoPor: autor }, { merge: true });
                 fecharModal('modal-observacoes');
                 alert('Status/Andamento gravado com sucesso no histórico ilimitado!');
             } catch(e) { alert(traduzirErroSistema(e)); }
@@ -1071,9 +1071,9 @@
         async function salvarEdicaoAdmin(e){
             e.preventDefault(); if(currentUser?.perfil !== 'admin'){ alert('Somente administradores.'); return; }
             const colecao = document.getElementById('edit-colecao').value;
-            const id = document.getElementById('edit-doc-id').value;
+            const firestoreId = document.getElementById('edit-doc-id').value;
             const form = e.target;
-            const itemAntigo = dbData[colecao]?.find(i => String(i.id) === String(id)) || {};
+            const itemAntigo = dbData[colecao]?.find(i => String(i.firestoreId) === String(firestoreId)) || {};
             const agora = new Date().toISOString();
             const autorAtual = currentUser.nome || currentUser.email || 'Admin';
 
@@ -1108,7 +1108,7 @@
             }
 
             try {
-                await setDoc(doc(db, colecao, String(id)), obj, { merge: true });
+                await setDoc(doc(db, colecao, String(firestoreId)), obj, { merge: true });
                 alert('Alterações salvas na nuvem com sucesso!');
                 fecharModal('modal-detalhes');
             } catch(err) {
@@ -1249,10 +1249,10 @@
 
         async function excluirRegistroUniversal() {
             const colecao = document.getElementById('edit-colecao').value;
-            const id = document.getElementById('edit-doc-id').value;
+            const firestoreId = document.getElementById('edit-doc-id').value;
             if (!confirm('Deseja realmente excluir este registro da nuvem?')) return;
             try {
-                await deleteDoc(doc(db, colecao, String(id)));
+                await deleteDoc(doc(db, colecao, String(firestoreId)));
                 alert('Registro excluído!');
                 fecharModal('modal-detalhes');
             } catch(err) { alert(traduzirErroSistema(err)); }
@@ -1298,10 +1298,10 @@
         document.addEventListener('change', async ev => {
             const selectMover = ev.target.closest?.('.select-mover-dia');
             if (selectMover) {
-                const idDemanda = selectMover.getAttribute('data-id');
+                const firestoreId = selectMover.getAttribute('data-firestore-id');
                 const novoDia = selectMover.value;
-                const demandaObj = dbData.demandas.find(x => String(x.id) === String(idDemanda));
-                if (!demandaObj) return;
+                const demandaObj = dbData.demandas.find(x => String(x.firestoreId) === String(firestoreId));
+                if (!demandaObj || !firestoreId) return;
 
                 try {
                     const agora = new Date().toISOString();
@@ -1309,7 +1309,8 @@
                     const diaNome = novoDia ? novoDia.toUpperCase() : 'BACKLOG';
                     const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Movido para: ${diaNome}` }];
                     
-                    await setDoc(doc(db, 'demandas', String(idDemanda)), { 
+                    // Atualização cirúrgica exclusiva do documento existente no Firestore
+                    await setDoc(doc(db, 'demandas', String(firestoreId)), { 
                         diaSemana: novoDia, 
                         historicoAcoes, 
                         atualizadoEm: agora, 
@@ -1326,10 +1327,10 @@
             const btnExcluir = ev.target.closest?.('.btn-excluir-demanda-direta');
             if (btnExcluir) {
                 ev.stopPropagation();
-                const idDem = btnExcluir.getAttribute('data-id');
+                const firestoreId = btnExcluir.getAttribute('data-id');
                 if (confirm('Deseja realmente excluir esta demanda do sistema?')) {
                     try {
-                        await deleteDoc(doc(db, 'demandas', String(idDem)));
+                        await deleteDoc(doc(db, 'demandas', String(firestoreId)));
                         alert('Demanda excluída com sucesso!');
                     } catch(err) { alert(traduzirErroSistema(err)); }
                 }
