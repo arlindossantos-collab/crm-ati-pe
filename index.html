@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.43 - MÓDULO DE DEMANDAS AVANÇADO        -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.44 - MÓDULO DE DEMANDAS REFINADO         -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -14,8 +14,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js para Dashboard Gerencial -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- QRCode.js para Ficha de Presença -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
@@ -56,7 +54,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.43</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.44</span></p>
             </div>
         </div>
     </div>
@@ -69,7 +67,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.43</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.44</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -130,7 +128,7 @@
             </div>
         </div>
 
-        <!-- ABA DEMANDAS (V0.43) -->
+        <!-- ABA DEMANDAS (V0.44) -->
         <div id="aba-demandas" class="hidden space-y-4">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -170,7 +168,7 @@
 
             <!-- VISÃO 1: TABELA -->
             <div id="container-visao-tabela" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4">
-                <!-- Legendas Unidas (Prioridade e Status) -->
+                <!-- Legendas Unidas (Prioridade e Status com Play Verde) -->
                 <div class="flex flex-wrap items-center gap-6 mb-3 text-xs font-semibold text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                     <div class="flex items-center gap-3">
                         <span class="text-slate-700 font-bold"><i class="fa-solid fa-circle-info text-blue-900 mr-1"></i> Prioridade:</span>
@@ -180,7 +178,7 @@
                     </div>
                     <div class="flex items-center gap-3 border-l pl-4 border-slate-300">
                         <span class="text-slate-700 font-bold">Status:</span>
-                        <div class="flex items-center gap-1"><i class="fa-solid fa-play text-amber-500"></i> <span>Em Andamento</span></div>
+                        <div class="flex items-center gap-1"><i class="fa-solid fa-play text-emerald-600"></i> <span>Em Andamento</span></div>
                         <div class="flex items-center gap-1"><i class="fa-solid fa-pause text-blue-600"></i> <span>Pausado</span></div>
                         <div class="flex items-center gap-1"><i class="fa-solid fa-xmark text-red-600 font-bold"></i> <span>Cancelado</span></div>
                         <div class="flex items-center gap-1"><i class="fa-solid fa-check text-emerald-600 font-bold"></i> <span>Concluído</span></div>
@@ -204,7 +202,7 @@
                 </table>
             </div>
 
-            <!-- VISÃO 2: CALENDÁRIO & BACKLOG (Drag and Drop habilitado) -->
+            <!-- VISÃO 2: CALENDÁRIO & BACKLOG (Drag and Drop com Confirmação) -->
             <div id="container-visao-calendario" class="hidden space-y-6">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                     <div class="flex items-center justify-between mb-3">
@@ -344,7 +342,7 @@
     <!-- Modais -->
     <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento e Edição Completa</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento e Edição Completa</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
             
             <div id="dashboard-detalhe-evento-container" class="hidden mb-6 space-y-4"></div>
 
@@ -356,20 +354,20 @@
         </div>
     </div>
 
-    <!-- Modal de Observações / Histórico de Andamentos -->
+    <!-- Modal de Observações / Histórico Ilimitado de Andamentos -->
     <div id="modal-observacoes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-clock-rotate-left mr-2 text-blue-900"></i> Histórico de Andamentos e Observações</h3>
+                <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-clock-rotate-left mr-2 text-blue-900"></i> Histórico Ilimitado de Andamentos e Status</h3>
                 <button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-observacoes"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div id="obs-demanda-titulo" class="text-xs font-bold text-blue-900 mb-3 bg-blue-50 p-2 rounded-lg"></div>
             <div id="obs-historico-lista" class="space-y-2 mb-4 max-h-60 overflow-y-auto"></div>
             <div class="border-t pt-3 space-y-2">
                 <input type="hidden" id="obs-demanda-id">
-                <label class="block text-xs font-bold text-slate-700">Adicionar novo andamento / observação:</label>
-                <textarea id="obs-novo-texto" rows="3" placeholder="Digite o registro do andamento..." class="w-full p-2.5 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-600 focus:outline-none"></textarea>
-                <button type="button" id="btn-salvar-nova-observacao" class="w-full py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition cursor-pointer">Salvar Andamento</button>
+                <label class="block text-xs font-bold text-slate-700">Registrar novo status ou andamento:</label>
+                <textarea id="obs-novo-texto" rows="3" placeholder="Digite o registro do status ou andamento..." class="w-full p-2.5 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-600 focus:outline-none"></textarea>
+                <button type="button" id="btn-salvar-nova-observacao" class="w-full py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition cursor-pointer">Salvar no Histórico Ilimitado</button>
             </div>
         </div>
     </div>
@@ -381,14 +379,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.43 -->
+    <!-- Script Principal v0.44 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.43: Demandas com Drag and Drop, escolha de cor de card, ícones de status e exclusão rápida');
+        console.info('PRGD v0.44: Botões de detalhes restaurados, histórico ilimitado e drag-and-drop com confirmação');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -496,13 +494,13 @@
             </div>`;
         }
 
-        // Renderiza status por ícones na tabela
+        // Renderiza status por ícones na tabela (Play em verde)
         function renderizarIconeStatus(status) {
             const s = String(status || '').trim().toLowerCase();
             if (s.includes('pausado')) return '<span title="Pausado" class="text-blue-600 text-base"><i class="fa-solid fa-pause"></i></span>';
             if (s.includes('cancelado')) return '<span title="Cancelado" class="text-red-600 text-base"><i class="fa-solid fa-xmark"></i></span>';
             if (s.includes('concluído') || s.includes('concluido')) return '<span title="Concluído" class="text-emerald-600 text-base"><i class="fa-solid fa-check"></i></span>';
-            return '<span title="Em Andamento" class="text-amber-500 text-base"><i class="fa-solid fa-play"></i></span>';
+            return '<span title="Em Andamento" class="text-emerald-600 text-base"><i class="fa-solid fa-play"></i></span>';
         }
 
         function formatarData(dataStr) {
@@ -667,7 +665,7 @@
             document.getElementById('count-usuarios').textContent = us.length;
             tbody.innerHTML = us.map(u => {
                 const audit = renderAuditInfo(u);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900" data-colecao="usuarios" data-id="${esc(u.id)}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.id)}">Detalhes</button></td></tr>`;
             }).join('') || '<tr><td colspan="7" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
@@ -678,7 +676,7 @@
             document.getElementById('count-clientes').textContent = filtered.length;
             tbody.innerHTML = filtered.map(o => {
                 const audit = renderAuditInfo(o);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-indigo-900">${esc(o.sigla || o.id)}<div class="text-xs text-slate-600 font-medium">${esc(o.nome)}</div></td><td class="p-4"><div>${esc(o.tipoJuridico || '-')}</div><div class="text-xs text-slate-700"><b>Resp:</b> ${esc(o.responsavel || '-')}</div></td><td class="p-4 text-xs"><b>${esc(o.gestorNsiNome || '-')}</b><div class="text-slate-500">${esc(o.gestorNsiEmail || '')}</div></td><td class="p-4 text-xs">Até 3 membros</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900" data-colecao="orgaos" data-id="${esc(o.id)}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-indigo-900">${esc(o.sigla || o.id)}<div class="text-xs text-slate-600 font-medium">${esc(o.nome)}</div></td><td class="p-4"><div>${esc(o.tipoJuridico || '-')}</div><div class="text-xs text-slate-700"><b>Resp:</b> ${esc(o.responsavel || '-')}</div></td><td class="p-4 text-xs"><b>${esc(o.gestorNsiNome || '-')}</b><div class="text-slate-500">${esc(o.gestorNsiEmail || '')}</div></td><td class="p-4 text-xs">Até 3 membros</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="orgaos" data-id="${esc(o.id)}">Detalhes</button></td></tr>`;
             }).join('');
         }
 
@@ -688,12 +686,12 @@
             document.getElementById('count-bases').textContent = dbData.bases.length;
             tbody.innerHTML = dbData.bases.map(b => {
                 const audit = renderAuditInfo(b);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-blue-900">${esc(b.categoria)}</td><td class="p-4 font-mono text-xs">${esc(b.sigla || '-')}</td><td class="p-4 font-bold">${esc(b.nome)}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900" data-colecao="bases" data-id="${b.id}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-blue-900">${esc(b.categoria)}</td><td class="p-4 font-mono text-xs">${esc(b.sigla || '-')}</td><td class="p-4 font-bold">${esc(b.nome)}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="bases" data-id="${b.id}">Detalhes</button></td></tr>`;
             }).join('');
         }
 
         // =====================================================================
-        // MÓDULO DE DEMANDAS (V0.43)
+        // MÓDULO DE DEMANDAS (V0.44)
         // =====================================================================
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
@@ -743,13 +741,12 @@
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <!-- Tooltip no ícone de histórico mostrando o último status/andamento -->
                             <button type="button" class="text-xs bg-blue-50 text-blue-900 hover:bg-blue-100 p-1.5 rounded cursor-pointer transition relative group" data-abrir-observacoes="${esc(d.id)}">
                                 <i class="fa-solid fa-comments"></i>
                                 <span class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block w-48 p-1.5 bg-slate-900 text-white text-[10px] rounded shadow-lg z-20 text-center">Último andamento: ${esc(ultimoAndamento)}</span>
                             </button>
-                            <button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded cursor-pointer font-semibold tr-detalhe" data-colecao="demandas" data-id="${esc(d.id)}" title="Detalhes"><i class="fa-solid fa-eye"></i></button>
-                            <!-- Botão Excluir Demanda (X vermelho) -->
+                            <!-- Botão Detalhes Restaurado -->
+                            <button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded cursor-pointer font-semibold tr-detalhe" data-colecao="demandas" data-id="${esc(d.id)}" title="Detalhes"><i class="fa-solid fa-eye mr-1"></i> Detalhes</button>
                             <button type="button" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 p-1.5 rounded cursor-pointer transition btn-excluir-demanda-direta" data-id="${esc(d.id)}" title="Excluir demanda"><i class="fa-solid fa-xmark text-sm font-bold"></i></button>
                         </div>
                     </td>
@@ -794,7 +791,6 @@
             const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
             const isConcluido = String(d.status || '').toLowerCase().includes('concluído') || String(d.status || '').toLowerCase().includes('concluido');
             
-            // Se concluído, fica em tons de cinza; senão, usa a cor personalizada ou padrão
             const corCard = isConcluido ? 'bg-slate-200 border-slate-300 text-slate-600' : (d.corCard || 'bg-blue-50 border-blue-200 text-blue-900');
 
             return `<div class="post-it p-2.5 rounded-lg border ${corCard} shadow-sm flex flex-col justify-between gap-2" draggable="true" data-id="${esc(d.id)}" data-colecao="demandas">
@@ -813,7 +809,7 @@
             </div>`;
         }
 
-        // Lógica de Drag and Drop entre dias
+        // Lógica de Drag and Drop com confirmação via Pop-up
         function configurarDragAndDrop() {
             document.querySelectorAll('.post-it').forEach(card => {
                 card.addEventListener('dragstart', e => {
@@ -832,18 +828,20 @@
                     if (!idDemanda) return;
 
                     const demandaObj = dbData.demandas.find(x => String(x.id) === String(idDemanda));
-                    if (!demandasAlteradas(demandasObj, novoDia)) {
-                        try {
-                            const agora = new Date().toISOString();
-                            const autor = currentUser?.nome || currentUser?.email || 'Sistema';
-                            await setDoc(doc(db, 'demandas', String(idDemanda)), { diaSemana: novoDia, atualizadoEm: agora, editadoPor: autor }, { merge: true });
-                        } catch(err) { alert(traduzirErroSistema(err)); }
+                    if (demandaObj && demandaObj.diaSemana !== novoDia) {
+                        const nomeDestino = novoDia ? novoDia.toUpperCase() : 'BACKLOG';
+                        const confirmar = confirm(`Deseja realmente mudar a posição deste card para ${nomeDestino}?`);
+                        if (confirmar) {
+                            try {
+                                const agora = new Date().toISOString();
+                                const autor = currentUser?.nome || currentUser?.email || 'Sistema';
+                                await setDoc(doc(db, 'demandas', String(idDemanda)), { diaSemana: novoDia, atualizadoEm: agora, editadoPor: autor }, { merge: true });
+                            } catch(err) { alert(traduzirErroSistema(err)); }
+                        }
                     }
                 });
             });
         }
-
-        function demandasAlteradas(d, dia) { return d && d.diaSemana === dia; }
 
         function renderEventos() {
             const grid = document.getElementById('grid-eventos');
@@ -862,14 +860,14 @@
             const tbody = document.getElementById('tabela-locais');
             if (!tbody) return;
             document.getElementById('count-locais').textContent = dbData.locais.length;
-            tbody.innerHTML = dbData.locais.map(l => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900" data-colecao="locais" data-id="${esc(l.id)}">Detalhes</button></td></tr>`).join('');
+            tbody.innerHTML = dbData.locais.map(l => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="locais" data-id="${esc(l.id)}">Detalhes</button></td></tr>`).join('');
         }
 
         function renderFornecedores() {
             const tbody = document.getElementById('tabela-fornecedores');
             if (!tbody) return;
             document.getElementById('count-fornecedores').textContent = dbData.fornecedores.length;
-            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900" data-colecao="fornecedores" data-id="${esc(f.id)}">Detalhes</button></td></tr>`).join('');
+            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.id)}">Detalhes</button></td></tr>`).join('');
         }
 
         function renderGrupos() {
@@ -967,7 +965,7 @@
                     ${common('Categoria','categoria')} 
                     ${common('Título da Demanda','titulo','text','md:col-span-2')} 
                 </div>
-                <div class="mt-3"><label class="block text-xs font-bold mb-1">Detalhes / Descrição Escrita</label><textarea name="descricao" rows="4" class="w-full p-2 border rounded-lg text-xs bg-white">${esc(item.descricao)}</textarea></div>`;
+                <div class="mt-3"><label class="block font-bold text-xs mb-1">Detalhes / Descrição Escrita</label><textarea name="descricao" rows="4" class="w-full p-2 border rounded-lg text-xs bg-white">${esc(item.descricao)}</textarea></div>`;
                 return;
             }
             c.innerHTML = Object.entries(item).filter(([k])=>k!=='id').map(([k,v])=>`<div><label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label><input type="text" name="${esc(k)}" value="${esc(Array.isArray(v)?v.join(', '):v)}" class="w-full p-2 border rounded-lg text-xs bg-white"></div>`).join('');
@@ -1011,6 +1009,7 @@
             const listaEl = document.getElementById('obs-historico-lista');
             const historico = d.historicoAcoes || [];
 
+            // Exibe o histórico ilimitado completo de andamentos e status
             listaEl.innerHTML = historico.map(h => `
                 <div class="p-2.5 bg-slate-50 border rounded-lg text-xs space-y-1">
                     <div class="flex justify-between font-bold text-blue-900">
@@ -1028,19 +1027,21 @@
         async function salvarNovaObservacao() {
             const id = document.getElementById('obs-demanda-id').value;
             const texto = document.getElementById('obs-novo-texto').value.trim();
-            if (!texto) { alert('Digite o texto do andamento.'); return; }
+            if (!texto) { alert('Digite o texto do andamento ou status.'); return; }
 
             const d = dbData.demandas.find(x => String(x.id) === String(id));
             if (!d) return;
 
             const agora = new Date().toISOString();
             const autor = currentUser?.nome || currentUser?.email || 'Sistema';
+            
+            // Histórico ilimitado: acumula permanentemente todas as ações e status realizados
             const novoHistorico = [...(d.historicoAcoes || []), { data: agora, autor, texto }];
 
             try {
                 await setDoc(doc(db, 'demandas', String(id)), { historicoAcoes: novoHistorico, atualizadoEm: agora, editadoPor: autor }, { merge: true });
                 fecharModal('modal-observacoes');
-                alert('Andamento salvo com sucesso!');
+                alert('Status/Andamento gravado com sucesso no histórico ilimitado!');
             } catch(e) { alert(traduzirErroSistema(e)); }
         }
 
@@ -1072,7 +1073,14 @@
                     const el = form.querySelector(`[name="${k}"]`);
                     if (el) obj[k] = el.value;
                 });
-                obj.historicoAcoes = itemAntigo.historicoAcoes || [];
+                
+                // Se o status foi alterado, adiciona automaticamente um registro no histórico ilimitado
+                let historicoAcoes = itemAntigo.historicoAcoes || [];
+                if (obj.status && obj.status !== itemAntigo.status) {
+                    historicoAcoes.push({ data: agora, autor: autorAtual, texto: `Status alterado para: ${obj.status}` });
+                }
+                obj.historicoAcoes = historicoAcoes;
+
             } else {
                 form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el => { if(el.name) obj[el.name] = el.value; });
             }
@@ -1164,6 +1172,7 @@
 
             try {
                 if (tipo === 'demanda') {
+                    const statusInicial = val('uc-status') || 'Em Andamento';
                     await addDoc(collection(db, 'demandas'), {
                         id: 'DEM-' + Date.now(),
                         titulo: val('uc-1'),
@@ -1171,14 +1180,17 @@
                         solicitante: val('uc-sol'),
                         responsavelGrgd: val('uc-grgd'),
                         prioridade: val('uc-prio'),
-                        status: val('uc-status') || 'Em Andamento',
+                        status: statusInicial,
                         diaSemana: val('uc-dia'),
                         corCard: val('uc-cor'),
                         horario: val('uc-horario'),
                         dataLimite: val('uc-limite'),
                         categoria: val('uc-cat'),
                         descricao: val('uc-desc'),
-                        historicoAcoes: [{ data: agora, autor: autor, texto: 'Demanda criada no sistema.' }],
+                        historicoAcoes: [
+                            { data: agora, autor: autor, texto: 'Demanda criada no sistema.' },
+                            { data: agora, autor: autor, texto: `Status inicial definido: ${statusInicial}` }
+                        ],
                         versoesAnteriores: [],
                         criadoEm: agora,
                         atualizadoEm: agora,
@@ -1258,8 +1270,12 @@
             const btnObs = ev.target.closest?.('[data-abrir-observacoes]');
             if (btnObs) { ev.stopPropagation(); abrirModalObservacoes(btnObs.getAttribute('data-abrir-observacoes')); return; }
             
-            const row = ev.target.closest?.('.tr-detalhe, .post-it');
-            if (row && !ev.target.closest('button')) { detalharRegistro(row.dataset.colecao || 'demandas', row.dataset.id); return; }
+            const btnDetalhes = ev.target.closest?.('.tr-detalhe');
+            if (btnDetalhes) {
+                ev.stopPropagation();
+                detalharRegistro(btnDetalhes.dataset.colecao || 'demandas', btnDetalhes.dataset.id);
+                return;
+            }
         });
 
         onAuthStateChanged(auth, async user => {
