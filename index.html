@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.45 - CORREÇÃO DE DIA DA SEMANA E DRAG & DROP -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.45 - CORREÇÃO DE DRAG & DROP INDEPENDENTE -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -201,7 +201,7 @@
                 </table>
             </div>
 
-            <!-- VISÃO 2: CALENDÁRIO & BACKLOG (Drag and Drop Imediato Ultra-Rápido) -->
+            <!-- VISÃO 2: CALENDÁRIO & BACKLOG (Drag and Drop Sincronizado e Independente) -->
             <div id="container-visao-calendario" class="hidden space-y-6">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                     <div class="flex items-center justify-between mb-3">
@@ -212,7 +212,7 @@
                 </div>
 
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                    <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-900"></i> CALENDÁRIO SEMANAL (Arraste instantâneo entre os dias)</h4>
+                    <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-900"></i> CALENDÁRIO SEMANAL (Arraste livre e sincronizado)</h4>
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                         <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Segunda-feira</span></div><div id="cal-segunda" class="dropzone space-y-2 flex-1 transition-colors" data-dia="segunda"></div></div>
                         <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Terça-feira</span></div><div id="cal-terca" class="dropzone space-y-2 flex-1 transition-colors" data-dia="terca"></div></div>
@@ -385,7 +385,7 @@
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.45: Correção definitiva da edição do dia da semana e Drag & Drop otimizado');
+        console.info('PRGD v0.45: Sincronização estrita de diaSemana no Drag and Drop sem impacto cruzado');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -780,7 +780,7 @@
                 </tr>`;
             }).join('') || '<tr><td colspan="8" class="text-slate-400 text-sm text-center py-6">Nenhuma demanda encontrada.</td></tr>';
 
-            renderCalendarioEBacklog(filtered);
+            renderCalendarioEBacklog(dbData.demandas);
         }
 
         function renderCalendarioEBacklog(listaDemandas) {
@@ -834,7 +834,7 @@
             </div>`;
         }
 
-        // Drag and Drop Instantâneo otimizado e conectado perfeitamente com a propriedade diaSemana
+        // Drag and Drop Sincronizado: Atualiza estritamente o card movido para a nova coluna sem impactar os demais
         function configurarDragAndDrop() {
             document.querySelectorAll('.post-it').forEach(card => {
                 card.addEventListener('dragstart', e => {
@@ -857,8 +857,15 @@
                         try {
                             const agora = new Date().toISOString();
                             const autor = currentUser?.nome || currentUser?.email || 'Sistema';
-                            // Atualização imediata em segundo plano
-                            await setDoc(doc(db, 'demandas', String(idDemanda)), { diaSemana: novoDia, atualizadoEm: agora, editadoPor: autor }, { merge: true });
+                            const diaNome = novoDia ? novoDia.toUpperCase() : 'BACKLOG';
+                            const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Movido via arrastar para: ${diaNome}` }];
+                            
+                            await setDoc(doc(db, 'demandas', String(idDemanda)), { 
+                                diaSemana: novoDia, 
+                                historicoAcoes, 
+                                atualizadoEm: agora, 
+                                editadoPor: autor 
+                            }, { merge: true });
                         } catch(err) { alert(traduzirErroSistema(err)); }
                     }
                 });
