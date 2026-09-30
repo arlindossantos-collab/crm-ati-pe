@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.45 - CORREÇÃO DE DRAG & DROP INDEPENDENTE -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.46 - SINCRONIZAÇÃO EXATA DE DIA DA SEMANA -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -54,7 +54,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.45</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.46</span></p>
             </div>
         </div>
     </div>
@@ -67,7 +67,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.45</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.46</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -128,7 +128,7 @@
             </div>
         </div>
 
-        <!-- ABA DEMANDAS (V0.45) -->
+        <!-- ABA DEMANDAS (V0.46) -->
         <div id="aba-demandas" class="hidden space-y-4">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -201,7 +201,7 @@
                 </table>
             </div>
 
-            <!-- VISÃO 2: CALENDÁRIO & BACKLOG (Drag and Drop Sincronizado e Independente) -->
+            <!-- VISÃO 2: CALENDÁRIO & BACKLOG (Drag and Drop Sincronizado Instantaneamente) -->
             <div id="container-visao-calendario" class="hidden space-y-6">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                     <div class="flex items-center justify-between mb-3">
@@ -212,7 +212,7 @@
                 </div>
 
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                    <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-900"></i> CALENDÁRIO SEMANAL (Arraste livre e sincronizado)</h4>
+                    <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-900"></i> CALENDÁRIO SEMANAL (Arraste livre e sincronizado com o campo Dia da Semana)</h4>
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                         <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Segunda-feira</span></div><div id="cal-segunda" class="dropzone space-y-2 flex-1 transition-colors" data-dia="segunda"></div></div>
                         <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Terça-feira</span></div><div id="cal-terca" class="dropzone space-y-2 flex-1 transition-colors" data-dia="terca"></div></div>
@@ -378,14 +378,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.45 -->
+    <!-- Script Principal v0.46 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.45: Sincronização estrita de diaSemana no Drag and Drop sem impacto cruzado');
+        console.info('PRGD v0.46: Atualização atômica e imediata de diaSemana via Drag and Drop');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -718,7 +718,7 @@
         }
 
         // =====================================================================
-        // MÓDULO DE DEMANDAS (V0.45)
+        // MÓDULO DE DEMANDAS (V0.46)
         // =====================================================================
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
@@ -834,7 +834,7 @@
             </div>`;
         }
 
-        // Drag and Drop Sincronizado: Atualiza estritamente o card movido para a nova coluna sem impactar os demais
+        // Sincronização Estrita do Drag and Drop: Atualiza imediatamente o diaSemana exato da coluna onde foi solto
         function configurarDragAndDrop() {
             document.querySelectorAll('.post-it').forEach(card => {
                 card.addEventListener('dragstart', e => {
@@ -853,19 +853,24 @@
                     if (!idDemanda) return;
 
                     const demandaObj = dbData.demandas.find(x => String(x.id) === String(idDemanda));
-                    if (demandaObj && demandaObj.diaSemana !== novoDia) {
+                    if (demandaObj) {
                         try {
                             const agora = new Date().toISOString();
                             const autor = currentUser?.nome || currentUser?.email || 'Sistema';
                             const diaNome = novoDia ? novoDia.toUpperCase() : 'BACKLOG';
-                            const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Movido via arrastar para: ${diaNome}` }];
+                            const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Movido para: ${diaNome}` }];
                             
+                            // Atualização atômica direta no documento da demanda movida
                             await setDoc(doc(db, 'demandas', String(idDemanda)), { 
                                 diaSemana: novoDia, 
                                 historicoAcoes, 
                                 atualizadoEm: agora, 
                                 editadoPor: autor 
                             }, { merge: true });
+
+                            // Atualização instantânea local para evitar qualquer atraso de sincronização
+                            demandaObj.diaSemana = novoDia;
+                            renderDemandas();
                         } catch(err) { alert(traduzirErroSistema(err)); }
                     }
                 });
