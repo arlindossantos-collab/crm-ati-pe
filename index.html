@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.48 - CORREÇÃO DE ATUALIZAÇÃO DE CARDS    -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.48 - TOOLTIPS EM CATEGORIA E DETALHES    -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -383,7 +383,7 @@
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.48: Funcionalidade "Mover para" ajustada com segurança para atualizar apenas o documento existente');
+        console.info('PRGD v0.48: Tooltips informativos adicionados em Categoria e Detalhes');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -871,7 +871,7 @@
             const tbody = document.getElementById('tabela-fornecedores');
             if (!tbody) return;
             document.getElementById('count-fornecedores').textContent = dbData.fornecedores.length;
-            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.firestoreId)}">Detalhes</button></td></tr>`).join('');
+            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(l.firestoreId || f.firestoreId)}">Detalhes</button></td></tr>`).join('');
         }
 
         function renderGrupos() {
@@ -978,10 +978,30 @@
                     </div>
                     ${common('Horário','horario','time')}
                     ${common('Data Final de Acompanhamento','dataLimite','date')}
-                    ${common('Categoria','categoria')} 
+                    
+                    <div>
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <label class="block font-bold text-[11px] uppercase">Categoria</label>
+                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] cursor-help relative group">
+                                i
+                                <span class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block w-52 p-2 bg-slate-900 text-white text-[10px] font-normal rounded shadow-lg z-30 text-center normal-case">Preencha a categoria que esta demanda faz parte, ex.: reunião interna, incidente, visita institucional, receber fornecedor, etc</span>
+                            </span>
+                        </div>
+                        <input type="text" name="categoria" value="${esc(item.categoria || '')}" class="w-full p-2 border rounded-lg text-xs bg-white">
+                    </div>
+
                     ${common('Título da Demanda','titulo','text','md:col-span-2')} 
                 </div>
-                <div class="mt-3"><label class="block font-bold text-xs mb-1">Detalhes / Descrição Escrita</label><textarea name="descricao" rows="4" class="w-full p-2 border rounded-lg text-xs bg-white">${esc(item.descricao)}</textarea></div>`;
+                <div class="mt-3">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <label class="block font-bold text-xs">Detalhes / Descrição Escrita</label>
+                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] cursor-help relative group">
+                            i
+                            <span class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block w-52 p-2 bg-slate-900 text-white text-[10px] font-normal rounded shadow-lg z-30 text-center normal-case">Detalhe do que se trata esta solicitação</span>
+                        </span>
+                    </div>
+                    <textarea name="descricao" rows="4" class="w-full p-2 border rounded-lg text-xs bg-white">${esc(item.descricao)}</textarea>
+                </div>`;
                 
                 setTimeout(() => {
                     document.querySelectorAll('.select-cor-swatch').forEach(sw => {
@@ -1184,9 +1204,27 @@
                     </div>
                     <div><label class="block mb-1 font-medium">Horário</label><input type="time" id="uc-horario" class="w-full p-2 border rounded bg-white"></div>
                     <div><label class="block mb-1 font-medium">Data Final de Acompanhamento</label><input type="date" id="uc-limite" class="w-full p-2 border rounded bg-white"></div>
-                    <div><label class="block mb-1 font-medium">Categoria</label><input id="uc-cat" class="w-full p-2 border rounded"></div>
+                    <div>
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <label class="font-medium">Categoria</label>
+                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] cursor-help relative group">
+                                i
+                                <span class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block w-52 p-2 bg-slate-900 text-white text-[10px] font-normal rounded shadow-lg z-30 text-center normal-case">Preencha a categoria que esta demanda faz parte, ex.: reunião interna, incidente, visita institucional, receber fornecedor, etc</span>
+                            </span>
+                        </div>
+                        <input id="uc-cat" class="w-full p-2 border rounded">
+                    </div>
                 </div>
-                <div class="mt-3"><label class="block mb-1 font-medium">Detalhes / Descrição Escrita</label><textarea id="uc-desc" rows="3" class="w-full p-2 border rounded"></textarea></div>`;
+                <div class="mt-3">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <label class="font-medium">Detalhes / Descrição Escrita</label>
+                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] cursor-help relative group">
+                            i
+                            <span class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block w-52 p-2 bg-slate-900 text-white text-[10px] font-normal rounded shadow-lg z-30 text-center normal-case">Detalhe do que se trata esta solicitação</span>
+                        </span>
+                    </div>
+                    <textarea id="uc-desc" rows="3" class="w-full p-2 border rounded"></textarea>
+                </div>`;
                 
                 preencherSelectClientes();
                 setTimeout(() => {
@@ -1309,7 +1347,6 @@
                     const diaNome = novoDia ? novoDia.toUpperCase() : 'BACKLOG';
                     const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Movido para: ${diaNome}` }];
                     
-                    // Atualização cirúrgica exclusiva do documento existente no Firestore
                     await setDoc(doc(db, 'demandas', String(firestoreId)), { 
                         diaSemana: novoDia, 
                         historicoAcoes, 
