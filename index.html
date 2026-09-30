@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.45 - DRAG AND DROP OTIMIZADO E INSTANTÂNEO -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.45 - CORREÇÃO DE DIA DA SEMANA E DRAG & DROP -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -385,7 +385,7 @@
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.45: Drag and Drop instantâneo otimizado sem travamentos');
+        console.info('PRGD v0.45: Correção definitiva da edição do dia da semana e Drag & Drop otimizado');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -834,7 +834,7 @@
             </div>`;
         }
 
-        // Drag and Drop Instantâneo sem travamentos ou pop-ups de confirmação lentos
+        // Drag and Drop Instantâneo otimizado e conectado perfeitamente com a propriedade diaSemana
         function configurarDragAndDrop() {
             document.querySelectorAll('.post-it').forEach(card => {
                 card.addEventListener('dragstart', e => {
@@ -857,7 +857,7 @@
                         try {
                             const agora = new Date().toISOString();
                             const autor = currentUser?.nome || currentUser?.email || 'Sistema';
-                            // Atualização imediata em segundo plano sem travar a interface
+                            // Atualização imediata em segundo plano
                             await setDoc(doc(db, 'demandas', String(idDemanda)), { diaSemana: novoDia, atualizadoEm: agora, editadoPor: autor }, { merge: true });
                         } catch(err) { alert(traduzirErroSistema(err)); }
                     }
@@ -981,7 +981,7 @@
                     <div>
                         <label class="block font-bold text-[11px] uppercase mb-1">Dia da Semana (Calendário)</label>
                         <select name="diaSemana" class="w-full p-2 border rounded-lg text-xs bg-white">
-                            <option value="">Apenas no Backlog</option>
+                            <option value="" ${!item.diaSemana?'selected':''}>Apenas no Backlog</option>
                             <option value="segunda" ${item.diaSemana==='segunda'?'selected':''}>Segunda-feira</option>
                             <option value="terca" ${item.diaSemana==='terca'?'selected':''}>Terça-feira</option>
                             <option value="quarta" ${item.diaSemana==='quarta'?'selected':''}>Quarta-feira</option>
@@ -1122,6 +1122,10 @@
                 if (obj.status && obj.status !== itemAntigo.status) {
                     historicoAcoes.push({ data: agora, autor: autorAtual, texto: `Status alterado para: ${obj.status}` });
                 }
+                if (obj.diaSemana !== itemAntigo.diaSemana) {
+                    const diaNome = obj.diaSemana ? obj.diaSemana.toUpperCase() : 'BACKLOG';
+                    historicoAcoes.push({ data: agora, autor: autorAtual, texto: `Movido para: ${diaNome}` });
+                }
                 obj.historicoAcoes = historicoAcoes;
 
             } else {
@@ -1130,7 +1134,7 @@
 
             try {
                 await setDoc(doc(db, colecao, String(id)), obj, { merge: true });
-                alert('Alterações salvas na nuvem com versionamento mantido!');
+                alert('Alterações salvas na nuvem com sucesso!');
                 fecharModal('modal-detalhes');
             } catch(err) {
                 alert(traduzirErroSistema(err));
