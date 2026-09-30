@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.49 - CORREÇÃO DE LOGIN E PERFIL          -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.50 - CORREÇÃO DE AUTENTICAÇÃO E FUNÇÕES  -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -48,11 +48,10 @@
                     <button type="submit" id="btn-executar-login" class="w-full mt-6 py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-right-to-bracket"></i><span id="login-btn-text">Autenticar e Entrar</span>
                     </button>
-                    <button type="button" id="btn-esqueci-senha" class="w-full mt-2 py-2 text-xs text-blue-900 hover:underline cursor-pointer">Esqueci minha senha</button>
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.49</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.50</span></p>
             </div>
         </div>
     </div>
@@ -65,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.49</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.50</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -359,7 +358,7 @@
         </div>
     </div>
 
-    <!-- Modal de Observações / Histórico Ilimitado de Andamentos -->
+    <!-- Modal de Observações -->
     <div id="modal-observacoes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
@@ -384,14 +383,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.49 -->
+    <!-- Script Principal v0.50 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.49: Correção de autenticação e perfil do usuário');
+        console.info('PRGD v0.50: Correção de autenticação e inicialização');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -428,28 +427,6 @@
         let buscaFornecedoresVal = '';
         let buscaBasesVal = '';
         let buscaUsuariosVal = '';
-
-        const LISTA_RESP_GRGD_OFICIAL = [
-            "Arlindo Santos",
-            "Eronita Leidjen",
-            "Tino Perazzo",
-            "Richard Rodrigues",
-            "João Inácio",
-            "Lívia Kelly",
-            "Rebeca Medeiros",
-            "Lorena Gouveia",
-            "Clarissa Borba",
-            "José Pacheco"
-        ];
-
-        const CORES_CARD_DISPONIVEIS = [
-            { id: 'bg-blue-50 border-blue-200 text-blue-900', bgHex: '#eff6ff', borderHex: '#bfdbfe', nome: 'Azul' },
-            { id: 'bg-emerald-50 border-emerald-200 text-emerald-900', bgHex: '#ecfdf5', borderHex: '#a7f3d0', nome: 'Verde' },
-            { id: 'bg-amber-50 border-amber-200 text-amber-900', bgHex: '#fffbeb', borderHex: '#fde68a', nome: 'Amarelo' },
-            { id: 'bg-purple-50 border-purple-200 text-purple-900', bgHex: '#faf5ff', borderHex: '#e9d5ff', nome: 'Roxo' },
-            { id: 'bg-rose-50 border-rose-200 text-rose-900', bgHex: '#fff1f2', borderHex: '#fecdd3', nome: 'Rosa' },
-            { id: 'bg-slate-50 border-slate-200 text-slate-900', bgHex: '#f8fafc', borderHex: '#e2e8f0', nome: 'Cinza' }
-        ];
 
         const MÓDULOS_SISTEMA = [
             { id: 'dashboard', nome: 'Dashboard' },
@@ -1071,8 +1048,33 @@
             if (e?.preventDefault) e.preventDefault();
             const email = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
             const senha = document.getElementById('login-senha')?.value || '';
-            if (!email || !senha) { alert('Informe e-mail e senha.'); return; }
-            signInWithEmailAndPassword(auth, email, senha).catch(err => alert(traduzirErroSistema(err)));
+            const msgEl = document.getElementById('login-msg');
+            if (!email || !senha) { 
+                if(msgEl) { msgEl.textContent = 'Informe e-mail e senha.'; msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
+                else alert('Informe e-mail e senha.'); 
+                return; 
+            }
+            signInWithEmailAndPassword(auth, email, senha).catch(err => {
+                const txt = traduzirErroSistema(err);
+                if(msgEl) { msgEl.textContent = txt; msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
+                else alert(txt);
+            });
+        }
+
+        async function salvarNovaObservacao() {
+            const demandaId = document.getElementById('obs-demanda-id').value;
+            const texto = document.getElementById('obs-novo-texto').value.trim();
+            if(!texto || !demandaId) return;
+            const demandaObj = dbData.demandas.find(d => String(d.firestoreId) === String(demandaId));
+            if(!demandaObj) return;
+            const agora = new Date().toISOString();
+            const autor = currentUser?.nome || currentUser?.email || 'Sistema';
+            const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto }];
+            try {
+                await setDoc(doc(db, 'demandas', String(demandaId)), { historicoAcoes, atualizadoEm: agora, editadoPor: autor }, { merge: true });
+                document.getElementById('obs-novo-texto').value = '';
+                alert('Andamento registrado com sucesso!');
+            } catch(err) { alert(traduzirErroSistema(err)); }
         }
 
         function abrirModalForm(tipo) {
