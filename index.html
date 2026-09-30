@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.45 - MÓDULO DEMANDAS REFINADO            -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.45 - CORES EXCLUSIVAS PARA OS RESPONSÁVEIS -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -168,7 +168,6 @@
 
             <!-- VISÃO 1: TABELA -->
             <div id="container-visao-tabela" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4">
-                <!-- Legendas Atualizadas (Novos Ícones) -->
                 <div class="flex flex-wrap items-center gap-6 mb-3 text-xs font-semibold text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                     <div class="flex items-center gap-3">
                         <span class="text-slate-700 font-bold"><i class="fa-solid fa-circle-info text-blue-900 mr-1"></i> Prioridade:</span>
@@ -202,7 +201,7 @@
                 </table>
             </div>
 
-            <!-- VISÃO 2: CALENDÁRIO & BACKLOG (Drag and Drop Imediato) -->
+            <!-- VISÃO 2: CALENDÁRIO & BACKLOG -->
             <div id="container-visao-calendario" class="hidden space-y-6">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                     <div class="flex items-center justify-between mb-3">
@@ -386,7 +385,7 @@
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.45: Módulo de Demandas refinado com nova lista GRGD, seletores de cor e drag-and-drop imediato');
+        console.info('PRGD v0.45: Cores exclusivas e distintas para todos os 10 responsáveis GRGD');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -484,11 +483,19 @@
             return (partes[0].charAt(0) + partes[partes.length - 1].charAt(0)).toUpperCase();
         }
 
+        // Atribuição de cores exclusivas e distintas para cada um dos 10 responsáveis oficiais
         function obterCorResponsavel(nomeResp) {
             const nome = String(nomeResp || '').trim().toLowerCase();
-            if (nome.includes('pacheco')) return 'bg-blue-600 border-blue-800 text-white';
             if (nome.includes('arlindo')) return 'bg-emerald-600 border-emerald-800 text-white';
-            if (nome.includes('clarissa')) return 'bg-pink-600 border-pink-800 text-white';
+            if (nome.includes('eronita')) return 'bg-violet-600 border-violet-800 text-white';
+            if (nome.includes('tino')) return 'bg-amber-600 border-amber-800 text-white';
+            if (nome.includes('richard')) return 'bg-cyan-600 border-cyan-800 text-white';
+            if (nome.includes('joão') || nome.includes('joao')) return 'bg-indigo-600 border-indigo-800 text-white';
+            if (nome.includes('lívia') || nome.includes('livia')) return 'bg-pink-600 border-pink-800 text-white';
+            if (nome.includes('rebeca')) return 'bg-rose-600 border-rose-800 text-white';
+            if (nome.includes('lorena')) return 'bg-teal-600 border-teal-800 text-white';
+            if (nome.includes('clarissa')) return 'bg-fuchsia-600 border-fuchsia-800 text-white';
+            if (nome.includes('pacheco')) return 'bg-blue-600 border-blue-800 text-white';
             return 'bg-slate-700 border-slate-900 text-white';
         }
 
@@ -743,8 +750,6 @@
                 
                 const historico = d.historicoAcoes || [];
                 const ultimoAndamento = historico.length > 0 ? historico[historico.length - 1].texto : 'Nenhum andamento registrado.';
-
-                // Cada linha da tabela assume a cor escolhida no card
                 const corLinhaClara = d.corCard || 'bg-white';
 
                 return `<tr class="hover:opacity-95 transition-colors ${corLinhaClara} border-b border-slate-200">
@@ -830,7 +835,6 @@
             </div>`;
         }
 
-        // Drag and Drop Imediato com Confirmação
         function configurarDragAndDrop() {
             document.querySelectorAll('.post-it').forEach(card => {
                 card.addEventListener('dragstart', e => {
@@ -1323,7 +1327,6 @@
             if (btnExcluir) {
                 ev.stopPropagation();
                 const idDem = btnExcluir.getAttribute('data-id');
-                // Confirmação obrigatória antes de excluir
                 if (confirm('Deseja realmente excluir esta demanda do sistema?')) {
                     try {
                         await deleteDoc(doc(db, 'demandas', String(idDem)));
