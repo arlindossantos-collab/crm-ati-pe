@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.44 - MÓDULO DE DEMANDAS REFINADO         -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.45 - MÓDULO DEMANDAS REFINADO            -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -54,7 +54,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.44</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.45</span></p>
             </div>
         </div>
     </div>
@@ -67,7 +67,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.44</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.45</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -128,7 +128,7 @@
             </div>
         </div>
 
-        <!-- ABA DEMANDAS (V0.44) -->
+        <!-- ABA DEMANDAS (V0.45) -->
         <div id="aba-demandas" class="hidden space-y-4">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -168,7 +168,7 @@
 
             <!-- VISÃO 1: TABELA -->
             <div id="container-visao-tabela" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4">
-                <!-- Legendas Unidas (Prioridade e Status com Play Verde) -->
+                <!-- Legendas Atualizadas (Novos Ícones) -->
                 <div class="flex flex-wrap items-center gap-6 mb-3 text-xs font-semibold text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                     <div class="flex items-center gap-3">
                         <span class="text-slate-700 font-bold"><i class="fa-solid fa-circle-info text-blue-900 mr-1"></i> Prioridade:</span>
@@ -178,10 +178,10 @@
                     </div>
                     <div class="flex items-center gap-3 border-l pl-4 border-slate-300">
                         <span class="text-slate-700 font-bold">Status:</span>
-                        <div class="flex items-center gap-1"><i class="fa-solid fa-play text-emerald-600"></i> <span>Em Andamento</span></div>
-                        <div class="flex items-center gap-1"><i class="fa-solid fa-pause text-blue-600"></i> <span>Pausado</span></div>
-                        <div class="flex items-center gap-1"><i class="fa-solid fa-xmark text-red-600 font-bold"></i> <span>Cancelado</span></div>
-                        <div class="flex items-center gap-1"><i class="fa-solid fa-check text-emerald-600 font-bold"></i> <span>Concluído</span></div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-500 inline-flex items-center justify-center text-white text-[9px] shadow-sm"><i class="fa-solid fa-spinner"></i></span> <span>Em Andamento</span></div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-slate-500 inline-flex items-center justify-center text-white text-[9px] shadow-sm"><i class="fa-solid fa-pause"></i></span> <span>Pausado</span></div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-red-600 inline-flex items-center justify-center text-white text-[9px] shadow-sm font-bold">X</span> <span>Cancelado</span></div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-emerald-600 inline-flex items-center justify-center text-white text-[9px] shadow-sm font-bold">✓</span> <span>Concluído</span></div>
                     </div>
                 </div>
 
@@ -202,7 +202,7 @@
                 </table>
             </div>
 
-            <!-- VISÃO 2: CALENDÁRIO & BACKLOG (Drag and Drop com Confirmação) -->
+            <!-- VISÃO 2: CALENDÁRIO & BACKLOG (Drag and Drop Imediato) -->
             <div id="container-visao-calendario" class="hidden space-y-6">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                     <div class="flex items-center justify-between mb-3">
@@ -379,14 +379,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.44 -->
+    <!-- Script Principal v0.45 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.44: Botões de detalhes restaurados, histórico ilimitado e drag-and-drop com confirmação');
+        console.info('PRGD v0.45: Módulo de Demandas refinado com nova lista GRGD, seletores de cor e drag-and-drop imediato');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -423,6 +423,28 @@
         let buscaFornecedoresVal = '';
         let buscaBasesVal = '';
         let buscaUsuariosVal = '';
+
+        const LISTA_RESP_GRGD_OFICIAL = [
+            "Arlindo Santos",
+            "Eronita Leidjen",
+            "Tino Perazzo",
+            "Richard Rodrigues",
+            "João Inácio",
+            "Lívia Kelly",
+            "Rebeca Medeiros",
+            "Lorena Gouveia",
+            "Clarissa Borba",
+            "José Pacheco"
+        ];
+
+        const CORES_CARD_DISPONIVEIS = [
+            { id: 'bg-blue-50 border-blue-200 text-blue-900', bgHex: '#eff6ff', borderHex: '#bfdbfe', nome: 'Azul' },
+            { id: 'bg-emerald-50 border-emerald-200 text-emerald-900', bgHex: '#ecfdf5', borderHex: '#a7f3d0', nome: 'Verde' },
+            { id: 'bg-amber-50 border-amber-200 text-amber-900', bgHex: '#fffbeb', borderHex: '#fde68a', nome: 'Amarelo' },
+            { id: 'bg-purple-50 border-purple-200 text-purple-900', bgHex: '#faf5ff', borderHex: '#e9d5ff', nome: 'Roxo' },
+            { id: 'bg-rose-50 border-rose-200 text-rose-900', bgHex: '#fff1f2', borderHex: '#fecdd3', nome: 'Rosa' },
+            { id: 'bg-slate-50 border-slate-200 text-slate-900', bgHex: '#f8fafc', borderHex: '#e2e8f0', nome: 'Cinza' }
+        ];
 
         const MÓDULOS_SISTEMA = [
             { id: 'dashboard', nome: 'Dashboard' },
@@ -494,13 +516,12 @@
             </div>`;
         }
 
-        // Renderiza status por ícones na tabela (Play em verde)
         function renderizarIconeStatus(status) {
             const s = String(status || '').trim().toLowerCase();
-            if (s.includes('pausado')) return '<span title="Pausado" class="text-blue-600 text-base"><i class="fa-solid fa-pause"></i></span>';
-            if (s.includes('cancelado')) return '<span title="Cancelado" class="text-red-600 text-base"><i class="fa-solid fa-xmark"></i></span>';
-            if (s.includes('concluído') || s.includes('concluido')) return '<span title="Concluído" class="text-emerald-600 text-base"><i class="fa-solid fa-check"></i></span>';
-            return '<span title="Em Andamento" class="text-emerald-600 text-base"><i class="fa-solid fa-play"></i></span>';
+            if (s.includes('pausado')) return '<span title="Pausado" class="w-5 h-5 rounded-full bg-slate-500 inline-flex items-center justify-center text-white text-[11px] shadow-sm"><i class="fa-solid fa-pause"></i></span>';
+            if (s.includes('cancelado')) return '<span title="Cancelado" class="w-5 h-5 rounded-full bg-red-600 inline-flex items-center justify-center text-white text-[10px] font-bold shadow-sm">X</span>';
+            if (s.includes('concluído') || s.includes('concluido')) return '<span title="Concluído" class="w-5 h-5 rounded-full bg-emerald-600 inline-flex items-center justify-center text-white text-[10px] font-bold shadow-sm">✓</span>';
+            return '<span title="Em Andamento" class="w-5 h-5 rounded-full bg-blue-500 inline-flex items-center justify-center text-white text-[10px] shadow-sm"><i class="fa-solid fa-spinner"></i></span>';
         }
 
         function formatarData(dataStr) {
@@ -691,7 +712,7 @@
         }
 
         // =====================================================================
-        // MÓDULO DE DEMANDAS (V0.44)
+        // MÓDULO DE DEMANDAS (V0.45)
         // =====================================================================
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
@@ -723,11 +744,14 @@
                 const historico = d.historicoAcoes || [];
                 const ultimoAndamento = historico.length > 0 ? historico[historico.length - 1].texto : 'Nenhum andamento registrado.';
 
-                return `<tr class="hover:bg-slate-50 border-slate-200">
-                    <td class="p-4 font-bold text-slate-800">${esc(d.solicitante || 'Não informado')}<div class="text-[11px] font-normal text-slate-500">${esc(d.orgao || '')}</div></td>
+                // Cada linha da tabela assume a cor escolhida no card
+                const corLinhaClara = d.corCard || 'bg-white';
+
+                return `<tr class="hover:opacity-95 transition-colors ${corLinhaClara} border-b border-slate-200">
+                    <td class="p-4 font-bold text-slate-800">${esc(d.solicitante || 'Não informado')}<div class="text-[11px] font-normal text-slate-600">${esc(d.orgao || '')}</div></td>
                     <td class="p-4 font-semibold text-blue-900">
                         ${esc(d.titulo)}
-                        ${d.dataLimite ? `<div class="text-[10px] text-slate-500 mt-0.5"><i class="fa-regular fa-clock"></i> Limite: ${formatarData(d.dataLimite)} ${d.horario ? 'às '+d.horario : ''}</div>` : ''}
+                        ${d.dataLimite ? `<div class="text-[10px] text-slate-600 mt-0.5"><i class="fa-regular fa-clock"></i> Limite: ${formatarData(d.dataLimite)} ${d.horario ? 'às '+d.horario : ''}</div>` : ''}
                     </td>
                     <td class="p-4">
                         <span class="text-xs text-slate-700 line-clamp-2 max-w-xs" title="${esc(d.descricao || '')}">${esc(d.descricao || 'Sem detalhes')}</span>
@@ -737,17 +761,16 @@
                     <td class="p-4 text-center">${iconeStatus}</td>
                     <td class="p-4">
                         <div class="text-xs text-slate-700">${audit.dataHtml}</div>
-                        <div class="text-[11px] text-slate-500 font-medium">${audit.autorHtml}</div>
+                        <div class="text-[11px] text-slate-600 font-medium">${audit.autorHtml}</div>
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <button type="button" class="text-xs bg-blue-50 text-blue-900 hover:bg-blue-100 p-1.5 rounded cursor-pointer transition relative group" data-abrir-observacoes="${esc(d.id)}">
+                            <button type="button" class="text-xs bg-white/85 text-blue-900 hover:bg-white p-1.5 rounded cursor-pointer transition relative group shadow-sm border border-black/10" data-abrir-observacoes="${esc(d.id)}">
                                 <i class="fa-solid fa-comments"></i>
                                 <span class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block w-48 p-1.5 bg-slate-900 text-white text-[10px] rounded shadow-lg z-20 text-center">Último andamento: ${esc(ultimoAndamento)}</span>
                             </button>
-                            <!-- Botão Detalhes Restaurado -->
-                            <button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded cursor-pointer font-semibold tr-detalhe" data-colecao="demandas" data-id="${esc(d.id)}" title="Detalhes"><i class="fa-solid fa-eye mr-1"></i> Detalhes</button>
-                            <button type="button" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 p-1.5 rounded cursor-pointer transition btn-excluir-demanda-direta" data-id="${esc(d.id)}" title="Excluir demanda"><i class="fa-solid fa-xmark text-sm font-bold"></i></button>
+                            <button type="button" class="text-xs bg-white/85 hover:bg-white text-slate-800 px-2.5 py-1 rounded cursor-pointer font-semibold tr-detalhe border border-black/10 shadow-sm" data-colecao="demandas" data-id="${esc(d.id)}" title="Detalhes"><i class="fa-solid fa-eye mr-1"></i> Detalhes</button>
+                            <button type="button" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 p-1.5 rounded cursor-pointer transition btn-excluir-demanda-direta border border-red-200 shadow-sm" data-id="${esc(d.id)}" title="Excluir demanda"><i class="fa-solid fa-xmark text-sm font-bold"></i></button>
                         </div>
                     </td>
                 </tr>`;
@@ -789,11 +812,9 @@
         function criarPostItHtml(d) {
             const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
             const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
-            const isConcluido = String(d.status || '').toLowerCase().includes('concluído') || String(d.status || '').toLowerCase().includes('concluido');
-            
-            const corCard = isConcluido ? 'bg-slate-200 border-slate-300 text-slate-600' : (d.corCard || 'bg-blue-50 border-blue-200 text-blue-900');
+            const corCard = d.corCard || 'bg-blue-50 border-blue-200 text-blue-900';
 
-            return `<div class="post-it p-2.5 rounded-lg border ${corCard} shadow-sm flex flex-col justify-between gap-2" draggable="true" data-id="${esc(d.id)}" data-colecao="demandas">
+            return `<div class="post-it p-2.5 rounded-lg border ${corCard} shadow-sm flex flex-col justify-between gap-2 tr-detalhe cursor-pointer" draggable="true" data-id="${esc(d.id)}" data-colecao="demandas" title="Clique para ver os detalhes">
                 <div>
                     <div class="flex justify-between items-start gap-1">
                         <span class="font-bold text-xs leading-tight line-clamp-2">${esc(d.titulo)}</span>
@@ -809,7 +830,7 @@
             </div>`;
         }
 
-        // Lógica de Drag and Drop com confirmação via Pop-up
+        // Drag and Drop Imediato com Confirmação
         function configurarDragAndDrop() {
             document.querySelectorAll('.post-it').forEach(card => {
                 card.addEventListener('dragstart', e => {
@@ -820,7 +841,7 @@
             document.querySelectorAll('.dropzone').forEach(zone => {
                 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dropzone-hover'); });
                 zone.addEventListener('dragleave', () => { zone.classList.remove('dropzone-hover'); });
-                zone.addEventListener('drop', async e => {
+                zone.addEventListener('drop', e => {
                     e.preventDefault();
                     zone.classList.remove('dropzone-hover');
                     const idDemanda = e.dataTransfer.getData('text/plain');
@@ -832,11 +853,13 @@
                         const nomeDestino = novoDia ? novoDia.toUpperCase() : 'BACKLOG';
                         const confirmar = confirm(`Deseja realmente mudar a posição deste card para ${nomeDestino}?`);
                         if (confirmar) {
-                            try {
-                                const agora = new Date().toISOString();
-                                const autor = currentUser?.nome || currentUser?.email || 'Sistema';
-                                await setDoc(doc(db, 'demandas', String(idDemanda)), { diaSemana: novoDia, atualizadoEm: agora, editadoPor: autor }, { merge: true });
-                            } catch(err) { alert(traduzirErroSistema(err)); }
+                            (async () => {
+                                try {
+                                    const agora = new Date().toISOString();
+                                    const autor = currentUser?.nome || currentUser?.email || 'Sistema';
+                                    await setDoc(doc(db, 'demandas', String(idDemanda)), { diaSemana: novoDia, atualizadoEm: agora, editadoPor: autor }, { merge: true });
+                                } catch(err) { alert(traduzirErroSistema(err)); }
+                            })();
                         }
                     }
                 });
@@ -901,7 +924,7 @@
                     const s = String(d.status || '').toLowerCase();
                     if (s.includes('andamento')) and++; else if (s.includes('pausado')) paus++; else if (s.includes('cancelado')) canc++; else if (s.includes('concluído') || s.includes('concluido')) conc++; else and++;
                 });
-                chartStatusInstance = new Chart(ctx2, { type: 'doughnut', data: { labels: ['Em Andamento', 'Pausado', 'Cancelado', 'Concluído'], datasets: [{ data: [and, paus, canc, conc], backgroundColor: ['#3b82f6', '#8b5cf6', '#64748b', '#10b981'] }] } });
+                chartStatusInstance = new Chart(ctx2, { type: 'doughnut', data: { labels: ['Em Andamento', 'Pausado', 'Cancelado', 'Concluído'], datasets: [{ data: [and, paus, canc, conc], backgroundColor: ['#3b82f6', '#64748b', '#dc2626', '#16a34a'] }] } });
             }
             const ctx3 = document.getElementById('chartTiposOrgaos')?.getContext('2d');
             if (ctx3) {
@@ -918,10 +941,27 @@
             const common = (label,key,type='text',cls='') => `<div class="${cls}"><label class="block font-bold text-[11px] uppercase mb-1">${label}</label><input type="${type}" name="${key}" value="${esc(item[key] || '')}" class="w-full p-2 border rounded-lg text-xs bg-white"></div>`;
             
             if(colecao === 'demandas'){
+                const respAtuais = Array.isArray(item.responsavelGrgd) ? item.responsavelGrgd : String(item.responsavelGrgd || '').split(',').map(s=>s.trim()).filter(Boolean);
+                
+                const checkboxesResp = LISTA_RESP_GRGD_OFICIAL.map(nome => {
+                    const checked = respAtuais.includes(nome) ? 'checked' : '';
+                    return `<label class="flex items-center gap-2 text-xs font-medium cursor-pointer"><input type="checkbox" name="respGrgdCheckbox" value="${esc(nome)}" ${checked} class="rounded text-blue-900"> ${esc(nome)}</label>`;
+                }).join('');
+
+                const swatchesCor = CORES_CARD_DISPONIVEIS.map(cor => {
+                    const sel = (item.corCard === cor.id) ? 'ring-4 ring-blue-900/40 border-slate-900' : 'border-transparent';
+                    return `<div class="w-8 h-8 rounded-lg cursor-pointer shadow-sm border-2 ${sel} transition-all select-cor-swatch" data-cor="${esc(cor.id)}" style="background-color: ${cor.bgHex}; border-color: ${cor.borderHex};" title="${cor.nome}"></div>`;
+                }).join('');
+
                 c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    ${common('Solicitante','solicitante')} 
-                    ${common('Órgão / Cliente','orgao')} 
-                    ${common('Responsável GRGD (separados por vírgula)','responsavelGrgd')} 
+                    ${common('Solicitante (Órgão / Área Interna)','solicitante')} 
+                    ${common('Órgão / Cliente Relacionado','orgao')} 
+                    
+                    <div class="md:col-span-2 bg-slate-50 p-3 rounded-lg border">
+                        <label class="block font-bold text-[11px] uppercase mb-2">Responsáveis GRGD (Escolha um ou mais)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">${checkboxesResp}</div>
+                    </div>
+
                     <div>
                         <label class="block font-bold text-[11px] uppercase mb-1">Status</label>
                         <select name="status" class="w-full p-2 border rounded-lg text-xs bg-white">
@@ -950,15 +990,10 @@
                             <option value="sexta" ${item.diaSemana==='sexta'?'selected':''}>Sexta-feira</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block font-bold text-[11px] uppercase mb-1">Cor do Card</label>
-                        <select name="corCard" class="w-full p-2 border rounded-lg text-xs bg-white">
-                            <option value="bg-blue-50 border-blue-200 text-blue-900" ${item.corCard?.includes('blue')?'selected':''}>Azul Padrão</option>
-                            <option value="bg-emerald-50 border-emerald-200 text-emerald-900" ${item.corCard?.includes('emerald')?'selected':''}>Verde Suave</option>
-                            <option value="bg-amber-50 border-amber-200 text-amber-900" ${item.corCard?.includes('amber')?'selected':''}>Amarelo Suave</option>
-                            <option value="bg-purple-50 border-purple-200 text-purple-900" ${item.corCard?.includes('purple')?'selected':''}>Roxo Suave</option>
-                            <option value="bg-rose-50 border-rose-200 text-rose-900" ${item.corCard?.includes('rose')?'selected':''}>Rosa Suave</option>
-                        </select>
+                    <div class="md:col-span-2">
+                        <label class="block font-bold text-[11px] uppercase mb-1.5">Cor do Card (Clique na cor desejada)</label>
+                        <input type="hidden" id="edit-cor-card-input" name="corCard" value="${esc(item.corCard || 'bg-blue-50 border-blue-200 text-blue-900')}">
+                        <div class="flex items-center gap-3" id="container-swatches-cor">${swatchesCor}</div>
                     </div>
                     ${common('Horário','horario','time')}
                     ${common('Data Final de Acompanhamento','dataLimite','date')}
@@ -966,6 +1001,16 @@
                     ${common('Título da Demanda','titulo','text','md:col-span-2')} 
                 </div>
                 <div class="mt-3"><label class="block font-bold text-xs mb-1">Detalhes / Descrição Escrita</label><textarea name="descricao" rows="4" class="w-full p-2 border rounded-lg text-xs bg-white">${esc(item.descricao)}</textarea></div>`;
+                
+                setTimeout(() => {
+                    document.querySelectorAll('.select-cor-swatch').forEach(sw => {
+                        sw.addEventListener('click', () => {
+                            document.querySelectorAll('.select-cor-swatch').forEach(s => s.classList.remove('ring-4', 'ring-blue-900/40', 'border-slate-900'));
+                            sw.classList.add('ring-4', 'ring-blue-900/40', 'border-slate-900');
+                            document.getElementById('edit-cor-card-input').value = sw.getAttribute('data-cor');
+                        });
+                    });
+                }, 100);
                 return;
             }
             c.innerHTML = Object.entries(item).filter(([k])=>k!=='id').map(([k,v])=>`<div><label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label><input type="text" name="${esc(k)}" value="${esc(Array.isArray(v)?v.join(', '):v)}" class="w-full p-2 border rounded-lg text-xs bg-white"></div>`).join('');
@@ -983,7 +1028,7 @@
                     <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border text-xs">
                         <div><b>Solicitante:</b> ${esc(item.solicitante || '-')}</div>
                         <div><b>Órgão:</b> ${esc(item.orgao || '-')}</div>
-                        <div><b>Responsável GRGD:</b> ${renderizarBadgesResponsaveis(item.responsavelGrgd)}</div>
+                        <div class="col-span-2"><b>Responsável GRGD:</b> ${renderizarBadgesResponsaveis(item.responsavelGrgd)}</div>
                         <div><b>Status:</b> <span class="uppercase">${esc(item.status || '-')}</span></div>
                         <div><b>Prioridade:</b> <span class="uppercase">${esc(item.prioridade || '-')}</span></div>
                         <div><b>Data Limite:</b> ${formatarData(item.dataLimite || '')} ${item.horario ? 'às '+item.horario : ''}</div>
@@ -1009,7 +1054,6 @@
             const listaEl = document.getElementById('obs-historico-lista');
             const historico = d.historicoAcoes || [];
 
-            // Exibe o histórico ilimitado completo de andamentos e status
             listaEl.innerHTML = historico.map(h => `
                 <div class="p-2.5 bg-slate-50 border rounded-lg text-xs space-y-1">
                     <div class="flex justify-between font-bold text-blue-900">
@@ -1034,8 +1078,6 @@
 
             const agora = new Date().toISOString();
             const autor = currentUser?.nome || currentUser?.email || 'Sistema';
-            
-            // Histórico ilimitado: acumula permanentemente todas as ações e status realizados
             const novoHistorico = [...(d.historicoAcoes || []), { data: agora, autor, texto }];
 
             try {
@@ -1069,12 +1111,14 @@
             };
 
             if(colecao === 'demandas'){
-                ['titulo','orgao','solicitante','responsavelGrgd','categoria','prioridade','status','descricao','diaSemana','horario','dataLimite','corCard'].forEach(k => {
+                ['titulo','orgao','solicitante','categoria','prioridade','status','diaSemana','horario','dataLimite','corCard','descricao'].forEach(k => {
                     const el = form.querySelector(`[name="${k}"]`);
                     if (el) obj[k] = el.value;
                 });
                 
-                // Se o status foi alterado, adiciona automaticamente um registro no histórico ilimitado
+                const respSelecionados = Array.from(form.querySelectorAll('input[name="respGrgdCheckbox"]:checked')).map(cb => cb.value);
+                obj.responsavelGrgd = respSelecionados;
+
                 let historicoAcoes = itemAntigo.historicoAcoes || [];
                 if (obj.status && obj.status !== itemAntigo.status) {
                     historicoAcoes.push({ data: agora, autor: autorAtual, texto: `Status alterado para: ${obj.status}` });
@@ -1108,11 +1152,25 @@
             document.getElementById('form-univ-titulo').textContent = 'Novo Cadastro: ' + tipo.toUpperCase();
 
             if (tipo === 'demanda') {
+                const checkboxesResp = LISTA_RESP_GRGD_OFICIAL.map(nome => {
+                    return `<label class="flex items-center gap-2 text-xs font-medium cursor-pointer"><input type="checkbox" name="uc-resp" value="${esc(nome)}" class="rounded text-blue-900"> ${esc(nome)}</label>`;
+                }).join('');
+
+                const swatchesCor = CORES_CARD_DISPONIVEIS.map((cor, idx) => {
+                    const sel = idx === 0 ? 'ring-4 ring-blue-900/40 border-slate-900' : 'border-transparent';
+                    return `<div class="w-8 h-8 rounded-lg cursor-pointer shadow-sm border-2 ${sel} transition-all select-cor-swatch-novo" data-cor="${esc(cor.id)}" style="background-color: ${cor.bgHex}; border-color: ${cor.borderHex};" title="${cor.nome}"></div>`;
+                }).join('');
+
                 container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="md:col-span-2"><label class="block mb-1 font-medium">Título da Demanda</label><input id="uc-1" required class="w-full p-2 border rounded"></div>
-                    <div><label class="block mb-1 font-medium">Cliente / Órgão</label><select id="uc-2" class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>
-                    <div><label class="block mb-1 font-medium">Solicitante</label><input id="uc-sol" class="w-full p-2 border rounded"></div>
-                    <div><label class="block mb-1 font-medium">Responsável GRGD (separados por vírgula)</label><input id="uc-grgd" class="w-full p-2 border rounded" placeholder="José Pacheco, Arlindo Santos"></div>
+                    <div><label class="block mb-1 font-medium">Cliente / Órgão Relacionado</label><select id="uc-2" class="w-full p-2 border rounded select-orgaos-dinamico"></select></div>
+                    <div><label class="block mb-1 font-medium">Solicitante (Órgão ou Área Interna)</label><input id="uc-sol" class="w-full p-2 border rounded"></div>
+                    
+                    <div class="md:col-span-2 bg-slate-50 p-3 rounded-lg border">
+                        <label class="block font-bold text-[11px] uppercase mb-2">Responsáveis GRGD (Escolha um ou mais)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="uc-resp-container">${checkboxesResp}</div>
+                    </div>
+
                     <div>
                         <label class="block mb-1 font-medium">Prioridade</label>
                         <select id="uc-prio" class="w-full p-2 border rounded bg-white">
@@ -1141,22 +1199,27 @@
                             <option value="sexta">Sexta-feira</option>
                         </select>
                     </div>
-                    <div>
+                    <div class="md:col-span-2">
                         <label class="block mb-1 font-medium">Cor do Card</label>
-                        <select id="uc-cor" class="w-full p-2 border rounded bg-white">
-                            <option value="bg-blue-50 border-blue-200 text-blue-900">Azul Padrão</option>
-                            <option value="bg-emerald-50 border-emerald-200 text-emerald-900">Verde Suave</option>
-                            <option value="bg-amber-50 border-amber-200 text-amber-900">Amarelo Suave</option>
-                            <option value="bg-purple-50 border-purple-200 text-purple-900">Roxo Suave</option>
-                            <option value="bg-rose-50 border-rose-200 text-rose-900">Rosa Suave</option>
-                        </select>
+                        <input type="hidden" id="uc-cor" value="bg-blue-50 border-blue-200 text-blue-900">
+                        <div class="flex items-center gap-3">${swatchesCor}</div>
                     </div>
                     <div><label class="block mb-1 font-medium">Horário</label><input type="time" id="uc-horario" class="w-full p-2 border rounded bg-white"></div>
                     <div><label class="block mb-1 font-medium">Data Final de Acompanhamento</label><input type="date" id="uc-limite" class="w-full p-2 border rounded bg-white"></div>
                     <div><label class="block mb-1 font-medium">Categoria</label><input id="uc-cat" class="w-full p-2 border rounded"></div>
                 </div>
                 <div class="mt-3"><label class="block mb-1 font-medium">Detalhes / Descrição Escrita</label><textarea id="uc-desc" rows="3" class="w-full p-2 border rounded"></textarea></div>`;
+                
                 preencherSelectClientes();
+                setTimeout(() => {
+                    document.querySelectorAll('.select-cor-swatch-novo').forEach(sw => {
+                        sw.addEventListener('click', () => {
+                            document.querySelectorAll('.select-cor-swatch-novo').forEach(s => s.classList.remove('ring-4', 'ring-blue-900/40', 'border-slate-900'));
+                            sw.classList.add('ring-4', 'ring-blue-900/40', 'border-slate-900');
+                            document.getElementById('uc-cor').value = sw.getAttribute('data-cor');
+                        });
+                    });
+                }, 100);
             } else {
                 container.innerHTML = '<div><label class="block mb-1 font-medium">Nome / Título</label><input type="text" id="uc-1" required class="w-full p-2 border rounded"></div><div><label class="block mb-1 font-medium">Descrição</label><input type="text" id="uc-2" class="w-full p-2 border rounded"></div>';
             }
@@ -1173,16 +1236,18 @@
             try {
                 if (tipo === 'demanda') {
                     const statusInicial = val('uc-status') || 'Em Andamento';
+                    const respSelecionados = Array.from(document.querySelectorAll('input[name="uc-resp"]:checked')).map(cb => cb.value);
+
                     await addDoc(collection(db, 'demandas'), {
                         id: 'DEM-' + Date.now(),
                         titulo: val('uc-1'),
                         orgao: val('uc-2'),
                         solicitante: val('uc-sol'),
-                        responsavelGrgd: val('uc-grgd'),
+                        responsavelGrgd: respSelecionados,
                         prioridade: val('uc-prio'),
                         status: statusInicial,
                         diaSemana: val('uc-dia'),
-                        corCard: val('uc-cor'),
+                        corCard: val('uc-cor') || 'bg-blue-50 border-blue-200 text-blue-900',
                         horario: val('uc-horario'),
                         dataLimite: val('uc-limite'),
                         categoria: val('uc-cat'),
@@ -1258,7 +1323,8 @@
             if (btnExcluir) {
                 ev.stopPropagation();
                 const idDem = btnExcluir.getAttribute('data-id');
-                if (confirm('Deseja realmente excluir esta demanda?')) {
+                // Confirmação obrigatória antes de excluir
+                if (confirm('Deseja realmente excluir esta demanda do sistema?')) {
                     try {
                         await deleteDoc(doc(db, 'demandas', String(idDem)));
                         alert('Demanda excluída com sucesso!');
