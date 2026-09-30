@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.48 - MÓDULO CLIENTES REFORMULADO         -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.49 - CORREÇÃO DE LOGIN E PERFIL          -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -52,7 +52,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.48</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.49</span></p>
             </div>
         </div>
     </div>
@@ -65,7 +65,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.48</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.49</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -206,7 +206,7 @@
             </div>
         </div>
 
-        <!-- ABA CLIENTES (V0.48 - REFORMULADA) -->
+        <!-- ABA CLIENTES -->
         <div id="aba-clientes" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -384,14 +384,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.48 -->
+    <!-- Script Principal v0.49 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.48: Módulo Clientes reformulado com novas colunas e detalhes');
+        console.info('PRGD v0.49: Correção de autenticação e perfil do usuário');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -702,9 +702,6 @@
             }).join('') || '<tr><td colspan="7" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
-        // =====================================================================
-        // MÓDULO DE CLIENTES (V0.48 - REFORMULADO)
-        // =====================================================================
         function renderClientes() {
             const tbody = document.getElementById('tabela-clientes');
             if (!tbody) return;
@@ -1182,7 +1179,6 @@
                 const linhas = text.split(/\r\n|\n/).filter(Boolean);
                 if (linhas.length < 2) { alert('Arquivo CSV inválido ou vazio.'); return; }
                 
-                const cabecalho = linhas[0].split(',').map(s => s.trim().replace(/^"|"$/g, ''));
                 let importados = 0;
                 const agora = new Date().toISOString();
                 const autor = currentUser?.nome || currentUser?.email || 'Sistema';
@@ -1330,6 +1326,8 @@
                 document.getElementById('main-content')?.classList.remove('hidden');
                 document.getElementById('modal-login')?.classList.add('hidden');
                 atualizarVisibilidadeAbas();
+                iniciarSnapshotFirestore();
+                renderizarTudo();
             }
         });
 
