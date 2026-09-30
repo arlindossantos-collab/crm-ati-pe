@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.48 - TOOLTIPS EM CATEGORIA E DETALHES    -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.48 - BUSCA UNIVERSAL EM DEMANDAS         -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -131,7 +131,7 @@
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
                     <h3 class="text-base font-bold text-slate-800">Demandas (<span id="count-demandas">0</span>)</h3>
-                    <input type="text" id="busca-demandas" placeholder="Buscar demanda, cliente, solicitante..." class="p-2 border rounded-lg text-xs bg-white w-52 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    <input type="text" id="busca-demandas" placeholder="Busca universal (nome, órgão, detalhes, data...)" class="p-2 border rounded-lg text-xs bg-white w-72 focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     
                     <select id="filtro-demanda-status" class="p-2 border rounded-lg text-xs bg-white font-medium">
                         <option value="">Todos os Status</option>
@@ -383,7 +383,7 @@
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.48: Tooltips informativos adicionados em Categoria e Detalhes');
+        console.info('PRGD v0.48: Busca universal avançada em Demandas implementada com sucesso');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -716,7 +716,7 @@
         }
 
         // =====================================================================
-        // MÓDULO DE DEMANDAS (V0.48)
+        // MÓDULO DE DEMANDAS (V0.48 - BUSCA UNIVERSAL AVANÇADA)
         // =====================================================================
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
@@ -725,8 +725,36 @@
             let filtered = dbData.demandas.filter(d => {
                 const matchStatus = !filtroDemandaStatusAtual || d.status === filtroDemandaStatusAtual;
                 const matchPrio = !filtroDemandaPrioAtual || String(d.prioridade || '').trim().toLowerCase() === filtroDemandaPrioAtual.toLowerCase();
-                const txt = buscaDemandasVal;
-                const matchBusca = !txt || (d.titulo || '').toLowerCase().includes(txt) || (d.orgao || '').toLowerCase().includes(txt) || (d.solicitante || '').toLowerCase().includes(txt) || (d.responsavelGrgd || '').toLowerCase().includes(txt);
+                
+                const txt = buscaDemandasVal.trim().toLowerCase();
+                let matchBusca = true;
+                if (txt) {
+                    // Varredura universal em todos os campos do card e histórico
+                    const responsaveisStr = Array.isArray(d.responsavelGrgd) ? d.responsavelGrgd.join(' ') : String(d.responsavelGrgd || '');
+                    const historicoStr = (d.historicoAcoes || []).map(h => `${h.autor} ${h.texto} ${h.data}`).join(' ');
+                    const dataFormatada = formatarData(d.dataLimite || '').toLowerCase();
+                    
+                    const textoConsolidado = [
+                        d.titulo,
+                        d.orgao,
+                        d.solicitante,
+                        d.descricao,
+                        d.categoria,
+                        d.prioridade,
+                        d.status,
+                        d.diaSemana,
+                        d.horario,
+                        d.dataLimite,
+                        dataFormatada,
+                        responsaveisStr,
+                        historicoStr,
+                        d.criadoPor,
+                        d.editadoPor
+                    ].filter(Boolean).join(' ').toLowerCase();
+
+                    matchBusca = textoConsolidado.includes(txt);
+                }
+
                 return matchStatus && matchPrio && matchBusca;
             });
 
@@ -778,7 +806,7 @@
                 </tr>`;
             }).join('') || '<tr><td colspan="8" class="text-slate-400 text-sm text-center py-6">Nenhuma demanda encontrada.</td></tr>';
 
-            renderCalendarioEBacklog(dbData.demandas);
+            renderCalendarioEBacklog(filtered);
         }
 
         function renderCalendarioEBacklog(listaDemandas) {
@@ -871,7 +899,7 @@
             const tbody = document.getElementById('tabela-fornecedores');
             if (!tbody) return;
             document.getElementById('count-fornecedores').textContent = dbData.fornecedores.length;
-            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(l.firestoreId || f.firestoreId)}">Detalhes</button></td></tr>`).join('');
+            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.firestoreId)}">Detalhes</button></td></tr>`).join('');
         }
 
         function renderGrupos() {
