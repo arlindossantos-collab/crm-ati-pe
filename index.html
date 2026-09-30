@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.45 - CORES EXCLUSIVAS PARA OS RESPONSÁVEIS -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.45 - DRAG AND DROP OTIMIZADO E INSTANTÂNEO -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -201,7 +201,7 @@
                 </table>
             </div>
 
-            <!-- VISÃO 2: CALENDÁRIO & BACKLOG -->
+            <!-- VISÃO 2: CALENDÁRIO & BACKLOG (Drag and Drop Imediato Ultra-Rápido) -->
             <div id="container-visao-calendario" class="hidden space-y-6">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                     <div class="flex items-center justify-between mb-3">
@@ -212,7 +212,7 @@
                 </div>
 
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                    <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-900"></i> CALENDÁRIO SEMANAL (Arraste os cards entre os dias)</h4>
+                    <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-900"></i> CALENDÁRIO SEMANAL (Arraste instantâneo entre os dias)</h4>
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                         <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Segunda-feira</span></div><div id="cal-segunda" class="dropzone space-y-2 flex-1 transition-colors" data-dia="segunda"></div></div>
                         <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Terça-feira</span></div><div id="cal-terca" class="dropzone space-y-2 flex-1 transition-colors" data-dia="terca"></div></div>
@@ -385,7 +385,7 @@
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.45: Cores exclusivas e distintas para todos os 10 responsáveis GRGD');
+        console.info('PRGD v0.45: Drag and Drop instantâneo otimizado sem travamentos');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -483,7 +483,6 @@
             return (partes[0].charAt(0) + partes[partes.length - 1].charAt(0)).toUpperCase();
         }
 
-        // Atribuição de cores exclusivas e distintas para cada um dos 10 responsáveis oficiais
         function obterCorResponsavel(nomeResp) {
             const nome = String(nomeResp || '').trim().toLowerCase();
             if (nome.includes('arlindo')) return 'bg-emerald-600 border-emerald-800 text-white';
@@ -835,6 +834,7 @@
             </div>`;
         }
 
+        // Drag and Drop Instantâneo sem travamentos ou pop-ups de confirmação lentos
         function configurarDragAndDrop() {
             document.querySelectorAll('.post-it').forEach(card => {
                 card.addEventListener('dragstart', e => {
@@ -845,7 +845,7 @@
             document.querySelectorAll('.dropzone').forEach(zone => {
                 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dropzone-hover'); });
                 zone.addEventListener('dragleave', () => { zone.classList.remove('dropzone-hover'); });
-                zone.addEventListener('drop', e => {
+                zone.addEventListener('drop', async e => {
                     e.preventDefault();
                     zone.classList.remove('dropzone-hover');
                     const idDemanda = e.dataTransfer.getData('text/plain');
@@ -854,17 +854,12 @@
 
                     const demandaObj = dbData.demandas.find(x => String(x.id) === String(idDemanda));
                     if (demandaObj && demandaObj.diaSemana !== novoDia) {
-                        const nomeDestino = novoDia ? novoDia.toUpperCase() : 'BACKLOG';
-                        const confirmar = confirm(`Deseja realmente mudar a posição deste card para ${nomeDestino}?`);
-                        if (confirmar) {
-                            (async () => {
-                                try {
-                                    const agora = new Date().toISOString();
-                                    const autor = currentUser?.nome || currentUser?.email || 'Sistema';
-                                    await setDoc(doc(db, 'demandas', String(idDemanda)), { diaSemana: novoDia, atualizadoEm: agora, editadoPor: autor }, { merge: true });
-                                } catch(err) { alert(traduzirErroSistema(err)); }
-                            })();
-                        }
+                        try {
+                            const agora = new Date().toISOString();
+                            const autor = currentUser?.nome || currentUser?.email || 'Sistema';
+                            // Atualização imediata em segundo plano sem travar a interface
+                            await setDoc(doc(db, 'demandas', String(idDemanda)), { diaSemana: novoDia, atualizadoEm: agora, editadoPor: autor }, { merge: true });
+                        } catch(err) { alert(traduzirErroSistema(err)); }
                     }
                 });
             });
