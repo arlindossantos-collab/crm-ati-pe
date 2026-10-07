@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.58 - TODOS OS MÓDULOS COM DADOS E CLIENTES -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.59 - IDENTIDADE VISUAL ORIGINAL v0.51/v0.52 -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.58</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.59</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.58</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.59</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -90,7 +90,7 @@
             <span id="badge-perfil-acesso" class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold uppercase"></span>
         </div>
 
-        <!-- Navegação por Abas -->
+        <!-- Navegação por Abas (Visual Original v0.51/v0.52) -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
                 <button type="button" data-tab="dashboard" class="nav-tab px-3.5 py-2 rounded-lg transition tab-active"><i class="fa-solid fa-chart-pie mr-1"></i> Dashboard</button>
@@ -127,20 +127,20 @@
 
         <!-- ABA DEMANDAS -->
         <div id="aba-demandas" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <h3 class="text-base font-bold text-slate-800">Demandas (<span id="count-demandas">0</span>)</h3>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4">
-                <table class="w-full text-left border-collapse min-w-[900px]">
+                <table class="w-full text-left border-collapse min-w-[1050px]">
                     <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
-                        <tr><th class="p-3">Solicitante</th><th class="p-3">Título da Demanda</th><th class="p-3">Prioridade</th><th class="p-3">Status</th></tr>
+                        <tr><th class="p-4">Solicitante</th><th class="p-4">Demanda</th><th class="p-4 text-center">Prioridade</th><th class="p-4 text-center">Status</th></tr>
                     </thead>
-                    <tbody id="tabela-demandas" class="divide-y text-xs"></tbody>
+                    <tbody id="tabela-demandas" class="divide-y text-sm"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ABA CLIENTES -->
+        <!-- ABA CLIENTES (COM VISUAL ORIGINAL v0.51/v0.52 + DADOS DINÂMICOS) -->
         <div id="aba-clientes" class="hidden space-y-4">
             <div class="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-6 overflow-x-auto text-xs font-medium text-slate-600">
                 <span class="bg-blue-900 text-white font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider text-[10px]">EXPERIÊNCIA CX</span>
@@ -148,6 +148,15 @@
                 <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Interlocutores</a>
                 <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Serviços</a>
                 <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Órgãos × serviços</a>
+                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Processos</a>
+                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Jornadas</a>
+                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Voz do cliente</a>
+                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Melhorias</a>
+                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Plano de trabalho</a>
+                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Indicadores</a>
+                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Dados</a>
+                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Conhecimento</a>
+                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Inscrições <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i></a>
             </div>
 
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
@@ -214,8 +223,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="bg-blue-900 text-white p-4 rounded-xl shadow-sm flex flex-col justify-between">
                             <div>
-                                <div class="flex justify-between items-center mb-2"><span class="font-bold text-xs"><i class="fa-solid fa-shield-halved mr-1"></i> 1. Resp. Institucional</span><span class="bg-emerald-400 text-blue-950 text-[10px] font-bold px-2 py-0.5 rounded-full">Atualizado</span></div>
-                                <p class="text-[11px] text-blue-200 mb-2">Camada formal / legal - Designado oficialmente em Portaria ou Diário Oficial.</p>
+                                <div class="flex justify-between items-center mb-2"><span class="font-bold text-xs"><i class="fa-solid fa-shield-halved mr-1"></i> 1. Responsável Institucional</span><span class="bg-emerald-400 text-blue-950 text-[10px] font-bold px-2 py-0.5 rounded-full">Atualizado</span></div>
+                                <p class="text-[11px] text-blue-200 mb-2">Camada formal / legal - Designado oficialmente em Portaria, Ato ou Diário Oficial.</p>
                                 <div class="space-y-1 text-xs mb-3">
                                     <p><strong>Nome:</strong> <span id="card-inst-nome">João Inácio</span></p>
                                     <p><strong>Cargo:</strong> <span id="card-inst-cargo">Diretor Presidente</span></p>
@@ -272,25 +281,25 @@
         <!-- ABA EVENTOS -->
         <div id="aba-eventos" class="hidden space-y-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Eventos Programados (<span id="count-eventos">0</span>)</h3></div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-3">Título do Evento</th><th class="p-3">Data</th><th class="p-3">Local</th></tr></thead><tbody id="tabela-eventos" class="divide-y text-xs"></tbody></table></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="grid-eventos"></div>
         </div>
 
         <!-- ABA LOCAIS -->
         <div id="aba-locais" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Locais & Auditórios (<span id="count-locais">0</span>)</h3></div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-3">Nome do Local</th><th class="p-3">Capacidade</th></tr></thead><tbody id="tabela-locais" class="divide-y text-xs"></tbody></table></div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Locais (<span id="count-locais">0</span>)</h3></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-3">Nome</th><th class="p-3">Capacidade</th></tr></thead><tbody id="tabela-locais" class="divide-y text-xs"></tbody></table></div>
         </div>
 
         <!-- ABA FORNECEDORES -->
         <div id="aba-fornecedores" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Fornecedores TIC (<span id="count-fornecedores">0</span>)</h3></div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-3">Razão Social / Nome</th><th class="p-3">CNPJ</th></tr></thead><tbody id="tabela-fornecedores" class="divide-y text-xs"></tbody></table></div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Fornecedores (<span id="count-fornecedores">0</span>)</h3></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-3">Nome</th><th class="p-3">CNPJ</th></tr></thead><tbody id="tabela-fornecedores" class="divide-y text-xs"></tbody></table></div>
         </div>
 
         <!-- ABA USUÁRIOS -->
         <div id="aba-usuarios" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Usuários do Sistema (<span id="count-usuarios">0</span>)</h3></div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-3">Nome</th><th class="p-3">E-mail</th><th class="p-3">Perfil</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-xs"></tbody></table></div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Usuários (<span id="count-usuarios">0</span>)</h3></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-3">Nome</th><th class="p-3">E-mail</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-xs"></tbody></table></div>
         </div>
 
         <!-- ABA BASES -->
@@ -300,14 +309,14 @@
         </div>
     </main>
 
-    <!-- Script Principal v0.58 -->
+    <!-- Script Principal v0.59 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.58: Todos os módulos com dados preenchidos');
+        console.info('PRGD v0.59: Identidade visual original v0.51/v0.52 restaurada');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -326,8 +335,6 @@
         setPersistence(auth, inMemoryPersistence).catch(console.warn);
 
         let currentUser = null;
-
-        // Dados mockados robustos para garantir que nenhum módulo apareça vazio
         let dbData = {
             demandas: [
                 { id: 'DEM-1', solicitante: 'Secretaria de Educação', titulo: 'Migração de Servidores para Nuvem Gov', prioridade: 'Alta', status: 'Em Andamento' },
@@ -335,8 +342,8 @@
                 { id: 'DEM-3', solicitante: 'Secretaria da Fazenda', titulo: 'Suporte ao Sistema SEI PE', prioridade: 'Média', status: 'Concluído' }
             ],
             eventos: [
-                { id: 'EV-1', titulo: '1º Encontro Leap Club PE', data: '19/09/2026', local: 'Marina Porto do Mar' },
-                { id: 'EV-2', titulo: 'II Encontro de Gestores do Governo Digital', data: '10/11/2026', local: 'Auditório ATI-PE' }
+                { id: 'EV-1', titulo: '1º Encontro Leap Club PE', data: '19/09/2026', local: 'Marina Porto do Mar', descricao: 'Encontro estadual de proprietários de veículos elétricos Leapmotor.' },
+                { id: 'EV-2', titulo: 'II Encontro de Gestores do Governo Digital', data: '10/11/2026', local: 'Auditório ATI-PE', descricao: 'Painéis sobre transformação digital nos municípios.' }
             ],
             locais: [
                 { id: 'LOC-1', nome: 'Auditório Principal ATI-PE', capacidade: '120 pessoas' },
@@ -347,8 +354,8 @@
                 { id: 'FOR-2', nome: 'Microsoft Informática Ltda', cnpj: '60.316.817/0001-03' }
             ],
             usuarios: [
-                { id: 'USR-1', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br', perfil: 'admin' },
-                { id: 'USR-2', nome: 'Rebeca', email: 'rebeca@ati.pe.gov.br', perfil: 'admin' }
+                { id: 'USR-1', nome: 'Arlindo Santos', email: 'arlindo.santos@ati.pe.gov.br' },
+                { id: 'USR-2', nome: 'Rebeca', email: 'rebeca@ati.pe.gov.br' }
             ],
             bases: [
                 { id: 'BAS-1', categoria: 'Modalidade Gestor', nome: 'TI' },
@@ -409,10 +416,6 @@
                 const btnTab = document.querySelector(`[data-tab="${mod.id}"]`);
                 if (btnTab) btnTab.style.display = permitidos.includes(mod.id) ? 'inline-flex' : 'none';
             });
-            document.querySelectorAll('.btn-admin-only').forEach(btn => {
-                if (isAdmin) btn.classList.remove('hidden'); else btn.classList.add('hidden');
-            });
-
             if (!permitidos.includes(abaAtual)) mudarAba(permitidos[0] || 'dashboard');
         }
 
@@ -424,8 +427,9 @@
                 if (el) el.classList.toggle('hidden', mod.id !== abaAtual);
                 if (btn) btn.className = 'nav-tab px-3.5 py-2 rounded-lg transition ' + (mod.id === abaAtual ? 'tab-active' : 'tab-inactive');
             });
-            if (aba === 'clientes') renderClientes();
+            if (aba === 'dashboard') renderCharts();
             if (aba === 'demandas') renderDemandas();
+            if (aba === 'clientes') renderClientes();
             if (aba === 'eventos') renderEventos();
             if (aba === 'locais') renderLocais();
             if (aba === 'fornecedores') renderFornecedores();
@@ -450,60 +454,60 @@
             document.getElementById('dash-tot-fornecedores').textContent = dbData.fornecedores.length;
         }
 
-        let snapshotUnsubs = [];
-        function pararSnapshots() { snapshotUnsubs.forEach(fn => { try { fn(); } catch(e){} }); snapshotUnsubs = []; }
-
-        function iniciarSnapshotFirestore() {
-            pararSnapshots();
-            if (!currentUser) return;
-            ['demandas','locais','orgaos','fornecedores','bases','usuarios'].forEach(col => {
-                const unsub = onSnapshot(collection(db, col), snap => {
-                    const docs = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
-                    if (docs.length > 0) {
-                        if (col === 'orgaos') { /* mantemos o estruturado */ }
-                        else { dbData[col] = docs; }
-                    }
-                    atualizarContadores();
-                    if(abaAtual === 'demandas') renderDemandas();
-                }, err => console.warn('Firestore '+col+':', err.message));
-                snapshotUnsubs.push(unsub);
-            });
+        let chartCatInstance = null, chartStatusInstance = null, chartTiposInstance = null;
+        function renderCharts() {
+            if (typeof Chart === 'undefined') return;
+            const ctx1 = document.getElementById('chartCategorias')?.getContext('2d');
+            if (ctx1) {
+                if (chartCatInstance) chartCatInstance.destroy();
+                chartCatInstance = new Chart(ctx1, { type: 'bar', data: { labels: ['Infra', 'Gov Digital', 'Suporte'], datasets: [{ data: [12, 8, 5], backgroundColor: '#1e3a8a' }] }, options: { plugins: { legend: { display: false } } } });
+            }
+            const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
+            if (ctx2) {
+                if (chartStatusInstance) chartStatusInstance.destroy();
+                chartStatusInstance = new Chart(ctx2, { type: 'doughnut', data: { labels: ['Em Andamento', 'Concluído'], datasets: [{ data: [15, 10], backgroundColor: ['#3b82f6', '#16a34a'] }] } });
+            }
+            const ctx3 = document.getElementById('chartTiposOrgaos')?.getContext('2d');
+            if (ctx3) {
+                if (chartTiposInstance) chartTiposInstance.destroy();
+                chartTiposInstance = new Chart(ctx3, { type: 'pie', data: { labels: ['Secretaria', 'Autarquia'], datasets: [{ data: [4, 1], backgroundColor: ['#3b82f6', '#8b5cf6'] }] } });
+            }
         }
 
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
             if (!tbody) return;
-            tbody.innerHTML = dbData.demandas.map(d => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${esc(d.solicitante)}</td><td class="p-3">${esc(d.titulo)}</td><td class="p-3">${esc(d.prioridade || 'Média')}</td><td class="p-3">${esc(d.status || 'Em Andamento')}</td></tr>`).join('');
+            tbody.innerHTML = dbData.demandas.map(d => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(d.solicitante)}</td><td class="p-4">${esc(d.titulo)}</td><td class="p-4 text-center">${esc(d.prioridade || 'Média')}</td><td class="p-4 text-center">${esc(d.status || 'Em Andamento')}</td></tr>`).join('');
         }
 
         function renderEventos() {
-            const tbody = document.getElementById('tabela-eventos');
-            if (!tbody) return;
-            tbody.innerHTML = dbData.eventos.map(e => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${esc(e.titulo)}</td><td class="p-3">${esc(e.data)}</td><td class="p-3">${esc(e.local)}</td></tr>`).join('');
+            const grid = document.getElementById('grid-eventos');
+            if (!grid) return;
+            grid.innerHTML = dbData.eventos.map(e => `<div class="bg-white rounded-2xl border p-4 shadow-sm"><h4 class="font-bold text-blue-900">${esc(e.titulo)}</h4><p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-calendar mr-1"></i> ${esc(e.data)} | <i class="fa-solid fa-location-dot mr-1"></i> ${esc(e.local)}</p><p class="text-xs text-slate-600 mt-2">${esc(e.descricao)}</p></div>`).join('');
         }
 
         function renderLocais() {
             const tbody = document.getElementById('tabela-locais');
             if (!tbody) return;
-            tbody.innerHTML = dbData.locais.map(l => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${esc(l.nome)}</td><td class="p-3">${esc(l.capacidade)}</td></tr>`).join('');
+            tbody.innerHTML = dbData.locais.map(l => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(l.nome)}</td><td class="p-4">${esc(l.capacidade)}</td></tr>`).join('');
         }
 
         function renderFornecedores() {
             const tbody = document.getElementById('tabela-fornecedores');
             if (!tbody) return;
-            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${esc(f.nome)}</td><td class="p-3 font-mono">${esc(f.cnpj)}</td></tr>`).join('');
+            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(f.nome)}</td><td class="p-4 font-mono">${esc(f.cnpj)}</td></tr>`).join('');
         }
 
         function renderUsuarios() {
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
-            tbody.innerHTML = dbData.usuarios.map(u => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${esc(u.nome)}</td><td class="p-3 text-slate-600">${esc(u.email)}</td><td class="p-3 uppercase font-semibold">${esc(u.perfil)}</td></tr>`).join('');
+            tbody.innerHTML = dbData.usuarios.map(u => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome)}</td><td class="p-4 text-slate-600">${esc(u.email)}</td></tr>`).join('');
         }
 
         function renderBases() {
             const tbody = document.getElementById('tabela-bases');
             if (!tbody) return;
-            tbody.innerHTML = dbData.bases.map(b => `<tr class="hover:bg-slate-50"><td class="p-3 font-bold">${esc(b.categoria)}</td><td class="p-3">${esc(b.nome)}</td></tr>`).join('');
+            tbody.innerHTML = dbData.bases.map(b => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(b.categoria)}</td><td class="p-4">${esc(b.nome)}</td></tr>`).join('');
         }
 
         function renderClientes() {
@@ -618,7 +622,6 @@
 
         onAuthStateChanged(auth, async user => {
             currentUser = user;
-            pararSnapshots();
             if (!user) {
                 document.getElementById('main-content')?.classList.add('hidden');
                 document.getElementById('modal-login')?.classList.remove('hidden');
@@ -630,15 +633,8 @@
             document.getElementById('main-content')?.classList.remove('hidden');
             document.getElementById('modal-login')?.classList.add('hidden');
             atualizarVisibilidadeAbas();
-            iniciarSnapshotFirestore();
             atualizarContadores();
-            renderClientes();
-            renderDemandas();
-            renderEventos();
-            renderLocais();
-            renderFornecedores();
-            renderUsuarios();
-            renderBases();
+            mudarAba('dashboard');
         });
     </script>
 </body>
