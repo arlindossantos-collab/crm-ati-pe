@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.56 - AUTENTICAÇÃO BLINDADA + CLIENTES CX -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.57 - CLIENTES DINÂMICOS + MÓDULOS REAIS -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.56</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.57</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.56</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.57</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -140,7 +140,7 @@
             </div>
         </div>
 
-        <!-- ABA CLIENTES (NOVO MÓDULO CUSTOMIZADO) -->
+        <!-- ABA CLIENTES (COM DADOS DINÂMICOS) -->
         <div id="aba-clientes" class="hidden space-y-4">
             <div class="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-6 overflow-x-auto text-xs font-medium text-slate-600">
                 <span class="bg-blue-900 text-white font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider text-[10px]">EXPERIÊNCIA CX</span>
@@ -184,7 +184,7 @@
                 </div>
             </div>
             
-            <!-- Tabela Clientes com as colunas solicitadas -->
+            <!-- Tabela Clientes -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[1200px]">
                     <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
@@ -203,15 +203,15 @@
                 </table>
             </div>
 
-            <!-- Painel de Governança (Responsáveis e Contatos por Camadas) -->
+            <!-- Painel de Governança Dinâmico -->
             <div id="painel-detalhe-cliente-ativo" class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hidden space-y-4">
                 <div class="flex items-center justify-between border-b pb-3">
                     <div>
                         <div class="flex items-center gap-2">
-                            <h4 id="detalhe-cli-nome" class="font-bold text-sm text-slate-900">Agência Estadual de Tecnologia da Informação de Pernambuco - ATI</h4>
-                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Atualizado</span>
+                            <h4 id="detalhe-cli-nome" class="font-bold text-sm text-slate-900">Nome do Órgão</h4>
+                            <span id="detalhe-cli-badge" class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Atualizado</span>
                         </div>
-                        <p id="detalhe-cli-sub" class="text-xs text-slate-500 mt-0.5">ATI | CNPJ: 10.123.456/0001-00 | Tel: (81) 3183-7600</p>
+                        <p id="detalhe-cli-sub" class="text-xs text-slate-500 mt-0.5">SIGLA | CNPJ: 00.000.000/0001-00 | Tel: (81) 0000-0000</p>
                     </div>
                     <button type="button" onclick="document.getElementById('painel-detalhe-cliente-ativo').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold text-sm"><i class="fa-solid fa-xmark"></i> Fechar</button>
                 </div>
@@ -224,18 +224,18 @@
                         <div class="bg-blue-900 text-white p-4 rounded-xl shadow-sm flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="font-bold text-xs"><i class="fa-solid fa-shield-halved mr-1"></i> 1. Responsável Institucional</span>
+                                    <span class="font-bold text-xs"><i class="fa-solid fa-shield-halved mr-1"></i> 1. Resp. Institucional</span>
                                     <span class="bg-emerald-400 text-blue-950 text-[10px] font-bold px-2 py-0.5 rounded-full">Atualizado</span>
                                 </div>
-                                <p class="text-[11px] text-blue-200 mb-2">Camada formal / legal - Designado oficialmente em Portaria, Ato ou Diário Oficial.</p>
+                                <p class="text-[11px] text-blue-200 mb-2">Camada formal / legal - Designado oficialmente em Portaria ou Diário Oficial.</p>
                                 <div class="space-y-1 text-xs mb-3">
-                                    <p><strong>Nome:</strong> João Inácio</p>
-                                    <p><strong>Cargo:</strong> Diretor Presidente</p>
-                                    <p><strong>E-mail:</strong> joao.inacio@ati.pe.gov.br</p>
-                                    <p><strong>Telefone:</strong> (81) 3183-7600</p>
+                                    <p><strong>Nome:</strong> <span id="card-inst-nome">João Inácio</span></p>
+                                    <p><strong>Cargo:</strong> <span id="card-inst-cargo">Diretor Presidente</span></p>
+                                    <p><strong>E-mail:</strong> <span id="card-inst-email">joao@ati.pe.gov.br</span></p>
+                                    <p><strong>Telefone:</strong> <span id="card-inst-tel">(81) 3183-7600</span></p>
                                 </div>
                                 <div class="p-2 bg-blue-950/60 rounded text-[11px] border border-blue-800">
-                                    <strong>Fonte:</strong> Diário Oficial do Estado
+                                    <strong>Fonte:</strong> <span id="card-inst-fonte">Diário Oficial do Estado</span>
                                 </div>
                             </div>
                         </div>
@@ -249,7 +249,7 @@
                                 </div>
                                 <div class="mb-2">
                                     <label class="block text-[10px] text-emerald-100 font-bold mb-1">Modalidade:</label>
-                                    <select class="w-full p-1 text-xs bg-emerald-800 text-white border border-emerald-600 rounded font-bold">
+                                    <select id="card-op-modalidade-select" class="w-full p-1 text-xs bg-emerald-800 text-white border border-emerald-600 rounded font-bold">
                                         <option value="TI">TI</option>
                                         <option value="Estratégico">Estratégico</option>
                                         <option value="SEI">SEI</option>
@@ -258,10 +258,10 @@
                                     </select>
                                 </div>
                                 <div class="space-y-1 text-xs">
-                                    <p><strong>Nome:</strong> Carlos Silva</p>
-                                    <p><strong>Cargo:</strong> Gestor Técnico</p>
-                                    <p><strong>E-mail:</strong> carlos.silva@ati.pe.gov.br</p>
-                                    <p><strong>WhatsApp:</strong> (81) 9 9488-7766</p>
+                                    <p><strong>Nome:</strong> <span id="card-op-nome">Carlos Silva</span></p>
+                                    <p><strong>Cargo:</strong> <span id="card-op-cargo">Gestor Técnico</span></p>
+                                    <p><strong>E-mail:</strong> <span id="card-op-email">carlos@pe.gov.br</span></p>
+                                    <p><strong>WhatsApp:</strong> <span id="card-op-tel">(81) 9 9488-7766</span></p>
                                 </div>
                             </div>
                         </div>
@@ -275,10 +275,10 @@
                                 </div>
                                 <p class="text-[11px] text-purple-200 mb-3">Canal ágil para alinhamentos e convocações.</p>
                                 <div class="space-y-1 text-xs">
-                                    <p><strong>Nome:</strong> Fernanda Alves</p>
-                                    <p><strong>Cargo:</strong> Analista de TI</p>
-                                    <p><strong>E-mail:</strong> fernanda.alves@ati.pe.gov.br</p>
-                                    <p><strong>WhatsApp:</strong> (81) 9 9655-7788</p>
+                                    <p><strong>Nome:</strong> <span id="card-fp-nome">Fernanda Alves</span></p>
+                                    <p><strong>Cargo:</strong> <span id="card-fp-cargo">Analista de TI</span></p>
+                                    <p><strong>E-mail:</strong> <span id="card-fp-email">fernanda@pe.gov.br</span></p>
+                                    <p><strong>WhatsApp:</strong> <span id="card-fp-tel">(81) 9 9655-7788</span></p>
                                 </div>
                             </div>
                         </div>
@@ -292,10 +292,10 @@
                                 </div>
                                 <p class="text-[11px] text-slate-300 mb-3">Substituto em eventuais ausências.</p>
                                 <div class="space-y-1 text-xs">
-                                    <p><strong>Nome:</strong> Ricardo Lima</p>
-                                    <p><strong>Cargo:</strong> Analista de Suporte</p>
-                                    <p><strong>E-mail:</strong> ricardo.lima@ati.pe.gov.br</p>
-                                    <p><strong>WhatsApp:</strong> (81) 9 9122-3344</p>
+                                    <p><strong>Nome:</strong> <span id="card-sub-nome">Ricardo Lima</span></p>
+                                    <p><strong>Cargo:</strong> <span id="card-sub-cargo">Analista de Suporte</span></p>
+                                    <p><strong>E-mail:</strong> <span id="card-sub-email">ricardo@pe.gov.br</span></p>
+                                    <p><strong>WhatsApp:</strong> <span id="card-sub-tel">(81) 9 9122-3344</span></p>
                                 </div>
                             </div>
                         </div>
@@ -305,21 +305,21 @@
         </div>
 
         <!-- OUTRAS ABAS -->
-        <div id="aba-eventos" class="hidden space-y-4"></div>
-        <div id="aba-locais" class="hidden space-y-4"></div>
-        <div id="aba-fornecedores" class="hidden space-y-4"></div>
-        <div id="aba-usuarios" class="hidden space-y-4"></div>
-        <div id="aba-bases" class="hidden space-y-4"></div>
+        <div id="aba-eventos" class="hidden space-y-4"><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Eventos (<span id="count-eventos">0</span>)</h3></div></div>
+        <div id="aba-locais" class="hidden space-y-4"><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Locais (<span id="count-locais">0</span>)</h3></div></div>
+        <div id="aba-fornecedores" class="hidden space-y-4"><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Fornecedores (<span id="count-fornecedores">0</span>)</h3></div></div>
+        <div id="aba-usuarios" class="hidden space-y-4"><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Usuários (<span id="count-usuarios">0</span>)</h3></div></div>
+        <div id="aba-bases" class="hidden space-y-4"><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><h3 class="text-base font-bold text-slate-800">Bases (<span id="count-bases">0</span>)</h3></div></div>
     </main>
 
-    <!-- Script Principal v0.56 -->
+    <!-- Script Principal v0.57 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.56: Autenticação blindada com sucesso');
+        console.info('PRGD v0.57: Clientes dinâmicos por órgão e contadores restaurados');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -355,12 +355,20 @@
             { id: 'bases', nome: 'Bases' }
         ];
 
+        // Base robusta de órgãos com dados específicos para preenchimento dinâmico dos cards de governança
+        const LISTA_CLIENTES_ESTRUTURADA = [
+            { id: '1', nome: 'Agência Estadual de Tecnologia da Informação de Pernambuco', sigla: 'ATI', cnpj: '10.123.456/0001-00', telFixo: '(81) 3183-7600', gestorModalidade: 'TI', gestorNome: 'João Inácio', cargo: 'Diretor Presidente', email: 'joao.inacio@ati.pe.gov.br', whatsapp: '(81) 9 9488-7766', situacao: 'Atualizado', atualizadoEm: '30/09/2026', autor: 'Rebeca', fonte: 'Diário Oficial do Estado', opCargo: 'Gestor Técnico de TI', opNome: 'Carlos Silva', opEmail: 'carlos.silva@ati.pe.gov.br', opTel: '(81) 9 9488-7766', fpNome: 'Fernanda Alves', fpCargo: 'Analista de TI', fpEmail: 'fernanda.alves@ati.pe.gov.br', fpTel: '(81) 9 9655-7788', subNome: 'Ricardo Lima', subCargo: 'Analista de Suporte', subEmail: 'ricardo.lima@ati.pe.gov.br', subTel: '(81) 9 9122-3344' },
+            { id: '2', nome: 'Secretaria de Educação e Esportes', sigla: 'SEE', cnpj: '05.432.111/0001-22', telFixo: '(81) 3183-8200', gestorModalidade: 'Estratégico', gestorNome: 'Maria Oliveira', cargo: 'Secretária Executiva', email: 'maria.oliveira@see.pe.gov.br', whatsapp: '(81) 9 9123-4567', situacao: 'Pendente', atualizadoEm: '28/09/2026', autor: 'Rebeca', fonte: 'Ofício Interno', opCargo: 'Gestor Estratégico', opNome: 'Maria Oliveira', opEmail: 'maria.oliveira@see.pe.gov.br', opTel: '(81) 9 9123-4567', fpNome: 'Juliana Souza', fpCargo: 'Coordenadora', fpEmail: 'juliana.souza@see.pe.gov.br', fpTel: '(81) 9 9333-1122', subNome: 'Marcos Paulo', subCargo: 'Técnico', subEmail: 'marcos.paulo@see.pe.gov.br', subTel: '(81) 9 9222-3344' },
+            { id: '3', nome: 'Secretaria de Saúde de Pernambuco', sigla: 'SES', cnpj: '08.789.444/0001-55', telFixo: '(81) 3184-0000', gestorModalidade: 'SEI', gestorNome: 'Carlos Mendes', cargo: 'Diretor de Sistemas', email: 'carlos.mendes@ses.pe.gov.br', whatsapp: '(81) 9 9987-1122', situacao: 'Desatualizado', atualizadoEm: '25/09/2026', autor: 'Rebeca', fonte: 'Contato Telefônico', opCargo: 'Gestor SEI', opNome: 'Carlos Mendes', opEmail: 'carlos.mendes@ses.pe.gov.br', opTel: '(81) 9 9987-1122', fpNome: 'Beatriz Lima', fpCargo: 'Analista SEI', fpEmail: 'beatriz.lima@ses.pe.gov.br', fpTel: '(81) 9 9555-4433', subNome: 'Roberto Carlos', subCargo: 'Suporte', subEmail: 'roberto.carlos@ses.pe.gov.br', subTel: '(81) 9 9444-5566' },
+            { id: '4', nome: 'Secretaria da Fazenda de Pernambuco', sigla: 'SEFAZ', cnpj: '11.222.333/0001-99', telFixo: '(81) 3183-6400', gestorModalidade: 'SI', gestorNome: 'Ana Paula Santos', cargo: 'Gerente de TI', email: 'ana.santos@sefaz.pe.gov.br', whatsapp: '(81) 9 9811-2233', situacao: 'Atualizado', atualizadoEm: '22/09/2026', autor: 'Rebeca', fonte: 'WhatsApp Institucional', opCargo: 'Gestor SI', opNome: 'Ana Paula Santos', opEmail: 'ana.santos@sefaz.pe.gov.br', opTel: '(81) 9 9811-2233', fpNome: 'Lucas Gabriel', fpCargo: 'Desenvolvedor', fpEmail: 'lucas.gabriel@sefaz.pe.gov.br', fpTel: '(81) 9 9777-8899', subNome: 'Camila Rocha', subCargo: 'Analista', subEmail: 'camila.rocha@sefaz.pe.gov.br', subTel: '(81) 9 9666-7788' },
+            { id: '5', nome: 'Secretaria de Planejamento, Gestão e Desenvolvimento Regional', sigla: 'SEPLAG', cnpj: '12.345.678/0001-10', telFixo: '(81) 3183-7800', gestorModalidade: 'Telemática', gestorNome: 'Rafael Lima', cargo: 'Gerente de Infraestrutura', email: 'rafael.lima@seplag.pe.gov.br', whatsapp: '(81) 9 9722-3344', situacao: 'Atualizado', atualizadoEm: '20/09/2026', autor: 'Rebeca', fonte: 'Diário Oficial', opCargo: 'Gestor Telemática', opNome: 'Rafael Lima', opEmail: 'rafael.lima@seplag.pe.gov.br', opTel: '(81) 9 9722-3344', fpNome: 'Patrícia Dias', fpCargo: 'Redes', fpEmail: 'patricia.dias@seplag.pe.gov.br', fpTel: '(81) 9 9555-2211', subNome: 'Bruno Costa', subCargo: 'Suporte Redes', subEmail: 'bruno.costa@seplag.pe.gov.br', subTel: '(81) 9 9111-2233' }
+        ];
+
         function traduzirErroSistema(err) {
             const msg = String(err?.message || err || '');
             if (msg.includes('permission-denied')) return 'Permissão negada. Você não tem autorização para realizar esta operação.';
             if (msg.includes('auth/invalid-credential') || msg.includes('auth/user-not-found') || msg.includes('auth/wrong-password')) return 'E-mail ou senha incorretos.';
-            if (msg.includes('auth/invalid-email')) return 'O formato do e-mail é inválido.';
-            return 'Erro ao autenticar: ' + msg;
+            return 'Erro ao processar: ' + msg;
         }
 
         function verificarAutenticacaoObrigatoria() {
@@ -401,6 +409,23 @@
                 if (btn) btn.className = 'nav-tab px-3.5 py-2 rounded-lg transition ' + (mod.id === abaAtual ? 'tab-active' : 'tab-inactive');
             });
             if (aba === 'clientes') renderClientes();
+            atualizarContadores();
+        }
+
+        function atualizarContadores() {
+            document.getElementById('cnt-tab-demandas').textContent = dbData.demandas.length;
+            document.getElementById('cnt-tab-clientes').textContent = LISTA_CLIENTES_ESTRUTURADA.length;
+            document.getElementById('cnt-tab-eventos').textContent = dbData.eventos.length;
+            document.getElementById('cnt-tab-locais').textContent = dbData.locais.length;
+            document.getElementById('cnt-tab-fornecedores').textContent = dbData.fornecedores.length;
+            document.getElementById('cnt-tab-usuarios').textContent = dbData.usuarios.length;
+            document.getElementById('cnt-tab-bases').textContent = dbData.bases.length;
+
+            document.getElementById('dash-tot-demandas').textContent = dbData.demandas.length;
+            document.getElementById('dash-tot-eventos').textContent = dbData.eventos.length;
+            document.getElementById('dash-tot-locais').textContent = dbData.locais.length;
+            document.getElementById('dash-tot-clientes').textContent = LISTA_CLIENTES_ESTRUTURADA.length;
+            document.getElementById('dash-tot-fornecedores').textContent = dbData.fornecedores.length;
         }
 
         let snapshotUnsubs = [];
@@ -409,29 +434,28 @@
         function iniciarSnapshotFirestore() {
             pararSnapshots();
             if (!currentUser) return;
-            ['demandas','locais','orgaos','fornecedores','bases','usuarios'].forEach(col => {
+            ['demandas','locais','fornecedores','bases','usuarios'].forEach(col => {
                 const unsub = onSnapshot(collection(db, col), snap => {
                     dbData[col] = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
-                    renderClientes();
+                    atualizarContadores();
+                    if(abaAtual === 'demandas') renderDemandas();
                 }, err => console.warn('Firestore '+col+':', err.message));
                 snapshotUnsubs.push(unsub);
             });
+        }
+
+        function renderDemandas() {
+            const tbody = document.getElementById('tabela-demandas');
+            if (!tbody) return;
+            tbody.innerHTML = dbData.demandas.map(d => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(d.solicitante)}</td><td class="p-4">${esc(d.titulo)}</td><td class="p-4">${esc(d.prioridade || 'Média')}</td><td class="p-4">${esc(d.status || 'Em Andamento')}</td></tr>`).join('') || '<tr><td colspan="4" class="text-slate-400 text-sm text-center py-6">Nenhuma demanda cadastrada.</td></tr>';
         }
 
         function renderClientes() {
             const tbody = document.getElementById('tabela-clientes');
             if (!tbody) return;
 
-            const mockClientes = [
-                { id: '1', nome: 'Agência Estadual de Tecnologia da Informação de Pernambuco', sigla: 'ATI', telFixo: '(81) 3183-7600', gestorModalidade: 'TI', gestorNome: 'João Inácio', email: 'joao.inacio@ati.pe.gov.br', whatsapp: '(81) 9 9488-7766', situacao: 'Atualizado', atualizadoEm: '30/09/2026', autor: 'Rebeca' },
-                { id: '2', nome: 'Secretaria de Educação', sigla: 'SEE', telFixo: '(81) 3183-8200', gestorModalidade: 'Estratégico', gestorNome: 'Maria Oliveira', email: 'maria.oliveira@see.pe.gov.br', whatsapp: '(81) 9 9123-4567', situacao: 'Pendente', atualizadoEm: '28/09/2026', autor: 'Rebeca' },
-                { id: '3', nome: 'Secretaria de Saúde', sigla: 'SES', telFixo: '(81) 3184-0000', gestorModalidade: 'SEI', gestorNome: 'Carlos Mendes', email: 'carlos.mendes@ses.pe.gov.br', whatsapp: '(81) 9 9987-1122', situacao: 'Desatualizado', atualizadoEm: '25/09/2026', autor: 'Rebeca' },
-                { id: '4', nome: 'Secretaria da Fazenda', sigla: 'SEFAZ', telFixo: '(81) 3183-6400', gestorModalidade: 'SI', gestorNome: 'Ana Paula Santos', email: 'ana.santos@sefaz.pe.gov.br', whatsapp: '(81) 9 9811-2233', situacao: 'Atualizado', atualizadoEm: '22/09/2026', autor: 'Rebeca' },
-                { id: '5', nome: 'Secretaria de Planejamento, Gestão e Desenvolvimento Regional', sigla: 'SEPLAG', telFixo: '(81) 3183-7800', gestorModalidade: 'Telemática', gestorNome: 'Rafael Lima', email: 'rafael.lima@seplag.pe.gov.br', whatsapp: '(81) 9 9722-3344', situacao: 'Atualizado', atualizadoEm: '20/09/2026', autor: 'Rebeca' }
-            ];
-
             const txt = buscaClientesVal.trim().toLowerCase();
-            const filtered = mockClientes.filter(c => {
+            const filtered = LISTA_CLIENTES_ESTRUTURADA.filter(c => {
                 const matchBusca = !txt || [c.nome, c.sigla, c.gestorNome, c.email].join(' ').toLowerCase().includes(txt);
                 const matchMod = !filtroModalidadeVal || c.gestorModalidade === filtroModalidadeVal;
                 const matchSit = !filtroSituacaoVal || c.situacao === filtroSituacaoVal;
@@ -446,7 +470,7 @@
                 else if(c.situacao === 'Pendente') sitBadge = '<span class="bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold text-[10px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> Pendente</span>';
                 else sitBadge = '<span class="bg-rose-100 text-rose-800 px-2.5 py-0.5 rounded-full font-bold text-[10px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span> Desatualizado</span>';
 
-                return `<tr class="hover:bg-slate-50 border-b border-slate-100 cursor-pointer" onclick="document.getElementById('painel-detalhe-cliente-ativo').classList.remove('hidden')">
+                return `<tr class="hover:bg-slate-50 border-b border-slate-100 cursor-pointer" onclick="abrirDetalheCliente('${c.id}')">
                     <td class="p-3 font-bold text-blue-900">${esc(c.nome)}<div class="text-[11px] font-normal text-slate-500">${esc(c.sigla)}</div></td>
                     <td class="p-3 text-slate-600">${esc(c.telFixo)}</td>
                     <td class="p-3"><select class="p-1 border rounded bg-white text-xs font-semibold text-blue-900" onclick="event.stopPropagation()"><option selected>${esc(c.gestorModalidade)}</option><option>TI</option><option>Estratégico</option><option>SEI</option><option>SI</option><option>Telemática</option></select></td>
@@ -454,10 +478,48 @@
                     <td class="p-3 text-emerald-700 font-medium"><i class="fa-brands fa-whatsapp mr-1 text-emerald-600"></i> ${esc(c.whatsapp)}</td>
                     <td class="p-3">${sitBadge}</td>
                     <td class="p-3 text-slate-600">${esc(c.atualizadoEm)}<div class="text-[10px] text-slate-400 font-normal">${esc(c.autor)}</div></td>
-                    <td class="p-3 text-center"><button type="button" class="bg-blue-900 hover:bg-blue-800 text-white px-3 py-1 rounded text-xs font-bold cursor-pointer" onclick="event.stopPropagation(); document.getElementById('painel-detalhe-cliente-ativo').classList.remove('hidden')"><i class="fa-solid fa-arrow-right"></i></button></td>
+                    <td class="p-3 text-center"><button type="button" class="bg-blue-900 hover:bg-blue-800 text-white px-3 py-1 rounded text-xs font-bold cursor-pointer" onclick="event.stopPropagation(); abrirDetalheCliente('${c.id}')"><i class="fa-solid fa-arrow-right"></i></button></td>
                 </tr>`;
             }).join('');
         }
+
+        // Função para preencher dinamicamente o painel de governança com o órgão selecionado
+        window.abrirDetalheCliente = function(id) {
+            const cliente = LISTA_CLIENTES_ESTRUTURADA.find(c => c.id === id);
+            if (!cliente) return;
+
+            document.getElementById('detalhe-cli-nome').textContent = cliente.nome;
+            document.getElementById('detalhe-cli-sub').textContent = `${cliente.sigla} | CNPJ: ${cliente.cnpj} | Tel: ${cliente.telFixo}`;
+            
+            // Institucional
+            document.getElementById('card-inst-nome').textContent = cliente.gestorNome;
+            document.getElementById('card-inst-cargo').textContent = cliente.cargo;
+            document.getElementById('card-inst-email').textContent = cliente.email;
+            document.getElementById('card-inst-tel').textContent = cliente.telFixo;
+            document.getElementById('card-inst-fonte').textContent = cliente.fonte;
+
+            // Operacional
+            document.getElementById('card-op-modalidade-select').value = cliente.gestorModalidade;
+            document.getElementById('card-op-nome').textContent = cliente.opNome;
+            document.getElementById('card-op-cargo').textContent = cliente.opCargo;
+            document.getElementById('card-op-email').textContent = cliente.opEmail;
+            document.getElementById('card-op-tel').textContent = cliente.opTel;
+
+            // Ponto Focal
+            document.getElementById('card-fp-nome').textContent = cliente.fpNome;
+            document.getElementById('card-fp-cargo').textContent = cliente.fpCargo;
+            document.getElementById('card-fp-email').textContent = cliente.fpEmail;
+            document.getElementById('card-fp-tel').textContent = cliente.fpTel;
+
+            // Substituto
+            document.getElementById('card-sub-nome').textContent = cliente.subNome;
+            document.getElementById('card-sub-cargo').textContent = cliente.subCargo;
+            document.getElementById('card-sub-email').textContent = cliente.subEmail;
+            document.getElementById('card-sub-tel').textContent = cliente.subTel;
+
+            document.getElementById('painel-detalhe-cliente-ativo').classList.remove('hidden');
+            document.getElementById('painel-detalhe-cliente-ativo').scrollIntoView({ behavior: 'smooth' });
+        };
 
         function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
 
@@ -518,6 +580,7 @@
             document.getElementById('modal-login')?.classList.add('hidden');
             atualizarVisibilidadeAbas();
             iniciarSnapshotFirestore();
+            atualizarContadores();
             renderClientes();
         });
     </script>
