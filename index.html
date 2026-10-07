@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.52.1 - AUTENTICAÇÃO RESTAURADA E CLIENTES -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.52.2 - AUTENTICAÇÃO BLINDADA E CORRIGIDA   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.52.1</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.52.2</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.52.1</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.52.2</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -205,7 +205,7 @@
             </div>
         </div>
 
-        <!-- ABA CLIENTES (Com Filtros e Governança inspirados nas imagens) -->
+        <!-- ABA CLIENTES -->
         <div id="aba-clientes" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -306,4 +306,109 @@
         </div>
 
         <!-- ABA LOCAIS -->
-        <div id="aba
+        <div id="aba-locais" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-slate-800">Locais (<span id="count-locais">0</span>)</h3>
+                    <input type="text" id="busca-locais" placeholder="Buscar local, endereço, contato..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                </div>
+                <button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Local / Auditório</button>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome / Espaço</th><th class="p-4">Capacidade / Área</th><th class="p-4">Valor Aluguel</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-locais" class="divide-y text-sm"></tbody></table></div>
+        </div>
+
+        <!-- ABA FORNECEDORES -->
+        <div id="aba-fornecedores" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <h3 class="text-base font-bold text-slate-800">Fornecedores (<span id="count-fornecedores">0</span>)</h3>
+                    <input type="text" id="busca-fornecedores" placeholder="Buscar fornecedor, CNPJ, serviço..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                </div>
+                <button type="button" data-modal-target="fornecedor" class="btn-abrir-form btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Fornecedor</button>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Razão Social / Nome</th><th class="p-4">CNPJ / Categoria</th><th class="p-4">Serviço Principal</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-fornecedores" class="divide-y text-sm"></tbody></table></div>
+        </div>
+
+        <!-- ABA USUÁRIOS -->
+        <div id="aba-usuarios" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h3 class="text-base font-bold text-slate-800">Usuários (<span id="count-usuarios">0</span>)</h3>
+                    <input type="text" id="busca-usuarios" placeholder="Buscar nome ou e-mail..." class="p-2 border rounded-lg text-xs bg-white w-48 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    <select id="filtro-orgao-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="">Filtrar por Cliente / Secretaria</option>
+                    </select>
+                    <select id="filtro-tag-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="">Filtrar por Tag / Categoria</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                        <i class="fa-solid fa-file-arrow-up"></i> Importar CSV <input type="file" id="input-import-csv" accept=".csv" class="hidden">
+                    </label>
+                    <button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Cliente</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários (Acesso Restrito a Eventos)</h4><p class="text-xs text-slate-500">Crie grupos para controlar quais usuários enxergam os eventos restritos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
+                <div id="lista-grupos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            </div>
+        </div>
+
+        <!-- ABA BASES -->
+        <div id="aba-bases" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div>
+                    <h3 class="text-base font-bold text-slate-800">Repositório de Bases Dinâmicas (<span id="count-bases">0</span>)</h3>
+                    <p class="text-xs text-slate-500">Cadastre parâmetros, categorias e opções compartilhadas que alimentam automaticamente os dropdowns de todo o sistema.</p>
+                </div>
+                <button type="button" data-modal-target="base" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Base / Categoria</button>
+            </div>
+            <div class="flex gap-2 items-center">
+                <input type="text" id="busca-bases" placeholder="Buscar categoria, sigla, nome..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[800px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria / Domínio</th><th class="p-4">Identificador / Sigla</th><th class="p-4">Valor / Opção</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
+        </div>
+    </main>
+
+    <!-- Modais -->
+    <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-5xl w-full p-6 max-h-[95vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <div>
+                    <h3 id="detalhe-titulo-modal" class="text-base font-bold text-blue-900">Detalhamento por Camadas de Governança</h3>
+                    <p id="detalhe-subtitulo-modal" class="text-xs text-slate-500"></p>
+                </div>
+                <button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div id="detalhe-conteudo" class="space-y-4 mb-4"></div>
+            
+            <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-50 -mx-6 -mb-6 p-6 rounded-b-2xl">
+                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Gerenciamento Cloud do Cliente</p><button type="button" id="btn-excluir-registro" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer">Excluir Registro</button></div>
+                <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-72 overflow-y-auto space-y-2"></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="submit" class="px-4 py-2 bg-blue-900 text-white font-bold rounded cursor-pointer">Salvar na Nuvem (Firestore)</button></div></form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Observações -->
+    <div id="modal-observacoes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-clock-rotate-left mr-2 text-blue-900"></i> Histórico Ilimitado de Andamentos e Status</h3>
+                <button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-observacoes"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="obs-demanda-titulo" class="text-xs font-bold text-blue-900 mb-3 bg-blue-50 p-2 rounded-lg"></div>
+            <div id="obs-historico-lista" class="space-y-2 mb-4 max-h-60 overflow-y-auto"></div>
+            <div class="border-t pt-3 space-y-2">
+                <input type="hidden" id="obs-demanda-id">
+                <label class="block text-xs font-bold text-slate-700">Registrar novo status ou andamento:</label>
+                <textarea id="obs-novo-texto" rows="3" placeholder="Digite o registro do status ou andamento..." class="w-full p-2.5 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-600 focus:outline-none"></textarea>
+                <button type="button" id="btn-salvar-nova-observacao" class="w-full py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition cursor-pointer">Salvar no Histórico Ilimitado</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w
