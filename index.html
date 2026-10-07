@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.53 - MÓDULO CLIENTES + MÓDULOS RESTAURADOS -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.54 - AUTENTICAÇÃO RESTAURADA + CLIENTES  -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.53</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.54</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.53</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.54</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -97,193 +97,4 @@
                 <button type="button" data-tab="demandas" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-list-check mr-1"></i> Demandas <span id="cnt-tab-demandas" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
                 <button type="button" data-tab="clientes" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-sitemap mr-1"></i> Clientes <span id="cnt-tab-clientes" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
                 <button type="button" data-tab="eventos" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-calendar-day mr-1"></i> Eventos <span id="cnt-tab-eventos" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
-                <button type="button" data-tab="locais" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-building-circle-check mr-1"></i> Locais <span id="cnt-tab-locais" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
-                <button type="button" data-tab="fornecedores" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-handshake mr-1"></i> Fornecedores <span id="cnt-tab-fornecedores" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
-                <button type="button" data-tab="usuarios" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-users-gear mr-1"></i> Usuários <span id="cnt-tab-usuarios" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
-                <button type="button" data-tab="bases" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-database mr-1"></i> Bases <span id="cnt-tab-bases" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
-            </div>
-            <div class="flex items-center gap-2">
-                <button type="button" id="btn-export-csv" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-                    <i class="fa-solid fa-file-csv"></i> Exportar Dados
-                </button>
-            </div>
-        </div>
-
-        <!-- ABA DASHBOARD -->
-        <div id="aba-dashboard" class="block space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Demandas Ativas</p><h3 id="dash-tot-demandas" class="text-3xl font-bold text-blue-900 mt-1">0</h3></div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Eventos Programados</p><h3 id="dash-tot-eventos" class="text-3xl font-bold text-amber-600 mt-1">0</h3></div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Locais Auditórios</p><h3 id="dash-tot-locais" class="text-3xl font-bold text-purple-600 mt-1">0</h3></div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Clientes Cadastrados</p><h3 id="dash-tot-clientes" class="text-3xl font-bold text-indigo-600 mt-1">0</h3></div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Fornecedores TIC</p><h3 id="dash-tot-fornecedores" class="text-3xl font-bold text-emerald-600 mt-1">0</h3></div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="text-sm font-bold text-slate-700 mb-4">Demandas por Categoria</h4><canvas id="chartCategorias" class="max-h-56"></canvas></div>
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="text-sm font-bold text-slate-700 mb-4">Status das Solicitações</h4><canvas id="chartStatus" class="max-h-56"></canvas></div>
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200"><h4 class="text-sm font-bold text-slate-700 mb-4">Tipos Jurídicos de Clientes</h4><canvas id="chartTiposOrgaos" class="max-h-56"></canvas></div>
-            </div>
-        </div>
-
-        <!-- ABA DEMANDAS -->
-        <div id="aba-demandas" class="hidden space-y-4">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex items-center gap-3 flex-wrap">
-                    <h3 class="text-base font-bold text-slate-800">Demandas (<span id="count-demandas">0</span>)</h3>
-                    <input type="text" id="busca-demandas" placeholder="Busca universal..." class="p-2 border rounded-lg text-xs bg-white w-72 focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    
-                    <select id="filtro-demanda-status" class="p-2 border rounded-lg text-xs bg-white font-medium">
-                        <option value="">Todos os Status</option>
-                        <option value="Em Andamento">Em Andamento</option>
-                        <option value="Pausado">Pausado</option>
-                        <option value="Cancelado">Cancelado</option>
-                        <option value="Concluído">Concluído</option>
-                    </select>
-
-                    <select id="filtro-demanda-prio" class="p-2 border rounded-lg text-xs bg-white font-medium">
-                        <option value="">Todas as Prioridades</option>
-                        <option value="Baixa">Baixa</option>
-                        <option value="Média">Média</option>
-                        <option value="Alta">Alta</option>
-                    </select>
-
-                    <select id="ordenacao-demandas" class="p-2 border rounded-lg text-xs bg-white font-medium">
-                        <option value="recente">Mais Recentes</option>
-                        <option value="antiga">Mais Antigas</option>
-                        <option value="prio">Maior Prioridade</option>
-                    </select>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <div class="inline-flex bg-slate-100 p-1 rounded-lg text-xs font-semibold">
-                        <button type="button" id="btn-visao-tabela" class="px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition"><i class="fa-solid fa-table mr-1"></i> Tabela</button>
-                        <button type="button" id="btn-visao-calendario" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition"><i class="fa-solid fa-calendar-week mr-1"></i> Calendário & Backlog</button>
-                    </div>
-                    <button type="button" data-modal-target="demanda" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Demanda</button>
-                </div>
-            </div>
-
-            <!-- Visão Tabela Demandas -->
-            <div id="container-visao-tabela" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4">
-                <table class="w-full text-left border-collapse min-w-[1050px]">
-                    <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
-                        <tr>
-                            <th class="p-4">Solicitante</th>
-                            <th class="p-4">Demanda</th>
-                            <th class="p-4">Detalhes</th>
-                            <th class="p-4">Resp. GRGD</th>
-                            <th class="p-4 text-center">Prioridade</th>
-                            <th class="p-4 text-center">Status</th>
-                            <th class="p-4">Criação / Modificação</th>
-                            <th class="p-4 text-center">Detalhes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-demandas" class="divide-y text-sm"></tbody>
-                </table>
-            </div>
-
-            <!-- Visão Calendário & Backlog Demandas -->
-            <div id="container-visao-calendario" class="hidden space-y-6">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-box-archive text-amber-600"></i> BACKLOG (Atividades Fixas / Pendentes)</h4>
-                        <span id="backlog-count" class="text-xs bg-slate-100 px-2 py-0.5 rounded-full font-bold">0</span>
-                    </div>
-                    <div id="backlog-postits-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 min-h-[90px] p-2 bg-slate-50 rounded-lg border border-dashed border-slate-200"></div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                    <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-900"></i> CALENDÁRIO SEMANAL</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase"><span>Segunda-feira</span></div><div id="cal-segunda" class="space-y-2 flex-1"></div></div>
-                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase"><span>Terça-feira</span></div><div id="cal-terca" class="space-y-2 flex-1"></div></div>
-                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase"><span>Quarta-feira</span></div><div id="cal-quarta" class="space-y-2 flex-1"></div></div>
-                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase"><span>Quinta-feira</span></div><div id="cal-quinta" class="space-y-2 flex-1"></div></div>
-                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase"><span>Sexta-feira</span></div><div id="cal-sexta" class="space-y-2 flex-1"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ABA CLIENTES (COM AS NOVAS FUNCIONALIDADES SOLICITADAS) -->
-        <div id="aba-clientes" class="hidden space-y-4">
-            <div class="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-6 overflow-x-auto text-xs font-medium text-slate-600">
-                <span class="bg-blue-900 text-white font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider text-[10px]">EXPERIÊNCIA CX</span>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Saúde dos órgãos</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Interlocutores</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Serviços</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Órgãos × serviços</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Processos</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Jornadas</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Voz do cliente</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Melhorias</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Plano de trabalho</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Indicadores</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Dados</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Conhecimento</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Inscrições <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i></a>
-            </div>
-
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-800">Clientes (<span id="count-clientes">0</span>)</h3>
-                        <p class="text-xs text-slate-500">Cadastro institucional compartilhado pelo relacionamento e por CX.</p>
-                    </div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <button type="button" id="btn-limpar-clientes" class="btn-admin-only bg-red-600 hover:bg-red-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-                            <i class="fa-solid fa-trash-can"></i> Limpar Todos
-                        </button>
-                        <label class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-                            <i class="fa-solid fa-file-arrow-up"></i> Importar CSV <input type="file" id="input-import-orgaos-csv" accept=".csv" class="hidden">
-                        </label>
-                        <button type="button" data-modal-target="cliente" class="btn-abrir-form btn-admin-only bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Cliente</button>
-                    </div>
-                </div>
-
-                <!-- Filtros e Busca Clientes -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
-                    <div>
-                        <input type="text" id="busca-clientes" placeholder="Buscar por nome, sigla ou gestor..." class="w-full p-2 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    </div>
-                    <div>
-                        <select id="filtro-gestor-modalidade" class="w-full p-2 border rounded-lg text-xs bg-white font-medium">
-                            <option value="">Todos os gestores (TI, Estratégico, SEI, SI, Telemática)</option>
-                            <option value="TI">TI</option>
-                            <option value="Estratégico">Estratégico</option>
-                            <option value="SEI">SEI</option>
-                            <option value="SI">SI</option>
-                            <option value="Telemática">Telemática</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select id="filtro-situacao-cliente" class="w-full p-2 border rounded-lg text-xs bg-white font-medium">
-                            <option value="">Todas as situações</option>
-                            <option value="Atualizado">Atualizado (Verde)</option>
-                            <option value="Pendente">Pendente (Amarelo)</option>
-                            <option value="Desatualizado">Desatualizado (Vermelho)</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Tabela Clientes -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[1200px]">
-                    <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
-                        <tr>
-                            <th class="p-3">Nome / Sigla</th>
-                            <th class="p-3">Telefone fixo</th>
-                            <th class="p-3">Gestor (Modalidade)</th>
-                            <th class="p-3">E-mail</th>
-                            <th class="p-3">Telefone / WhatsApp</th>
-                            <th class="p-3">Situação</th>
-                            <th class="p-3">Atualização</th>
-                            <th class="p-3 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-clientes" class="divide-y text-xs"></tbody>
-                </table>
-            </div>
-
-            <!-- Painel de Governança Detalhado (Responsáveis e Cont
+                <button type="button" data-tab="locais" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-building-circle-check
