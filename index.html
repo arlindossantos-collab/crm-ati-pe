@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.52 - MÓDULO CLIENTES REAJUSTADO          -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.55 - MÓDULOS RESTAURADOS + CLIENTES CX   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.52</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.55</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.52</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.55</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -126,11 +126,87 @@
         </div>
 
         <!-- ABA DEMANDAS -->
-        <div id="aba-demandas" class="hidden space-y-4"></div>
+        <div id="aba-demandas" class="hidden space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h3 class="text-base font-bold text-slate-800">Demandas (<span id="count-demandas">0</span>)</h3>
+                    <input type="text" id="busca-demandas" placeholder="Busca universal..." class="p-2 border rounded-lg text-xs bg-white w-72 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    
+                    <select id="filtro-demanda-status" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="">Todos os Status</option>
+                        <option value="Em Andamento">Em Andamento</option>
+                        <option value="Pausado">Pausado</option>
+                        <option value="Cancelado">Cancelado</option>
+                        <option value="Concluído">Concluído</option>
+                    </select>
 
-        <!-- ABA CLIENTES (ATUALIZADA COM AS NOVAS FUNCIONALIDADES) -->
+                    <select id="filtro-demanda-prio" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="">Todas as Prioridades</option>
+                        <option value="Baixa">Baixa</option>
+                        <option value="Média">Média</option>
+                        <option value="Alta">Alta</option>
+                    </select>
+
+                    <select id="ordenacao-demandas" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="recente">Mais Recentes</option>
+                        <option value="antiga">Mais Antigas</option>
+                        <option value="prio">Maior Prioridade</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <div class="inline-flex bg-slate-100 p-1 rounded-lg text-xs font-semibold">
+                        <button type="button" id="btn-visao-tabela" class="px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition"><i class="fa-solid fa-table mr-1"></i> Tabela</button>
+                        <button type="button" id="btn-visao-calendario" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition"><i class="fa-solid fa-calendar-week mr-1"></i> Calendário & Backlog</button>
+                    </div>
+                    <button type="button" data-modal-target="demanda" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Demanda</button>
+                </div>
+            </div>
+
+            <!-- Visão Tabela Demandas -->
+            <div id="container-visao-tabela" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4">
+                <table class="w-full text-left border-collapse min-w-[1050px]">
+                    <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
+                        <tr>
+                            <th class="p-4">Solicitante</th>
+                            <th class="p-4">Demanda</th>
+                            <th class="p-4">Detalhes</th>
+                            <th class="p-4">Resp. GRGD</th>
+                            <th class="p-4 text-center">Prioridade</th>
+                            <th class="p-4 text-center">Status</th>
+                            <th class="p-4">Criação / Modificação</th>
+                            <th class="p-4 text-center">Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-demandas" class="divide-y text-sm"></tbody>
+                </table>
+            </div>
+
+            <!-- Visão Calendário & Backlog -->
+            <div id="container-visao-calendario" class="hidden space-y-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-box-archive text-amber-600"></i> BACKLOG (Atividades Fixas / Pendentes)</h4>
+                        <span id="backlog-count" class="text-xs bg-slate-100 px-2 py-0.5 rounded-full font-bold">0</span>
+                    </div>
+                    <div id="backlog-postits-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 min-h-[90px] p-2 bg-slate-50 rounded-lg border border-dashed border-slate-200"></div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-900"></i> CALENDÁRIO SEMANAL</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase"><span>Segunda-feira</span></div><div id="cal-segunda" class="space-y-2 flex-1"></div></div>
+                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase"><span>Terça-feira</span></div><div id="cal-terca" class="space-y-2 flex-1"></div></div>
+                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase"><span>Quarta-feira</span></div><div id="cal-quarta" class="space-y-2 flex-1"></div></div>
+                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase"><span>Quinta-feira</span></div><div id="cal-quinta" class="space-y-2 flex-1"></div></div>
+                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase"><span>Sexta-feira</span></div><div id="cal-sexta" class="space-y-2 flex-1"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA CLIENTES (NOVO MÓDULO CUSTOMIZADO) -->
         <div id="aba-clientes" class="hidden space-y-4">
-            <!-- Submenu Experiência CX -->
             <div class="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-6 overflow-x-auto text-xs font-medium text-slate-600">
                 <span class="bg-blue-900 text-white font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider text-[10px]">EXPERIÊNCIA CX</span>
                 <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Saúde dos órgãos</a>
@@ -165,7 +241,7 @@
                     </div>
                 </div>
 
-                <!-- Filtros e Busca -->
+                <!-- Filtros e Busca Clientes -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
                     <div>
                         <input type="text" id="busca-clientes" placeholder="Buscar por nome, sigla ou gestor..." class="w-full p-2 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-600 focus:outline-none">
@@ -191,7 +267,7 @@
                 </div>
             </div>
             
-            <!-- Tabela de Clientes com as novas colunas -->
+            <!-- Tabela Clientes com as colunas solicitadas -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[1200px]">
                     <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
@@ -206,309 +282,4 @@
                             <th class="p-3 text-center">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-clientes" class="divide-y text-xs"></tbody>
-                </table>
-            </div>
-
-            <!-- Painel de Governança (Responsáveis e Contatos) -->
-            <div id="painel-detalhe-cliente-ativo" class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hidden space-y-4">
-                <div class="flex items-center justify-between border-b pb-3">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h4 id="detalhe-cli-nome" class="font-bold text-sm text-slate-900">Agência Estadual de Tecnologia da Informação de Pernambuco - ATI</h4>
-                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Atualizado</span>
-                        </div>
-                        <p id="detalhe-cli-sub" class="text-xs text-slate-500 mt-0.5">ATI | CNPJ: 10.123.456/0001-00 | Tel: (81) 3183-7600</p>
-                    </div>
-                    <button type="button" onclick="document.getElementById('painel-detalhe-cliente-ativo').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold text-sm"><i class="fa-solid fa-xmark"></i> Fechar</button>
-                </div>
-
-                <div>
-                    <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wide mb-3">Responsáveis e Contatos — Três camadas de governança conforme modelo Rede GovTIC</h5>
-
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <!-- 1. Responsável Institucional -->
-                        <div class="bg-blue-900 text-white p-4 rounded-xl shadow-sm flex flex-col justify-between">
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="font-bold text-xs"><i class="fa-solid fa-shield-halved mr-1"></i> 1. Responsável Institucional</span>
-                                    <span class="bg-emerald-400 text-blue-950 text-[10px] font-bold px-2 py-0.5 rounded-full">Atualizado</span>
-                                </div>
-                                <p class="text-[11px] text-blue-200 mb-2">Camada formal / legal - Designado oficialmente em Portaria, Ato ou Diário Oficial.</p>
-                                <div class="space-y-1 text-xs mb-3">
-                                    <p><strong>Nome:</strong> João Inácio</p>
-                                    <p><strong>Cargo:</strong> Diretor Presidente</p>
-                                    <p><strong>E-mail:</strong> joao.inacio@ati.pe.gov.br</p>
-                                    <p><strong>Telefone:</strong> (81) 3183-7600</p>
-                                </div>
-                                <div class="p-2 bg-blue-950/60 rounded text-[11px] border border-blue-800">
-                                    <strong>Fonte:</strong> Diário Oficial do Estado
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 2. Responsável Operacional (Modalidades) -->
-                        <div class="bg-emerald-700 text-white p-4 rounded-xl shadow-sm flex flex-col justify-between">
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="font-bold text-xs"><i class="fa-solid fa-user-gear mr-1"></i> 2. Resp. Operacional</span>
-                                    <span class="bg-emerald-400 text-emerald-950 text-[10px] font-bold px-2 py-0.5 rounded-full">Atualizado</span>
-                                </div>
-                                <div class="mb-2">
-                                    <label class="block text-[10px] text-emerald-100 font-bold mb-1">Modalidade:</label>
-                                    <select id="card-resp-op-modalidade" class="w-full p-1 text-xs bg-emerald-800 text-white border border-emerald-600 rounded font-bold">
-                                        <option value="TI">TI</option>
-                                        <option value="Estratégico">Estratégico</option>
-                                        <option value="SEI">SEI</option>
-                                        <option value="SI">SI</option>
-                                        <option value="Telemática">Telemática</option>
-                                    </select>
-                                </div>
-                                <div class="space-y-1 text-xs">
-                                    <p><strong>Nome:</strong> <span id="card-op-nome">Carlos Silva</span></p>
-                                    <p><strong>Cargo:</strong> <span id="card-op-cargo">Gestor Técnico</span></p>
-                                    <p><strong>E-mail:</strong> <span id="card-op-email">carlos.silva@ati.pe.gov.br</span></p>
-                                    <p><strong>WhatsApp:</strong> <span id="card-op-tel">(81) 9 9488-7766</span></p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3. Ponto Focal (Lilás) -->
-                        <div class="bg-purple-800 text-white p-4 rounded-xl shadow-sm flex flex-col justify-between">
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="font-bold text-xs"><i class="fa-solid fa-comments mr-1"></i> 3. Ponto Focal</span>
-                                    <span class="bg-emerald-400 text-purple-950 text-[10px] font-bold px-2 py-0.5 rounded-full">Atualizado</span>
-                                </div>
-                                <p class="text-[11px] text-purple-200 mb-3">Canal ágil para alinhamentos e convocações.</p>
-                                <div class="space-y-1 text-xs">
-                                    <p><strong>Nome:</strong> Fernanda Alves</p>
-                                    <p><strong>Cargo:</strong> Analista de TI</p>
-                                    <p><strong>E-mail:</strong> fernanda.alves@ati.pe.gov.br</p>
-                                    <p><strong>WhatsApp:</strong> (81) 9 9655-7788</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 4. Ponto Focal Substituto (Cinza) -->
-                        <div class="bg-slate-700 text-white p-4 rounded-xl shadow-sm flex flex-col justify-between">
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="font-bold text-xs"><i class="fa-solid fa-user-clock mr-1"></i> 4. Focal Substituto</span>
-                                    <span class="bg-slate-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Ativo</span>
-                                </div>
-                                <p class="text-[11px] text-slate-300 mb-3">Substituto em eventuais ausências.</p>
-                                <div class="space-y-1 text-xs">
-                                    <p><strong>Nome:</strong> Ricardo Lima</p>
-                                    <p><strong>Cargo:</strong> Analista de Suporte</p>
-                                    <p><strong>E-mail:</strong> ricardo.lima@ati.pe.gov.br</p>
-                                    <p><strong>WhatsApp:</strong> (81) 9 9122-3344</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Demais Abas -->
-        <div id="aba-eventos" class="hidden space-y-4"></div>
-        <div id="aba-locais" class="hidden space-y-4"></div>
-        <div id="aba-fornecedores" class="hidden space-y-4"></div>
-        <div id="aba-usuarios" class="hidden space-y-4"></div>
-        <div id="aba-bases" class="hidden space-y-4"></div>
-    </main>
-
-    <!-- Script Principal v0.52 -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.52: Módulo Clientes com Gestores por Modalidade e Cards de Governança');
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
-            authDomain: "prgd-ati-pe.firebaseapp.com",
-            projectId: "prgd-ati-pe",
-            storageBucket: "prgd-ati-pe.firebasestorage.app",
-            messagingSenderId: "798768232646",
-            appId: "1:798768232646:web:31b80951f237b4af17bfc7",
-            measurementId: "G-MWES9XN421"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        
-        setPersistence(auth, inMemoryPersistence).catch(console.warn);
-
-        let currentUser = null;
-        let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
-        let abaAtual = 'dashboard';
-
-        let buscaClientesVal = '';
-        let filtroModalidadeVal = '';
-        let filtroSituacaoVal = '';
-
-        const MÓDULOS_SISTEMA = [
-            { id: 'dashboard', nome: 'Dashboard' },
-            { id: 'demandas', nome: 'Demandas' },
-            { id: 'clientes', nome: 'Clientes' },
-            { id: 'eventos', nome: 'Eventos' },
-            { id: 'locais', nome: 'Locais' },
-            { id: 'fornecedores', nome: 'Fornecedores' },
-            { id: 'usuarios', nome: 'Usuários' },
-            { id: 'bases', nome: 'Bases' }
-        ];
-
-        function traduzirErroSistema(err) {
-            const msg = String(err?.message || err || '');
-            if (msg.includes('permission-denied')) return 'Permissão negada. Você não tem autorização para realizar esta operação.';
-            if (msg.includes('auth/invalid-credential')) return 'E-mail ou senha incorretos.';
-            return 'Erro ao processar a operação: ' + msg;
-        }
-
-        function verificarAutenticacaoObrigatoria() {
-            const mainEl = document.getElementById('main-content');
-            const loginModal = document.getElementById('modal-login');
-            if (!currentUser) {
-                if (mainEl) mainEl.classList.add('hidden');
-                if (loginModal) loginModal.classList.remove('hidden');
-            } else {
-                if (mainEl) mainEl.classList.remove('hidden');
-                if (loginModal) loginModal.classList.add('hidden');
-            }
-        }
-
-        function atualizarVisibilidadeAbas() {
-            verificarAutenticacaoObrigatoria();
-            if (!currentUser) return;
-            const isAdmin = currentUser.perfil === 'admin';
-            const permitidos = isAdmin ? MÓDULOS_SISTEMA.map(m=>m.id) : (currentUser.modulosPermitidos || ['dashboard', 'demandas', 'eventos', 'clientes']);
-            
-            MÓDULOS_SISTEMA.forEach(mod => {
-                const btnTab = document.querySelector(`[data-tab="${mod.id}"]`);
-                if (btnTab) btnTab.style.display = permitidos.includes(mod.id) ? 'inline-flex' : 'none';
-            });
-            document.querySelectorAll('.btn-admin-only').forEach(btn => {
-                if (isAdmin) btn.classList.remove('hidden'); else btn.classList.add('hidden');
-            });
-
-            if (!permitidos.includes(abaAtual)) mudarAba(permitidos[0] || 'dashboard');
-        }
-
-        function mudarAba(aba) {
-            abaAtual = aba;
-            MÓDULOS_SISTEMA.forEach(mod => {
-                const el = document.getElementById('aba-' + mod.id);
-                const btn = document.querySelector(`[data-tab="${mod.id}"]`);
-                if (el) el.classList.toggle('hidden', mod.id !== abaAtual);
-                if (btn) btn.className = 'nav-tab px-3.5 py-2 rounded-lg transition ' + (mod.id === abaAtual ? 'tab-active' : 'tab-inactive');
-            });
-            if (aba === 'clientes') renderClientes();
-        }
-
-        let snapshotUnsubs = [];
-        function pararSnapshots() { snapshotUnsubs.forEach(fn => { try { fn(); } catch(e){} }); snapshotUnsubs = []; }
-
-        function iniciarSnapshotFirestore() {
-            pararSnapshots();
-            if (!currentUser) return;
-            ['demandas','locais','orgaos','fornecedores','bases','usuarios'].forEach(col => {
-                const unsub = onSnapshot(collection(db, col), snap => {
-                    dbData[col] = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
-                    renderClientes();
-                }, err => console.warn('Firestore '+col+':', err.message));
-                snapshotUnsubs.push(unsub);
-            });
-        }
-
-        function renderClientes() {
-            const tbody = document.getElementById('tabela-clientes');
-            if (!tbody) return;
-
-            // Dados mockados de exemplo fidedignos às telas de referência caso o Firestore esteja vazio
-            const mockClientes = [
-                { id: '1', nome: 'Agência Estadual de Tecnologia da Informação de Pernambuco', sigla: 'ATI', telFixo: '(81) 3183-7600', gestorModalidade: 'TI', gestorNome: 'João Inácio', email: 'joao.inacio@ati.pe.gov.br', whatsapp: '(81) 9 9488-7766', situacao: 'Atualizado', atualizadoEm: '30/09/2026', autor: 'Rebeca' },
-                { id: '2', nome: 'Secretaria de Educação', sigla: 'SEE', telFixo: '(81) 3183-8200', gestorModalidade: 'Estratégico', gestorNome: 'Maria Oliveira', email: 'maria.oliveira@see.pe.gov.br', whatsapp: '(81) 9 9123-4567', situacao: 'Pendente', atualizadoEm: '28/09/2026', autor: 'Rebeca' },
-                { id: '3', nome: 'Secretaria de Saúde', sigla: 'SES', telFixo: '(81) 3184-0000', gestorModalidade: 'SEI', gestorNome: 'Carlos Mendes', email: 'carlos.mendes@ses.pe.gov.br', whatsapp: '(81) 9 9987-1122', situacao: 'Desatualizado', atualizadoEm: '25/09/2026', autor: 'Rebeca' },
-                { id: '4', nome: 'Secretaria da Fazenda', sigla: 'SEFAZ', telFixo: '(81) 3183-6400', gestorModalidade: 'SI', gestorNome: 'Ana Paula Santos', email: 'ana.santos@sefaz.pe.gov.br', whatsapp: '(81) 9 9811-2233', situacao: 'Atualizado', atualizadoEm: '22/09/2026', autor: 'Rebeca' },
-                { id: '5', nome: 'Secretaria de Planejamento, Gestão e Desenvolvimento Regional', sigla: 'SEPLAG', telFixo: '(81) 3183-7800', gestorModalidade: 'Telemática', gestorNome: 'Rafael Lima', email: 'rafael.lima@seplag.pe.gov.br', whatsapp: '(81) 9 9722-3344', situacao: 'Atualizado', atualizadoEm: '20/09/2026', autor: 'Rebeca' }
-            ];
-
-            const txt = buscaClientesVal.trim().toLowerCase();
-            const filtered = mockClientes.filter(c => {
-                const matchBusca = !txt || [c.nome, c.sigla, c.gestorNome, c.email].join(' ').toLowerCase().includes(txt);
-                const matchMod = !filtroModalidadeVal || c.gestorModalidade === filtroModalidadeVal;
-                const matchSit = !filtroSituacaoVal || c.situacao === filtroSituacaoVal;
-                return matchBusca && matchMod && matchSit;
-            });
-
-            document.getElementById('count-clientes').textContent = filtered.length;
-
-            tbody.innerHTML = filtered.map(c => {
-                let sitBadge = '';
-                if(c.situacao === 'Atualizado') sitBadge = '<span class="bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold text-[10px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Atualizado</span>';
-                else if(c.situacao === 'Pendente') sitBadge = '<span class="bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold text-[10px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> Pendente</span>';
-                else sitBadge = '<span class="bg-rose-100 text-rose-800 px-2.5 py-0.5 rounded-full font-bold text-[10px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span> Desatualizado</span>';
-
-                return `<tr class="hover:bg-slate-50 border-b border-slate-100 cursor-pointer" onclick="document.getElementById('painel-detalhe-cliente-ativo').classList.remove('hidden')">
-                    <td class="p-3 font-bold text-blue-900">${esc(c.nome)}<div class="text-[11px] font-normal text-slate-500">${esc(c.sigla)}</div></td>
-                    <td class="p-3 text-slate-600">${esc(c.telFixo)}</td>
-                    <td class="p-3"><select class="p-1 border rounded bg-white text-xs font-semibold text-blue-900" onclick="event.stopPropagation()"><option selected>${esc(c.gestorModalidade)}</option><option>TI</option><option>Estratégico</option><option>SEI</option><option>SI</option><option>Telemática</option></select></td>
-                    <td class="p-3 text-slate-600">${esc(c.email)}</td>
-                    <td class="p-3 text-emerald-700 font-medium"><i class="fa-brands fa-whatsapp mr-1 text-emerald-600"></i> ${esc(c.whatsapp)}</td>
-                    <td class="p-3">${sitBadge}</td>
-                    <td class="p-3 text-slate-600">${esc(c.atualizadoEm)}<div class="text-[10px] text-slate-400 font-normal">${esc(c.autor)}</div></td>
-                    <td class="p-3 text-center"><button type="button" class="bg-blue-900 hover:bg-blue-800 text-white px-3 py-1 rounded text-xs font-bold cursor-pointer" onclick="event.stopPropagation(); document.getElementById('painel-detalhe-cliente-ativo').classList.remove('hidden')"><i class="fa-solid fa-arrow-right"></i></button></td>
-                </tr>`;
-            }).join('');
-        }
-
-        function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
-
-        function fazerLoginLocal(e) {
-            if (e?.preventDefault) e.preventDefault();
-            const email = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
-            const senha = document.getElementById('login-senha')?.value || '';
-            const msgEl = document.getElementById('login-msg');
-            if (!email || !senha) { if(msgEl) msgEl.textContent = 'Informe e-mail e senha.'; return; }
-            signInWithEmailAndPassword(auth, email, senha).catch(err => {
-                if(msgEl) { msgEl.textContent = traduzirErroSistema(err); msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
-            });
-        }
-
-        function configurarInterface() {
-            document.getElementById('login-form')?.addEventListener('submit', fazerLoginLocal);
-            document.getElementById('btn-executar-logout')?.addEventListener('click', async () => { await signOut(auth); });
-            document.getElementById('busca-clientes')?.addEventListener('input', e => { buscaClientesVal = e.target.value; renderClientes(); });
-            document.getElementById('filtro-gestor-modalidade')?.addEventListener('change', e => { filtroModalidadeVal = e.target.value; renderClientes(); });
-            document.getElementById('filtro-situacao-cliente')?.addEventListener('change', e => { filtroSituacaoVal = e.target.value; renderClientes(); });
-
-            document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => mudarAba(b.dataset.tab)));
-        }
-
-        configurarInterface();
-
-        onAuthStateChanged(auth, async user => {
-            currentUser = user;
-            pararSnapshots();
-            if (!user) {
-                document.getElementById('main-content')?.classList.add('hidden');
-                document.getElementById('modal-login')?.classList.remove('hidden');
-                return;
-            }
-            currentUser = { uid: user.uid, email: user.email, nome: user.email, perfil: 'admin', orgao: 'ATI', modulosPermitidos: ['dashboard','demandas','eventos','clientes'] };
-            document.getElementById('user-name-display').textContent = user.email;
-            document.getElementById('user-role-display').textContent = 'ADMIN • ATI';
-            document.getElementById('main-content')?.classList.remove('hidden');
-            document.getElementById('modal-login')?.classList.add('hidden');
-            atualizarVisibilidadeAbas();
-            iniciarSnapshotFirestore();
-            renderClientes();
-        });
-    </script>
-</body>
-</html>
+                    <tbody id="tabela-clientes"
