@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.1.1 - DEMANDAS RESTAURADAS & MÓDULOS UNIFICADOS -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.1.1 - DEMANDAS ORIGINAIS RESTAURADAS & MÓDULOS UNIFICADOS -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -29,7 +29,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
     <!-- Modal Login Obrigatório -->
-    <div id="modal-login" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex justify-center items-center p-4 z-50">
+    <div id="modal-login" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 flex flex-col justify-between">
             <div>
                 <div class="text-center mb-6">
@@ -46,7 +46,7 @@
                         <label class="block font-semibold text-slate-700 mb-1">Senha</label>
                         <input type="password" id="login-senha" autocomplete="current-password" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
                     </div>
-                    <div id="login-msg" class="hidden mt-4 p-3 rounded-lg text-xs font-medium" role="alert" aria-live="polite"></div>
+                    <div id="login-msg" class="hidden mt-2 p-3 rounded-lg text-xs font-medium" role="alert" aria-live="polite"></div>
                     <button type="submit" id="btn-executar-login" class="w-full mt-6 py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-right-to-bracket"></i><span id="login-btn-text">Autenticar e Entrar</span>
                     </button>
@@ -128,7 +128,7 @@
             </div>
         </div>
 
-        <!-- ABA DEMANDAS (RESTAURADA ORIGINAL) -->
+        <!-- ABA DEMANDAS (RESTAURADA ORIGINAL PERFEITA) -->
         <div id="aba-demandas" class="hidden space-y-4">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -145,9 +145,9 @@
 
                     <select id="filtro-demanda-prio" class="p-2 border rounded-lg text-xs bg-white font-medium">
                         <option value="">Todas as Prioridades</option>
-                        <option value="baixa">Baixa</option>
-                        <option value="média">Média</option>
-                        <option value="alta">Alta</option>
+                        <option value="Baixa">Baixa</option>
+                        <option value="Média">Média</option>
+                        <option value="Alta">Alta</option>
                     </select>
 
                     <select id="ordenacao-demandas" class="p-2 border rounded-lg text-xs bg-white font-medium">
@@ -208,14 +208,14 @@
             </div>
         </div>
 
-        <!-- ABA CLIENTES -->
+        <!-- ABA CLIENTES (REESTRUTURADA) -->
         <div id="aba-clientes" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
                     <h3 class="text-base font-bold text-slate-800">Clientes (<span id="count-clientes">0</span>)</h3>
-                    <input type="text" id="busca-clientes" placeholder="Buscar sigla, nome, responsável..." class="p-2 border rounded-lg text-xs bg-white w-56 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    <input type="text" id="busca-clientes" placeholder="Buscar cliente, sigla, gestor..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     <select id="filtro-tipo-juridico" class="p-2 border rounded-lg text-xs bg-white font-medium">
-                        <option value="">Filtrar por Tipo Jurídico</option>
+                        <option value="">Filtrar por Categoria</option>
                         <option value="Secretaria Estadual">Secretaria Estadual</option>
                         <option value="Autarquia">Autarquia</option>
                         <option value="Fundação Pública">Fundação Pública</option>
@@ -223,14 +223,41 @@
                         <option value="Órgão Autônomo">Órgão Autônomo</option>
                     </select>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" id="btn-limpar-clientes" class="btn-admin-only bg-red-600 hover:bg-red-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer" title="Apagar todos os clientes da nuvem">
+                        <i class="fa-solid fa-trash-can"></i> Limpar Todos
+                    </button>
                     <label class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-file-arrow-up"></i> Importar CSV <input type="file" id="input-import-orgaos-csv" accept=".csv" class="hidden">
                     </label>
                     <button type="button" data-modal-target="cliente" class="btn-abrir-form btn-admin-only bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Cliente</button>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[1100px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Sigla / Nome</th><th class="p-4">Tipo / Resp. Cliente</th><th class="p-4">Gestor NSI</th><th class="p-4">Equipe NSI (3 Membros)</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-clientes" class="divide-y text-sm"></tbody></table></div>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[1600px]">
+                    <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
+                        <tr>
+                            <th class="p-3">Nome</th>
+                            <th class="p-3">Sigla</th>
+                            <th class="p-3">Categoria</th>
+                            <th class="p-3">Telefone Fixo</th>
+                            <th class="p-3">Classificação</th>
+                            <th class="p-3">Órgão Raiz</th>
+                            <th class="p-3">Gestor Técnico</th>
+                            <th class="p-3">Gestor Estratégico</th>
+                            <th class="p-3">Gestor TI</th>
+                            <th class="p-3">Gestor Telemática</th>
+                            <th class="p-3">Gestor SI</th>
+                            <th class="p-3">Gestor SEI</th>
+                            <th class="p-3">Criação / Edição</th>
+                            <th class="p-3">Editado por</th>
+                            <th class="p-3 text-center">Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-clientes" class="divide-y text-xs"></tbody>
+                </table>
+            </div>
         </div>
 
         <!-- ABA EVENTOS -->
@@ -264,7 +291,7 @@
                 </div>
                 <button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Local / Auditório</button>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome / Espaço</th><th class="p-4">Capacidade / Área</th><th class="p-4">Valor Aluguel</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-locais" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome / Espaço</th><th class="p-4">Capacidade / Área</th><th class="p-4">Valor Aluguel</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-locais" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA FORNECEDORES -->
@@ -276,7 +303,7 @@
                 </div>
                 <button type="button" data-modal-target="fornecedor" class="btn-abrir-form btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Fornecedor</button>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Razão Social / Nome</th><th class="p-4">CNPJ / Categoria</th><th class="p-4">Serviço Principal</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-fornecedores" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Razão Social / Nome</th><th class="p-4">CNPJ / Categoria</th><th class="p-4">Serviço Principal</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-fornecedores" class="divide-y text-sm"></tbody></table></div>
         </div>
 
         <!-- ABA USUÁRIOS -->
@@ -299,7 +326,7 @@
                     <button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Cliente</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Cliente</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
                 <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários (Acesso Restrito a Eventos)</h4><p class="text-xs text-slate-500">Crie grupos para controlar quais usuários enxergam os eventos restritos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
                 <div id="lista-grupos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -318,14 +345,14 @@
             <div class="flex gap-2 items-center">
                 <input type="text" id="busca-bases" placeholder="Buscar categoria, sigla, nome..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[800px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria / Domínio</th><th class="p-4">Identificador / Sigla</th><th class="p-4">Valor / Opção</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Ações</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[800px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria / Domínio</th><th class="p-4">Identificador / Sigla</th><th class="p-4">Valor / Opção</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
         </div>
     </main>
 
     <!-- Modais -->
     <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento e Edição Completa</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento e Edição Completa</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
             
             <div id="dashboard-detalhe-evento-container" class="hidden mb-6 space-y-4"></div>
 
@@ -369,7 +396,7 @@
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.1.1: Demandas originais com Calendário e Post-its restauradas + versionamento v0.1.1');
+        console.info('PRGD v0.1.1: Módulo de Demandas original restaurado perfeitamente + Clientes v0.51 + Auth Cloud');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -432,8 +459,8 @@
         function traduzirErroSistema(err) {
             const msg = String(err?.message || err || '');
             if (msg.includes('longer than') || msg.includes('bytes')) return 'A imagem selecionada é muito pesada para o banco de dados. Limite máximo: 500 KB.';
-            if (msg.includes('permission-denied') || msg.includes('Missing or insufficient permissions')) return 'Permissão negada. Você não tem autorização para realizar esta operação.';
-            if (msg.includes('auth/invalid-credential') || msg.includes('wrong-password') || msg.includes('user-not-found')) return 'E-mail ou senha incorretos. Verifique suas credenciais.';
+            if (msg.includes('permission-denied')) return 'Permissão negada. Você não tem autorização para realizar esta operação.';
+            if (msg.includes('auth/invalid-credential') || msg.includes('auth/user-not-found') || msg.includes('auth/wrong-password') || msg.includes('auth/invalid-email')) return 'E-mail ou senha incorretos.';
             return 'Erro ao processar a operação: ' + msg;
         }
 
@@ -542,6 +569,7 @@
             });
             if (aba === 'dashboard') renderCharts();
             if (aba === 'demandas') renderDemandas();
+            if (aba === 'clientes') renderClientes();
             if (aba === 'eventos') renderEventos();
             if (aba === 'locais') renderLocais();
             if (aba === 'fornecedores') renderFornecedores();
@@ -567,7 +595,7 @@
             
             colecoes.forEach(col => {
                 const unsub = onSnapshot(collection(db, col), snap => {
-                    dbData[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    dbData[col] = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
                     renderizarTudo();
                 }, err => console.warn('Firestore '+col+':', err.message));
                 snapshotUnsubs.push(unsub);
@@ -576,21 +604,21 @@
             const gruposUser = currentUser.grupos || [];
             const eventSources = [
                 onSnapshot(query(collection(db,'eventos'), where('eventoPublico','==',true)), snap => {
-                    atualizarEventosVisiveis(snap.docs.map(d => ({ id: d.id, ...d.data()})));
+                    atualizarEventosVisiveis(snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data()})));
                 }, err => console.warn('Eventos públicos:', err.message))
             ];
             gruposUser.forEach(gid => {
                 eventSources.push(onSnapshot(query(collection(db,'eventos'), where('gruposPermitidos','array-contains',gid)), snap => {
-                    atualizarEventosVisiveis(snap.docs.map(d => ({ id: d.id, ...d.data()})));
+                    atualizarEventosVisiveis(snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data()})));
                 }, err => console.warn('Eventos do grupo:', err.message)));
             });
             eventSources.push(onSnapshot(query(collection(db,'eventos'), where('gruposPermitidos','==',[])), snap => {
-                atualizarEventosVisiveis(snap.docs.map(d => ({ id: d.id, ...d.data()})));
+                atualizarEventosVisiveis(snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data()})));
             }, err => console.warn('Eventos sem grupo:', err.message)));
 
             if (currentUser.perfil === 'admin') {
                 eventSources.push(onSnapshot(collection(db,'eventos'), snap => {
-                    atualizarEventosVisiveis(snap.docs.map(d => ({ id: d.id, ...d.data()})));
+                    atualizarEventosVisiveis(snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data()})));
                 }, err => console.warn('Eventos admin:', err.message)));
             }
             eventSources.forEach(u => snapshotUnsubs.push(u));
@@ -606,14 +634,14 @@
             }
 
             const unsubGroups = onSnapshot(collection(db,'grupos'), snap => {
-                dbData.grupos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                dbData.grupos = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
                 renderGrupos();
                 renderUsuarios();
             }, err => console.warn('Firestore grupos:', err.message));
             snapshotUnsubs.push(unsubGroups);
 
             const unsubIns = onSnapshot(collection(db,'inscricoes'), snap => {
-                dbData.inscricoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                dbData.inscricoes = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
                 renderEventos();
             }, err => console.warn('Firestore inscrições:', err.message));
             snapshotUnsubs.push(unsubIns);
@@ -658,19 +686,6 @@
                 });
                 selectTag.value = valAtual;
             }
-
-            const selectOrgao = document.getElementById('filtro-orgao-usuario');
-            if (selectOrgao) {
-                const valAtualO = selectOrgao.value;
-                selectOrgao.innerHTML = '<option value="">Filtrar por Cliente / Secretaria</option>';
-                dbData.orgaos.forEach(o => {
-                    const opt = document.createElement('option');
-                    opt.value = o.sigla || o.id;
-                    opt.textContent = (o.sigla || o.id) + ' - ' + (o.nome || '');
-                    selectOrgao.appendChild(opt);
-                });
-                selectOrgao.value = valAtualO;
-            }
         }
 
         function renderUsuarios() {
@@ -684,36 +699,47 @@
             });
             document.getElementById('count-usuarios').textContent = us.length;
             tbody.innerHTML = us.map(u => {
-                const tagsHtml = (u.tags || []).map(tName => {
-                    const tObj = TAGS_DISPONIVEIS.find(t => t.nome === tName) || { cor: 'bg-slate-100 text-slate-800' };
-                    return `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${tObj.cor} mr-1 mb-1">${esc(tName)}</span>`;
-                }).join('') || '<span class="text-slate-400 text-xs">Sem tags</span>';
                 const audit = renderAuditInfo(u);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4">${tagsHtml}</td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 text-${u.perfil === 'admin' ? 'emerald' : 'amber'}-900 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded cursor-pointer hover:bg-slate-200 tr-detalhe font-semibold text-blue-900" data-colecao="usuarios" data-id="${esc(u.id)}">Detalhes</button></td></tr>`;
-            }).join('') || '<tr><td colspan="8" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button></td></tr>`;
+            }).join('') || '<tr><td colspan="7" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
         function renderClientes() {
             const tbody = document.getElementById('tabela-clientes');
             if (!tbody) return;
+            const txt = buscaClientesVal.trim().toLowerCase();
             const filtered = dbData.orgaos.filter(o => {
-                const matchTipo = !filtroTipoJuridicoAtual || o.tipoJuridico === filtroTipoJuridicoAtual;
-                const txt = buscaClientesVal;
-                const matchBusca = !txt || (o.sigla || '').toLowerCase().includes(txt) || (o.nome || '').toLowerCase().includes(txt) || (o.responsavel || '').toLowerCase().includes(txt) || (o.gestorNsiNome || '').toLowerCase().includes(txt);
+                const matchTipo = !filtroTipoJuridicoAtual || o.categoria === filtroTipoJuridicoAtual || o.tipoJuridico === filtroTipoJuridicoAtual;
+                const matchBusca = !txt || [
+                    o.nome, o.sigla, o.categoria, o.telefoneFixo, o.classificacao, o.orgaoRaiz,
+                    o.gestorTecnico, o.gestorEstrategico, o.gestorTi, o.gestorTelematica, o.gestorSi, o.gestorSei,
+                    o.endereco, o.email, o.site
+                ].filter(Boolean).join(' ').toLowerCase().includes(txt);
                 return matchTipo && matchBusca;
             });
             document.getElementById('count-clientes').textContent = filtered.length;
             tbody.innerHTML = filtered.map(o => {
                 const audit = renderAuditInfo(o);
-                let equipeNsiHtml = '-';
-                const membros = [
-                    { nome: o.equipe1Nome, email: o.equipe1Email, tel: o.equipe1Tel },
-                    { nome: o.equipe2Nome, email: o.equipe2Email, tel: o.equipe2Tel },
-                    { nome: o.equipe3Nome, email: o.equipe3Email, tel: o.equipe3Tel }
-                ].filter(m => m.nome);
-                if (membros.length > 0) equipeNsiHtml = membros.map((m, idx) => `<div class="mb-1 text-[11px]"><b class="text-indigo-900">Membro ${idx+1}:</b> ${esc(m.nome)}</div>`).join('');
-                return `<tr class="hover:bg-slate-50"><td class="p-4"><div class="font-bold text-indigo-900 text-base">${esc(o.sigla || o.id)}</div><div class="text-xs text-slate-600 font-medium">${esc(o.nome)}</div></td><td class="p-4"><div class="text-xs text-slate-700"><b>Resp:</b> ${esc(o.responsavel || '-')}</div></td><td class="p-4 text-xs"><b>${esc(o.gestorNsiNome || '-')}</b></td><td class="p-4 text-xs max-w-xs">${equipeNsiHtml}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900" data-colecao="orgaos" data-id="${esc(o.id)}">Detalhes</button></td></tr>`;
-            }).join('');
+                return `<tr class="hover:bg-slate-50 border-b border-slate-200">
+                    <td class="p-3 font-bold text-indigo-900">${esc(o.nome || '-')}</td>
+                    <td class="p-3 font-mono font-semibold">${esc(o.sigla || '-')}</td>
+                    <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-medium">${esc(o.categoria || o.tipoJuridico || '-')}</span></td>
+                    <td class="p-3">${esc(o.telefoneFixo || '-')}</td>
+                    <td class="p-3">${esc(o.classificacao || '-')}</td>
+                    <td class="p-3">${esc(o.orgaoRaiz || '-')}</td>
+                    <td class="p-3">${esc(o.gestorTecnico || '-')}</td>
+                    <td class="p-3">${esc(o.gestorEstrategico || '-')}</td>
+                    <td class="p-3">${esc(o.gestorTi || '-')}</td>
+                    <td class="p-3">${esc(o.gestorTelematica || '-')}</td>
+                    <td class="p-3">${esc(o.gestorSi || '-')}</td>
+                    <td class="p-3">${esc(o.gestorSei || '-')}</td>
+                    <td class="p-3">${audit.dataHtml}</td>
+                    <td class="p-3">${audit.autorHtml}</td>
+                    <td class="p-3 text-center">
+                        <button class="text-xs bg-slate-100 hover:bg-slate-200 text-blue-900 px-3 py-1 rounded font-semibold tr-detalhe shadow-sm cursor-pointer border border-slate-200" data-colecao="orgaos" data-id="${esc(o.firestoreId)}"><i class="fa-solid fa-eye mr-1"></i> Detalhes</button>
+                    </td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="15" class="text-slate-400 text-sm text-center py-8">Nenhum cliente cadastrado.</td></tr>';
         }
 
         function renderBases() {
@@ -722,12 +748,12 @@
             document.getElementById('count-bases').textContent = dbData.bases.length;
             tbody.innerHTML = dbData.bases.map(b => {
                 const audit = renderAuditInfo(b);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-blue-900">${esc(b.categoria)}</td><td class="p-4 font-mono text-xs">${esc(b.sigla || '-')}</td><td class="p-4 font-bold">${esc(b.nome)}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900" data-colecao="bases" data-id="${b.id}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-blue-900">${esc(b.categoria)}</td><td class="p-4 font-mono text-xs">${esc(b.sigla || '-')}</td><td class="p-4 font-bold">${esc(b.nome)}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="bases" data-id="${esc(b.firestoreId)}">Detalhes</button></td></tr>`;
             }).join('');
         }
 
         // =====================================================================
-        // MÓDULO DE DEMANDAS — VERSÃO ORIGINAL RESTAURADA
+        // MÓDULO DE DEMANDAS — VERSÃO ORIGINAL PERFEITA RESTAURADA
         // =====================================================================
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
@@ -767,8 +793,8 @@
                     <td class="p-4"><div class="text-xs text-slate-700">${audit.dataHtml}</div><div class="text-[11px] text-slate-500 font-medium">${audit.autorHtml}</div></td>
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-1.5">
-                            <button type="button" class="text-xs bg-blue-50 text-blue-900 hover:bg-blue-100 p-1.5 rounded cursor-pointer transition" data-abrir-observacoes="${esc(d.id)}" title="Histórico de Andamentos"><i class="fa-solid fa-comments"></i></button>
-                            <button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded cursor-pointer font-semibold tr-detalhe" data-colecao="demandas" data-id="${esc(d.id)}" title="Detalhes"><i class="fa-solid fa-eye"></i></button>
+                            <button type="button" class="text-xs bg-blue-50 text-blue-900 hover:bg-blue-100 p-1.5 rounded cursor-pointer transition" data-abrir-observacoes="${esc(d.firestoreId)}" title="Histórico de Andamentos"><i class="fa-solid fa-comments"></i></button>
+                            <button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded cursor-pointer font-semibold tr-detalhe" data-colecao="demandas" data-id="${esc(d.firestoreId)}" title="Detalhes"><i class="fa-solid fa-eye"></i></button>
                         </div>
                     </td>
                 </tr>`;
@@ -803,7 +829,7 @@
         function criarPostItHtml(d, corPostIt) {
             const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
             const prioClass = obterCorPrioridade(d.prioridade);
-            return `<div class="post-it p-2.5 rounded-lg border ${corPostIt} shadow-sm cursor-pointer flex flex-col justify-between gap-2" data-colecao="demandas" data-id="${esc(d.id)}">
+            return `<div class="post-it p-2.5 rounded-lg border ${corPostIt} shadow-sm cursor-pointer flex flex-col justify-between gap-2" data-colecao="demandas" data-id="${esc(d.firestoreId)}">
                 <div>
                     <div class="flex justify-between items-start gap-1"><span class="font-bold text-xs leading-tight line-clamp-2">${esc(d.titulo)}</span><span class="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase ${prioClass}">${esc(d.prioridade || 'Baixa')}</span></div>
                     <p class="text-[11px] opacity-80 mt-1 line-clamp-2">${esc(d.descricao || '')}</p>
@@ -873,7 +899,7 @@
                             ${!minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrever-se</button>` : ''}
                             <div class="flex items-center gap-1 ml-auto">
                                 ${isAdmin ? `<button type="button" data-relatorio-evento="${esc(e.id)}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-2.5 py-2 rounded-xl font-bold cursor-pointer" title="Relatório"><i class="fa-solid fa-file-excel"></i></button>` : ''}
-                                <button type="button" class="tr-detalhe border bg-white hover:bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-xl font-bold cursor-pointer" data-colecao="eventos" data-id="${esc(e.id)}">Detalhes</button>
+                                <button type="button" class="tr-detalhe border bg-white hover:bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-xl font-bold cursor-pointer" data-colecao="eventos" data-id="${esc(e.firestoreId)}">Detalhes</button>
                             </div>
                         </div>
                     </div>
@@ -891,7 +917,7 @@
             document.getElementById('count-locais').textContent = filtered.length;
             tbody.innerHTML = filtered.map(l => {
                 const audit = renderAuditInfo(l);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="locais" data-id="${esc(l.id)}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="locais" data-id="${esc(l.firestoreId)}">Detalhes</button></td></tr>`;
             }).join('') || '<tr><td colspan="6" class="text-slate-400 text-sm text-center py-6">Nenhum local cadastrado.</td></tr>';
         }
 
@@ -905,7 +931,7 @@
             document.getElementById('count-fornecedores').textContent = filtered.length;
             tbody.innerHTML = filtered.map(f => {
                 const audit = renderAuditInfo(f);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.id)}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.firestoreId)}">Detalhes</button></td></tr>`;
             }).join('') || '<tr><td colspan="6" class="text-slate-400 text-sm text-center py-6">Nenhum fornecedor cadastrado.</td></tr>';
         }
 
@@ -945,7 +971,7 @@
             const ctx3 = document.getElementById('chartTiposOrgaos')?.getContext('2d');
             if (ctx3) {
                 if (chartTiposInstance) chartTiposInstance.destroy();
-                const tCounts = {}; dbData.orgaos.forEach(o => { const tj = o.tipoJuridico || 'Outros'; tCounts[tj] = (tCounts[tj] || 0) + 1; });
+                const tCounts = {}; dbData.orgaos.forEach(o => { const tj = o.categoria || o.tipoJuridico || 'Outros'; tCounts[tj] = (tCounts[tj] || 0) + 1; });
                 chartTiposInstance = new Chart(ctx3, { type: 'pie', data: { labels: Object.keys(tCounts), datasets: [{ data: Object.values(tCounts), backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#64748b'] }] } });
             }
         }
@@ -967,13 +993,13 @@
                 <div class="mt-3"><label class="block text-xs font-bold mb-1">Descrição</label><textarea name="descricao" rows="4" class="w-full p-2 border rounded-lg text-xs bg-white">${esc(item.descricao)}</textarea></div>`;
                 return;
             }
-            c.innerHTML=Object.entries(item).filter(([k])=>k!=='id').map(([k,v])=>`<div><label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label><input type="text" name="${esc(k)}" value="${esc(Array.isArray(v)?v.join(', '):v)}" class="w-full p-2 border rounded-lg text-xs bg-white"></div>`).join('');
+            c.innerHTML=Object.entries(item).filter(([k])=>k!=='id'&&k!=='firestoreId').map(([k,v])=>`<div><label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label><input type="text" name="${esc(k)}" value="${esc(Array.isArray(v)?v.join(', '):v)}" class="w-full p-2 border rounded-lg text-xs bg-white"></div>`).join('');
         }
 
         function detalharRegistro(colecao,id){
-            const item=dbData[colecao]?.find(i=>String(i.id)===String(id)); if(!item)return;
+            const item=dbData[colecao]?.find(i=>String(i.firestoreId)===String(id) || String(i.id)===String(id)); if(!item)return;
             document.getElementById('detalhe-titulo-modal').textContent='Detalhar / Editar ('+colecao.toUpperCase()+')';
-            document.getElementById('edit-colecao').value=colecao; document.getElementById('edit-doc-id').value=id;
+            document.getElementById('edit-colecao').value=colecao; document.getElementById('edit-doc-id').value=item.firestoreId || id;
             document.getElementById('dashboard-detalhe-evento-container').classList.add('hidden');
             montarEdicaoEstruturada(colecao,item);
             
@@ -990,16 +1016,16 @@
                     </div>
                 `;
             } else {
-                document.getElementById('detalhe-conteudo').innerHTML=Object.entries(item).map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
+                document.getElementById('detalhe-conteudo').innerHTML=Object.entries(item).filter(([k])=>k!=='firestoreId').map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
             }
             document.getElementById('detalhe-area-admin').classList.toggle('hidden',currentUser?.perfil!=='admin');
             document.getElementById('modal-detalhes').classList.remove('hidden');
         }
 
-        function abrirModalObservacoes(demandaId) {
-            const d = dbData.demandas.find(x => String(x.id) === String(demandaId));
+        function abrirModalObservacoes(demandaFirestoreId) {
+            const d = dbData.demandas.find(x => String(x.firestoreId) === String(demandaFirestoreId) || String(x.id) === String(demandaFirestoreId));
             if (!d) return;
-            document.getElementById('obs-demanda-id').value = d.id;
+            document.getElementById('obs-demanda-id').value = d.firestoreId || d.id;
             document.getElementById('obs-demanda-titulo').textContent = `Demanda: ${d.titulo} (${d.solicitante || 'Geral'})`;
             const listaEl = document.getElementById('obs-historico-lista');
             listaEl.innerHTML = (d.historicoAcoes || []).map(h => `<div class="p-2.5 bg-slate-50 border rounded-lg text-xs space-y-1"><div class="flex justify-between font-bold text-blue-900"><span>${esc(h.autor)}</span><span class="text-[10px] text-slate-500">${formatarData(h.data)}</span></div><p class="text-slate-700">${esc(h.texto)}</p></div>`).join('') || '<p class="text-xs text-slate-400 text-center py-4">Nenhum andamento registrado ainda.</p>';
@@ -1011,13 +1037,13 @@
             const id = document.getElementById('obs-demanda-id').value;
             const texto = document.getElementById('obs-novo-texto').value.trim();
             if (!texto) return;
-            const d = dbData.demandas.find(x => String(x.id) === String(id));
+            const d = dbData.demandas.find(x => String(x.firestoreId) === String(id) || String(x.id) === String(id));
             if (!d) return;
             const agora = new Date().toISOString();
             const autor = currentUser?.nome || currentUser?.email || 'Sistema';
             const novoHistorico = [...(d.historicoAcoes || []), { data: agora, autor, texto }];
             try {
-                await setDoc(doc(db, 'demandas', String(id)), { historicoAcoes: novoHistorico, atualizadoEm: agora, editadoPor: autor }, { merge: true });
+                await setDoc(doc(db, 'demandas', String(d.firestoreId || id)), { historicoAcoes: novoHistorico, atualizadoEm: agora, editadoPor: autor }, { merge: true });
                 fecharModal('modal-observacoes');
                 alert('Andamento salvo com sucesso!');
             } catch(e) { alert(traduzirErroSistema(e)); }
@@ -1026,7 +1052,7 @@
         async function salvarEdicaoAdmin(e){
             e.preventDefault(); if(currentUser?.perfil!=='admin'){alert('Somente administradores.');return;}
             const colecao=document.getElementById('edit-colecao').value,id=document.getElementById('edit-doc-id').value,form=e.target;
-            const itemAntigo = dbData[colecao]?.find(i=>String(i.id)===String(id)) || {};
+            const itemAntigo = dbData[colecao]?.find(i=>String(i.firestoreId)===String(id) || String(i.id)===String(id)) || {};
             const agora = new Date().toISOString();
             const autorAtual = currentUser.nome || currentUser.email || 'Admin';
             const obj={ atualizadoEm: agora, editadoPor: autorAtual, criadoEm: itemAntigo.criadoEm || agora, criadoPor: itemAntigo.criadoPor || autorAtual };
@@ -1037,7 +1063,7 @@
                 form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el=>{if(el.name)obj[el.name]=el.value;});
             }
             try{
-                await setDoc(doc(db,colecao,String(id)),obj,{merge:true});
+                await setDoc(doc(db,colecao,String(itemAntigo.firestoreId || id)),obj,{merge:true});
                 alert('Alterações salvas na nuvem com sucesso!');
                 fecharModal('modal-detalhes');
             }catch(err){alert(traduzirErroSistema(err));}
@@ -1049,12 +1075,12 @@
             const senha = document.getElementById('login-senha')?.value || '';
             const msgEl = document.getElementById('login-msg');
             if (!email || !senha) { 
-                if(msgEl) { msgEl.textContent = 'Informe e-mail e senha.'; msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
+                if(msgEl) { msgEl.textContent = 'Informe e-mail e senha.'; msgEl.className = 'mt-2 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
                 return; 
             }
             signInWithEmailAndPassword(auth, email, senha).catch(err => {
                 const txt = traduzirErroSistema(err);
-                if(msgEl) { msgEl.textContent = txt; msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
+                if(msgEl) { msgEl.textContent = txt; msgEl.className = 'mt-2 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
             });
         }
 
@@ -1167,7 +1193,7 @@
                 iniciarSnapshotFirestore();
                 renderizarTudo();
             } catch(err) {
-                currentUser = { uid: user.uid, id: user.uid, email: user.email || '', nome: user.email || 'Usuário', perfil: 'comum', orgao: 'GERAL', modulosPermitidos: ['dashboard','demandas','eventos','locais','fornecedores'] };
+                currentUser = { uid: user.uid, id: user.uid, email: user.email || '', nome: user.email || 'Usuário', perfil: 'comum', orgao: 'GERAL', modulosPermitidos: ['dashboard','demandas','eventos','locais','fornecedores','clientes'] };
                 document.getElementById('main-content')?.classList.remove('hidden');
                 document.getElementById('modal-login')?.classList.add('hidden');
                 atualizarVisibilidadeAbas();
@@ -1182,7 +1208,7 @@
                 const snap = await getDoc(ref);
                 if (snap.exists()) return { uid: user.uid, id: snap.id, ...snap.data(), email: snap.data().email || user.email };
             } catch (e) {}
-            return { uid: user.uid, id: user.uid, email: user.email, nome: user.email, perfil: 'comum', orgao: 'GERAL', modulosPermitidos: ['dashboard','demandas','eventos','locais','fornecedores'] };
+            return { uid: user.uid, id: user.uid, email: user.email, nome: user.email, perfil: 'comum', orgao: 'GERAL', modulosPermitidos: ['dashboard','demandas','eventos','locais','fornecedores','clientes'] };
         }
     </script>
 </body>
