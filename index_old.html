@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.62 - AUTENTICAÇÃO CORRIGIDA E BLINDADA    -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.1.2 - AUTENTICAÇÃO ORIGINAL RESTAURADA   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -27,7 +27,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
     <!-- Modal Login Obrigatório -->
-    <div id="modal-login" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md flex justify-center items-center p-4 z-50">
+    <div id="modal-login" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 flex flex-col justify-between">
             <div>
                 <div class="text-center mb-6">
@@ -44,14 +44,14 @@
                         <label class="block font-semibold text-slate-700 mb-1">Senha</label>
                         <input type="password" id="login-senha" autocomplete="current-password" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800">
                     </div>
-                    <div id="login-msg" class="hidden mt-2 p-3 rounded-lg text-xs font-medium" role="alert" aria-live="polite"></div>
+                    <div id="login-msg" class="hidden mt-4 p-3 rounded-lg text-xs font-medium" role="alert" aria-live="polite"></div>
                     <button type="submit" id="btn-executar-login" class="w-full mt-6 py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-right-to-bracket"></i><span id="login-btn-text">Autenticar e Entrar</span>
                     </button>
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.62</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.1.2</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.62</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.1.2</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -125,7 +125,7 @@
             </div>
         </div>
 
-        <!-- ABA DEMANDAS -->
+        <!-- ABA DEMANDAS (MANTIDO INTACTO) -->
         <div id="aba-demandas" class="hidden space-y-4">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -205,25 +205,8 @@
             </div>
         </div>
 
-        <!-- ABA CLIENTES (MÓDULO CX) -->
+        <!-- ABA CLIENTES (REESTRUTURADA / CONFORME v0.51) -->
         <div id="aba-clientes" class="hidden space-y-4">
-            <div class="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-6 overflow-x-auto text-xs font-medium text-slate-600">
-                <span class="bg-blue-900 text-white font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider text-[10px]">EXPERIÊNCIA CX</span>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Saúde dos órgãos</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Interlocutores</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Serviços</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Órgãos × serviços</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Processos</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Jornadas</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Voz do cliente</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Melhorias</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Plano de trabalho</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Indicadores</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Dados</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Conhecimento</a>
-                <a href="#" class="hover:text-blue-900 transition whitespace-nowrap">Inscrições <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i></a>
-            </div>
-
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
                     <h3 class="text-base font-bold text-slate-800">Clientes (<span id="count-clientes">0</span>)</h3>
@@ -403,14 +386,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.62 (Login Imediato e Seguro) -->
+    <!-- Script Principal v0.1.2 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.62: Módulo de Autenticação Direta Inicializado');
+        console.info('PRGD v0.1.2: Autenticação original restaurada e módulos alinhados');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -472,7 +455,7 @@
             const msg = String(err?.message || err || '');
             if (msg.includes('longer than') || msg.includes('bytes')) return 'A imagem selecionada é muito pesada para o banco de dados. Limite máximo: 500 KB.';
             if (msg.includes('permission-denied')) return 'Permissão negada. Você não tem autorização para realizar esta operação.';
-            if (msg.includes('auth/invalid-credential') || msg.includes('auth/user-not-found') || msg.includes('auth/wrong-password') || msg.includes('auth/invalid-email')) return 'E-mail ou senha incorretos.';
+            if (msg.includes('auth/invalid-credential')) return 'E-mail ou senha incorretos. Verifique suas credenciais.';
             return 'Erro ao processar a operação: ' + msg;
         }
 
@@ -551,7 +534,20 @@
 
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+        function verificarAutenticacaoObrigatoria() {
+            const mainEl = document.getElementById('main-content');
+            const loginModal = document.getElementById('modal-login');
+            if (!currentUser) {
+                if (mainEl) mainEl.classList.add('hidden');
+                if (loginModal) loginModal.classList.remove('hidden');
+            } else {
+                if (mainEl) mainEl.classList.remove('hidden');
+                if (loginModal) loginModal.classList.add('hidden');
+            }
+        }
+
         function atualizarVisibilidadeAbas() {
+            verificarAutenticacaoObrigatoria();
             if (!currentUser) return;
             const isAdmin = currentUser.perfil === 'admin';
             const permitidos = isAdmin ? MÓDULOS_SISTEMA.map(m=>m.id) : (currentUser.modulosPermitidos || ['dashboard', 'demandas', 'eventos']);
@@ -580,7 +576,6 @@
             });
             if (aba === 'dashboard') renderCharts();
             if (aba === 'demandas') renderDemandas();
-            if (aba === 'clientes') renderClientes();
             if (aba === 'eventos') renderEventos();
             if (aba === 'locais') renderLocais();
             if (aba === 'fornecedores') renderFornecedores();
@@ -613,6 +608,11 @@
             snapshotUnsubs.push(onSnapshot(query(collection(db,'eventos'), where('eventoPublico','==',true)), snap => {
                 atualizarEventosVisiveis(snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data()})));
             }));
+            if (currentUser.uid) {
+                snapshotUnsubs.push(onSnapshot(doc(db,'usuarios',currentUser.uid), snap => {
+                    if (snap.exists()) { currentUser = { ...currentUser, ...snap.data(), uid: currentUser.uid }; renderizarTudo(); }
+                }));
+            }
             snapshotUnsubs.push(onSnapshot(collection(db,'grupos'), snap => {
                 dbData.grupos = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
                 renderGrupos(); renderUsuarios();
@@ -1045,24 +1045,21 @@
             }
         }
 
-        async function fazerLoginLocal(e) {
+        function fazerLoginLocal(e) {
             if (e?.preventDefault) e.preventDefault();
             const email = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
             const senha = document.getElementById('login-senha')?.value || '';
             const msgEl = document.getElementById('login-msg');
-            
             if (!email || !senha) { 
-                if(msgEl) { msgEl.textContent = 'Informe e-mail e senha.'; msgEl.className = 'mt-2 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
+                if(msgEl) { msgEl.textContent = 'Informe e-mail e senha.'; msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
+                else alert('Informe e-mail e senha.'); 
                 return; 
             }
-
-            try {
-                if(msgEl) { msgEl.textContent = 'Autenticando...'; msgEl.className = 'mt-2 p-3 rounded-lg text-xs font-medium bg-blue-100 text-blue-800 block'; }
-                await signInWithEmailAndPassword(auth, email, senha);
-            } catch (err) {
+            signInWithEmailAndPassword(auth, email, senha).catch(err => {
                 const txt = traduzirErroSistema(err);
-                if(msgEl) { msgEl.textContent = txt; msgEl.className = 'mt-2 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
-            }
+                if(msgEl) { msgEl.textContent = txt; msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
+                else alert(txt);
+            });
         }
 
         async function salvarNovaObservacao() {
@@ -1328,50 +1325,41 @@
             }
         });
 
-        // =====================================================================
-        // AUTENTICAÇÃO SEGURA COM CARREGAMENTO ROBUSTO DO FIRESTORE
-        // =====================================================================
-        async function obterDadosPerfilUsuario(user) {
-            try {
-                const snap = await getDoc(doc(db, 'usuarios', user.uid));
-                if (snap.exists()) {
-                    return { uid: user.uid, id: snap.id, ...snap.data(), email: snap.data().email || user.email };
-                }
-            } catch (e) {
-                console.warn('Aviso: Perfil customizado não encontrado no Firestore, usando padrão admin.');
-            }
-            return { 
-                uid: user.uid, 
-                id: user.uid, 
-                email: user.email, 
-                nome: user.email, 
-                perfil: 'admin', 
-                orgao: 'ATI', 
-                modulosPermitidos: ['dashboard','demandas','clientes','eventos','locais','fornecedores','usuarios','bases'] 
-            };
-        }
-
         onAuthStateChanged(auth, async user => {
+            currentUser = user;
             pararSnapshots();
             if (!user) {
-                currentUser = null;
                 document.getElementById('main-content')?.classList.add('hidden');
                 document.getElementById('modal-login')?.classList.remove('hidden');
                 return;
             }
-
-            currentUser = await obterDadosPerfilUsuario(user);
-            
-            document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
-            document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum').toUpperCase() + ' • ' + (currentUser.orgao || 'GERAL');
-            
-            document.getElementById('modal-login')?.classList.add('hidden');
-            document.getElementById('main-content')?.classList.remove('hidden');
-            
-            atualizarVisibilidadeAbas();
-            iniciarSnapshotFirestore();
-            renderizarTudo();
+            try {
+                currentUser = await carregarPerfilFirebase(user);
+                document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
+                document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
+                document.getElementById('main-content')?.classList.remove('hidden');
+                document.getElementById('modal-login')?.classList.add('hidden');
+                atualizarVisibilidadeAbas();
+                iniciarSnapshotFirestore();
+                renderizarTudo();
+            } catch(err) {
+                currentUser = { uid: user.uid, id: user.uid, email: user.email || '', nome: user.email || 'Usuário', perfil: 'comum', orgao: 'GERAL', modulosPermitidos: ['dashboard','demandas','eventos'] };
+                document.getElementById('main-content')?.classList.remove('hidden');
+                document.getElementById('modal-login')?.classList.add('hidden');
+                atualizarVisibilidadeAbas();
+                iniciarSnapshotFirestore();
+                renderizarTudo();
+            }
         });
+
+        async function carregarPerfilFirebase(user) {
+            const ref = doc(db, 'usuarios', user.uid);
+            try {
+                const snap = await getDoc(ref);
+                if (snap.exists()) return { uid: user.uid, id: snap.id, ...snap.data(), email: snap.data().email || user.email };
+            } catch (e) {}
+            return { uid: user.uid, id: user.uid, email: user.email, nome: user.email, perfil: 'comum', orgao: 'GERAL', modulosPermitidos: ['dashboard','demandas','eventos'] };
+        }
     </script>
 </body>
 </html>
