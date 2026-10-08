@@ -393,7 +393,7 @@
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.1.1: Homologação - Demandas e Eventos Restaurados com Sucesso');
+        console.info('PRGD v0.1.1: Homologação - Demandas e Eventos Integrados com Sucesso');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -523,6 +523,13 @@
                 if (isNaN(d.getTime())) return dataStr;
                 return d.toLocaleDateString('pt-BR');
             } catch(e) { return dataStr; }
+        }
+
+        function normalizarUrl(url) {
+            if (!url) return '';
+            const s = String(url).trim();
+            if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('data:')) return s;
+            return '';
         }
 
         function renderAuditInfo(item) {
@@ -841,31 +848,72 @@
             </div>`;
         }
 
+        // =====================================================================
+        // MÓDULO DE EVENTOS RESTAURADO E INTEGRADO
+        // =====================================================================
         function renderEventos() {
             const grid = document.getElementById('grid-eventos');
             if (!grid) return;
             const agora = new Date();
-            const filtrados = dbData.eventos.filter(e => {
+            const gruposUser = currentUser?.grupos || [];
+            const visiveis = dbData.eventos.filter(e => e.eventoPublico || !(e.gruposPermitidos?.length) || e.gruposPermitidos.some(g => gruposUser.includes(g)));
+            const filtrados = visiveis.filter(e => {
                 const fim = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
                 const real = fim < agora;
-                return (filtroEventoAtual === 'futuros' && !real) || (filtroEventoAtual === 'realizados' && real);
+                const matchTab = (filtroEventoAtual === 'futuros' && !real) || (filtroEventoAtual === 'realizados' && real);
+                const txt = buscaEventosVal;
+                const matchBusca = !txt || (e.titulo || '').toLowerCase().includes(txt) || (e.palestrante || '').toLowerCase().includes(txt) || (e.localEvento || '').toLowerCase().includes(txt);
+                return matchTab && matchBusca;
             });
+
             document.getElementById('count-eventos').textContent = filtrados.length;
+            const btnFuturos = document.getElementById('filtro-evento-futuros');
+            const btnRealizados = document.getElementById('filtro-evento-realizados');
+            if (btnFuturos && btnRealizados) {
+                if (filtroEventoAtual === 'futuros') {
+                    btnFuturos.className = 'px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition font-bold';
+                    btnRealizados.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition';
+                } else {
+                    btnFuturos.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition';
+                    btnRealizados.className = 'px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition font-bold';
+                }
+            }
+
             grid.innerHTML = filtrados.map(e => {
-                return `<div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between gap-4">
-                    <div>
-                        <div class="flex justify-between items-start gap-2 mb-2">
-                            <span class="bg-amber-100 text-amber-900 font-bold px-2.5 py-0.5 rounded-full text-[10px]">EVENTO</span>
-                            <span class="text-xs text-slate-500"><i class="fa-regular fa-calendar mr-1"></i> ${formatarData(e.dataInicio)}</span>
+                const fim = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
+                const real = fim < agora;
+                const vagas = Number(e.limiteVagas || 0);
+                const inscritosReal = (dbData.inscricoes || []).filter(i => String(i.eventId) === String(e.id)).length;
+                const lotado = vagas > 0 && inscritosReal >= vagas;
+                const minha = !!(dbData.inscricoes || []).some(i => String(i.eventId) === String(e.id) && i.uid === currentUser?.uid);
+                const bannerImg = normalizarUrl(e.imagemCard);
+                const audit = renderAuditInfo(e);
+                const isAdmin = currentUser?.perfil === 'admin';
+                const cardBgClass = real ? 'bg-slate-100 border-slate-300 opacity-95 grayscale-[20%]' : 'bg-white border-slate-200';
+                const headerBgClass = real ? 'bg-slate-700 text-slate-200' : 'bg-blue-900 text-white';
+
+                return `<article class="${cardBgClass} rounded-2xl border shadow-sm overflow-hidden flex flex-col transition hover:shadow-md">
+                    ${bannerImg ? `<div class="relative w-full h-44 bg-slate-900 overflow-hidden"><img src="${esc(bannerImg)}" class="w-full h-full object-cover" alt="Capa"><div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent flex items-end p-3"><h3 class="text-white font-black text-base tracking-wide drop-shadow line-clamp-2">${esc(e.titulo)}</h3></div></div>` : `<div class="w-full h-32 ${headerBgClass} flex items-center justify-center font-black text-base px-4 text-center tracking-wide"><i class="fa-solid fa-calendar-star mr-2"></i> ${esc(e.titulo)}</div>`}
+                    <div class="p-5 flex flex-col flex-1">
+                        <div class="flex justify-between gap-2 items-center"><span class="${real ? 'bg-slate-200 text-slate-700' : 'bg-amber-100 text-amber-800'} text-[10px] font-bold px-2.5 py-1 rounded-full">${esc(e.tipoEvento || 'Capacitação')}</span><span class="text-[10px] font-bold ${real ? 'text-slate-600 bg-slate-200 px-2 py-0.5 rounded' : 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded'}">${real ? 'Realizado' : 'Futuro'}</span></div>
+                        <h4 class="font-bold text-base mt-2 ${real ? 'text-slate-700' : 'text-slate-900'}">${esc(e.titulo)}</h4>
+                        <p class="text-xs ${real ? 'text-slate-600' : 'text-indigo-900'} font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> ${esc(e.palestrante || 'Equipe ATI')}</p>
+                        <p class="text-xs text-slate-500 mt-2 line-clamp-2">${esc(e.descricao || e.textoCard || '')}</p>
+                        <div class="mt-3 text-xs space-y-1.5 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+                            <div><i class="fa-solid fa-calendar text-blue-800 mr-1.5"></i> ${formatarData(e.dataInicio)}</div>
+                            <div><i class="fa-solid fa-location-dot text-purple-700 mr-1.5"></i> ${esc(e.localEvento || 'Local não informado')}</div>
+                            <div><i class="fa-solid fa-users text-emerald-700 mr-1.5"></i> ${vagas ? `${inscritosReal}/${vagas} vagas` : `${inscritosReal} inscritos`}</div>
                         </div>
-                        <h4 class="font-bold text-slate-900 text-base">${esc(e.titulo)}</h4>
-                        <p class="text-xs text-slate-600 mt-1.5 line-clamp-3">${esc(e.descricao || 'Sem descrição cadastrada.')}</p>
+                        <div class="pt-3 border-t mt-3 flex justify-between text-[11px] text-slate-500"><span>${audit.dataHtml}</span><span>Por: ${audit.autorHtml}</span></div>
+                        <div class="mt-auto pt-4 flex flex-wrap gap-2 items-center">
+                            ${!minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrever-se</button>` : ''}
+                            <div class="flex items-center gap-1 ml-auto">
+                                ${isAdmin ? `<button type="button" data-relatorio-evento="${esc(e.id)}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-2.5 py-2 rounded-xl font-bold cursor-pointer" title="Relatório"><i class="fa-solid fa-file-excel"></i></button>` : ''}
+                                <button type="button" class="tr-detalhe border bg-white hover:bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-xl font-bold cursor-pointer" data-colecao="eventos" data-id="${esc(e.firestoreId || e.id)}">Detalhes</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="border-t pt-3 flex items-center justify-between text-xs text-slate-500">
-                        <div><i class="fa-solid fa-location-dot mr-1"></i> ${esc(e.local || 'Local a definir')}</div>
-                        <button class="bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg font-semibold tr-detalhe shadow-sm cursor-pointer" data-colecao="eventos" data-id="${esc(e.firestoreId)}"><i class="fa-solid fa-eye mr-1"></i> Detalhes</button>
-                    </div>
-                </div>`;
+                </article>`;
             }).join('') || '<p class="text-slate-400 text-sm col-span-3 text-center py-8">Nenhum evento encontrado.</p>';
         }
 
@@ -983,9 +1031,9 @@
         }
 
         function detalharRegistro(colecao,firestoreId){
-            const item = dbData[colecao]?.find(i=>String(i.firestoreId)===String(firestoreId)); if(!item) return;
+            const item = dbData[colecao]?.find(i=>String(i.firestoreId)===String(firestoreId) || String(i.id)===String(firestoreId)); if(!item) return;
             document.getElementById('detalhe-titulo-modal').textContent = 'Detalhes (' + colecao.toUpperCase() + ')';
-            document.getElementById('edit-colecao').value = colecao; document.getElementById('edit-doc-id').value = firestoreId;
+            document.getElementById('edit-colecao').value = colecao; document.getElementById('edit-doc-id').value = item.firestoreId || firestoreId;
             document.getElementById('dashboard-detalhe-evento-container').classList.add('hidden');
             montarEdicaoEstruturada(colecao, item);
             
@@ -1042,7 +1090,7 @@
             const colecao = document.getElementById('edit-colecao').value;
             const firestoreId = document.getElementById('edit-doc-id').value;
             const form = e.target;
-            const itemAntigo = dbData[colecao]?.find(i => String(i.firestoreId) === String(firestoreId)) || {};
+            const itemAntigo = dbData[colecao]?.find(i => String(i.firestoreId) === String(firestoreId) || String(i.id) === String(firestoreId)) || {};
             const agora = new Date().toISOString();
             const autorAtual = currentUser.nome || currentUser.email || 'Admin';
 
@@ -1286,6 +1334,10 @@
             byId('busca-clientes')?.addEventListener('input', e => { buscaClientesVal = e.target.value; renderClientes(); });
             byId('filtro-tipo-juridico')?.addEventListener('change', e => { filtroTipoJuridicoAtual = e.target.value; renderClientes(); });
 
+            byId('busca-eventos')?.addEventListener('input', e => { buscaEventosVal = e.target.value.toLowerCase().trim(); renderEventos(); });
+            byId('filtro-evento-futuros')?.addEventListener('click', () => { filtroEventoAtual = 'futuros'; renderEventos(); });
+            byId('filtro-evento-realizados')?.addEventListener('click', () => { filtroEventoAtual = 'realizados'; renderEventos(); });
+
             byId('btn-visao-tabela')?.addEventListener('click', () => {
                 visaoDemandasAtual = 'tabela';
                 byId('container-visao-tabela').classList.remove('hidden');
@@ -1341,6 +1393,23 @@
             if (btnDetalhes) {
                 ev.stopPropagation();
                 detalharRegistro(btnDetalhes.dataset.colecao || 'demandas', btnDetalhes.dataset.id);
+                return;
+            }
+
+            const btnInscricao = ev.target.closest?.('[data-acao-inscricao]');
+            if (btnInscricao) {
+                const eventId = btnInscricao.getAttribute('data-acao-inscricao');
+                if (!currentUser) return;
+                try {
+                    await addDoc(collection(db, 'inscricoes'), {
+                        eventId: String(eventId),
+                        uid: currentUser.uid,
+                        nome: currentUser.nome || currentUser.email,
+                        email: currentUser.email,
+                        criadoEm: new Date().toISOString()
+                    });
+                    alert('Inscrição realizada com sucesso!');
+                } catch(err) { alert(traduzirErroSistema(err)); }
                 return;
             }
         });
