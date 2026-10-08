@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.51 - DEMANDAS COM CORES E MOVIMENTAÇÃO   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.1.1 - HOMOLOGAÇÃO (DEMANDAS + EVENTOS)   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.51</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.1.1</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.51</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.1.1</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -386,14 +386,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.51 -->
+    <!-- Script Principal v0.1.1 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.51: Demandas com cores, avatares coloridos e movimentação semanal');
+        console.info('PRGD v0.1.1: Homologação - Demandas e Eventos Restaurados com Sucesso');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -851,7 +851,22 @@
                 return (filtroEventoAtual === 'futuros' && !real) || (filtroEventoAtual === 'realizados' && real);
             });
             document.getElementById('count-eventos').textContent = filtrados.length;
-            grid.innerHTML = filtrados.map(e => `<div class="bg-white rounded-2xl border p-4 shadow-sm"><h4 class="font-bold">${esc(e.titulo)}</h4><p class="text-xs text-slate-500 mt-1">${esc(e.descricao || '')}</p></div>`).join('') || '<p class="text-slate-400 text-sm col-span-3 text-center py-8">Nenhum evento encontrado.</p>';
+            grid.innerHTML = filtrados.map(e => {
+                return `<div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between gap-4">
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <span class="bg-amber-100 text-amber-900 font-bold px-2.5 py-0.5 rounded-full text-[10px]">EVENTO</span>
+                            <span class="text-xs text-slate-500"><i class="fa-regular fa-calendar mr-1"></i> ${formatarData(e.dataInicio)}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-base">${esc(e.titulo)}</h4>
+                        <p class="text-xs text-slate-600 mt-1.5 line-clamp-3">${esc(e.descricao || 'Sem descrição cadastrada.')}</p>
+                    </div>
+                    <div class="border-t pt-3 flex items-center justify-between text-xs text-slate-500">
+                        <div><i class="fa-solid fa-location-dot mr-1"></i> ${esc(e.local || 'Local a definir')}</div>
+                        <button class="bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg font-semibold tr-detalhe shadow-sm cursor-pointer" data-colecao="eventos" data-id="${esc(e.firestoreId)}"><i class="fa-solid fa-eye mr-1"></i> Detalhes</button>
+                    </div>
+                </div>`;
+            }).join('') || '<p class="text-slate-400 text-sm col-span-3 text-center py-8">Nenhum evento encontrado.</p>';
         }
 
         function renderLocais() {
