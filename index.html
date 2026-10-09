@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.0 - HOMOLOGAÇÃO (CLIENTES + DEMANDAS + EVENTOS) -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.1 - HOMOLOGAÇÃO (DEMANDAS + CLIENTES + EVENTOS) -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.0</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.1</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.0</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.1</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -165,16 +165,16 @@
 
             <!-- VISÃO 1: TABELA -->
             <div id="container-visao-tabela" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4">
-                <table class="w-full text-left border-collapse min-w-[1050px]">
+                <table class="w-full text-left border-collapse min-w-[1100px]">
                     <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
                         <tr>
                             <th class="p-4">Solicitante</th>
                             <th class="p-4">Demanda</th>
                             <th class="p-4">Detalhes</th>
                             <th class="p-4">Resp. GRGD</th>
+                            <th class="p-4 text-center">Data / Alocação</th>
                             <th class="p-4 text-center">Prioridade</th>
                             <th class="p-4 text-center">Status</th>
-                            <th class="p-4">Criação / Modificação</th>
                             <th class="p-4 text-center">Detalhes</th>
                         </tr>
                     </thead>
@@ -205,7 +205,7 @@
             </div>
         </div>
 
-        <!-- ABA CLIENTES (RESTRUTURADA CONFORME SOLICITAÇÃO & IMAGENS) -->
+        <!-- ABA CLIENTES -->
         <div id="aba-clientes" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -391,14 +391,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.2.0 -->
+    <!-- Script Principal v0.2.1 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.2.0: Homologação - Módulo de Clientes Atualizado com Cards de Camadas de Governança');
+        console.info('PRGD v0.2.1: Homologação - Seletor de Datas e Alocação Inteligente por Semana nas Demandas');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -525,10 +525,40 @@
         function formatarData(dataStr) {
             if (!dataStr) return '-';
             try {
-                const d = new Date(dataStr);
+                const d = new Date(dataStr + 'T00:00:00');
                 if (isNaN(d.getTime())) return dataStr;
                 return d.toLocaleDateString('pt-BR');
             } catch(e) { return dataStr; }
+        }
+
+        function calcularInfoSemana(dataStr) {
+            if (!dataStr) return { diaSemana: '', badgeOutraSemana: '' };
+            try {
+                const parts = dataStr.split('-');
+                if (parts.length !== 3) return { diaSemana: '', badgeOutraSemana: '' };
+                const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                if (isNaN(d.getTime())) return { diaSemana: '', badgeOutraSemana: '' };
+
+                const jsDay = d.getDay(); // 0=dom, 1=seg, ..., 5=sex, 6=sab
+                const mapDias = { 1: 'segunda', 2: 'terca', 3: 'quarta', 4: 'quinta', 5: 'sexta' };
+                const diaSemana = mapDias[jsDay] || '';
+
+                // Calcular número da semana ISO
+                const agora = new Date();
+                const onejan = new Date(d.getFullYear(), 0, 1);
+                const weekTarget = Math.ceil((((d - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+                const onejanAgora = new Date(agora.getFullYear(), 0, 1);
+                const weekAgora = Math.ceil((((agora - onejanAgora) / 86400000) + onejanAgora.getDay() + 1) / 7);
+
+                let badgeOutraSemana = '';
+                if (weekTarget !== weekAgora || d.getFullYear() !== agora.getFullYear()) {
+                    badgeOutraSemana = `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded ml-1" title="Data alocada em outra semana"><i class="fa-solid fa-clock-rotate-left"></i> Outra semana</span>`;
+                }
+
+                return { diaSemana, badgeOutraSemana };
+            } catch(e) {
+                return { diaSemana: '', badgeOutraSemana: '' };
+            }
         }
 
         function normalizarUrl(url) {
@@ -696,9 +726,6 @@
             }).join('') || '<tr><td colspan="7" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
-        // =====================================================================
-        // MÓDULO DE CLIENTES ATUALIZADO (CONFORME SOLICITAÇÃO E IMAGENS)
-        // =====================================================================
         function renderClientes() {
             const tbody = document.getElementById('tabela-clientes');
             if (!tbody) return;
@@ -707,8 +734,6 @@
             const filtered = dbData.orgaos.filter(o => {
                 const modalidadeSel = filtroGestorModalidadeAtual;
                 const situacaoSel = filtroSituacaoClienteAtual;
-                
-                // Filtro por modalidade de gestor escolhida no select da linha ou filtro global
                 const matchModalidade = !modalidadeSel || (o.gestorModalidadeSelecionada === modalidadeSel);
                 const matchSituacao = !situacaoSel || (o.situacaoContato === situacaoSel);
 
@@ -724,9 +749,8 @@
 
             tbody.innerHTML = filtered.map(o => {
                 const audit = renderAuditInfo(o);
-                const modalidadeAtual = o.gestorModalidadeSelecionada || 'TI'; // Padrão TI
+                const modalidadeAtual = o.gestorModalidadeSelecionada || 'TI';
                 
-                // Mapear dados conforme modalidade escolhida
                 let nomeGestor = o.gestorTi || o.gestorTecnico || '-';
                 let emailGestor = o.emailGestorTi || o.emailGestorTecnico || '-';
                 let telGestor = o.telGestorTi || o.telGestorTecnico || '-';
@@ -793,6 +817,9 @@
             }).join('');
         }
 
+        // =====================================================================
+        // MÓDULO DE DEMANDAS ATUALIZADO COM SELETOR DE DATA E ALOCAÇÃO INTELIGENTE
+        // =====================================================================
         function renderDemandas() {
             const tbody = document.getElementById('tabela-demandas');
             if (!tbody) return;
@@ -826,15 +853,22 @@
                 const iconeStatus = renderizarIconeStatus(d.status);
                 const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
                 const corLinhaClara = d.corCard || 'bg-white';
+                const dataVal = d.dataLimite || d.dataInicio || '';
+                const { badgeOutraSemana } = calcularInfoSemana(dataVal);
 
                 return `<tr class="hover:opacity-95 transition-colors ${corLinhaClara} border-b border-slate-200">
                     <td class="p-4 font-bold text-slate-800">${esc(d.solicitante || 'Não informado')}<div class="text-[11px] font-normal text-slate-600">${esc(d.orgao || '')}</div></td>
-                    <td class="p-4 font-semibold text-blue-900">${esc(d.titulo)}${d.dataLimite ? `<div class="text-[10px] text-slate-600 mt-0.5"><i class="fa-regular fa-clock"></i> Limite: ${formatarData(d.dataLimite)}</div>` : ''}</td>
+                    <td class="p-4 font-semibold text-blue-900">${esc(d.titulo)}</td>
                     <td class="p-4"><span class="text-xs text-slate-700 line-clamp-2 max-w-xs">${esc(d.descricao || 'Sem detalhes')}</span></td>
                     <td class="p-4">${badgesResp}</td>
+                    <td class="p-4 text-center">
+                        <div class="flex items-center justify-center gap-1 flex-wrap">
+                            <input type="date" class="input-data-demanda p-1 border rounded text-xs bg-white font-medium text-blue-900 cursor-pointer shadow-sm" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Clique para escolher a data">
+                            ${badgeOutraSemana}
+                        </div>
+                    </td>
                     <td class="p-4 text-center">${bolinhaPrio}</td>
                     <td class="p-4 text-center">${iconeStatus}</td>
-                    <td class="p-4"><div class="text-xs text-slate-700">${audit.dataHtml}</div><div class="text-[11px] text-slate-600 font-medium">${audit.autorHtml}</div></td>
                     <td class="p-4 text-center">
                         <button type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-blue-900 px-2.5 py-1 rounded font-semibold tr-detalhe border shadow-sm cursor-pointer" data-colecao="demandas" data-id="${esc(d.firestoreId)}"><i class="fa-solid fa-eye mr-1"></i> Detalhes</button>
                     </td>
@@ -857,9 +891,15 @@
             const diasSemana = { 'segunda': [], 'terca': [], 'quarta': [], 'quinta': [], 'sexta': [] };
 
             listaDemandas.forEach(d => {
-                const dia = String(d.diaSemana || '').trim().toLowerCase();
-                if (diasSemana[dia]) diasSemana[dia].push(d);
-                else backlog.push(d);
+                const dataVal = d.dataLimite || d.dataInicio || '';
+                const { diaSemana } = calcularInfoSemana(dataVal);
+                const diaAtribuido = diaSemana || String(d.diaSemana || '').trim().toLowerCase();
+
+                if (diasSemana[diaAtribuido]) {
+                    diasSemana[diaAtribuido].push(d);
+                } else {
+                    backlog.push(d);
+                }
             });
 
             document.getElementById('backlog-count').textContent = backlog.length;
@@ -876,34 +916,29 @@
             const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
             const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
             const corCard = d.corCard || 'bg-blue-50 border-blue-200 text-blue-900';
-            const diaAtual = d.diaSemana || '';
+            const dataVal = d.dataLimite || d.dataInicio || '';
+            const { badgeOutraSemana } = calcularInfoSemana(dataVal);
 
             return `<div class="post-it p-3 rounded-lg border ${corCard} shadow-sm flex flex-col justify-between gap-2.5">
                 <div>
-                    <div class="flex justify-between items-start gap-1"><span class="font-bold text-xs leading-tight line-clamp-2">${esc(d.titulo)}</span>${bolinhaPrio}</div>
+                    <div class="flex justify-between items-start gap-1">
+                        <span class="font-bold text-xs leading-tight line-clamp-2">${esc(d.titulo)}</span>
+                        ${bolinhaPrio}
+                    </div>
                     <p class="text-[11px] opacity-80 mt-1 line-clamp-2">${esc(d.descricao || '')}</p>
                 </div>
                 <div class="pt-2 border-t border-black/10 space-y-2">
                     <div class="flex justify-between items-center"><span class="text-[10px] font-semibold opacity-75">${esc(d.solicitante || 'ATI')}</span><div class="scale-90 origin-right">${badgesResp}</div></div>
-                    <div class="flex items-center justify-between gap-1 pt-1 bg-white/60 p-1 rounded border border-black/5">
-                        <span class="text-[10px] font-bold text-slate-700">Mover:</span>
-                        <select class="select-mover-dia text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}">
-                            <option value="" ${!diaAtual ? 'selected' : ''}>Backlog</option>
-                            <option value="segunda" ${diaAtual === 'segunda' ? 'selected' : ''}>Segunda</option>
-                            <option value="terca" ${diaAtual === 'terca' ? 'selected' : ''}>Terça</option>
-                            <option value="quarta" ${diaAtual === 'quarta' ? 'selected' : ''}>Quarta</option>
-                            <option value="quinta" ${diaAtual === 'quinta' ? 'selected' : ''}>Quinta</option>
-                            <option value="sexta" ${diaAtual === 'sexta' ? 'selected' : ''}>Sexta</option>
-                        </select>
-                        <button type="button" class="text-[10px] bg-blue-900 text-white px-2 py-1 rounded font-bold cursor-pointer tr-detalhe" data-colecao="demandas" data-id="${esc(d.firestoreId)}"><i class="fa-solid fa-eye"></i></button>
+                    <div class="flex items-center justify-between gap-1 pt-1 bg-white/60 p-1 rounded border border-black/5 flex-wrap">
+                        <span class="text-[10px] font-bold text-slate-700">Data:</span>
+                        <input type="date" class="input-data-demanda text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Escolha a data para alocar no dia da semana">
+                        ${badgeOutraSemana}
+                        <button type="button" class="text-[10px] bg-blue-900 text-white px-2 py-1 rounded font-bold cursor-pointer tr-detalhe ml-auto" data-colecao="demandas" data-id="${esc(d.firestoreId)}"><i class="fa-solid fa-eye"></i></button>
                     </div>
                 </div>
             </div>`;
         }
 
-        // =====================================================================
-        // MÓDULO DE EVENTOS RESTAURADO E INTEGRADO
-        // =====================================================================
         function renderEventos() {
             const grid = document.getElementById('grid-eventos');
             if (!grid) return;
@@ -1081,6 +1116,7 @@
                     ${common('Solicitante','solicitante')} 
                     ${common('Órgão','orgao')} 
                     ${common('Responsável GRGD','responsavelGrgd')}
+                    ${common('Data Limite / Início','dataLimite','date')}
                     <div><label class="block font-bold text-[11px] uppercase mb-1">Cor do Card / Linha</label><select name="corCard" class="w-full p-2 border rounded-lg text-xs bg-white"><option value="bg-white" ${item.corCard==='bg-white'?'selected':''}>Branco (Padrão)</option><option value="bg-blue-50 border-blue-200 text-blue-900" ${item.corCard?.includes('blue')?'selected':''}>Azul Suave</option><option value="bg-amber-50 border-amber-200 text-amber-900" ${item.corCard?.includes('amber')?'selected':''}>Amarelo / Laranja Suave</option><option value="bg-emerald-50 border-emerald-200 text-emerald-900" ${item.corCard?.includes('emerald')?'selected':''}>Verde Suave</option><option value="bg-purple-50 border-purple-200 text-purple-900" ${item.corCard?.includes('purple')?'selected':''}>Roxo Suave</option><option value="bg-rose-50 border-rose-200 text-rose-900" ${item.corCard?.includes('rose')?'selected':''}>Rosa / Vermelho Suave</option></select></div>
                     <div><label class="block font-bold text-[11px] uppercase mb-1">Status</label><select name="status" class="w-full p-2 border rounded-lg text-xs bg-white"><option ${item.status==='Em Andamento'?'selected':''}>Em Andamento</option><option ${item.status==='Pausado'?'selected':''}>Pausado</option><option ${item.status==='Cancelado'?'selected':''}>Cancelado</option><option ${item.status==='Concluído'?'selected':''}>Concluído</option></select></div>
                     <div><label class="block font-bold text-[11px] uppercase mb-1">Prioridade</label><select name="prioridade" class="w-full p-2 border rounded-lg text-xs bg-white"><option value="Baixa">Baixa</option><option value="Média">Média</option><option value="Alta">Alta</option></select></div>
@@ -1093,7 +1129,6 @@
             c.innerHTML = Object.entries(item).filter(([k])=>k!=='id' && k!=='firestoreId').map(([k,v])=>`<div><label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label><input type="text" name="${esc(k)}" value="${esc(Array.isArray(v)?v.join(', '):v)}" class="w-full p-2 border rounded-lg text-xs bg-white"></div>`).join('');
         }
 
-        // Função de Detalhes / Ações de Clientes (Card detalhado estilo Red GovTIC conforme imagem)
         function detalharRegistro(colecao, firestoreId){
             const item = dbData[colecao]?.find(i=>String(i.firestoreId)===String(firestoreId) || String(i.id)===String(firestoreId)); if(!item) return;
             document.getElementById('detalhe-titulo-modal').textContent = colecao === 'orgaos' ? 'Governança e Contatos Institucionais' : 'Detalhes (' + colecao.toUpperCase() + ')';
@@ -1110,7 +1145,6 @@
                 const modalidadeAtual = item.gestorModalidadeSelecionada || 'TI';
 
                 document.getElementById('detalhe-conteudo').innerHTML = `
-                    <!-- Cabeçalho do Órgão (Estilo Imagem) -->
                     <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
@@ -1128,7 +1162,6 @@
                         </div>
                     </div>
 
-                    <!-- Sub-menu simulado de abas -->
                     <div class="flex border-b text-xs text-slate-600 font-semibold gap-4 pb-2">
                         <span class="border-b-2 border-blue-900 text-blue-900 pb-2"><i class="fa-solid fa-user-shield mr-1"></i> Responsáveis e Contatos</span>
                         <span class="text-slate-400">Serviços</span>
@@ -1139,10 +1172,7 @@
 
                     <p class="text-xs text-slate-500 italic">Três camadas de governança conforme modelo Rede GovTIC. Mantenha os contatos sempre atualizados.</p>
 
-                    <!-- Cards das 3 Camadas de Governança -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-                        
-                        <!-- 1. Responsável Institucional -->
                         <div class="bg-blue-900 text-white rounded-2xl p-4 shadow-sm flex flex-col justify-between border border-blue-800">
                             <div>
                                 <div class="flex justify-between items-center mb-3">
@@ -1160,7 +1190,6 @@
                             </div>
                         </div>
 
-                        <!-- 2. Responsável Operacional -->
                         <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-300 flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-center mb-3">
@@ -1183,7 +1212,6 @@
                             </div>
                         </div>
 
-                        <!-- 3. Ponto Focal -->
                         <div class="bg-white rounded-2xl p-4 shadow-sm border border-purple-200 flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-center mb-3">
@@ -1200,7 +1228,6 @@
                             </div>
                         </div>
 
-                        <!-- Ponto Focal Substituto -->
                         <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-center mb-3">
@@ -1216,7 +1243,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 `;
             } else if (colecao === 'demandas') {
@@ -1325,6 +1351,7 @@
             } else if (tipo === 'demanda') {
                 container.innerHTML = `<div class="space-y-3 text-xs">
                     <div><label class="block mb-1 font-bold">Título da Demanda</label><input id="uc-1" required class="w-full p-2 border rounded"></div>
+                    <div><label class="block mb-1 font-bold">Data Limite / Início</label><input type="date" id="uc-data" class="w-full p-2 border rounded"></div>
                     <div><label class="block mb-1 font-bold">Detalhes</label><textarea id="uc-desc" rows="3" class="w-full p-2 border rounded"></textarea></div>
                 </div>`;
             } else {
@@ -1367,6 +1394,7 @@
                     await addDoc(collection(db, 'demandas'), {
                         id: 'DEM-' + Date.now(),
                         titulo: val('uc-1'),
+                        dataLimite: val('uc-data'),
                         descricao: val('uc-desc'),
                         status: 'Em Andamento',
                         prioridade: 'Média',
@@ -1384,7 +1412,6 @@
             } catch (err) { alert(traduzirErroSistema(err)); }
         }
 
-        // Botão Limpar Todos os Clientes
         document.getElementById('btn-limpar-clientes')?.addEventListener('click', async () => {
             if (currentUser?.perfil !== 'admin') { alert('Somente administradores podem limpar a base.'); return; }
             if (!confirm('ATENÇÃO: Deseja realmente apagar TODOS os clientes cadastrados na nuvem? Esta ação não pode ser desfeita.')) return;
@@ -1402,7 +1429,6 @@
             }
         });
 
-        // Importação de CSV para Clientes (Órgãos)
         document.getElementById('input-import-orgaos-csv')?.addEventListener('change', async e => {
             const file = e.target.files[0];
             if (!file) return;
@@ -1502,8 +1528,36 @@
 
         configurarInterface();
 
-        // Event listener para mudança de modalidade direto na tabela de clientes
+        // Event listener para mudança de data da demanda na tabela ou nos cards
         document.addEventListener('change', async ev => {
+            const inputData = ev.target.closest?.('.input-data-demanda');
+            if (inputData) {
+                const firestoreId = inputData.getAttribute('data-firestore-id');
+                const novaData = inputData.value;
+                const demandaObj = dbData.demandas.find(x => String(x.firestoreId) === String(firestoreId) || String(x.id) === String(firestoreId));
+                if (!demandaObj || !firestoreId) return;
+
+                try {
+                    const agora = new Date().toISOString();
+                    const autor = currentUser?.nome || currentUser?.email || 'Sistema';
+                    const { diaSemana } = calcularInfoSemana(novaData);
+                    const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Data alterada para ${novaData} (Alocado em: ${diaSemana || 'Backlog'})` }];
+                    
+                    await setDoc(doc(db, 'demandas', String(firestoreId)), { 
+                        dataLimite: novaData, 
+                        diaSemana: diaSemana || '',
+                        historicoAcoes, 
+                        atualizadoEm: agora, 
+                        editadoPor: autor 
+                    }, { merge: true });
+
+                    demandaObj.dataLimite = novaData;
+                    demandaObj.diaSemana = diaSemana || '';
+                    renderDemandas();
+                } catch(err) { alert(traduzirErroSistema(err)); }
+                return;
+            }
+
             const selectMod = ev.target.closest?.('.select-modalidade-gestor');
             if (selectMod) {
                 const firestoreId = selectMod.getAttribute('data-firestore-id');
@@ -1525,34 +1579,8 @@
                 } catch(err) { alert(traduzirErroSistema(err)); }
                 return;
             }
-
-            const selectMover = ev.target.closest?.('.select-mover-dia');
-            if (selectMover) {
-                const firestoreId = selectMover.getAttribute('data-firestore-id');
-                const novoDia = selectMover.value;
-                const demandaObj = dbData.demandas.find(x => String(x.firestoreId) === String(firestoreId));
-                if (!demandaObj || !firestoreId) return;
-
-                try {
-                    const agora = new Date().toISOString();
-                    const autor = currentUser?.nome || currentUser?.email || 'Sistema';
-                    const diaNome = novoDia ? novoDia.toUpperCase() : 'BACKLOG';
-                    const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Movido para: ${diaNome}` }];
-                    
-                    await setDoc(doc(db, 'demandas', String(firestoreId)), { 
-                        diaSemana: novoDia, 
-                        historicoAcoes, 
-                        atualizadoEm: agora, 
-                        editadoPor: autor 
-                    }, { merge: true });
-
-                    demandaObj.diaSemana = novoDia;
-                    renderDemandas();
-                } catch(err) { alert(traduzirErroSistema(err)); }
-            }
         });
 
-        // Event listener para mudança de modalidade dentro do modal de detalhes do cliente
         document.addEventListener('change', ev => {
             const selectDetMod = ev.target.closest?.('#detalhe-select-modalidade');
             if (selectDetMod) {
