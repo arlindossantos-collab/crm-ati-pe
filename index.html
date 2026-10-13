@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.6 - HOMOLOGAÇÃO (CALENDÁRIO MENSAL + SEMANAL) -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.7 - HOMOLOGAÇÃO (HERANÇA DE CORES NO MENSAL) -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.6</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.7</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.6</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.7</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -428,14 +428,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.2.6 -->
+    <!-- Script Principal v0.2.7 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.2.6: Homologação - Calendário Mensal Completo + Semanal');
+        console.info('PRGD v0.2.7: Homologação - Herança de Cores no Calendário Mensal');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -985,7 +985,6 @@
                 const dataVal = d.dataLimite || d.dataInicio || '';
                 const { diaSemana: diaPorData, badgeOutraSemana } = calcularInfoSemana(dataVal);
                 
-                // Se a demanda mudou para outra semana, ela sai do calendário semanal e vai para o backlog/mensal
                 if (badgeOutraSemana) {
                     backlog.push(d);
                     return;
@@ -1026,7 +1025,6 @@
             const diasNoMes = ultimoDiaMes.getDate();
             const diaSemanaInicio = primeiroDiaMes.getDay();
 
-            // Mapear demandas por data "YYYY-MM-DD"
             const demandasPorData = {};
             listaDemandas.forEach(d => {
                 const dt = d.dataLimite || d.dataInicio || '';
@@ -1037,7 +1035,6 @@
             });
 
             let html = '';
-            // Dias vazios do mês anterior
             for (let i = 0; i < diaSemanaInicio; i++) {
                 html += `<div class="bg-slate-50/50 border border-slate-100 rounded-lg p-2 min-h-[90px] opacity-40"></div>`;
             }
@@ -1057,11 +1054,13 @@
                         ${demandasDoDia.length ? `<span class="text-[10px] bg-blue-100 text-blue-900 font-bold px-1.5 rounded-full">${demandasDoDia.length}</span>` : ''}
                     </div>
                     <div class="space-y-1 overflow-y-auto max-h-24 flex-1">
-                        ${demandasDoDia.map(d => `
-                            <div class="p-1 rounded bg-blue-50 border border-blue-200 text-[10px] text-blue-900 font-semibold truncate cursor-pointer tr-detalhe" data-colecao="demandas" data-id="${esc(d.firestoreId)}" title="${esc(d.titulo)}">
+                        ${demandasDoDia.map(d => {
+                            // Herda a mesma classe de cor definida no card semanal / backlog
+                            const corCard = d.corCard || 'bg-blue-50 border-blue-200 text-blue-900';
+                            return `<div class="p-1 rounded ${corCard} text-[10px] font-semibold truncate cursor-pointer tr-detalhe shadow-sm" data-colecao="demandas" data-id="${esc(d.firestoreId)}" title="${esc(d.titulo)}">
                                 ${esc(d.titulo)}
-                            </div>
-                        `).join('')}
+                            </div>`;
+                        }).join('')}
                     </div>
                 </div>`;
             }
