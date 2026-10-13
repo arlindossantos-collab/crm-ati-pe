@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.3.1 - HOMOLOGAÇÃO (CAMPOS COMPLETOS DEMANDA) -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.3.2 - HOMOLOGAÇÃO (ATUALIZAÇÃO GRGD ANTÔNIO) -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.3.1</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.3.2</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.3.1</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.3.2</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -428,14 +428,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.3.1 -->
+    <!-- Script Principal v0.3.2 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.3.1: Homologação - Campos completos de demandas restaurados');
+        console.info('PRGD v0.3.2: Homologação - Inclusão de Antônio na lista GRGD');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -488,7 +488,16 @@
         ];
 
         const RESPONSAVEIS_GRGD_DISPONIVEIS = [
-            'Arlindo Santos', 'Eronita', 'Tino', 'Richard', 'João', 'Lívia', 'Rebeca', 'Lorena', 'Clarissa Borba', 'Pacheco'
+            'Arlindo Santos',
+            'Richard Lima',
+            'Eronita Leidjen',
+            'Tino Perazzo',
+            'João Inácio',
+            'Lívia Kelly',
+            'Rebeca Medeiros',
+            'Lorena Gouveia',
+            'Clarissa Borba',
+            'Antônio Lopes'
         ];
 
         const CORES_CARD_DEMANDA = [
@@ -573,6 +582,7 @@
             if (nome.includes('rebeca')) return 'bg-rose-600 border-rose-800 text-white';
             if (nome.includes('lorena')) return 'bg-teal-600 border-teal-800 text-white';
             if (nome.includes('clarissa')) return 'bg-fuchsia-600 border-fuchsia-800 text-white';
+            if (nome.includes('antônio') || nome.includes('antonio')) return 'bg-orange-600 border-orange-800 text-white';
             if (nome.includes('pacheco')) return 'bg-blue-600 border-blue-800 text-white';
             return 'bg-slate-700 border-slate-900 text-white';
         }
