@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.5 - HOMOLOGAÇÃO (ORDEM E CARDS DE GESTORES) -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.6 - HOMOLOGAÇÃO (CALENDÁRIO MENSAL + SEMANAL) -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.5</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.6</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.5</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.6</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -200,8 +200,9 @@
                 </table>
             </div>
 
-            <!-- VISÃO 2: CALENDÁRIO & BACKLOG -->
+            <!-- VISÃO 2: CALENDÁRIO & BACKLOG + CALENDÁRIO MENSAL -->
             <div id="container-visao-calendario" class="hidden space-y-6">
+                <!-- Backlog -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                     <div class="flex items-center justify-between mb-3">
                         <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-box-archive text-amber-600"></i> BACKLOG (Atividades Pendentes)</h4>
@@ -210,6 +211,7 @@
                     <div id="backlog-postits-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 min-h-[90px] p-2 bg-slate-50 rounded-lg border border-dashed border-slate-200"></div>
                 </div>
 
+                <!-- Calendário Semanal -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                     <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-900"></i> CALENDÁRIO SEMANAL</h4>
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
@@ -219,6 +221,24 @@
                         <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Quinta-feira</span></div><div id="cal-quinta" class="space-y-2 flex-1"></div></div>
                         <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Sexta-feira</span></div><div id="cal-sexta" class="space-y-2 flex-1"></div></div>
                     </div>
+                </div>
+
+                <!-- Calendário Completo Mensal -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4 border-b pb-3">
+                        <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-calendar-alt text-indigo-700"></i> CALENDÁRIO MENSAL COMPLETO</h4>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="btn-mes-anterior" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition cursor-pointer"><i class="fa-solid fa-chevron-left mr-1"></i> Anterior</button>
+                            <span id="mes-atual-label" class="text-xs font-bold text-blue-900 min-w-[140px] text-center uppercase">Outubro 2026</span>
+                            <button type="button" id="btn-mes-proximo" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition cursor-pointer">Próximo <i class="fa-solid fa-chevron-right ml-1"></i></button>
+                            <button type="button" id="btn-mes-hoje" class="p-2 bg-blue-900 text-white rounded-lg text-xs font-bold transition cursor-pointer ml-2">Hoje</button>
+                        </div>
+                    </div>
+                    <!-- Grid do Calendário Mensal -->
+                    <div class="grid grid-cols-7 gap-1 text-center font-bold text-xs text-slate-500 mb-2">
+                        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                    </div>
+                    <div id="calendario-mensal-grid" class="grid grid-cols-7 gap-1.5"></div>
                 </div>
             </div>
         </div>
@@ -408,14 +428,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.2.5 -->
+    <!-- Script Principal v0.2.6 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.2.5: Homologação - Nova Ordem e Cards de Gestores');
+        console.info('PRGD v0.2.6: Homologação - Calendário Mensal Completo + Semanal');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -445,6 +465,8 @@
         let filtroDemandaPrioAtual = '';
         let ordenacaoDemandasAtual = 'recente';
         let visaoDemandasAtual = 'tabela';
+
+        let dataMensalAtual = new Date();
 
         let buscaDemandasVal = '';
         let buscaEventosVal = '';
@@ -584,12 +606,12 @@
         }
 
         function calcularInfoSemana(dataStr) {
-            if (!dataStr) return { diaSemana: '', badgeOutraSemana: '' };
+            if (!dataStr) return { diaSemana: '', badgeOutraSemana: false };
             try {
                 const parts = dataStr.split('-');
-                if (parts.length !== 3) return { diaSemana: '', badgeOutraSemana: '' };
+                if (parts.length !== 3) return { diaSemana: '', badgeOutraSemana: false };
                 const d = new Date(parts[0], parts[1] - 1, parts[2]);
-                if (isNaN(d.getTime())) return { diaSemana: '', badgeOutraSemana: '' };
+                if (isNaN(d.getTime())) return { diaSemana: '', badgeOutraSemana: false };
 
                 const jsDay = d.getDay();
                 const mapDias = { 1: 'segunda', 2: 'terca', 3: 'quarta', 4: 'quinta', 5: 'sexta' };
@@ -601,14 +623,11 @@
                 const onejanAgora = new Date(agora.getFullYear(), 0, 1);
                 const weekAgora = Math.ceil((((agora - onejanAgora) / 86400000) + onejanAgora.getDay() + 1) / 7);
 
-                let badgeOutraSemana = '';
-                if (weekTarget !== weekAgora || d.getFullYear() !== agora.getFullYear()) {
-                    badgeOutraSemana = `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded ml-1" title="Data alocada em outra semana"><i class="fa-solid fa-clock-rotate-left"></i> Outra semana</span>`;
-                }
+                const outraSemana = weekTarget !== weekAgora || d.getFullYear() !== agora.getFullYear();
 
-                return { diaSemana, badgeOutraSemana };
+                return { diaSemana, badgeOutraSemana: outraSemana };
             } catch(e) {
-                return { diaSemana: '', badgeOutraSemana: '' };
+                return { diaSemana: '', badgeOutraSemana: false };
             }
         }
 
@@ -802,12 +821,10 @@
                 const audit = renderAuditInfo(o);
                 const modalidadeAtual = o.gestorModalidadeSelecionada || 'Órgão';
                 
-                // 1 - Gestor do Órgão (Sempre fixo na coluna dedicada)
                 const gestorOrgaoNome = o.gestorOrgao || o.respInstitucionalNome || '-';
                 const gestorOrgaoEmail = o.emailGestorOrgao || o.respInstitucionalEmail || '-';
                 const gestorOrgaoTel = o.telGestorOrgao || o.respInstitucionalTel || '-';
 
-                // Gestor atualmente selecionado no dropdown para exibição na tabela
                 let nomeGestorSel = gestorOrgaoNome;
                 let emailGestorSel = gestorOrgaoEmail;
                 let telGestorSel = gestorOrgaoTel;
@@ -914,6 +931,7 @@
                 const dataVal = d.dataLimite || d.dataInicio || '';
                 const diaSemanaVal = d.diaSemana || '';
                 const { badgeOutraSemana } = calcularInfoSemana(dataVal);
+                const badgeOutraSemanaHtml = badgeOutraSemana ? `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded ml-1" title="Data alocada em outra semana"><i class="fa-solid fa-clock-rotate-left"></i> Outra semana</span>` : '';
 
                 return `<tr class="hover:opacity-95 transition-colors ${corLinhaClara} border-b border-slate-200">
                     <td class="p-4 font-bold text-slate-800">${esc(d.solicitante || 'Não informado')}<div class="text-[11px] font-normal text-slate-600">${esc(d.orgao || '')}</div></td>
@@ -924,7 +942,7 @@
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-1 flex-wrap">
                             <input type="date" class="input-data-demanda p-1 border rounded text-xs bg-white font-medium text-blue-900 cursor-pointer shadow-sm" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Escolha uma data específica">
-                            ${badgeOutraSemana}
+                            ${badgeOutraSemanaHtml}
                         </div>
                     </td>
 
@@ -948,6 +966,7 @@
             }).join('') || '<tr><td colspan="9" class="text-slate-400 text-sm text-center py-6">Nenhuma demanda encontrada.</td></tr>';
 
             renderCalendarioEBacklog(filtered);
+            renderCalendarioMensal(filtered);
         }
 
         function renderCalendarioEBacklog(listaDemandas) {
@@ -964,7 +983,14 @@
 
             listaDemandas.forEach(d => {
                 const dataVal = d.dataLimite || d.dataInicio || '';
-                const { diaSemana: diaPorData } = calcularInfoSemana(dataVal);
+                const { diaSemana: diaPorData, badgeOutraSemana } = calcularInfoSemana(dataVal);
+                
+                // Se a demanda mudou para outra semana, ela sai do calendário semanal e vai para o backlog/mensal
+                if (badgeOutraSemana) {
+                    backlog.push(d);
+                    return;
+                }
+
                 const diaAtribuido = diaPorData || String(d.diaSemana || '').trim().toLowerCase();
 
                 if (diasSemana[diaAtribuido]) {
@@ -984,6 +1010,78 @@
             colSex.innerHTML = diasSemana['sexta'].map(d => criarPostItHtml(d)).join('') || '<span class="text-[11px] text-slate-400 italic">Vazio</span>';
         }
 
+        function renderCalendarioMensal(listaDemandas) {
+            const grid = document.getElementById('calendario-mensal-grid');
+            const labelMes = document.getElementById('mes-atual-label');
+            if (!grid || !labelMes) return;
+
+            const ano = dataMensalAtual.getFullYear();
+            const mes = dataMensalAtual.getMonth();
+
+            const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            labelMes.textContent = `${nomesMeses[mes]} ${ano}`;
+
+            const primeiroDiaMes = new Date(ano, mes, 1);
+            const ultimoDiaMes = new Date(ano, mes + 1, 0);
+            const diasNoMes = ultimoDiaMes.getDate();
+            const diaSemanaInicio = primeiroDiaMes.getDay();
+
+            // Mapear demandas por data "YYYY-MM-DD"
+            const demandasPorData = {};
+            listaDemandas.forEach(d => {
+                const dt = d.dataLimite || d.dataInicio || '';
+                if (dt) {
+                    if (!demandasPorData[dt]) demandasPorData[dt] = [];
+                    demandasPorData[dt].push(d);
+                }
+            });
+
+            let html = '';
+            // Dias vazios do mês anterior
+            for (let i = 0; i < diaSemanaInicio; i++) {
+                html += `<div class="bg-slate-50/50 border border-slate-100 rounded-lg p-2 min-h-[90px] opacity-40"></div>`;
+            }
+
+            const hojeStr = new Date().toISOString().split('T')[0];
+
+            for (let dia = 1; dia <= diasNoMes; dia++) {
+                const mesStr = String(mes + 1).padStart(2, '0');
+                const diaStr = String(dia).padStart(2, '0');
+                const dataIso = `${ano}-${mesStr}-${diaStr}`;
+                const ehHoje = dataIso === hojeStr;
+                const demandasDoDia = demandasPorData[dataIso] || [];
+
+                html += `<div class="bg-white border ${ehHoje ? 'border-blue-600 ring-2 ring-blue-100' : 'border-slate-200'} rounded-lg p-2 min-h-[90px] flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold ${ehHoje ? 'bg-blue-900 text-white w-5 h-5 rounded-full flex items-center justify-center' : 'text-slate-700'}">${dia}</span>
+                        ${demandasDoDia.length ? `<span class="text-[10px] bg-blue-100 text-blue-900 font-bold px-1.5 rounded-full">${demandasDoDia.length}</span>` : ''}
+                    </div>
+                    <div class="space-y-1 overflow-y-auto max-h-24 flex-1">
+                        ${demandasDoDia.map(d => `
+                            <div class="p-1 rounded bg-blue-50 border border-blue-200 text-[10px] text-blue-900 font-semibold truncate cursor-pointer tr-detalhe" data-colecao="demandas" data-id="${esc(d.firestoreId)}" title="${esc(d.titulo)}">
+                                ${esc(d.titulo)}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        document.getElementById('btn-mes-anterior')?.addEventListener('click', () => {
+            dataMensalAtual.setMonth(dataMensalAtual.getMonth() - 1);
+            renderDemandas();
+        });
+        document.getElementById('btn-mes-proximo')?.addEventListener('click', () => {
+            dataMensalAtual.setMonth(dataMensalAtual.getMonth() + 1);
+            renderDemandas();
+        });
+        document.getElementById('btn-mes-hoje')?.addEventListener('click', () => {
+            dataMensalAtual = new Date();
+            renderDemandas();
+        });
+
         function criarPostItHtml(d) {
             const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
             const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
@@ -991,6 +1089,7 @@
             const dataVal = d.dataLimite || d.dataInicio || '';
             const diaSemanaVal = d.diaSemana || '';
             const { badgeOutraSemana } = calcularInfoSemana(dataVal);
+            const badgeOutraSemanaHtml = badgeOutraSemana ? `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded ml-1" title="Data alocada em outra semana"><i class="fa-solid fa-clock-rotate-left"></i> Outra semana</span>` : '';
 
             return `<div class="post-it p-3 rounded-lg border ${corCard} shadow-sm flex flex-col justify-between gap-2.5">
                 <div>
@@ -1013,7 +1112,7 @@
                             <option value="quinta" ${diaSemanaVal==='quinta'?'selected':''}>Qui</option>
                             <option value="sexta" ${diaSemanaVal==='sexta'?'selected':''}>Sex</option>
                         </select>
-                        ${badgeOutraSemana}
+                        ${badgeOutraSemanaHtml}
                         <button type="button" class="text-[10px] bg-blue-900 text-white px-2 py-1 rounded font-bold cursor-pointer tr-detalhe ml-auto" data-colecao="demandas" data-id="${esc(d.firestoreId)}"><i class="fa-solid fa-eye"></i></button>
                     </div>
                 </div>
@@ -1183,11 +1282,6 @@
                     ${common('Cargo Ponto Focal','pontoFocalCargo')}
                     ${common('E-mail Ponto Focal','pontoFocalEmail','email')}
                     ${common('Telefone/WhatsApp Ponto Focal','pontoFocalTel','text','','input-mask-telefone')}
-
-                    ${common('Nome Substituto Secundário','pontoFocalSubNome')}
-                    ${common('Cargo Substituto','pontoFocalSubCargo')}
-                    ${common('E-mail Substituto','pontoFocalSubEmail','email')}
-                    ${common('Telefone Substituto','pontoFocalSubTel','text','','input-mask-telefone')}
                 </div>`;
                 return;
             }
@@ -1225,7 +1319,6 @@
 
                 const modalidadeAtual = item.gestorModalidadeSelecionada || 'Órgão';
 
-                // Dados iniciais do Card 2 (Dinâmico conforme dropdown)
                 let nomeCard2 = item.gestorOrgao || item.respInstitucionalNome || 'Carlos Silva';
                 let cargoCard2 = '1 - Gestor do Órgão';
                 let emailCard2 = item.emailGestorOrgao || item.respInstitucionalEmail || 'carlos.silva@ati.pe.gov.br';
@@ -1270,7 +1363,6 @@
                     <p class="text-xs text-slate-500 italic">Estrutura oficial de gestores em 5 níveis e contatos de substitutos.</p>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                        <!-- CARD 1: Gestor do Órgão (Fixo em destaque) -->
                         <div class="bg-blue-900 text-white rounded-2xl p-4 shadow-sm flex flex-col justify-between border border-blue-800">
                             <div>
                                 <div class="flex justify-between items-center mb-3">
@@ -1288,7 +1380,6 @@
                             </div>
                         </div>
 
-                        <!-- CARD 2: Dados do Gestor (Dinâmico via dropdown) -->
                         <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-300 flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-center mb-3">
@@ -1311,7 +1402,6 @@
                             </div>
                         </div>
 
-                        <!-- CARD 3: Substituto / Outros Contatos -->
                         <div class="bg-white rounded-2xl p-4 shadow-sm border border-purple-200 flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-center mb-3">
