@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.4 - HOMOLOGAÇÃO (LEGENDA DEMANDAS + GESTOR PRINCIPAL) -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.5 - HOMOLOGAÇÃO (ORDEM E CARDS DE GESTORES) -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.4</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.5</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.4</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.5</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -233,13 +233,12 @@
                     </div>
                     <input type="text" id="busca-clientes" placeholder="Buscar por nome, sigla ou gestor..." class="p-2 border rounded-lg text-xs bg-white w-72 focus:ring-2 focus:ring-blue-600 focus:outline-none">
                     
-                    <select id="filtro-gestor-modalidade" class="p-2 border rounded-lg text-xs bg-white font-medium">
-                        <option value="">Principal</option>
-                        <option value="TI">TI</option>
-                        <option value="Estratégico">Estratégico</option>
-                        <option value="SEI">SEI</option>
-                        <option value="SI">SI</option>
-                        <option value="Telemática">Telemática</option>
+                    <select id="filtro-gestor-modalidade" class="p-2 border rounded-lg text-xs bg-white font-medium" title="Filtrar por modalidade de gestor">
+                        <option value="">1 - Gestor do Órgão (Principal)</option>
+                        <option value="NSI">2 - Gestor do NSI</option>
+                        <option value="Telemática">3 - Gestor de Telemática</option>
+                        <option value="SI">4 - Gestor de SI</option>
+                        <option value="SEI">5 - Gestor do SEI</option>
                     </select>
 
                     <select id="filtro-situacao-cliente" class="p-2 border rounded-lg text-xs bg-white font-medium">
@@ -266,8 +265,8 @@
                         <tr>
                             <th class="p-3">Nome / Sigla</th>
                             <th class="p-3">Telefone fixo</th>
-                            <th class="p-3">Gestor Principal</th>
-                            <th class="p-3">Outros Gestores</th>
+                            <th class="p-3">1 - Gestor do Órgão</th>
+                            <th class="p-3">Selecionar Modalidade de Gestor</th>
                             <th class="p-3">E-mail</th>
                             <th class="p-3">Telefone / WhatsApp</th>
                             <th class="p-3">Situação</th>
@@ -409,14 +408,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.2.4 -->
+    <!-- Script Principal v0.2.5 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.2.4: Homologação - Legenda de Demandas + Gestor Principal em Clientes');
+        console.info('PRGD v0.2.5: Homologação - Nova Ordem e Cards de Gestores');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -790,8 +789,8 @@
                 const matchSituacao = !situacaoSel || (o.situacaoContato === situacaoSel);
 
                 const matchBusca = !txt || [
-                    o.nome, o.sigla, o.telefoneFixo, o.gestorTi, o.gestorEstrategico, o.gestorSei, o.gestorSi, o.gestorTelemática,
-                    o.emailGestorTi, o.emailGestorEstrategico, o.emailGestorSei, o.emailGestorSi, o.emailGestorTelemática
+                    o.nome, o.sigla, o.telefoneFixo, o.gestorOrgao, o.gestorNsi, o.gestorTelematica, o.gestorSi, o.gestorSei,
+                    o.emailGestorOrgao, o.emailGestorNsi, o.emailGestorTelematica, o.emailGestorSi, o.emailGestorSei
                 ].filter(Boolean).join(' ').toLowerCase().includes(txt);
 
                 return matchBusca && matchSituacao && matchModalidade;
@@ -801,26 +800,26 @@
 
             tbody.innerHTML = filtered.map(o => {
                 const audit = renderAuditInfo(o);
-                const modalidadeAtual = o.gestorModalidadeSelecionada || 'TI';
+                const modalidadeAtual = o.gestorModalidadeSelecionada || 'Órgão';
                 
-                // Sempre exibe o gestor principal (TI / resp principal) primeiro
-                const gestorPrincipalNome = o.gestorTi || o.gestorTecnico || '-';
-                const gestorPrincipalEmail = o.emailGestorTi || o.emailGestorTecnico || '-';
-                const gestorPrincipalTel = o.telGestorTi || o.telGestorTecnico || '-';
+                // 1 - Gestor do Órgão (Sempre fixo na coluna dedicada)
+                const gestorOrgaoNome = o.gestorOrgao || o.respInstitucionalNome || '-';
+                const gestorOrgaoEmail = o.emailGestorOrgao || o.respInstitucionalEmail || '-';
+                const gestorOrgaoTel = o.telGestorOrgao || o.respInstitucionalTel || '-';
 
-                // Gestor atualmente selecionado para exibição do contato
-                let nomeGestor = gestorPrincipalNome;
-                let emailGestor = gestorPrincipalEmail;
-                let telGestor = gestorPrincipalTel;
+                // Gestor atualmente selecionado no dropdown para exibição na tabela
+                let nomeGestorSel = gestorOrgaoNome;
+                let emailGestorSel = gestorOrgaoEmail;
+                let telGestorSel = gestorOrgaoTel;
 
-                if (modalidadeAtual === 'Estratégico') {
-                    nomeGestor = o.gestorEstrategico || '-'; emailGestor = o.emailGestorEstrategico || '-'; telGestor = o.telGestorEstrategico || '-';
-                } else if (modalidadeAtual === 'SEI') {
-                    nomeGestor = o.gestorSei || '-'; emailGestor = o.emailGestorSei || '-'; telGestor = o.telGestorSei || '-';
-                } else if (modalidadeAtual === 'SI') {
-                    nomeGestor = o.gestorSi || '-'; emailGestor = o.emailGestorSi || '-'; telGestor = o.telGestorSi || '-';
+                if (modalidadeAtual === 'NSI') {
+                    nomeGestorSel = o.gestorNsi || '-'; emailGestorSel = o.emailGestorNsi || '-'; telGestorSel = o.telGestorNsi || '-';
                 } else if (modalidadeAtual === 'Telemática') {
-                    nomeGestor = o.gestorTelematica || '-'; emailGestor = o.emailGestorTelematica || '-'; telGestor = o.telGestorTelematica || '-';
+                    nomeGestorSel = o.gestorTelematica || '-'; emailGestorSel = o.emailGestorTelematica || '-'; telGestorSel = o.telGestorTelematica || '-';
+                } else if (modalidadeAtual === 'SI') {
+                    nomeGestorSel = o.gestorSi || '-'; emailGestorSel = o.emailGestorSi || '-'; telGestorSel = o.telGestorSi || '-';
+                } else if (modalidadeAtual === 'SEI') {
+                    nomeGestorSel = o.gestorSei || '-'; emailGestorSel = o.emailGestorSei || '-'; telGestorSel = o.telGestorSei || '-';
                 }
 
                 const situacao = o.situacaoContato || 'Validado';
@@ -838,22 +837,22 @@
                     </td>
                     <td class="p-3 font-mono text-slate-600">${esc(o.telefoneFixo || '-')}</td>
                     <td class="p-3 font-bold text-slate-900">
-                        <div>${esc(gestorPrincipalNome)}</div>
-                        <div class="text-[10px] text-slate-500 font-normal">Principal (TI)</div>
+                        <div>${esc(gestorOrgaoNome)}</div>
+                        <div class="text-[10px] text-slate-500 font-normal">1 - Gestor do Órgão</div>
                     </td>
                     <td class="p-3">
-                        <select class="select-modalidade-gestor p-1.5 border rounded text-xs bg-white font-semibold text-blue-900 cursor-pointer" data-firestore-id="${esc(o.firestoreId)}" title="Escolha os demais gestores">
-                            <option value="TI" ${modalidadeAtual==='TI'?'selected':''}>TI (Principal)</option>
-                            <option value="Estratégico" ${modalidadeAtual==='Estratégico'?'selected':''}>Estratégico</option>
-                            <option value="SEI" ${modalidadeAtual==='SEI'?'selected':''}>SEI</option>
-                            <option value="SI" ${modalidadeAtual==='SI'?'selected':''}>SI</option>
-                            <option value="Telemática" ${modalidadeAtual==='Telemática'?'selected':''}>Telemática</option>
+                        <select class="select-modalidade-gestor p-1.5 border rounded text-xs bg-white font-semibold text-blue-900 cursor-pointer" data-firestore-id="${esc(o.firestoreId)}" title="Escolha o gestor desejado">
+                            <option value="Órgão" ${modalidadeAtual==='Órgão'?'selected':''}>1 - Gestor do Órgão</option>
+                            <option value="NSI" ${modalidadeAtual==='NSI'?'selected':''}>2 - Gestor do NSI</option>
+                            <option value="Telemática" ${modalidadeAtual==='Telemática'?'selected':''}>3 - Gestor de Telemática</option>
+                            <option value="SI" ${modalidadeAtual==='SI'?'selected':''}>4 - Gestor de SI</option>
+                            <option value="SEI" ${modalidadeAtual==='SEI'?'selected':''}>5 - Gestor do SEI</option>
                         </select>
-                        <div class="text-[10px] font-semibold text-slate-700 mt-1">${esc(nomeGestor)}</div>
+                        <div class="text-[10px] font-semibold text-slate-700 mt-1">${esc(nomeGestorSel)}</div>
                     </td>
-                    <td class="p-3 text-blue-800 underline">${esc(emailGestor)}</td>
+                    <td class="p-3 text-blue-800 underline">${esc(emailGestorSel)}</td>
                     <td class="p-3 font-mono text-slate-700">
-                        <span class="inline-flex items-center gap-1"><i class="fa-brands fa-whatsapp text-emerald-600"></i> ${esc(telGestor)}</span>
+                        <span class="inline-flex items-center gap-1"><i class="fa-brands fa-whatsapp text-emerald-600"></i> ${esc(telGestorSel)}</span>
                     </td>
                     <td class="p-3">${badgeSitHtml}</td>
                     <td class="p-3">
@@ -861,7 +860,7 @@
                         ${audit.autorHtml}
                     </td>
                     <td class="p-3 text-center">
-                        <button type="button" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-900 hover:text-white text-blue-900 font-bold inline-flex items-center justify-center transition tr-detalhe cursor-pointer shadow-sm border border-slate-200" data-colecao="orgaos" data-id="${esc(o.firestoreId)}" title="Ver Responsáveis e Contatos">
+                        <button type="button" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-900 hover:text-white text-blue-900 font-bold inline-flex items-center justify-center transition tr-detalhe cursor-pointer shadow-sm border border-slate-200" data-colecao="orgaos" data-id="${esc(o.firestoreId)}" title="Ver Cards de Gestores e Contatos">
                             <i class="fa-solid fa-arrow-right text-xs"></i>
                         </button>
                     </td>
@@ -1157,38 +1156,38 @@
                     <div><label class="block font-bold text-[11px] uppercase mb-1">Situação do Contato</label><select name="situacaoContato" class="w-full p-2 border rounded-lg text-xs bg-white"><option ${item.situacaoContato==='Validado'?'selected':''}>Validado</option><option ${item.situacaoContato==='Pendente'?'selected':''}>Pendente</option><option ${item.situacaoContato==='Desatualizado'?'selected':''}>Desatualizado</option></select></div>
                     ${common('Fonte da Informação (ex: WhatsApp, DO)','fonteInformacao')}
                     
-                    <div class="md:col-span-2 border-t pt-3 mt-2"><h5 class="font-bold text-blue-900 mb-2">1. Responsável Institucional</h5></div>
-                    ${common('Nome Resp. Institucional','respInstitucionalNome')}
-                    ${common('Cargo Resp. Institucional','respInstitucionalCargo')}
-                    ${common('E-mail Resp. Institucional','respInstitucionalEmail','email')}
-                    ${common('Telefone Resp. Institucional','respInstitucionalTel','text','','input-mask-telefone')}
+                    <div class="md:col-span-2 border-t pt-3 mt-2"><h5 class="font-bold text-blue-900 mb-2">1. Gestor do Órgão</h5></div>
+                    ${common('Nome Gestor do Órgão','gestorOrgao')}
+                    ${common('Cargo Gestor do Órgão','cargoGestorOrgao')}
+                    ${common('E-mail Gestor do Órgão','emailGestorOrgao','email')}
+                    ${common('Telefone Gestor do Órgão','telGestorOrgao','text','','input-mask-telefone')}
 
-                    <div class="md:col-span-2 border-t pt-3 mt-2"><h5 class="font-bold text-blue-900 mb-2">2. Gestor TI & Demais Modalidades</h5></div>
-                    ${common('Nome Gestor TI','gestorTi')}
-                    <div class="grid grid-cols-2 gap-2">${common('Tel. Gestor TI','telGestorTi','text','','input-mask-telefone')}${common('E-mail Gestor TI','emailGestorTi','email')}</div>
+                    <div class="md:col-span-2 border-t pt-3 mt-2"><h5 class="font-bold text-blue-900 mb-2">2. Gestor do NSI</h5></div>
+                    ${common('Nome Gestor do NSI','gestorNsi')}
+                    <div class="grid grid-cols-2 gap-2">${common('Tel. Gestor NSI','telGestorNsi','text','','input-mask-telefone')}${common('E-mail Gestor NSI','emailGestorNsi','email')}</div>
 
-                    ${common('Nome Gestor Estratégico','gestorEstrategico')}
-                    <div class="grid grid-cols-2 gap-2">${common('Tel. Gestor Estratégico','telGestorEstrategico','text','','input-mask-telefone')}${common('E-mail Gestor Estratégico','emailGestorEstrategico','email')}</div>
-
-                    ${common('Nome Gestor SEI','gestorSei')}
-                    <div class="grid grid-cols-2 gap-2">${common('Tel. Gestor SEI','telGestorSei','text','','input-mask-telefone')}${common('E-mail Gestor SEI','emailGestorSei','email')}</div>
-
-                    ${common('Nome Gestor SI','gestorSi')}
-                    <div class="grid grid-cols-2 gap-2">${common('Tel. Gestor SI','telGestorSi','text','','input-mask-telefone')}${common('E-mail Gestor SI','emailGestorSi','email')}</div>
-
+                    <div class="md:col-span-2 border-t pt-3 mt-2"><h5 class="font-bold text-blue-900 mb-2">3. Gestor de Telemática</h5></div>
                     ${common('Nome Gestor Telemática','gestorTelematica')}
-                    <div class="grid grid-cols-2 gap-2">${common('Tel. Gestor Telemática','telGestorTelematica','text','','input-mask-telefone')}${common('E-mail Gestor Telemática','emailGestorTelematica','email')}</div>
+                    <div class="grid grid-cols-2 gap-2">${common('Tel. Telemática','telGestorTelematica','text','','input-mask-telefone')}${common('E-mail Telemática','emailGestorTelematica','email')}</div>
 
-                    <div class="md:col-span-2 border-t pt-3 mt-2"><h5 class="font-bold text-blue-900 mb-2">3. Ponto Focal & Substitutos</h5></div>
-                    ${common('Nome Ponto Focal','pontoFocalNome')}
+                    <div class="md:col-span-2 border-t pt-3 mt-2"><h5 class="font-bold text-blue-900 mb-2">4. Gestor de SI</h5></div>
+                    ${common('Nome Gestor de SI','gestorSi')}
+                    <div class="grid grid-cols-2 gap-2">${common('Tel. SI','telGestorSi','text','','input-mask-telefone')}${common('E-mail SI','emailGestorSi','email')}</div>
+
+                    <div class="md:col-span-2 border-t pt-3 mt-2"><h5 class="font-bold text-blue-900 mb-2">5. Gestor do SEI</h5></div>
+                    ${common('Nome Gestor do SEI','gestorSei')}
+                    <div class="grid grid-cols-2 gap-2">${common('Tel. SEI','telGestorSei','text','','input-mask-telefone')}${common('E-mail SEI','emailGestorSei','email')}</div>
+
+                    <div class="md:col-span-2 border-t pt-3 mt-2"><h5 class="font-bold text-blue-900 mb-2">Substitutos e Outros Contatos</h5></div>
+                    ${common('Nome Ponto Focal / Substituto','pontoFocalNome')}
                     ${common('Cargo Ponto Focal','pontoFocalCargo')}
                     ${common('E-mail Ponto Focal','pontoFocalEmail','email')}
                     ${common('Telefone/WhatsApp Ponto Focal','pontoFocalTel','text','','input-mask-telefone')}
 
-                    ${common('Nome Ponto Focal Substituto','pontoFocalSubNome')}
-                    ${common('Cargo Ponto Focal Substituto','pontoFocalSubCargo')}
-                    ${common('E-mail Ponto Focal Substituto','pontoFocalSubEmail','email')}
-                    ${common('Telefone/WhatsApp Ponto Focal Substituto','pontoFocalSubTel','text','','input-mask-telefone')}
+                    ${common('Nome Substituto Secundário','pontoFocalSubNome')}
+                    ${common('Cargo Substituto','pontoFocalSubCargo')}
+                    ${common('E-mail Substituto','pontoFocalSubEmail','email')}
+                    ${common('Telefone Substituto','pontoFocalSubTel','text','','input-mask-telefone')}
                 </div>`;
                 return;
             }
@@ -1224,7 +1223,23 @@
                 if (situacao === 'Pendente') badgeSitHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Pendente</span>`;
                 if (situacao === 'Desatualizado') badgeSitHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Desatualizado</span>`;
 
-                const modalidadeAtual = item.gestorModalidadeSelecionada || 'TI';
+                const modalidadeAtual = item.gestorModalidadeSelecionada || 'Órgão';
+
+                // Dados iniciais do Card 2 (Dinâmico conforme dropdown)
+                let nomeCard2 = item.gestorOrgao || item.respInstitucionalNome || 'Carlos Silva';
+                let cargoCard2 = '1 - Gestor do Órgão';
+                let emailCard2 = item.emailGestorOrgao || item.respInstitucionalEmail || 'carlos.silva@ati.pe.gov.br';
+                let telCard2 = item.telGestorOrgao || item.respInstitucionalTel || '(81) 9 9488-7766';
+
+                if (modalidadeAtual === 'NSI') {
+                    nomeCard2 = item.gestorNsi || 'Maria Oliveira'; cargoCard2 = '2 - Gestor do NSI'; emailCard2 = item.emailGestorNsi || 'maria.oliveira@see.pe.gov.br'; telCard2 = item.telGestorNsi || '(81) 9 9123-4567';
+                } else if (modalidadeAtual === 'Telemática') {
+                    nomeCard2 = item.gestorTelematica || 'Rafael Lima'; cargoCard2 = '3 - Gestor de Telemática'; emailCard2 = item.emailGestorTelematica || 'rafael.lima@seplag.pe.gov.br'; telCard2 = item.telGestorTelematica || '(81) 9 9722-3344';
+                } else if (modalidadeAtual === 'SI') {
+                    nomeCard2 = item.gestorSi || 'Ana Paula Santos'; cargoCard2 = '4 - Gestor de SI'; emailCard2 = item.emailGestorSi || 'ana.santos@sefaz.pe.gov.br'; telCard2 = item.telGestorSi || '(81) 9 9811-2233';
+                } else if (modalidadeAtual === 'SEI') {
+                    nomeCard2 = item.gestorSei || 'Carlos Mendes'; cargoCard2 = '5 - Gestor do SEI'; emailCard2 = item.emailGestorSei || 'carlos.mendes@ses.pe.gov.br'; telCard2 = item.telGestorSei || '(81) 9 9987-1122';
+                }
 
                 document.getElementById('detalhe-conteudo').innerHTML = `
                     <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -1245,83 +1260,70 @@
                     </div>
 
                     <div class="flex border-b text-xs text-slate-600 font-semibold gap-4 pb-2">
-                        <span class="border-b-2 border-blue-900 text-blue-900 pb-2"><i class="fa-solid fa-user-shield mr-1"></i> Responsáveis e Contatos</span>
+                        <span class="border-b-2 border-blue-900 text-blue-900 pb-2"><i class="fa-solid fa-user-shield mr-1"></i> Gestores e Contatos</span>
                         <span class="text-slate-400">Serviços</span>
                         <span class="text-slate-400">Histórico</span>
                         <span class="text-slate-400">Validações</span>
                         <span class="text-slate-400">Relacionamento</span>
                     </div>
 
-                    <p class="text-xs text-slate-500 italic">Três camadas de governança conforme modelo Rede GovTIC. Mantenha os contatos sempre atualizados.</p>
+                    <p class="text-xs text-slate-500 italic">Estrutura oficial de gestores em 5 níveis e contatos de substitutos.</p>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                        <!-- CARD 1: Gestor do Órgão (Fixo em destaque) -->
                         <div class="bg-blue-900 text-white rounded-2xl p-4 shadow-sm flex flex-col justify-between border border-blue-800">
                             <div>
                                 <div class="flex justify-between items-center mb-3">
-                                    <span class="font-bold text-xs"><i class="fa-solid fa-user-tie mr-1"></i> 1. Responsável Institucional</span>
-                                    <span class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Atualizado</span>
+                                    <span class="font-bold text-xs"><i class="fa-solid fa-user-tie mr-1"></i> 1. Gestor do Órgão</span>
+                                    <span class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Principal</span>
                                 </div>
-                                <p class="text-[11px] text-blue-200 mb-3">Camada formal / legal - Designado oficialmente em Portaria, Ato ou Diário Oficial.</p>
+                                <p class="text-[11px] text-blue-200 mb-3">Responsável principal institucional do órgão.</p>
                                 <div class="space-y-1.5 text-xs bg-blue-950/50 p-3 rounded-xl">
-                                    <div><strong class="text-blue-300">Nome:</strong> ${esc(item.respInstitucionalNome || 'João Inácio')}</div>
-                                    <div><strong class="text-blue-300">Cargo:</strong> ${esc(item.respInstitucionalCargo || 'Diretor Presidente')}</div>
-                                    <div><strong class="text-blue-300">E-mail:</strong> ${esc(item.respInstitucionalEmail || 'joao.inacio@ati.pe.gov.br')}</div>
-                                    <div><strong class="text-blue-300">Telefone:</strong> ${esc(item.respInstitucionalTel || '(81) 3183-7600')}</div>
-                                    <div class="pt-2 border-t border-blue-800/60"><strong class="text-amber-300">Fonte:</strong> ${esc(item.fonteInformacao || 'Diário Oficial / WhatsApp')}</div>
+                                    <div><strong class="text-blue-300">Nome:</strong> ${esc(item.gestorOrgao || item.respInstitucionalNome || 'João Inácio')}</div>
+                                    <div><strong class="text-blue-300">Cargo:</strong> ${esc(item.cargoGestorOrgao || item.respInstitucionalCargo || 'Diretor Presidente')}</div>
+                                    <div><strong class="text-blue-300">E-mail:</strong> ${esc(item.emailGestorOrgao || item.respInstitucionalEmail || 'joao.inacio@ati.pe.gov.br')}</div>
+                                    <div><strong class="text-blue-300">Telefone:</strong> ${esc(item.telGestorOrgao || item.respInstitucionalTel || '(81) 3183-7600')}</div>
+                                    <div class="pt-2 border-t border-blue-800/60"><strong class="text-amber-300">Fonte:</strong> ${esc(item.fonteInformacao || 'Diário Oficial')}</div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- CARD 2: Dados do Gestor (Dinâmico via dropdown) -->
                         <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-300 flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-center mb-3">
-                                    <span class="font-bold text-xs text-emerald-900"><i class="fa-solid fa-gears mr-1"></i> 2. Resp. Operacional</span>
-                                    <select id="detalhe-select-modalidade" class="text-[10px] p-1 border rounded bg-emerald-50 font-bold text-emerald-900 cursor-pointer">
-                                        <option value="TI" ${modalidadeAtual==='TI'?'selected':''}>TI</option>
-                                        <option value="Estratégico" ${modalidadeAtual==='Estratégico'?'selected':''}>Estratégico</option>
-                                        <option value="SEI" ${modalidadeAtual==='SEI'?'selected':''}>SEI</option>
-                                        <option value="SI" ${modalidadeAtual==='SI'?'selected':''}>SI</option>
-                                        <option value="Telemática" ${modalidadeAtual==='Telemática'?'selected':''}>Telemática</option>
+                                    <span class="font-bold text-xs text-emerald-900"><i class="fa-solid fa-gears mr-1"></i> Dados do Gestor</span>
+                                    <select id="detalhe-select-modalidade" class="text-[10px] p-1 border rounded bg-emerald-50 font-bold text-emerald-900 cursor-pointer" title="Selecione o nível do gestor">
+                                        <option value="Órgão" ${modalidadeAtual==='Órgão'?'selected':''}>1 - Órgão</option>
+                                        <option value="NSI" ${modalidadeAtual==='NSI'?'selected':''}>2 - NSI</option>
+                                        <option value="Telemática" ${modalidadeAtual==='Telemática'?'selected':''}>3 - Telemática</option>
+                                        <option value="SI" ${modalidadeAtual==='SI'?'selected':''}>4 - SI</option>
+                                        <option value="SEI" ${modalidadeAtual==='SEI'?'selected':''}>5 - SEI</option>
                                     </select>
                                 </div>
-                                <p class="text-[11px] text-slate-500 mb-3">Camada técnica real - Responde pela TIC no dia a dia do órgão.</p>
+                                <p class="text-[11px] text-slate-500 mb-3">Dados exibidos conforme a seleção da modalidade acima.</p>
                                 <div class="space-y-1.5 text-xs bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
-                                    <div><strong class="text-slate-700">Nome:</strong> <span id="det-op-nome">${esc(item.gestorTi || 'Carlos Silva')}</span></div>
-                                    <div><strong class="text-slate-700">Cargo:</strong> Gestor de ${modalidadeAtual}</div>
-                                    <div><strong class="text-slate-700">E-mail:</strong> <span id="det-op-email">${esc(item.emailGestorTi || 'carlos.silva@ati.pe.gov.br')}</span></div>
-                                    <div><strong class="text-slate-700">WhatsApp:</strong> <span id="det-op-tel">${esc(item.telGestorTi || '(81) 9 9488-7766')}</span></div>
+                                    <div><strong class="text-slate-700">Nível:</strong> <span id="det-card2-nivel">${esc(cargoCard2)}</span></div>
+                                    <div><strong class="text-slate-700">Nome:</strong> <span id="det-card2-nome">${esc(nomeCard2)}</span></div>
+                                    <div><strong class="text-slate-700">E-mail:</strong> <span id="det-card2-email">${esc(emailCard2)}</span></div>
+                                    <div><strong class="text-slate-700">WhatsApp:</strong> <span id="det-card2-tel">${esc(telCard2)}</span></div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- CARD 3: Substituto / Outros Contatos -->
                         <div class="bg-white rounded-2xl p-4 shadow-sm border border-purple-200 flex flex-col justify-between">
                             <div>
                                 <div class="flex justify-between items-center mb-3">
-                                    <span class="font-bold text-xs text-purple-900"><i class="fa-solid fa-user-check mr-1"></i> 3. Ponto Focal</span>
-                                    <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Principal</span>
+                                    <span class="font-bold text-xs text-purple-900"><i class="fa-solid fa-user-clock mr-1"></i> Substituto / Contatos</span>
+                                    <span class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Suporte</span>
                                 </div>
-                                <p class="text-[11px] text-slate-500 mb-3">Canal de relacionamento - Canal ágil para alinhamentos, incidentes e convocações.</p>
+                                <p class="text-[11px] text-slate-500 mb-3">Ponto focal substituto e demais contatos operacionais.</p>
                                 <div class="space-y-1.5 text-xs bg-purple-50/50 p-3 rounded-xl border border-purple-100">
-                                    <div><strong class="text-slate-700">Nome:</strong> ${esc(item.pontoFocalNome || 'Fernanda Alves')}</div>
-                                    <div><strong class="text-slate-700">Cargo:</strong> Analista de TI</div>
+                                    <div><strong class="text-slate-700">Nome:</strong> ${esc(item.pontoFocalNome || item.pontoFocalSubNome || 'Fernanda Alves')}</div>
+                                    <div><strong class="text-slate-700">Cargo:</strong> ${esc(item.pontoFocalCargo || 'Analista de Suporte')}</div>
                                     <div><strong class="text-slate-700">E-mail:</strong> ${esc(item.pontoFocalEmail || 'fernanda.alves@ati.pe.gov.br')}</div>
                                     <div><strong class="text-slate-700">WhatsApp:</strong> ${esc(item.pontoFocalTel || '(81) 9 9655-7788')}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
-                            <div>
-                                <div class="flex justify-between items-center mb-3">
-                                    <span class="font-bold text-xs text-slate-700"><i class="fa-solid fa-user-clock mr-1"></i> Substituto</span>
-                                    <span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Ativo</span>
-                                </div>
-                                <p class="text-[11px] text-slate-500 mb-3">Suporte operacional nas ausências do titular.</p>
-                                <div class="space-y-1.5 text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">
-                                    <div><strong class="text-slate-700">Nome:</strong> ${esc(item.pontoFocalSubNome || 'Ricardo Lima')}</div>
-                                    <div><strong class="text-slate-700">Cargo:</strong> Analista de Suporte</div>
-                                    <div><strong class="text-slate-700">E-mail:</strong> ${esc(item.pontoFocalSubEmail || 'ricardo.lima@ati.pe.gov.br')}</div>
-                                    <div><strong class="text-slate-700">WhatsApp:</strong> ${esc(item.pontoFocalSubTel || '(81) 9 9122-3344')}</div>
                                 </div>
                             </div>
                         </div>
@@ -1421,33 +1423,30 @@
                     <div><label class="block mb-1 font-bold">Situação do Contato</label><select id="uc-situacao" class="w-full p-2 border rounded"><option>Validado</option><option>Pendente</option><option>Desatualizado</option></select></div>
                     <div><label class="block mb-1 font-bold">Fonte da Informação</label><input id="uc-fonte" placeholder="Ex: Diário Oficial, WhatsApp" class="w-full p-2 border rounded"></div>
                     
-                    <div class="md:col-span-2 border-t pt-2 mt-1"><p class="font-bold text-blue-900">1. Responsável Institucional</p></div>
-                    <div><input id="uc-ri-nome" placeholder="Nome" class="w-full p-2 border rounded"></div>
-                    <div><input id="uc-ri-cargo" placeholder="Cargo" class="w-full p-2 border rounded"></div>
-                    <div class="grid grid-cols-2 gap-1"><input id="uc-ri-tel" placeholder="Telefone" class="p-2 border rounded input-mask-telefone"><input id="uc-ri-email" placeholder="E-mail" class="p-2 border rounded"></div>
+                    <div class="md:col-span-2 border-t pt-2 mt-1"><p class="font-bold text-blue-900">1. Gestor do Órgão</p></div>
+                    <div><input id="uc-gestor-orgao" placeholder="Nome Gestor do Órgão" class="w-full p-2 border rounded"></div>
+                    <div><input id="uc-cargo-orgao" placeholder="Cargo Gestor" class="w-full p-2 border rounded"></div>
+                    <div class="grid grid-cols-2 gap-1"><input id="uc-tel-orgao" placeholder="Telefone" class="p-2 border rounded input-mask-telefone"><input id="uc-email-orgao" placeholder="E-mail" class="p-2 border rounded"></div>
 
-                    <div class="md:col-span-2 border-t pt-2 mt-1"><p class="font-bold text-blue-900">2. Gestores (TI, Estratégico, SEI, SI, Telemática)</p></div>
-                    <div><input id="uc-gti-nome" placeholder="Nome Gestor TI" class="w-full p-2 border rounded"></div>
-                    <div class="grid grid-cols-2 gap-1"><input id="uc-gti-tel" placeholder="Tel Gestor TI" class="p-2 border rounded input-mask-telefone"><input id="uc-gti-email" placeholder="E-mail Gestor TI" class="p-2 border rounded"></div>
+                    <div class="md:col-span-2 border-t pt-2 mt-1"><p class="font-bold text-blue-900">2. Gestor do NSI</p></div>
+                    <div><input id="uc-gest-nsi" placeholder="Nome Gestor do NSI" class="w-full p-2 border rounded"></div>
+                    <div class="grid grid-cols-2 gap-1"><input id="uc-tel-nsi" placeholder="Tel NSI" class="p-2 border rounded input-mask-telefone"><input id="uc-email-nsi" placeholder="E-mail NSI" class="p-2 border rounded"></div>
 
-                    <div><input id="uc-gest-estrat" placeholder="Nome Gestor Estratégico" class="w-full p-2 border rounded"></div>
-                    <div class="grid grid-cols-2 gap-1"><input id="uc-tel-estrat" placeholder="Tel Estratégico" class="p-2 border rounded input-mask-telefone"><input id="uc-email-estrat" placeholder="E-mail Estratégico" class="p-2 border rounded"></div>
-
-                    <div><input id="uc-gest-sei" placeholder="Nome Gestor SEI" class="w-full p-2 border rounded"></div>
-                    <div class="grid grid-cols-2 gap-1"><input id="uc-tel-sei" placeholder="Tel SEI" class="p-2 border rounded input-mask-telefone"><input id="uc-email-sei" placeholder="E-mail SEI" class="p-2 border rounded"></div>
-
-                    <div><input id="uc-gest-si" placeholder="Nome Gestor SI" class="w-full p-2 border rounded"></div>
-                    <div class="grid grid-cols-2 gap-1"><input id="uc-tel-si" placeholder="Tel SI" class="p-2 border rounded input-mask-telefone"><input id="uc-email-si" placeholder="E-mail SI" class="p-2 border rounded"></div>
-
+                    <div class="md:col-span-2 border-t pt-2 mt-1"><p class="font-bold text-blue-900">3. Gestor de Telemática</p></div>
                     <div><input id="uc-gest-tel" placeholder="Nome Gestor Telemática" class="w-full p-2 border rounded"></div>
                     <div class="grid grid-cols-2 gap-1"><input id="uc-tel-tel" placeholder="Tel Telemática" class="p-2 border rounded input-mask-telefone"><input id="uc-email-tel" placeholder="E-mail Telemática" class="p-2 border rounded"></div>
 
-                    <div class="md:col-span-2 border-t pt-2 mt-1"><p class="font-bold text-blue-900">3. Ponto Focal & Substituto</p></div>
+                    <div class="md:col-span-2 border-t pt-2 mt-1"><p class="font-bold text-blue-900">4. Gestor de SI</p></div>
+                    <div><input id="uc-gest-si" placeholder="Nome Gestor SI" class="w-full p-2 border rounded"></div>
+                    <div class="grid grid-cols-2 gap-1"><input id="uc-tel-si" placeholder="Tel SI" class="p-2 border rounded input-mask-telefone"><input id="uc-email-si" placeholder="E-mail SI" class="p-2 border rounded"></div>
+
+                    <div class="md:col-span-2 border-t pt-2 mt-1"><p class="font-bold text-blue-900">5. Gestor do SEI</p></div>
+                    <div><input id="uc-gest-sei" placeholder="Nome Gestor SEI" class="w-full p-2 border rounded"></div>
+                    <div class="grid grid-cols-2 gap-1"><input id="uc-tel-sei" placeholder="Tel SEI" class="p-2 border rounded input-mask-telefone"><input id="uc-email-sei" placeholder="E-mail SEI" class="p-2 border rounded"></div>
+
+                    <div class="md:col-span-2 border-t pt-2 mt-1"><p class="font-bold text-blue-900">Substitutos e Outros Contatos</p></div>
                     <div><input id="uc-pf-nome" placeholder="Nome Ponto Focal" class="w-full p-2 border rounded"></div>
                     <div class="grid grid-cols-2 gap-1"><input id="uc-pf-tel" placeholder="WhatsApp Focal" class="p-2 border rounded input-mask-telefone"><input id="uc-pf-email" placeholder="E-mail Focal" class="p-2 border rounded"></div>
-
-                    <div><input id="uc-pfs-nome" placeholder="Nome Substituto" class="w-full p-2 border rounded"></div>
-                    <div class="grid grid-cols-2 gap-1"><input id="uc-pfs-tel" placeholder="WhatsApp Substituto" class="p-2 border rounded input-mask-telefone"><input id="uc-pfs-email" placeholder="E-mail Substituto" class="p-2 border rounded"></div>
                 </div>`;
             } else if (tipo === 'demanda') {
                 container.innerHTML = `<div class="space-y-3 text-xs">
@@ -1479,32 +1478,26 @@
                         telefoneFixo: val('uc-tel'),
                         situacaoContato: val('uc-situacao') || 'Validado',
                         fonteInformacao: val('uc-fonte') || 'Cadastro Direto',
-                        respInstitucionalNome: val('uc-ri-nome'),
-                        respInstitucionalCargo: val('uc-ri-cargo'),
-                        respInstitucionalTel: val('uc-ri-tel'),
-                        respInstitucionalEmail: val('uc-ri-email'),
-                        gestorTi: val('uc-gti-nome'),
-                        telGestorTi: val('uc-gti-tel'),
-                        emailGestorTi: val('uc-gti-email'),
-                        gestorEstrategico: val('uc-gest-estrat'),
-                        telGestorEstrategico: val('uc-tel-estrat'),
-                        emailGestorEstrategico: val('uc-email-estrat'),
-                        gestorSei: val('uc-gest-sei'),
-                        telGestorSei: val('uc-tel-sei'),
-                        emailGestorSei: val('uc-email-sei'),
-                        gestorSi: val('uc-gest-si'),
-                        telGestorSi: val('uc-tel-si'),
-                        emailGestorSi: val('uc-email-si'),
+                        gestorOrgao: val('uc-gestor-orgao'),
+                        cargoGestorOrgao: val('uc-cargo-orgao'),
+                        telGestorOrgao: val('uc-tel-orgao'),
+                        emailGestorOrgao: val('uc-email-orgao'),
+                        gestorNsi: val('uc-gest-nsi'),
+                        telGestorNsi: val('uc-tel-nsi'),
+                        emailGestorNsi: val('uc-email-nsi'),
                         gestorTelematica: val('uc-gest-tel'),
                         telGestorTelematica: val('uc-tel-tel'),
                         emailGestorTelematica: val('uc-email-tel'),
+                        gestorSi: val('uc-gest-si'),
+                        telGestorSi: val('uc-tel-si'),
+                        emailGestorSi: val('uc-email-si'),
+                        gestorSei: val('uc-gest-sei'),
+                        telGestorSei: val('uc-tel-sei'),
+                        emailGestorSei: val('uc-email-sei'),
                         pontoFocalNome: val('uc-pf-nome'),
                         pontoFocalTel: val('uc-pf-tel'),
                         pontoFocalEmail: val('uc-pf-email'),
-                        pontoFocalSubNome: val('uc-pfs-nome'),
-                        pontoFocalSubTel: val('uc-pfs-tel'),
-                        pontoFocalSubEmail: val('uc-pfs-email'),
-                        gestorModalidadeSelecionada: 'TI',
+                        gestorModalidadeSelecionada: 'Órgão',
                         criadoEm: agora,
                         atualizadoEm: agora,
                         criadoPor: autor,
@@ -1572,11 +1565,11 @@
                         nome: cols[0] || '',
                         sigla: cols[1] || '',
                         telefoneFixo: cols[2] || '',
-                        gestorTi: cols[3] || '',
-                        emailGestorTi: cols[4] || '',
-                        telGestorTi: cols[5] || '',
+                        gestorOrgao: cols[3] || '',
+                        emailGestorOrgao: cols[4] || '',
+                        telGestorOrgao: cols[5] || '',
                         situacaoContato: cols[6] || 'Validado',
-                        gestorModalidadeSelecionada: 'TI',
+                        gestorModalidadeSelecionada: 'Órgão',
                         criadoEm: agora,
                         atualizadoEm: agora,
                         criadoPor: autor,
@@ -1733,23 +1726,26 @@
                 const item = dbData.orgaos.find(x => String(x.firestoreId) === String(firestoreId) || String(x.id) === String(firestoreId));
                 if (!item) return;
 
-                let nome = item.gestorTi || 'Carlos Silva';
-                let email = item.emailGestorTi || 'carlos.silva@ati.pe.gov.br';
-                let tel = item.telGestorTi || '(81) 9 9488-7766';
+                let nivel = '1 - Gestor do Órgão';
+                let nome = item.gestorOrgao || item.respInstitucionalNome || 'Carlos Silva';
+                let email = item.emailGestorOrgao || item.respInstitucionalEmail || 'carlos.silva@ati.pe.gov.br';
+                let tel = item.telGestorOrgao || item.respInstitucionalTel || '(81) 9 9488-7766';
 
-                if (mod === 'Estratégico') {
-                    nome = item.gestorEstrategico || 'Maria Oliveira'; email = item.emailGestorEstrategico || 'maria.oliveira@see.pe.gov.br'; tel = item.telGestorEstrategico || '(81) 9 9123-4567';
-                } else if (mod === 'SEI') {
-                    nome = item.gestorSei || 'Carlos Mendes'; email = item.emailGestorSei || 'carlos.mendes@ses.pe.gov.br'; tel = item.telGestorSei || '(81) 9 9987-1122';
-                } else if (mod === 'SI') {
-                    nome = item.gestorSi || 'Ana Paula Santos'; email = item.emailGestorSi || 'ana.santos@sefaz.pe.gov.br'; tel = item.telGestorSi || '(81) 9 9811-2233';
+                if (mod === 'NSI') {
+                    nivel = '2 - Gestor do NSI'; nome = item.gestorNsi || 'Maria Oliveira'; email = item.emailGestorNsi || 'maria.oliveira@see.pe.gov.br'; tel = item.telGestorNsi || '(81) 9 9123-4567';
                 } else if (mod === 'Telemática') {
-                    nome = item.gestorTelematica || 'Rafael Lima'; email = item.emailGestorTelematica || 'rafael.lima@seplag.pe.gov.br'; tel = item.telGestorTelematica || '(81) 9 9722-3344';
+                    nivel = '3 - Gestor de Telemática'; nome = item.gestorTelematica || 'Rafael Lima'; email = item.emailGestorTelematica || 'rafael.lima@seplag.pe.gov.br'; tel = item.telGestorTelematica || '(81) 9 9722-3344';
+                } else if (mod === 'SI') {
+                    nivel = '4 - Gestor de SI'; nome = item.gestorSi || 'Ana Paula Santos'; email = item.emailGestorSi || 'ana.santos@sefaz.pe.gov.br'; tel = item.telGestorSi || '(81) 9 9811-2233';
+                } else if (mod === 'SEI') {
+                    nivel = '5 - Gestor do SEI'; nome = item.gestorSei || 'Carlos Mendes'; email = item.emailGestorSei || 'carlos.mendes@ses.pe.gov.br'; tel = item.telGestorSei || '(81) 9 9987-1122';
                 }
 
-                const nomeEl = document.getElementById('det-op-nome');
-                const emailEl = document.getElementById('det-op-email');
-                const telEl = document.getElementById('det-op-tel');
+                const nivelEl = document.getElementById('det-card2-nivel');
+                const nomeEl = document.getElementById('det-card2-nome');
+                const emailEl = document.getElementById('det-card2-email');
+                const telEl = document.getElementById('det-card2-tel');
+                if (nivelEl) nivelEl.textContent = nivel;
                 if (nomeEl) nomeEl.textContent = nome;
                 if (emailEl) emailEl.textContent = email;
                 if (telEl) telEl.textContent = tel;
