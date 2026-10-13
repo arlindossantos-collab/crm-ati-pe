@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.7 - HOMOLOGAÇÃO (HERANÇA DE CORES NO MENSAL) -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.8 - HOMOLOGAÇÃO (SYNC DATA ⇄ DIA DA SEMANA) -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.7</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.8</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.7</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.8</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -428,14 +428,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.2.7 -->
+    <!-- Script Principal v0.2.8 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.2.7: Homologação - Herança de Cores no Calendário Mensal');
+        console.info('PRGD v0.2.8: Homologação - Sincronização Automática Data ⇄ Dia da Semana');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -1055,7 +1055,6 @@
                     </div>
                     <div class="space-y-1 overflow-y-auto max-h-24 flex-1">
                         ${demandasDoDia.map(d => {
-                            // Herda a mesma classe de cor definida no card semanal / backlog
                             const corCard = d.corCard || 'bg-blue-50 border-blue-200 text-blue-900';
                             return `<div class="p-1 rounded ${corCard} text-[10px] font-semibold truncate cursor-pointer tr-detalhe shadow-sm" data-colecao="demandas" data-id="${esc(d.firestoreId)}" title="${esc(d.titulo)}">
                                 ${esc(d.titulo)}
@@ -1115,7 +1114,7 @@
                         <button type="button" class="text-[10px] bg-blue-900 text-white px-2 py-1 rounded font-bold cursor-pointer tr-detalhe ml-auto" data-colecao="demandas" data-id="${esc(d.firestoreId)}"><i class="fa-solid fa-eye"></i></button>
                     </div>
                 </div>
-            </div>`;
+            `;
         }
 
         function renderEventos() {
@@ -1541,7 +1540,6 @@
                 container.innerHTML = `<div class="space-y-3 text-xs">
                     <div><label class="block mb-1 font-bold">Título da Demanda</label><input id="uc-1" required class="w-full p-2 border rounded"></div>
                     <div><label class="block mb-1 font-bold">Data Específica</label><input type="date" id="uc-data" class="w-full p-2 border rounded"></div>
-                    <div><label class="block mb-1 font-bold">Ou Dia da Semana (Semana Atual)</label><select id="uc-diaselect" class="w-full p-2 border rounded bg-white"><option value="">-- Usar Data --</option><option value="segunda">Segunda</option><option value="terca">Terça</option><option value="quarta">Quarta</option><option value="quinta">Quinta</option><option value="sexta">Sexta</option></select></div>
                     <div><label class="block mb-1 font-bold">Detalhes</label><textarea id="uc-desc" rows="3" class="w-full p-2 border rounded"></textarea></div>
                 </div>`;
             } else {
@@ -1593,11 +1591,13 @@
                         editadoPor: autor
                     });
                 } else if (tipo === 'demanda') {
+                    const dataNova = val('uc-data');
+                    const { diaSemana } = calcularInfoSemana(dataNova);
                     await addDoc(collection(db, 'demandas'), {
                         id: 'DEM-' + Date.now(),
                         titulo: val('uc-1'),
-                        dataLimite: val('uc-data'),
-                        diaSemana: val('uc-diaselect'),
+                        dataLimite: dataNova,
+                        diaSemana: diaSemana || '',
                         descricao: val('uc-desc'),
                         status: 'Em Andamento',
                         prioridade: 'Média',
@@ -1743,17 +1743,18 @@
                     const agora = new Date().toISOString();
                     const autor = currentUser?.nome || currentUser?.email || 'Sistema';
                     const { diaSemana } = calcularInfoSemana(novaData);
-                    const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Data alterada para ${novaData}` }];
+                    const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Data alterada para ${novaData} (${diaSemana || 'fim de semana/outro'})` }];
                     
                     await setDoc(doc(db, 'demandas', String(firestoreId)), { 
                         dataLimite: novaData, 
-                        diaSemana: diaSemana || demandaObj.diaSemana || '',
+                        diaSemana: diaSemana || '',
                         historicoAcoes, 
                         atualizadoEm: agora, 
                         editadoPor: autor 
                     }, { merge: true });
 
                     demandaObj.dataLimite = novaData;
+                    demandaObj.diaSemana = diaSemana || '';
                     renderDemandas();
                 } catch(err) { alert(traduzirErroSistema(err)); }
                 return;
