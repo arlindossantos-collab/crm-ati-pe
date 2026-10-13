@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.8 - HOMOLOGAÇÃO (SYNC DATA ⇄ DIA DA SEMANA) -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.2.9 - HOMOLOGAÇÃO (CORREÇÃO LAYOUT BACKLOG) -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.8</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.2.9</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.8</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.2.9</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -208,7 +208,7 @@
                         <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-box-archive text-amber-600"></i> BACKLOG (Atividades Pendentes)</h4>
                         <span id="backlog-count" class="text-xs bg-slate-100 px-2 py-0.5 rounded-full font-bold">0</span>
                     </div>
-                    <div id="backlog-postits-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 min-h-[90px] p-2 bg-slate-50 rounded-lg border border-dashed border-slate-200"></div>
+                    <div id="backlog-postits-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 min-h-[90px] p-2 bg-slate-50 rounded-lg border border-dashed border-slate-200"></div>
                 </div>
 
                 <!-- Calendário Semanal -->
@@ -428,14 +428,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.2.8 -->
+    <!-- Script Principal v0.2.9 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.2.8: Homologação - Sincronização Automática Data ⇄ Dia da Semana');
+        console.info('PRGD v0.2.9: Homologação - Correção Layout Backlog');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -1114,7 +1114,7 @@
                         <button type="button" class="text-[10px] bg-blue-900 text-white px-2 py-1 rounded font-bold cursor-pointer tr-detalhe ml-auto" data-colecao="demandas" data-id="${esc(d.firestoreId)}"><i class="fa-solid fa-eye"></i></button>
                     </div>
                 </div>
-            `;
+            </div>`;
         }
 
         function renderEventos() {
