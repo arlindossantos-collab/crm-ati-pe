@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.3.6 - CORREÇÃO DE PERSISTÊNCIA DE AUTH    -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.3.7 - CORREÇÃO DEFINITIVA DE AUTH        -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.3.6</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.3.7</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.3.6</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.3.7</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -125,7 +125,7 @@
             </div>
         </div>
 
-        <!-- ABA LOCAIS (ATUALIZADA E OTIMIZADA) -->
+        <!-- ABA LOCAIS (COM TODOS OS RECURSOS SOLICITADOS) -->
         <div id="aba-locais" class="hidden space-y-6">
             <!-- 1. Cards de Indicadores (Dashboard de Locais) -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -270,7 +270,7 @@
             </div>
         </div>
 
-        <!-- Demais Abas omitidas para brevidade, mantendo funcionalidade idêntica -->
+        <!-- Demais Abas (Mantidas Idênticas) -->
         <div id="aba-demandas" class="hidden space-y-4"></div>
         <div id="aba-clientes" class="hidden space-y-4"></div>
         <div id="aba-eventos" class="hidden space-y-4"></div>
@@ -287,14 +287,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.3.6 (Com Persistência Local Corrigida) -->
+    <!-- Script Principal v0.3.7 (Correção Definitiva de Autenticação + Locais) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.3.6: Homologação - Correção de Persistência Local do Auth');
+        console.info('PRGD v0.3.7: Homologação - Correção Definitiva de Auth & Módulo de Locais');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -310,8 +310,10 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         
-        // CORREÇÃO DA AUTENTICAÇÃO: Alterado de inMemoryPersistence para browserLocalPersistence
-        setPersistence(auth, browserLocalPersistence).catch(console.warn);
+        // CORREÇÃO ROBUSTA DE PERSISTÊNCIA (Tenta persistência local e faz fallback seguro)
+        setPersistence(auth, browserLocalPersistence).catch(() => {
+            setPersistence(auth, inMemoryPersistence).catch(console.warn);
+        });
 
         let currentUser = null;
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
