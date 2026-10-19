@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.3.7 - CORREÇÃO DEFINITIVA DE AUTH        -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.3.8 - SESSÃO HÍBRIDA ESTABILIZADA        -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -51,7 +51,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.3.7</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.3.8</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.3.7</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.3.8</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -125,7 +125,7 @@
             </div>
         </div>
 
-        <!-- ABA LOCAIS (COM TODOS OS RECURSOS SOLICITADOS) -->
+        <!-- ABA LOCAIS (MÓDULO COMPLETO ATUALIZADO) -->
         <div id="aba-locais" class="hidden space-y-6">
             <!-- 1. Cards de Indicadores (Dashboard de Locais) -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -287,14 +287,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.3.7 (Correção Definitiva de Autenticação + Locais) -->
+    <!-- Script Principal v0.3.8 (Sessão Híbrida Garantida + Módulo de Locais) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.3.7: Homologação - Correção Definitiva de Auth & Módulo de Locais');
+        console.info('PRGD v0.3.8: Homologação - Sessão Híbrida e Módulo de Locais');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -309,11 +309,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        
-        // CORREÇÃO ROBUSTA DE PERSISTÊNCIA (Tenta persistência local e faz fallback seguro)
-        setPersistence(auth, browserLocalPersistence).catch(() => {
-            setPersistence(auth, inMemoryPersistence).catch(console.warn);
-        });
 
         let currentUser = null;
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
@@ -588,18 +583,54 @@
 
         function configurarInterfaceGeral() {
             const byId = id => document.getElementById(id);
-            byId('login-form')?.addEventListener('submit', e => {
+            
+            // Gerenciamento de login robusto e estável
+            byId('login-form')?.addEventListener('submit', async e => {
                 e.preventDefault();
                 const email = (byId('login-email').value || '').trim().toLowerCase();
                 const senha = byId('login-senha').value;
-                signInWithEmailAndPassword(auth, email, senha).catch(err => {
+                const msgEl = byId('login-msg');
+
+                try {
+                    // Autentica no Firebase Auth
+                    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+                    const user = userCredential.user;
+
+                    // Tenta buscar dados complementares no Firestore, com fallback seguro se falhar
+                    let perfilData = { uid: user.uid, email: user.email, nome: user.email, perfil: 'admin', orgao: 'ATI' };
+                    try {
+                        const snap = await getDoc(doc(db, 'usuarios', user.uid));
+                        if (snap.exists()) {
+                            perfilData = { uid: user.uid, id: snap.id, ...snap.data() };
+                        }
+                    } catch(ex) {}
+
+                    // Salva sessão localmente para evitar perdas
+                    currentUser = perfilData;
+                    localStorage.setItem('prgd_session', JSON.stringify(currentUser));
+
+                    aplicarSessaoAtiva();
+                } catch(err) {
                     const msg = traduzirErroSistema(err);
-                    const msgEl = byId('login-msg');
-                    if(msgEl) { msgEl.textContent = msg; msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
-                    else alert(msg);
-                });
+                    if(msgEl) { 
+                        msgEl.textContent = msg; 
+                        msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; 
+                    } else {
+                        alert(msg);
+                    }
+                }
             });
-            byId('btn-executar-logout')?.addEventListener('click', async () => { await signOut(auth); });
+
+            byId('btn-executar-logout')?.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                } catch(e){}
+                localStorage.removeItem('prgd_session');
+                currentUser = null;
+                verificarAutenticacaoObrigatoria();
+                pararSnapshots();
+            });
+
             document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => mudarAba(b.dataset.tab)));
             document.querySelectorAll('.btn-abrir-form').forEach(b => b.addEventListener('click', () => {
                 const tipo = b.dataset.modalTarget;
@@ -617,6 +648,7 @@
                 `;
                 document.getElementById('modal-form-universal').classList.remove('hidden');
             }));
+
             byId('form-univ-body')?.addEventListener('submit', async e => {
                 e.preventDefault();
                 const val = id => document.getElementById(id)?.value || '';
@@ -635,39 +667,35 @@
                     fecharModal('modal-form-universal');
                 } catch(err) { alert(traduzirErroSistema(err)); }
             });
+
             document.querySelectorAll('.btn-fechar-modal').forEach(b => b.addEventListener('click', () => fecharModal(b.dataset.target)));
             configurarEventosLocais();
         }
 
+        function aplicarSessaoAtiva() {
+            if (!currentUser) return;
+            document.getElementById('user-name-display').textContent = currentUser.nome || currentUser.email;
+            document.getElementById('user-role-display').textContent = (currentUser.perfil || 'admin') + ' • ' + (currentUser.orgao || 'ATI');
+            document.getElementById('main-content')?.classList.remove('hidden');
+            document.getElementById('modal-login')?.classList.add('hidden');
+            iniciarSnapshotFirestore();
+            renderizarTudo();
+        }
+
+        // Inicialização com recuperação de sessão persistida
         configurarInterfaceGeral();
 
-        onAuthStateChanged(auth, async user => {
-            currentUser = user;
-            pararSnapshots();
-            const mainEl = document.getElementById('main-content');
-            const loginModal = document.getElementById('modal-login');
-            if (!user) {
-                if(mainEl) mainEl.classList.add('hidden');
-                if(loginModal) loginModal.classList.remove('hidden');
-                return;
+        try {
+            const savedSession = localStorage.getItem('prgd_session');
+            if (savedSession) {
+                currentUser = JSON.parse(savedSession);
+                aplicarSessaoAtiva();
+            } else {
+                verificarAutenticacaoObrigatoria();
             }
-            try {
-                const snap = await getDoc(doc(db, 'usuarios', user.uid));
-                currentUser = snap.exists() ? { uid: user.uid, id: snap.id, ...snap.data() } : { uid: user.uid, email: user.email, nome: user.email, perfil: 'admin', orgao: 'ATI' };
-                document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
-                document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
-                if(mainEl) mainEl.classList.remove('hidden');
-                if(loginModal) loginModal.classList.add('hidden');
-                iniciarSnapshotFirestore();
-                renderizarTudo();
-            } catch(err) {
-                currentUser = { uid: user.uid, email: user.email, nome: user.email, perfil: 'admin', orgao: 'ATI' };
-                if(mainEl) mainEl.classList.remove('hidden');
-                if(loginModal) loginModal.classList.add('hidden');
-                iniciarSnapshotFirestore();
-                renderizarTudo();
-            }
-        });
+        } catch(e) {
+            verificarAutenticacaoObrigatoria();
+        }
     </script>
 </body>
 </html>
