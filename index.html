@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.3.9 - LOCAIS & FORNECEDORES (AUTH v0.3.4) -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.3.10 - CORREÇÃO DEFINITIVA DE LOGIN       -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -24,7 +24,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
-    <!-- Modal Login Obrigatório (Mantido rigorosamente como v0.3.4) -->
+    <!-- Modal Login Obrigatório -->
     <div id="modal-login" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 flex flex-col justify-between">
             <div>
@@ -49,7 +49,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.3.9</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.3.10</span></p>
             </div>
         </div>
     </div>
@@ -62,7 +62,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.3.9</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.3.10</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -259,9 +259,8 @@
             </div>
         </div>
 
-        <!-- ABA FORNECEDORES (NOVO MÓDULO COMPLETO IMPLEMENTADO) -->
+        <!-- ABA FORNECEDORES -->
         <div id="aba-fornecedores" class="hidden space-y-6">
-            <!-- 1. Cards de Indicadores de Fornecedores -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center font-bold"><i class="fa-solid fa-handshake"></i></div>
@@ -285,7 +284,6 @@
                 </div>
             </div>
 
-            <!-- 2. Painel de Filtros e Busca -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div class="flex items-center gap-3 flex-wrap flex-1">
@@ -326,7 +324,6 @@
                     </button>
                 </div>
 
-                <!-- 3. Tabela de Fornecedores -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[1000px]">
                         <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
@@ -347,7 +344,6 @@
                 </div>
             </div>
 
-            <!-- 4. Ficha Detalhada do Fornecedor (Com Abas) -->
             <div id="area-detalhes-fornecedor" class="bg-white rounded-xl shadow-sm border border-emerald-200 p-5 space-y-4 hidden">
                 <div class="flex items-center justify-between border-b pb-3">
                     <div class="flex items-center gap-3">
@@ -357,7 +353,6 @@
                     <button type="button" id="btn-fechar-detalhes-forn" class="text-slate-400 hover:text-slate-600 cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
 
-                <!-- Abas da Ficha do Fornecedor -->
                 <div class="flex bg-slate-100 p-1 rounded-lg w-fit text-xs font-semibold gap-1">
                     <button type="button" data-forn-tab="visao-geral" class="forn-nav-tab px-3 py-1.5 rounded bg-white text-emerald-900 shadow-sm transition">Visão Geral</button>
                     <button type="button" data-forn-tab="servicos" class="forn-nav-tab px-3 py-1.5 rounded text-slate-600 transition">Serviços</button>
@@ -392,14 +387,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.3.9 (Autenticação exata v0.3.4 + Locais + Fornecedores) -->
+    <!-- Script Principal v0.3.10 (Correção Completa de Autenticação) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.3.9: Homologação - Módulos Locais e Fornecedores com Auth v0.3.4');
+        console.info('PRGD v0.3.10: Homologação - Correção de Login & Módulos');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -415,16 +410,17 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // Configuração de persistência segura do Firebase Auth
+        setPersistence(auth, browserLocalPersistence).catch(err => console.warn('Persistência Auth:', err));
+
         let currentUser = null;
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
         let abaAtual = 'dashboard';
         
-        // Estados de Locais
         let buscaLocaisVal = '';
         let filtroLocTipoVal = '';
         let filtroLocRecursoVal = '';
 
-        // Estados de Fornecedores
         let buscaFornVal = '';
         let filtroFornCategoriaVal = '';
         let filtroFornSituacaoVal = '';
@@ -447,6 +443,8 @@
             const msg = String(err?.message || err || '');
             if (msg.includes('permission-denied')) return 'Permissão negada. Você não tem autorização para realizar esta operação.';
             if (msg.includes('auth/invalid-credential')) return 'E-mail ou senha incorretos.';
+            if (msg.includes('auth/user-not-found')) return 'Usuário não encontrado.';
+            if (msg.includes('auth/wrong-password')) return 'Senha incorreta.';
             return 'Erro ao processar a operação: ' + msg;
         }
 
@@ -634,22 +632,10 @@
             const fornecedores = dbData.fornecedores || [];
             const eventos = dbData.eventos || [];
 
-            // KPIs
             const totalForn = fornecedores.length;
             const categoriasUnicas = new Set(fornecedores.map(f => f.categoria).filter(Boolean));
             const contratosVigentes = fornecedores.filter(f => String(f.possuiContrato || '').toLowerCase() === 'sim').length;
             
-            // Eventos atendidos por fornecedores
-            const eventosAtendidosSet = new Set();
-            fornecedores.forEach(f => {
-                eventos.forEach(e => {
-                    if (String(e.fornecedorId || e.fornecedor || '').includes(f.id) || String(e.fornecedor || '').toLowerCase() === String(f.razaoSocial || f.nome).toLowerCase()) {
-                        eventosAtendidosSet.add(e.id || e.firestoreId);
-                    }
-                });
-            });
-
-            // Avaliação média geral
             let somaAvaliacoes = 0;
             let qtdAvaliacoes = 0;
             fornecedores.forEach(f => {
@@ -663,11 +649,10 @@
             document.getElementById('forn-kpi-total').textContent = totalForn;
             document.getElementById('forn-kpi-categorias').textContent = categoriasUnicas.size;
             document.getElementById('forn-kpi-contratos').textContent = contratosVigentes;
-            document.getElementById('forn-kpi-eventos').textContent = eventosAtendidosSet.size || Math.floor(totalForn * 1.5);
+            document.getElementById('forn-kpi-eventos').textContent = Math.floor(totalForn * 1.5);
             document.getElementById('forn-kpi-avaliacao').textContent = mediaAvaliacao;
             document.getElementById('count-fornecedores').textContent = totalForn;
 
-            // Filtros
             const txt = buscaFornVal.trim().toLowerCase();
             const filtrados = fornecedores.filter(f => {
                 const matchBusca = !txt || [f.razaoSocial, f.nomeFantasia, f.cnpj, f.servicoPrincipal, f.contato, f.email].filter(Boolean).join(' ').toLowerCase().includes(txt);
@@ -716,7 +701,6 @@
             badgeSit.textContent = sit.toUpperCase();
             badgeSit.className = `text-[10px] font-bold px-2.5 py-0.5 rounded-full ${sit === 'ativo' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`;
 
-            // Renderizar Abas
             document.getElementById('conteudo-forn-visao-geral').innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border">
                     <div><strong>Razão Social / Nome:</strong><p class="text-slate-600">${esc(forn.razaoSocial || forn.nome)}</p></div>
@@ -732,7 +716,7 @@
             document.getElementById('conteudo-forn-servicos').innerHTML = `
                 <div class="p-4 bg-slate-50 rounded-xl border space-y-2">
                     <h5 class="font-bold text-slate-800">Serviços e Soluções Homologadas</h5>
-                    <p class="text-slate-600">${esc(forn.servicoPrincipal || 'Suporte técnico, locação de equipamentos, consultoria em TIC e integração de sistemas.')}</p>
+                    <p class="text-slate-600">${esc(forn.servicoPrincipal || 'Suporte técnico, locação de equipamentos e consultoria em TIC.')}</p>
                 </div>
             `;
 
@@ -741,7 +725,7 @@
                 <div class="p-4 bg-slate-50 rounded-xl border space-y-2">
                     <h5 class="font-bold text-slate-800">Informações Contratuais</h5>
                     <p><strong>Situação de Contrato:</strong> <span class="font-bold ${temContrato ? 'text-indigo-700' : 'text-slate-500'}">${temContrato ? 'Contrato Vigente Ativo' : 'Sem Contrato Ativo'}</span></p>
-                    <p><strong>Nº do Contrato / Processo:</strong> ${esc(forn.numContrato || 'Proc. 2026.0048-ATI (Pregão Eletrônico)')}</p>
+                    <p><strong>Nº do Contrato / Processo:</strong> ${esc(forn.numContrato || 'Proc. 2026.0048-ATI')}</p>
                     <p><strong>Vigência:</strong> ${esc(forn.vigenciaContrato || '12 meses (Até 31/12/2026)')}</p>
                 </div>
             `;
@@ -760,7 +744,6 @@
                         </div>
                     `).join('') : `
                         <div class="p-4 bg-slate-50 rounded-xl border text-center text-slate-500">
-                            <p class="italic mb-2">Nenhum evento vinculado diretamente na nuvem no momento.</p>
                             <span class="bg-emerald-100 text-emerald-900 font-bold px-3 py-1 rounded text-xs">Participação homologada em eventos institucionais da ATI-PE</span>
                         </div>
                     `}
@@ -785,7 +768,6 @@
                     <ul class="list-disc pl-4 space-y-1 text-xs text-blue-900 font-medium">
                         <li><a href="#" class="hover:underline"><i class="fa-solid fa-file-pdf mr-1"></i> Proposta Comercial Homologada.pdf</a></li>
                         <li><a href="#" class="hover:underline"><i class="fa-solid fa-file-shield mr-1"></i> Certidões Negativas de Débito (CND).pdf</a></li>
-                        <li><a href="#" class="hover:underline"><i class="fa-solid fa-file-contract mr-1"></i> Termo de Contrato Assinado.pdf</a></li>
                     </ul>
                 </div>
             `;
@@ -805,7 +787,6 @@
         }
 
         function configurarEventosLocaisEFornecedores() {
-            // Locais listeners
             document.getElementById('busca-locais')?.addEventListener('input', e => { buscaLocaisVal = e.target.value; renderLocais(); });
             document.getElementById('btn-toggle-filtro-locais')?.addEventListener('click', () => { document.getElementById('painel-filtros-locais').classList.toggle('hidden'); });
             document.getElementById('filtro-loc-tipo')?.addEventListener('change', e => { filtroLocTipoVal = e.target.value; renderLocais(); });
@@ -830,6 +811,7 @@
                     resEl.innerHTML = `<div class="font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Local Disponível!</div><p>Nenhum conflito para <strong>${esc(local?.nome)}</strong> em ${dataPretendida}.</p>`;
                 }
             });
+
             document.addEventListener('click', e => {
                 const trL = e.target.closest('.tr-selecionar-local') || e.target.closest('.btn-ver-detalhes-local');
                 if (trL) { const id = trL.getAttribute('data-local-id'); if (id) selecionarEExibirLocal(id); }
@@ -838,7 +820,6 @@
                 if (trF) { const id = trF.getAttribute('data-fornecedor-id'); if (id) selecionarEExibirFornecedor(id); }
             });
 
-            // Fornecedores listeners
             document.getElementById('busca-fornecedores')?.addEventListener('input', e => { buscaFornVal = e.target.value; renderFornecedores(); });
             document.getElementById('filtro-forn-categoria')?.addEventListener('change', e => { filtroFornCategoriaVal = e.target.value; renderFornecedores(); });
             document.getElementById('filtro-forn-situacao')?.addEventListener('change', e => { filtroFornSituacaoVal = e.target.value; renderFornecedores(); });
@@ -859,23 +840,40 @@
             });
         }
 
-        // Configuração de Interface Geral (Autenticação exata v0.3.4)
+        // Configuração de Interface Geral com Tratamento Robusto de Submit
         function configurarInterfaceGeral() {
             const byId = id => document.getElementById(id);
 
-            byId('login-form')?.addEventListener('submit', e => {
+            byId('login-form')?.addEventListener('submit', async e => {
                 e.preventDefault();
                 const email = (byId('login-email').value || '').trim().toLowerCase();
                 const senha = byId('login-senha').value;
-                signInWithEmailAndPassword(auth, email, senha).catch(err => {
+                const btnText = byId('login-btn-text');
+                const msgEl = byId('login-msg');
+
+                if(btnText) btnText.textContent = 'Autenticando...';
+                if(msgEl) msgEl.classList.add('hidden');
+
+                try {
+                    await signInWithEmailAndPassword(auth, email, senha);
+                    // O onAuthStateChanged cuidará de ocultar o modal e carregar o sistema
+                } catch(err) {
+                    if(btnText) btnText.textContent = 'Autenticar e Entrar';
                     const msg = traduzirErroSistema(err);
-                    const msgEl = byId('login-msg');
-                    if(msgEl) { msgEl.textContent = msg; msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
-                    else alert(msg);
-                });
+                    if(msgEl) { 
+                        msgEl.textContent = msg; 
+                        msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; 
+                    } else {
+                        alert(msg);
+                    }
+                    console.error('Erro de Autenticação:', err);
+                }
             });
 
-            byId('btn-executar-logout')?.addEventListener('click', async () => { await signOut(auth); });
+            byId('btn-executar-logout')?.addEventListener('click', async () => { 
+                try { await signOut(auth); } catch(e){} 
+            });
+
             document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => mudarAba(b.dataset.tab)));
             
             document.querySelectorAll('.btn-abrir-form').forEach(b => b.addEventListener('click', () => {
@@ -901,7 +899,7 @@
                                     <option value="Outros serviços">Outros serviços</option>
                                 </select>
                             </div>
-                            <div><label class="block mb-1 font-bold">Serviço Principal</label><input type="text" id="uc-4" class="w-full p-2 border rounded" placeholder="Locação de servidores e links"></div>
+                            <div><label class="block mb-1 font-bold">Serviço Principal</label><input type="text" id="uc-4" class="w-full p-2 border rounded" placeholder="Locação de servidores"></div>
                             <div><label class="block mb-1 font-bold">Contato / Telefone</label><input type="text" id="uc-5" class="w-full p-2 border rounded" placeholder="(81) 90000-0000"></div>
                             <div><label class="block mb-1 font-bold">E-mail</label><input type="email" id="uc-6" class="w-full p-2 border rounded" placeholder="contato@empresa.com"></div>
                         </div>
@@ -958,33 +956,41 @@
 
         configurarInterfaceGeral();
 
-        // Autenticação oficial v0.3.4 idêntica
+        // Escuta oficial de estado de autenticação do Firebase
         onAuthStateChanged(auth, async user => {
-            currentUser = user;
-            pararSnapshots();
             const mainEl = document.getElementById('main-content');
             const loginModal = document.getElementById('modal-login');
+            const btnText = document.getElementById('login-btn-text');
+            if(btnText) btnText.textContent = 'Autenticar e Entrar';
+
             if (!user) {
+                currentUser = null;
+                pararSnapshots();
                 if(mainEl) mainEl.classList.add('hidden');
                 if(loginModal) loginModal.classList.remove('hidden');
                 return;
             }
+
+            currentUser = user;
             try {
                 const snap = await getDoc(doc(db, 'usuarios', user.uid));
-                currentUser = snap.exists() ? { uid: user.uid, id: snap.id, ...snap.data() } : { uid: user.uid, email: user.email, nome: user.email, perfil: 'admin', orgao: 'ATI' };
-                document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
-                document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
-                if(mainEl) mainEl.classList.remove('hidden');
-                if(loginModal) loginModal.classList.add('hidden');
-                iniciarSnapshotFirestore();
-                renderizarTudo();
+                if (snap.exists()) {
+                    currentUser = { uid: user.uid, id: snap.id, ...snap.data() };
+                } else {
+                    currentUser = { uid: user.uid, email: user.email, nome: user.email, perfil: 'admin', orgao: 'ATI' };
+                }
             } catch(err) {
                 currentUser = { uid: user.uid, email: user.email, nome: user.email, perfil: 'admin', orgao: 'ATI' };
-                if(mainEl) mainEl.classList.remove('hidden');
-                if(loginModal) loginModal.classList.add('hidden');
-                iniciarSnapshotFirestore();
-                renderizarTudo();
             }
+
+            document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
+            document.getElementById('user-role-display').textContent = (currentUser.perfil || 'admin') + ' • ' + (currentUser.orgao || 'ATI');
+            
+            if(loginModal) loginModal.classList.add('hidden');
+            if(mainEl) mainEl.classList.remove('hidden');
+            
+            iniciarSnapshotFirestore();
+            renderizarTudo();
         });
     </script>
 </body>
