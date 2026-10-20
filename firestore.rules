@@ -16,6 +16,24 @@ service cloud.firestore {
         && (profile().get('tipoUsuario', '') != 'externo' || module == 'eventos')
         && module in profile().get('modulosPermitidos', profile().get('tipoUsuario', '') == '' ? ['dashboard','demandas','eventos'] : []));
     }
+    function validPhoto(value) {
+      return value is string && value.size() <= 45000
+        && (value == '' || value.matches('^data:image/jpeg;base64,[A-Za-z0-9+/]+={0,2}$'));
+    }
+    function validPersonal(data) {
+      return data.keys().hasOnly(['telefone','endereco','atualizadoEm'])
+        && data.telefone is string && data.telefone.size() <= 40
+        && data.endereco is string && data.endereco.size() <= 400
+        && data.atualizadoEm is string && data.atualizadoEm.size() <= 40;
+    }
+    function validIdentity(data, uid) {
+      let user = getAfter(/databases/$(database)/documents/usuarios/$(uid)).data;
+      return data.keys().hasOnly(['uid','nome','fotoPerfil','tipoUsuario','ativo'])
+        && data.uid == uid && data.nome is string && data.nome.size() > 0 && data.nome.size() <= 150
+        && data.nome == user.nome && validPhoto(data.fotoPerfil) && data.fotoPerfil == user.get('fotoPerfil', '')
+        && data.tipoUsuario in ['','interno','externo'] && data.tipoUsuario == user.get('tipoUsuario', '')
+        && data.ativo is bool && data.ativo == user.get('ativo', true);
+    }
     function validUser(data, uid) {
       return data.uid == uid && data.nome is string && data.nome.size() > 0 && data.nome.size() <= 150
         && data.email is string && data.email.matches('^[^ @]+@[^ @]+[.][^ @]+$')
@@ -25,7 +43,7 @@ service cloud.firestore {
         && data.modulosPermitidos.hasOnly(['dashboard','demandas','clientes','eventos','locais','fornecedores','usuarios','bases'])
         && (data.perfil == 'admin' || !data.modulosPermitidos.hasAny(['usuarios']))
         && (data.tipoUsuario != 'externo' || data.modulosPermitidos.hasOnly(['eventos']))
-        && !data.keys().hasAny(['senha','password']);
+        && validPhoto(data.get('fotoPerfil', '')) && !data.keys().hasAny(['senha','password']);
     }
     function canReadEvent(data) {
       return isAdmin() || data.get('eventoPublico', false) == true
@@ -34,18 +52,30 @@ service cloud.firestore {
     }
 
     match /usuarios/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || isAdmin()
-        || (canReadModule('demandas') && profile().get('tipoUsuario', '') == 'interno'
-          && resource.data.tipoUsuario == 'interno' && resource.data.ativo == true));
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if isAdmin() && validUser(request.resource.data, uid);
       allow update: if (isAdmin()
           && (validUser(request.resource.data, uid)
-            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ativo','atualizadoEm','editadoPor']) && request.resource.data.ativo is bool))
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ativo','atualizadoEm','editadoPor','editadoPorUid']) && request.resource.data.ativo is bool))
           && (request.auth.uid != uid || (request.resource.data.ativo == true && request.resource.data.perfil == 'admin' && request.resource.data.tipoUsuario == 'interno')))
         || (active() && request.auth.uid == uid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome'])
-          && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 150);
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','fotoPerfil','perfilAtualizadoEm'])
+          && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 150
+          && validPhoto(request.resource.data.get('fotoPerfil', ''))
+          && request.resource.data.get('perfilAtualizadoEm', '') is string && request.resource.data.get('perfilAtualizadoEm', '').size() <= 40);
       // Inativar o perfil mantém os vínculos e o histórico.
+      allow delete: if false;
+    }
+    match /usuarios/{uid}/privado/{registro} {
+      allow read: if active() && request.auth.uid == uid && registro == 'perfil';
+      allow create, update: if active() && request.auth.uid == uid && registro == 'perfil' && validPersonal(request.resource.data);
+      allow delete: if false;
+    }
+    match /identidadesUsuarios/{uid} {
+      allow read: if active() && (isAdmin() || request.auth.uid == uid
+        || (resource.data.tipoUsuario == 'interno' && resource.data.ativo == true
+          && (profile().get('tipoUsuario', '') == 'interno' || canReadModule('eventos'))));
+      allow create, update: if (isAdmin() || (active() && request.auth.uid == uid)) && validIdentity(request.resource.data, uid);
       allow delete: if false;
     }
     match /grupos/{id} {
@@ -80,3 +110,4 @@ service cloud.firestore {
     }
   }
 }
+
