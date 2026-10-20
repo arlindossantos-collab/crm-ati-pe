@@ -27,6 +27,11 @@
         #aba-locais .locais-hero { background: linear-gradient(125deg,#3b176e 0%,#5b21b6 55%,#7c3aed 100%); }
         #aba-locais .locais-layout { display: grid; gap: 20px; align-items: start; }
         #aba-locais .locais-principal { min-width: 0; display: grid; gap: 20px; }
+        #aba-locais .locais-principal > section { min-width:0; max-width:100%; }
+        #aba-locais .locais-tabela .overflow-x-auto { max-width:100%; }
+        #aba-locais .locais-agenda form > label { min-width:0; }
+        #aba-locais #local-painel dd { overflow-wrap:anywhere; }
+        #aba-locais .locais-hero .text-violet-200, #aba-locais .locais-hero .text-violet-100 { color:#f5f3ff; }
         #aba-locais .local-card { --tone-ink:#5b21b6; --tone-accent:#7c3aed; --tone-soft:#f5f3ff; --tone-line:#ddd6fe; position:relative; min-width:0; padding:18px 15px; background:var(--tone-soft); border:1px solid var(--tone-line); border-top:4px solid var(--tone-accent); border-radius:16px; box-shadow:0 3px 12px #0f172a06; }
         #aba-locais .local-card[data-tone="sky"] { --tone-ink:#075985; --tone-accent:#0369a1; --tone-soft:#f0f9ff; --tone-line:#bae6fd; }
         #aba-locais .local-card[data-tone="indigo"] { --tone-ink:#3730a3; --tone-accent:#4f46e5; --tone-soft:#eef2ff; --tone-line:#c7d2fe; }
