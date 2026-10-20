@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.5.0 - GESTÃO DE USUÁRIOS E SESSÃO PERSISTENTE   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.7.0 - GESTÃO DE USUÁRIOS E SESSÃO PERSISTENTE   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -22,6 +22,14 @@
         .tab-inactive:hover { color: #0f172a; }
         .post-it { transition: transform 0.15s ease, box-shadow 0.15s ease; }
         .post-it:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+
+        /* Somente os indicadores de Locais: azul e verde com baixa opacidade. */
+        #locais-indicadores .local-card-suave { background-color:rgba(59,130,246,0.055); border-color:rgba(59,130,246,0.16); }
+        #locais-indicadores .local-card-suave[data-tone="verde"] { background-color:rgba(16,185,129,0.055); border-color:rgba(16,185,129,0.16); }
+        #locais-indicadores .local-card-rotulo { display:flex; align-items:flex-start; gap:8px; }
+        #locais-indicadores .local-card-icone { flex:none; font-size:15px; line-height:1.2; color:#4b6d8b; }
+        #locais-indicadores [data-tone="verde"] .local-card-icone { color:#427660; }
+
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
@@ -51,7 +59,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.5.0</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.7.0</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +72,7 @@
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.5.0</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.7.0</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -94,7 +102,7 @@
 
         <!-- Navegação por Abas -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit overflow-x-auto text-xs sm:text-sm">
+            <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit max-w-full overflow-x-auto text-xs sm:text-sm">
                 <button type="button" data-tab="dashboard" class="nav-tab px-3.5 py-2 rounded-lg transition tab-active"><i class="fa-solid fa-chart-pie mr-1"></i> Dashboard</button>
                 <button type="button" data-tab="demandas" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-list-check mr-1"></i> Demandas <span id="cnt-tab-demandas" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
                 <button type="button" data-tab="clientes" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-sitemap mr-1"></i> Clientes <span id="cnt-tab-clientes" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
@@ -323,15 +331,48 @@
         </div>
 
         <!-- ABA LOCAIS -->
-        <div id="aba-locais" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <h3 class="text-base font-bold text-slate-800">Locais (<span id="count-locais">0</span>)</h3>
-                    <input type="text" id="busca-locais" placeholder="Buscar local, endereço, contato..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+        <div id="aba-locais" class="hidden min-w-0 max-w-full space-y-5">
+            <section class="rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-900 p-5 sm:p-6 text-white shadow-lg">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div><p class="text-[10px] font-bold uppercase tracking-widest text-blue-200">Planejamento de espaços</p><h3 class="mt-1 text-2xl font-bold">Locais e auditórios</h3><p class="mt-2 text-sm text-blue-100">Compare espaços, consulte a agenda e acompanhe as locações.</p></div>
+                    <button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-blue-900 shadow hover:bg-blue-50"><i class="fa-solid fa-plus mr-1"></i> Novo Local / Auditório</button>
                 </div>
-                <button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only bg-purple-700 hover:bg-purple-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Local / Auditório</button>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome / Espaço</th><th class="p-4">Capacidade / Área</th><th class="p-4">Valor Aluguel</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-locais" class="divide-y text-sm"></tbody></table></div>
+                <p class="mt-4 text-xs text-blue-200">Indicadores de todos os locais carregados. Os filtros abaixo afetam apenas a tabela.</p>
+            </section>
+            <div id="locais-indicadores" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3" aria-label="Indicadores de locais"></div>
+            <p id="locais-qualidade" class="text-xs text-slate-500" aria-live="polite"></p>
+            <section class="rounded-2xl bg-white border border-slate-200 shadow-sm p-4 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h4 class="font-bold text-slate-800">Espaços cadastrados <span id="count-locais" class="text-blue-700">0</span></h4>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <label class="sr-only" for="busca-locais">Buscar nome, endereço ou contato</label>
+                        <input type="search" id="busca-locais" placeholder="Nome, endereço ou contato..." class="p-2.5 border rounded-xl text-xs bg-slate-50 w-full sm:w-72 focus:ring-2 focus:ring-blue-600">
+                        <button type="button" id="btn-filtros-locais" aria-expanded="false" aria-controls="locais-filtros" class="border rounded-xl p-2.5 text-xs font-bold hover:bg-slate-50"><i class="fa-solid fa-sliders mr-1"></i> Filtros</button>
+                    </div>
+                </div>
+                <div id="locais-filtros" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3 bg-slate-50 rounded-xl">
+                    <label class="text-xs font-semibold">Tipo de locação<select id="local-filtro-tipo" class="block w-full p-2 border rounded-lg mt-1"><option value="">Todos</option><option value="gratuito">Gratuito</option><option value="pago">Pago</option><option value="nao-informado">Não informado</option></select></label>
+                    <label class="text-xs font-semibold">Capacidade mínima<input id="local-filtro-capacidade" type="number" min="0" step="1" placeholder="Pessoas" class="block w-full p-2 border rounded-lg mt-1"></label>
+                    <label class="text-xs font-semibold">Recurso necessário<input id="local-filtro-recurso" placeholder="Ex.: projetor" class="block w-full p-2 border rounded-lg mt-1"></label>
+                    <button type="button" id="local-limpar-filtros" class="self-end p-2 border rounded-lg text-xs font-bold bg-white">Limpar filtros e busca</button>
+                </div>
+                <div class="overflow-x-auto"><table class="w-full text-left border-collapse min-w-[1100px]"><thead class="bg-slate-50 border-b text-[10px] text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome / Espaço</th><th class="p-4">Capacidade / Área</th><th class="p-4">Valor Aluguel</th><th class="p-4">Eventos vinculados</th><th class="p-4">Recursos</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-locais" class="divide-y text-sm"></tbody></table></div>
+            </section>
+            <section id="local-painel" tabindex="-1" class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5" aria-label="Detalhes do local selecionado">
+                <p class="text-sm text-slate-500">Selecione <strong>Detalhes</strong> na tabela para conhecer o espaço e seu histórico de eventos.</p>
+            </section>
+            <section class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+                <h4 class="text-base font-bold text-slate-800"><i class="fa-regular fa-calendar-check text-blue-700 mr-2"></i>Consultar disponibilidade</h4>
+                <p class="text-xs text-slate-500 mt-1">Consulta a agenda registrada no sistema. Não realiza reserva nem confirma a disponibilidade com o responsável pelo espaço.</p>
+                <form id="form-disponibilidade-local" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-4">
+                    <label class="text-xs font-semibold">Local<select id="disponibilidade-local" required class="w-full block mt-1 border rounded-lg p-2.5"><option value="">Selecione um local</option></select></label>
+                    <label class="text-xs font-semibold">Data pretendida<input type="date" id="disponibilidade-data" required class="w-full block mt-1 border rounded-lg p-2.5"></label>
+                    <label class="text-xs font-semibold">Início (opcional)<input type="time" id="disponibilidade-inicio" class="w-full block mt-1 border rounded-lg p-2.5"></label>
+                    <label class="text-xs font-semibold">Fim (opcional)<input type="time" id="disponibilidade-fim" class="w-full block mt-1 border rounded-lg p-2.5"></label>
+                    <button type="submit" class="self-end rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs p-2.5">Consultar disponibilidade</button>
+                </form>
+                <div id="disponibilidade-resultado" class="mt-4 text-sm" role="status" aria-live="polite"></div>
+            </section>
         </div>
 
         <!-- ABA FORNECEDORES -->
@@ -455,14 +496,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.5.0 -->
+    <!-- Script Principal v0.7.0 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.5.0: Usuários GRGD, perfil pessoal e identificação com foto');
+        console.info('PRGD v0.7.0: Usuários GRGD, perfil pessoal e identificação com foto');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -1110,6 +1151,7 @@
             eventosCacheMap = Object.fromEntries(lista.map(e => [e.firestoreId || e.id, e]));
             dbData.eventos = Object.values(eventosCacheMap);
             renderEventos();
+            renderLocais();
             renderDashboardKPIs();
             atualizarContadoresAbas();
         }
@@ -1147,11 +1189,13 @@
                     renderizarTudo();
                 }));
             }
+            agendaLocaisEstado=modulos.includes('eventos')?'carregando':'sem-acesso';
             if (modulos.includes('eventos')) {
                 const ref = admin ? collection(db,'eventos') : query(collection(db,'eventos'), where('eventoPublico','==',true));
                 snapshotUnsubs.push(observarFirestore(ref, snap => {
+                    agendaLocaisEstado=admin?'completa':'parcial';
                     atualizarEventosVisiveis(snap.docs.map(d => ({...d.data(), firestoreId: d.id, id: d.data().id || d.id})));
-                }));
+                }, err=>{agendaLocaisEstado='erro';dbData.eventos=[];eventosCacheMap={};renderLocais();renderEventos();renderDashboardKPIs();atualizarContadoresAbas();console.warn('Agenda de locais:',err.message);}));
                 const inscricoes = admin ? collection(db,'inscricoes') : query(collection(db,'inscricoes'), where('uid','==',currentUser.uid));
                 snapshotUnsubs.push(observarFirestore(inscricoes, snap => {
                     dbData.inscricoes = snap.docs.map(d => ({...d.data(), firestoreId:d.id, id:d.data().id || d.id}));
@@ -1652,12 +1696,231 @@
             }).join('') || '<p class="text-slate-400 text-sm col-span-3 text-center py-8">Nenhum evento encontrado.</p>';
         }
 
+
+        // Locais: dados ausentes permanecem desconhecidos; a consulta não efetua reserva.
+        let localSelecionadoId = '';
+        let agendaLocaisEstado = 'aguardando';
+        let consultaLocalAtiva = false;
+        const normalizarLocal = valor => String(valor ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase().replace(/\s+/g,' ');
+        const idLocal = local => String(local.firestoreId || local.id || '');
+        function numeroLocal(valor) {
+            if (typeof valor === 'number') return Number.isFinite(valor) && valor >= 0 ? valor : null;
+            let s = String(valor ?? '').trim().replace(/^R\$\s*/i,'').trim();
+            if (!s) return null;
+            if (/^\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?$/.test(s)) s = s.replace(/\./g,'').replace(',','.');
+            else if (/^\d+(?:,\d{1,2})?$/.test(s)) s = s.replace(',','.');
+            else if (!/^\d+(?:\.\d{1,2})?$/.test(s)) return null;
+            const n=Number(s); return Number.isFinite(n) && n>=0 ? n : null;
+        }
+        const moedaLocal = n => n === null ? 'Não informado' : n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+        const valorLocacaoTexto = l => numeroLocal(l.valorAluguel)===null ? String(l.valorAluguel ?? 'Não informado') : moedaLocal(numeroLocal(l.valorAluguel));
+        function tipoLocacaoLocal(l) {
+            if (['gratuito','pago'].includes(l.tipoLocacao)) return l.tipoLocacao;
+            const v=numeroLocal(l.valorAluguel);
+            if (v!==null) return v===0 ? 'gratuito' : 'pago';
+            return ['gratuito','gratis'].includes(normalizarLocal(l.valorAluguel)) ? 'gratuito' : 'nao-informado';
+        }
+        function recursosLocal(l) {
+            const r=l.recursos;
+            return Array.isArray(r) ? r.filter(v=>typeof v==='string' && v.trim()) : typeof r==='string' ? r.split(/[,;\n]/).map(s=>s.trim()).filter(Boolean) : [];
+        }
+        function vinculoEventoLocal(evento, locais=dbData.locais) {
+            if (evento.localId) {
+                const l=locais.find(l=>idLocal(l)===String(evento.localId));
+                return {id:l ? idLocal(l) : '', origem:l ? 'id' : 'inexistente'};
+            }
+            const nome=normalizarLocal(evento.localEvento);
+            if (!nome) return {id:'',origem:'ausente'};
+            const candidatos=locais.filter(l=>normalizarLocal(l.nome)===nome);
+            return candidatos.length===1 ? {id:idLocal(candidatos[0]),origem:'nome'} : {id:'',origem:candidatos.length>1?'ambiguo':'ausente'};
+        }
+        const eventosDoLocal = l => dbData.eventos.filter(e=>vinculoEventoLocal(e).id===idLocal(l));
+        const eventoCanceladoLocal = e => ['cancelado','cancelada','canceled','cancelled'].includes(normalizarLocal(e.status));
+        function diaEventoLocal(valor) {
+            if (typeof valor !== 'string') return '';
+            const m=valor.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|T)/); if(!m)return '';
+            const d=new Date(Date.UTC(Number(m[1]),Number(m[2])-1,Number(m[3])));
+            if(!(d.getUTCFullYear()===Number(m[1]) && d.getUTCMonth()===Number(m[2])-1 && d.getUTCDate()===Number(m[3])))return '';
+            if(/T.*(?:Z|[+-]\d{2}:?\d{2})$/.test(valor)){
+                const instante=new Date(valor);if(!Number.isFinite(instante.getTime()))return '';
+                return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(instante);
+            }
+            return m[0].slice(0,10);
+        }
+        function intervaloEventoLocal(e) {
+            const inicio=diaEventoLocal(e.dataInicio), fim=e.dataFim ? diaEventoLocal(e.dataFim) : inicio;
+            return inicio && fim && fim>=inicio ? {inicio,fim} : null;
+        }
+        function horarioEventoLocal(e,chave) {
+            const explicito=e[chave==='dataInicio'?'horaInicio':'horaFim'];
+            let hora = explicito || (typeof e[chave]==='string' ? e[chave].match(/T(\d{2}:\d{2})/)?.[1] : '');
+            if(!explicito && /T.*(?:Z|[+-]\d{2}:?\d{2})$/.test(e[chave] || '')){
+                const instante=new Date(e[chave]);
+                hora=Number.isFinite(instante.getTime()) ? new Intl.DateTimeFormat('en-GB',{timeZone:'America/Recife',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(instante) : '';
+            }
+            return /^\d{2}:\d{2}$/.test(hora || '') && Number(hora.slice(0,2))<24 && Number(hora.slice(3))<60 ? hora : '';
+        }
+        function hojeLocais() {
+            return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Recife',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+        }
+        function indicadoresLocais(locais=dbData.locais,eventos=dbData.eventos,hoje=hojeLocais()) {
+            let capacidade=0, semCapacidade=0, gratuitos=0, pagos=0, semTipo=0, custo=0, semCusto=0, vinculados=0, semVinculo=0, semData=0, custosInformados=0;
+            locais.forEach(l=>{
+                const n=numeroLocal(l.capacidade);if(n!==null && Number.isInteger(n))capacidade+=n;else semCapacidade++;
+                const t=tipoLocacaoLocal(l);if(t==='gratuito')gratuitos++;else if(t==='pago')pagos++;else semTipo++;
+            });
+            eventos.forEach(e=>{
+                if(!vinculoEventoLocal(e,locais).id){semVinculo++;return;} vinculados++;
+                if(eventoCanceladoLocal(e) || ['realizado','realizada','concluido'].includes(normalizarLocal(e.status)))return;
+                const periodo=intervaloEventoLocal(e);if(!periodo){semData++;return;}
+                if(periodo.fim<hoje)return;
+                const n=numeroLocal(e.custoLocacaoPrevisto);if(n===null)semCusto++;else {custo+=n;custosInformados++;}
+            });
+            return {total:locais.length,capacidade,semCapacidade,gratuitos,pagos,semTipo,custo,semCusto,vinculados,semVinculo,semData,custosInformados};
+        }
+        function textoAgendaLocais() {
+            if(!modulosDoUsuario().includes('eventos'))return 'Sem acesso ao módulo Eventos: a consulta de conflitos e os totais de eventos não estão disponíveis.';
+            if(agendaLocaisEstado==='erro')return 'Não foi possível carregar a agenda. A consulta é inconclusiva.';
+            if(agendaLocaisEstado==='aguardando' || agendaLocaisEstado==='carregando')return 'Aguardando o carregamento da agenda. A consulta é inconclusiva.';
+            if(agendaLocaisEstado!=='completa')return 'Agenda parcial: somente eventos acessíveis à sua conta. Podem existir reservas não exibidas.';
+            return 'Agenda cadastrada carregada. Reservas externas ao sistema não são verificadas.';
+        }
+        function consultarConflitosLocal(localId,data,inicio='',fim='') {
+            if(!dbData.locais.some(l=>idLocal(l)===localId))throw new Error('Selecione um local cadastrado.');
+            if(diaEventoLocal(data)!==data || !data)throw new Error('Informe uma data válida.');
+            if(!!inicio!==!!fim || (inicio && (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(inicio)||!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(fim)||fim<=inicio)))throw new Error('Informe início e fim válidos, com término após o início, ou deixe ambos vazios.');
+            const conflitos=[], pendencias=[];
+            dbData.eventos.filter(e=>!eventoCanceladoLocal(e)).forEach(e=>{
+                const vinculo=vinculoEventoLocal(e), periodo=intervaloEventoLocal(e);
+                if(vinculo.id && vinculo.id!==localId)return;
+                if(periodo && (data<periodo.inicio || data>periodo.fim))return;
+                if(!vinculo.id || !periodo){pendencias.push(e);return;}
+                const hi=horarioEventoLocal(e,'dataInicio'), hf=horarioEventoLocal(e,'dataFim');
+                // Sem horários completos e confiáveis, o dia inteiro pode estar comprometido.
+                if(inicio && hi && hf && periodo.inicio===periodo.fim && hf>hi && (fim<=hi || inicio>=hf))return;
+                conflitos.push(e);
+            });
+            return {conflitos,pendencias,completa:agendaLocaisEstado==='completa' && modulosDoUsuario().includes('eventos')};
+        }
+        function dataEventoTextoLocal(e) {
+            const p=intervaloEventoLocal(e);
+            if(!p)return 'Data não informada ou inválida';
+            const horas=[horarioEventoLocal(e,'dataInicio'),horarioEventoLocal(e,'dataFim')];
+            return formatarData(p.inicio)+(p.fim!==p.inicio?' a '+formatarData(p.fim):'')+(horas.every(Boolean)?' • '+horas.join('–'):' • horário não informado');
+        }
+        function executarConsultaLocal(e) {
+            e?.preventDefault?.();
+            const box=document.getElementById('disponibilidade-resultado');if(!box)return;
+            try {
+                const r=consultarConflitosLocal(document.getElementById('disponibilidade-local').value,document.getElementById('disponibilidade-data').value,document.getElementById('disponibilidade-inicio').value,document.getElementById('disponibilidade-fim').value);
+                consultaLocalAtiva=true;
+                const titulo=r.conflitos.length ? 'Possíveis conflitos encontrados' : (!r.completa || r.pendencias.length) ? 'Não foi possível concluir a disponibilidade' : 'Nenhum conflito na agenda cadastrada';
+                box.innerHTML='<div class="rounded-xl border p-4 bg-slate-50"><p class="font-bold">'+titulo+'</p><p class="text-xs text-slate-500 mt-1">'+esc(textoAgendaLocais())+'</p>'+
+                    (r.pendencias.length?'<p class="text-xs text-amber-800 mt-2">'+r.pendencias.length+' evento(s) precisam de revisão de local ou data antes de descartar conflitos.</p>':'')+
+                    '<ul class="mt-3 space-y-2">'+r.conflitos.map(ev=>'<li class="text-xs border rounded-lg p-2 bg-white"><b>'+esc(ev.titulo || ev.nome || 'Evento sem título')+'</b><br>'+esc(dataEventoTextoLocal(ev))+'</li>').join('')+'</ul><p class="text-xs mt-2">Confirme a reserva com o responsável pelo local.</p></div>';
+            } catch(err){consultaLocalAtiva=false;box.textContent=err.message;}
+        }
+        function renderPainelLocal() {
+            const box=document.getElementById('local-painel');if(!box)return;
+            const l=dbData.locais.find(l=>idLocal(l)===localSelecionadoId);
+            if(!l){box.innerHTML='<p class="text-sm text-slate-500">Selecione <strong>Detalhes</strong> na tabela para conhecer o espaço e seu histórico de eventos.</p>';return;}
+            const lista=eventosDoLocal(l);
+            const historico=lista.filter(e=>{const p=intervaloEventoLocal(e);return !eventoCanceladoLocal(e) && (['realizado','realizada','concluido'].includes(normalizarLocal(e.status)) || (p && p.fim<hojeLocais()));});
+            const info=(titulo,valor)=>'<div class="rounded-xl bg-slate-50 border p-3"><dt class="text-[10px] uppercase tracking-wide text-slate-500 font-bold">'+titulo+'</dt><dd class="text-sm mt-1 whitespace-pre-wrap">'+esc(valor ?? 'Não informado')+'</dd></div>';
+            const extra=Object.entries(l).filter(([k])=>!['firestoreId','nome','endereco','capacidade','area','areaM2','valorAluguel','tipoLocacao','periodicidadeLocacao','contato','contatoResponsavel','telefone','emailContato','recursos','descricao'].includes(k));
+            box.innerHTML='<div class="flex flex-wrap justify-between items-start gap-3"><div><p class="text-[10px] text-blue-700 font-bold uppercase tracking-widest">Detalhes do espaço</p><h4 class="font-bold text-xl mt-1">'+esc(l.nome || 'Local sem nome')+'</h4></div><div class="flex gap-2">'+(ehAdministrador()?'<button type="button" data-local-editar="'+esc(idLocal(l))+'" class="border border-blue-200 bg-blue-50 text-blue-900 rounded-lg px-3 py-2 text-xs font-bold">Editar cadastro</button>':'')+'<button type="button" id="local-fechar-painel" class="border rounded-lg px-3 py-2 text-xs">Fechar</button></div></div>'+
+                '<dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">'+info('Endereço',l.endereco || null)+info('Capacidade',numeroLocal(l.capacidade)===null?null:l.capacidade+' pessoas')+info('Área',l.area || (l.areaM2?l.areaM2+' m²':null))+info('Responsável / Contato',[l.contatoResponsavel,l.contato,l.telefone,l.emailContato].filter(Boolean).join('\n') || null)+info('Locação',(tipoLocacaoLocal(l)==='nao-informado'?'Tipo não informado':tipoLocacaoLocal(l)==='gratuito'?'Gratuito':'Pago')+' • '+valorLocacaoTexto(l)+(l.periodicidadeLocacao?' / '+l.periodicidadeLocacao:''))+info('Recursos disponíveis',recursosLocal(l).join(', ') || null)+'</dl>'+
+                '<p class="text-sm text-slate-600 whitespace-pre-wrap mt-4">'+esc(l.descricao || 'Descrição não informada.')+'</p>'+
+                '<div class="mt-5 pt-4 border-t"><h5 class="font-bold text-sm">Histórico de eventos</h5><p class="text-xs text-slate-500 mt-1">'+esc(textoAgendaLocais())+' Datas passadas sem status de realização exigem confirmação.</p><ul class="mt-3 space-y-2">'+historico.sort((a,b)=>(String(b.dataInicio || '')).localeCompare(String(a.dataInicio || ''))).map(ev=>'<li class="p-3 border rounded-xl bg-slate-50 text-xs"><b>'+esc(ev.titulo || ev.nome || 'Evento')+'</b><br>'+esc(dataEventoTextoLocal(ev))+'<br><span class="text-slate-500">'+(['realizado','realizada','concluido'].includes(normalizarLocal(ev.status))?'Realização registrada':'Data encerrada; realização a confirmar')+'</span></li>').join('')+'</ul>'+(historico.length?'':'<p class="text-xs text-slate-500 mt-3">Nenhum evento passado identificado entre os registros carregados.</p>')+'</div>'+
+                '<details class="mt-4 border-t pt-3"><summary class="text-xs font-bold cursor-pointer">Demais informações cadastradas</summary><dl class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">'+extra.map(([k,v])=>info(esc(k),typeof v==='object'?JSON.stringify(v):String(v))).join('')+'</dl></details>';
+        }
+        function selecionarLocal(id) {
+            localSelecionadoId=id;renderPainelLocal();
+            const s=document.getElementById('disponibilidade-local');if(s)s.value=id;
+            consultaLocalAtiva=false;document.getElementById('disponibilidade-resultado').textContent='';
+            const box=document.getElementById('local-painel');box?.scrollIntoView?.({behavior:'smooth',block:'start'});box?.focus?.({preventScroll:true});
+        }
         function renderLocais() {
-            const tbody = document.getElementById('tabela-locais');
-            if (!tbody) return;
-            const filtrados = dbData.locais.filter(l => !buscaLocaisVal || [l.nome, l.endereco, l.contato, l.contatoResponsavel].filter(Boolean).join(' ').toLowerCase().includes(buscaLocaisVal));
-            document.getElementById('count-locais').textContent = filtrados.length;
-            tbody.innerHTML = filtrados.map(l => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">${renderAuditInfo(l).dataHtml}</td><td class="p-4">${renderAuditInfo(l).autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="locais" data-id="${esc(l.firestoreId)}">Detalhes</button></td></tr>`).join('');
+            const tbody=document.getElementById('tabela-locais');if(!tbody)return;
+            const tipo=document.getElementById('local-filtro-tipo')?.value || '';
+            const minima=numeroLocal(document.getElementById('local-filtro-capacidade')?.value);
+            const recurso=normalizarLocal(document.getElementById('local-filtro-recurso')?.value);
+            const busca=normalizarLocal(buscaLocaisVal);
+            const filtrados=dbData.locais.filter(l=>{
+                const cap=numeroLocal(l.capacidade);
+                return (!busca || normalizarLocal([l.nome,l.endereco,l.contato,l.contatoResponsavel,l.telefone,l.emailContato].filter(Boolean).join(' ')).includes(busca)) &&
+                    (!tipo || tipoLocacaoLocal(l)===tipo) && (minima===null || (cap!==null && cap>=minima)) &&
+                    (!recurso || normalizarLocal(recursosLocal(l).join(' ')).includes(recurso));
+            });
+            document.getElementById('count-locais').textContent=filtrados.length;
+            const k=indicadoresLocais(), agenda=modulosDoUsuario().includes('eventos') && ['completa','parcial'].includes(agendaLocaisEstado);
+            const cards=[['Locais cadastrados',k.total,'Espaços carregados'],['Capacidade total',k.capacidade,'Pessoas • '+k.semCapacidade+' sem informação'],['Eventos vinculados',agenda?k.vinculados:'—','Todos os períodos, inclusive cancelados'],['Locais gratuitos',k.gratuitos,'Gratuidade informada no cadastro'],['Locais pagos',k.pagos,k.semTipo+' sem tipo informado'],['Custo total previsto',agenda?((k.semCusto || k.semData) && !k.custosInformados?'Não informado':moedaLocal(k.custo)):'—','Eventos atuais/futuros • subtotal informado']];
+            const iconesIndicadoresLocais=['building','users','calendar-days','gift','credit-card','coins'];
+            document.getElementById('locais-indicadores').innerHTML=cards.map(([label,val,nota],i)=>'<div class="local-card-suave rounded-2xl border shadow-sm p-4" data-tone="'+(i%2===0?'azul':'verde')+'"><div class="local-card-rotulo"><i class="fa-solid fa-'+iconesIndicadoresLocais[i]+' local-card-icone" aria-hidden="true"></i><p class="text-[10px] font-bold uppercase tracking-wide text-slate-500">'+label+'</p></div><p class="text-2xl font-bold text-blue-950 mt-2 break-words">'+val+'</p><p class="text-[10px] text-slate-500 mt-2">'+nota+'</p></div>').join('');
+            document.getElementById('locais-qualidade').textContent=textoAgendaLocais()+(agenda?' '+k.semVinculo+' evento(s) sem vínculo confirmado; '+k.semCusto+' evento(s) atual(is)/futuro(s) sem custo informado; '+k.semData+' evento(s) vinculados sem período válido. O custo é a soma dos totais informados por evento, sem multiplicar tarifas do local.':'');
+            tbody.innerHTML=filtrados.map(l=>{
+                const cap=numeroLocal(l.capacidade), rs=recursosLocal(l), tipo=tipoLocacaoLocal(l);
+                return '<tr class="hover:bg-blue-50/40"><td class="p-4"><b class="text-blue-950">'+esc(l.nome || 'Sem nome')+'</b><p class="text-[11px] text-slate-500 mt-1">'+esc(l.endereco || 'Endereço não informado')+'</p></td><td class="p-4 text-xs">'+(cap===null?'Não informada':esc(cap)+' pessoas')+'<br><span class="text-slate-500">'+esc(l.area || (l.areaM2?l.areaM2+' m²':''))+'</span></td><td class="p-4 text-xs font-semibold">'+esc(valorLocacaoTexto(l))+'<br><span class="font-normal text-slate-500">'+(tipo==='nao-informado'?'Tipo não informado':tipo==='gratuito'?'Gratuito':'Pago')+(l.periodicidadeLocacao?' / '+esc(l.periodicidadeLocacao):'')+'</span></td><td class="p-4"><span class="bg-blue-50 text-blue-800 rounded-full px-2.5 py-1 text-xs font-bold">'+(agenda?eventosDoLocal(l).length:'—')+'</span></td><td class="p-4 text-xs">'+(rs.length?rs.map(r=>'<span class="inline-block m-0.5 bg-slate-100 rounded-md px-2 py-1">'+esc(r)+'</span>').join(''):'Não informados')+'</td><td class="p-4">'+renderAuditInfo(l).dataHtml+'</td><td class="p-4">'+renderAuditInfo(l).autorHtml+'</td><td class="p-4 text-center"><button type="button" class="text-xs bg-blue-50 px-3 py-2 rounded-lg font-semibold text-blue-900" data-local-detalhes="'+esc(idLocal(l))+'">Detalhes</button></td></tr>';
+            }).join('') || '<tr><td colspan="8" class="text-center text-sm text-slate-500 p-8">Nenhum local encontrado. Ajuste os filtros ou cadastre um espaço.</td></tr>';
+            const sel=document.getElementById('disponibilidade-local'), atual=sel.value;
+            sel.innerHTML='<option value="">Selecione um local</option>'+dbData.locais.map(l=>'<option value="'+esc(idLocal(l))+'">'+esc(l.nome || 'Local sem nome')+'</option>').join('');
+            sel.value=dbData.locais.some(l=>idLocal(l)===atual)?atual:'';
+            renderPainelLocal();
+            if(consultaLocalAtiva)executarConsultaLocal();
+        }
+
+        function camposCadastroLocal(item={},novo=false) {
+            const prefix=novo?'novo-local-':'editar-local-';
+            const campo=(key,label,type='text',extra='')=>'<label class="block text-xs font-bold">'+label+'<input id="'+(novo && key==='nome'?'uc-1':prefix+key)+'" type="'+type+'" value="'+esc(item[key] ?? '')+'" '+extra+' class="block w-full p-2.5 border rounded-lg mt-1 font-normal"></label>';
+            return '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs max-h-[65vh] overflow-y-auto p-1">'+campo('nome','Nome do local','text','required maxlength="180"')+campo('capacidade','Capacidade (pessoas)','number','min="0" step="1"')+
+                campo('endereco','Endereço','text','maxlength="500"')+campo('area','Área (descrição ou m²)','text','maxlength="150"')+campo('contatoResponsavel','Nome / contato do responsável','text','maxlength="200"')+campo('contato','Outros contatos','text','maxlength="200"')+campo('telefone','Telefone','tel','maxlength="40"')+campo('emailContato','E-mail do contato','email','maxlength="200"')+
+                '<label class="font-bold">Tipo de locação<select id="'+prefix+'tipoLocacao" class="block w-full p-2.5 border rounded-lg mt-1 font-normal"><option value="nao-informado">Não informado</option><option value="gratuito" '+(tipoLocacaoLocal(item)==='gratuito'?'selected':'')+'>Gratuito</option><option value="pago" '+(tipoLocacaoLocal(item)==='pago'?'selected':'')+'>Pago</option></select></label>'+campo('valorAluguel','Valor de referência da locação (R$)','text','inputmode="decimal" placeholder="Ex.: 1.200,00"')+
+                campo('periodicidadeLocacao','Unidade / condição do valor','text','placeholder="Ex.: hora, diária, evento; confirmar" maxlength="150"')+
+                '<label class="font-bold">Recursos (um por linha ou separados por vírgula)<textarea id="'+prefix+'recursos" rows="3" class="block w-full p-2.5 border rounded-lg mt-1 font-normal" placeholder="Projetor, Wi-Fi, acessibilidade">'+esc(recursosLocal(item).join('\n'))+'</textarea></label>'+
+                '<label class="sm:col-span-2 font-bold">Descrição e orientações<textarea id="'+(novo?'uc-2':prefix+'descricao')+'" rows="3" maxlength="4000" class="block w-full p-2.5 border rounded-lg mt-1 font-normal">'+esc(item.descricao || '')+'</textarea></label><p class="sm:col-span-2 text-slate-500">Campos opcionais vazios permanecem sem informação. O valor de referência não é multiplicado para estimar despesas dos eventos.</p></div>';
+        }
+        function lerCadastroLocal(novo=false,anterior={}) {
+            const prefix=novo?'novo-local-':'editar-local-';
+            const val=k=>(document.getElementById(novo&&k==='nome'?'uc-1':novo&&k==='descricao'?'uc-2':prefix+k)?.value || '').trim();
+            const nome=val('nome');if(!nome || nome.length>180)throw new Error('Informe o nome do local, com até 180 caracteres.');
+            const capacidade=numeroLocal(val('capacidade'));
+            if(val('capacidade') && (capacidade===null || !Number.isInteger(capacidade)))throw new Error('Informe uma capacidade inteira, maior ou igual a zero.');
+            const tipo=val('tipoLocacao') || 'nao-informado';
+            if(!['nao-informado','gratuito','pago'].includes(tipo))throw new Error('Selecione um tipo de locação válido.');
+            let valor=numeroLocal(val('valorAluguel'));
+            if(val('valorAluguel') && valor===null && !['gratuito','gratis'].includes(normalizarLocal(val('valorAluguel'))))throw new Error('Informe um valor monetário válido ou deixe o campo vazio.');
+            if(tipo==='gratuito'){if(valor!==null && valor>0)throw new Error('Um local gratuito não pode ter valor de aluguel maior que zero.');valor=0;}
+            if(tipo==='pago' && valor===0)throw new Error('Para locação paga, informe valor maior que zero ou deixe sem informação.');
+            const email=val('emailContato');if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw new Error('Informe um e-mail de contato válido.');
+            const rs=val('recursos').split(/[,;\n]/).map(v=>v.trim()).filter(Boolean);
+            if(rs.length>80 || rs.some(v=>v.length>150))throw new Error('Informe até 80 recursos, com até 150 caracteres cada.');
+            const dados={nome,capacidade,tipoLocacao:tipo,valorAluguel:valor,recursos:[...new Set(rs)]};
+            for(const k of ['endereco','area','contatoResponsavel','contato','telefone','emailContato','periodicidadeLocacao','descricao'])dados[k]=val(k);
+            return dados;
+        }
+        function camposAgendaEvento(item={},novo=false) {
+            const iid=String(item.localId || ''), escolhido=dbData.locais.some(l=>idLocal(l)===iid);
+            const input=(id,label,value,type='text',extra='')=>'<label class="text-xs font-bold">'+label+'<input id="evt-'+id+'" type="'+type+'" value="'+esc(value ?? '')+'" '+extra+' class="block w-full border rounded-lg p-2 mt-1 font-normal"></label>';
+            return '<fieldset class="border-t mt-4 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3"><legend class="font-bold text-xs">Local, agenda e locação</legend><label class="text-xs font-bold">Local cadastrado<select id="evt-local-id" class="block w-full border rounded-lg p-2 mt-1 font-normal"><option value="">Sem vínculo; informar local em texto</option>'+(!escolhido && iid?'<option value="'+esc(iid)+'" selected>Local anteriormente vinculado (não carregado)</option>':'')+dbData.locais.map(l=>'<option value="'+esc(idLocal(l))+'" '+(iid===idLocal(l)?'selected':'')+'>'+esc(l.nome || 'Sem nome')+'</option>').join('')+'</select></label>'+
+                input('local-texto','Local em texto / observação',item.localEvento || '')+
+                input('data-inicio','Data inicial',diaEventoLocal(item.dataInicio),'date',novo?'required':'')+input('data-fim','Data final (opcional)',diaEventoLocal(item.dataFim),'date')+
+                input('hora-inicio','Horário inicial (opcional)',horarioEventoLocal(item,'dataInicio'),'time')+input('hora-fim','Horário final (opcional)',horarioEventoLocal(item,'dataFim'),'time')+
+                input('custo','Custo total previsto da locação (R$)',item.custoLocacaoPrevisto ?? '','text','inputmode="decimal" placeholder="Total deste evento, não a tarifa"')+
+                '<label class="text-xs font-bold">Situação<select id="evt-status" class="block w-full border rounded-lg p-2 mt-1 font-normal">'+[...new Set(['','Planejado','Confirmado','Realizado','Cancelado',item.status || ''])].map(s=>'<option value="'+esc(s)+'" '+((item.status || '')===s?'selected':'')+'>'+esc(s || 'Não informado')+'</option>').join('')+'</select></label><p class="text-xs text-slate-500 sm:col-span-2">O vínculo pelo local evita confusão entre espaços com o mesmo nome. A consulta de disponibilidade é indicativa e não garante uma reserva. Sem horário, o evento pode ocupar todo o período.</p></fieldset>';
+        }
+        function lerAgendaEvento(anterior={},novo=false) {
+            const val=k=>(document.getElementById('evt-'+k)?.value || '').trim();
+            const localId=val('local-id'), local=dbData.locais.find(l=>idLocal(l)===localId);
+            if(localId && !local && localId!==String(anterior.localId || ''))throw new Error('Selecione um local cadastrado.');
+            const inicio=val('data-inicio'), fim=val('data-fim'), hi=val('hora-inicio'), hf=val('hora-fim');
+            if((novo && !inicio) || (inicio && diaEventoLocal(inicio)!==inicio) || (fim && diaEventoLocal(fim)!==fim) || (fim && (!inicio || fim<inicio)))throw new Error('Informe um período válido, com fim igual ou posterior ao início.');
+            const agendaLegadaIntacta=!novo && inicio===diaEventoLocal(anterior.dataInicio) && fim===diaEventoLocal(anterior.dataFim) && hi===horarioEventoLocal(anterior,'dataInicio') && hf===horarioEventoLocal(anterior,'dataFim');
+            if(!agendaLegadaIntacta && (!!hi!==!!hf || ((hi || hf) && !inicio) || (hi && (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(hi) || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(hf) || ((!fim || fim===inicio) && hf<=hi)))))throw new Error('Informe ambos os horários; no mesmo dia, o fim deve ser posterior ao início.');
+            const custo=numeroLocal(val('custo'));if(val('custo') && custo===null)throw new Error('Informe um custo de locação válido ou deixe sem informação.');
+            return {localId,localEvento:local ? local.nome || '' : val('local-texto'),
+                dataInicio:inicio===diaEventoLocal(anterior.dataInicio)&&hi===horarioEventoLocal(anterior,'dataInicio') ? anterior.dataInicio || '' : inicio,
+                dataFim:fim===diaEventoLocal(anterior.dataFim)&&hf===horarioEventoLocal(anterior,'dataFim') ? anterior.dataFim || '' : fim,
+                horaInicio:hi,horaFim:hf,custoLocacaoPrevisto:custo,status:val('status')};
         }
 
         function renderFornecedores() {
@@ -1720,6 +1983,8 @@
             const common = (label,key,type='text',cls='',extraClass='') => `<div class="${cls}"><label class="block font-bold text-[11px] uppercase mb-1">${label}</label><input type="${type}" name="${key}" value="${esc(item[key] || '')}" class="w-full p-2 border rounded-lg text-xs bg-white ${extraClass}"></div>`;
             
             if (colecao === 'usuarios') { document.getElementById('form-univ-campos').innerHTML = ''; c.innerHTML = camposUsuario(item); atualizarControlesUsuario(); return; }
+            if (colecao === 'locais') { document.getElementById('form-univ-campos').innerHTML=''; c.innerHTML=camposCadastroLocal(item); return; }
+            if (colecao === 'eventos') document.getElementById('form-univ-campos').innerHTML='';
             if(colecao === 'orgaos'){
                 c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     ${common('Nome do Cliente / Órgão','nome')}
@@ -1788,7 +2053,7 @@
                 return;
             }
 
-            c.innerHTML = Object.entries(item).filter(([k]) => k !== 'id' && k !== 'firestoreId').map(([k, v]) => {
+            c.innerHTML = Object.entries(item).filter(([k]) => k !== 'id' && k !== 'firestoreId' && !(colecao === 'eventos' && ['localId','localEvento','dataInicio','dataFim','horaInicio','horaFim','custoLocacaoPrevisto','status'].includes(k))).map(([k, v]) => {
                 const classe = 'w-full p-2 border rounded-lg text-xs bg-white';
                 const label = `<label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label>`;
                 if (['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid', 'criadoPorUid', 'editadoPorUid', 'perfilAtualizadoEm'].includes(k)) {
@@ -1811,6 +2076,7 @@
                 }
                 return `<div>${label}<input type="text" name="${esc(k)}" value="${esc(v)}" class="${classe}"></div>`;
             }).join('');
+            if (colecao === 'eventos') c.innerHTML += camposAgendaEvento(item);
         }
 
         function detalharRegistro(colecao, firestoreId){
@@ -2000,7 +2266,8 @@
                 if (colecao === 'usuarios') {
                     Object.assign(obj, lerDadosUsuario(itemAntigo));
                     obj.uid = String(firestoreId);
-                } else form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el => {
+                } else if (colecao === 'locais') Object.assign(obj,lerCadastroLocal(false,itemAntigo));
+                else form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el => {
                     if (!el.name || el.name === 'responsavelGrgdCheckbox' || ['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid', 'criadoPorUid', 'editadoPorUid', 'perfilAtualizadoEm'].includes(el.name)) return;
                     const tipo = el.dataset.fieldType;
                     if (tipo === 'boolean') {
@@ -2018,6 +2285,7 @@
                     else if (itemAntigo[el.name] === null && !el.value) obj[el.name] = null;
                     else obj[el.name] = el.value;
                 });
+                if (colecao === 'eventos') Object.assign(obj,lerAgendaEvento(itemAntigo));
                 if (colecao === 'demandas') {
                     const respCheckboxes = form.querySelectorAll('input[name="responsavelGrgdCheckbox"]:checked');
                     Object.assign(obj, lerResponsaveis(respCheckboxes, itemAntigo));
@@ -2073,6 +2341,11 @@
 
             if (tipo === 'usuario') {
                 document.getElementById('edit-campos-dinamicos').innerHTML = ''; container.innerHTML = camposUsuario({}, true); atualizarControlesUsuario();
+            } else if (tipo === 'local') {
+                document.getElementById('edit-campos-dinamicos').innerHTML='';container.innerHTML=camposCadastroLocal({},true);
+            } else if (tipo === 'evento') {
+                document.getElementById('edit-campos-dinamicos').innerHTML='';
+                container.innerHTML='<div class="space-y-3 text-xs"><label class="block font-bold">Título do evento<input id="uc-1" required class="block w-full border rounded-lg p-2 mt-1"></label><label class="block font-bold">Descrição<textarea id="uc-2" class="block w-full border rounded-lg p-2 mt-1"></textarea></label>'+camposAgendaEvento({},true)+'</div>';
             } else if (tipo === 'cliente') {
                 container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs max-h-[70vh] overflow-y-auto p-1">
                     <div><label class="block mb-1 font-bold">Nome do Órgão / Cliente</label><input id="uc-1" required class="w-full p-2 border rounded"></div>
@@ -2150,6 +2423,11 @@
             try {
                 if (tipo === 'usuario') {
                     await criarCadastroUsuario();
+                } else if (tipo === 'local' || tipo === 'evento') {
+                    if (!ehAdministrador()) throw new Error('Somente administradores podem cadastrar locais e eventos.');
+                    const dados=tipo==='local' ? lerCadastroLocal(true) : {titulo:val('uc-1').trim(),nome:val('uc-1').trim(),descricao:val('uc-2'),...lerAgendaEvento({},true)};
+                    if(tipo==='evento' && !dados.titulo)throw new Error('Informe o título do evento.');
+                    await addDoc(collection(db,tipo==='local'?'locais':'eventos'),{...dados,criadoEm:agora,atualizadoEm:agora,criadoPor:autor,criadoPorUid:currentUser.uid,editadoPor:autor,editadoPorUid:currentUser.uid});
                 } else if (tipo === 'cliente') {
                     await addDoc(collection(db, 'orgaos'), {
                         id: 'CLI-' + Date.now(),
@@ -2297,6 +2575,14 @@
 
         function configurarInterface() {
             const byId = id => document.getElementById(id);
+            byId('btn-filtros-locais')?.addEventListener('click',()=>{
+                const btn=byId('btn-filtros-locais'), abrir=btn.getAttribute('aria-expanded')!=='true';
+                btn.setAttribute('aria-expanded',String(abrir));byId('locais-filtros').classList.toggle('hidden',!abrir);
+            });
+            ['local-filtro-tipo','local-filtro-capacidade','local-filtro-recurso'].forEach(id=>byId(id)?.addEventListener('input',renderLocais));
+            byId('local-limpar-filtros')?.addEventListener('click',()=>{['local-filtro-tipo','local-filtro-capacidade','local-filtro-recurso','busca-locais'].forEach(id=>byId(id).value='');buscaLocaisVal='';renderLocais();});
+            byId('form-disponibilidade-local')?.addEventListener('submit',executarConsultaLocal);
+            ['disponibilidade-local','disponibilidade-data','disponibilidade-inicio','disponibilidade-fim'].forEach(id=>byId(id)?.addEventListener('input',()=>{consultaLocalAtiva=false;byId('disponibilidade-resultado').textContent='';}));
             byId('btn-meu-perfil')?.addEventListener('click',abrirMeuPerfil);
             byId('form-meu-perfil')?.addEventListener('submit',salvarMeuPerfil);
             byId('form-minha-senha')?.addEventListener('submit',alterarMinhaSenha);
@@ -2481,6 +2767,11 @@
                 else document.getElementById('usuario-nome')?.focus();
                 return;
             }
+            const detalheLocal=ev.target.closest?.('[data-local-detalhes]');
+            if(detalheLocal){selecionarLocal(detalheLocal.getAttribute('data-local-detalhes'));return;}
+            const editarLocal=ev.target.closest?.('[data-local-editar]');
+            if(editarLocal){if(ehAdministrador())detalharRegistro('locais',editarLocal.getAttribute('data-local-editar'));return;}
+            if(ev.target.closest?.('#local-fechar-painel')){localSelecionadoId='';renderPainelLocal();return;}
             const btnDetalhes = ev.target.closest?.('.tr-detalhe');
             if (btnDetalhes) {
                 ev.stopPropagation();
@@ -2508,6 +2799,9 @@
 
         function limparDadosSessao() {
             currentUser = null;
+            localSelecionadoId='';agendaLocaisEstado='aguardando';consultaLocalAtiva=false;
+            ['local-filtro-tipo','local-filtro-capacidade','local-filtro-recurso','disponibilidade-local','disponibilidade-data','disponibilidade-inicio','disponibilidade-fim'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+            document.getElementById('disponibilidade-resultado').textContent='';
             dadosPessoaisPerfil = null; identidadesUsuarios = []; perfilEmEdicao = null; limparSenhasPerfil();
             ['perfil-nome','perfil-email','perfil-telefone','perfil-endereco','perfil-foto'].forEach(id => { document.getElementById(id).value = ''; });
             document.getElementById('perfil-foto-preview').innerHTML = '';

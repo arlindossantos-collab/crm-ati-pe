@@ -2,26 +2,129 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## Próxima entrega — v0.5.0 — proposta em 20/10/2026
+## v0.7.0 — Gestão de usuários e sessão persistente — proposta de 20/10/2026
 
-**Resumo para a chefia:** facilita a gestão de usuários e evita pedir login novamente a cada atualização da página.
-
-- Versão anterior: v0.4.0. Nova versão proposta: v0.5.0.
-- Sequência prevista: Release 02, a confirmar no histórico quando a publicação for autorizada. Ainda não publicada.
-- Próxima versão sugerida: v0.5.1 para correções ou v0.6.0 para novas funcionalidades.
+**Resumo para a chefia:** facilita editar e retirar usuários do cadastro ativo e preserva o login após atualizar a página. Parte da v0.6.3 e mantém os ícones, tons suaves e disposição atual de Locais.
 
 | Antes | Depois |
 | --- | --- |
-| Edição acessível somente dentro de Detalhes. | Botão Editar diretamente na lista e Salvar usuário no formulário existente. |
-| Inativação apenas no detalhe, sem remoção da lista. | Excluir retira do cadastro ativo, marca excluido=true e ativo=false, exige confirmação e preserva o histórico. |
-| Sessão em memória se perde no F5. | Persistência local do Firebase; sessão mantida no navegador até Sair, limpeza do armazenamento ou invalidação. |
-| Cadastro auxiliar precisava isolar a conta criada. | Continua em memória, sem trocar a sessão do administrador. |
+| Edição acessível em Detalhes. | Editar diretamente na lista e Salvar usuário no formulário. |
+| Inativação mantinha o cadastro na lista. | Excluir exige confirmação, marca ativo=false/excluido=true e retira da lista e contadores. |
+| F5 descartava a sessão em memória. | Persistência local na sessão principal; cadastro auxiliar permanece isolado em memória. |
 
-**Limites da exclusão:** lógica, somente administradores, com bloqueio da própria conta. Conta Auth, e-mail reservado, telefone/endereço e documentos históricos permanecem; não equivale a apagar a pessoa de todo o Firebase. Exclusão definitiva da conta exige backend administrativo e tratamento coordenado dos dados.
+**Limites:** somente administradores podem excluir; autoexclusão bloqueada. Conta Auth, dados pessoais, e-mail reservado e histórico permanecem. Exclusão definitiva exige implementação administrativa separada.
 
-**Validação:** [execução completa no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39461505142), em 20/10/2026, commit `7db5a7f1a41026ecb2cd0ca11bab21a5dc955646`: **59 testes da aplicação, 27 das regras e 2 de autenticação, totalizando 88 aprovações sem falhas**. Aplicação com DOM/Firebase simulados em Node 22; regras e autenticação em emuladores de demonstração. A verificação V8 inicial foi substituída por essa execução completa. A rotina `.github/workflows/validar-prgd.yml` executa essas suítes nos PRs e na main, sem publicar o site ou acessar produção. Conferência visual e persistência real no navegador continuam pendentes.
+**Validação:** execução das suítes atualizadas no GitHub Actions pendente nesta preparação. Os 88 testes da proposta antiga não validam esta integração. Regras e autenticação são verificadas em emuladores; a interface usa Firebase simulado. Persistência real e homologação institucional permanecem pendentes.
 
-**Implantação:** revisar e testar antes de integrar. Esta entrega muda firestore.rules; publicar as regras junto com o HTML. Sem acesso Firebase nesta sessão. Nenhum dado real foi alterado. Confirmar login, F5, reabertura, Sair, edição e exclusão no navegador. Permanência depende de armazenamento disponível; falhas são exibidas no login, sem fallback silencioso para sessão descartável.
+**Implantação:** proposta ainda não publicada. Publicar as novas regras do Firestore antes ou junto do HTML. Sem acesso Firebase nesta sessão; nenhum usuário real alterado. Confirmar login, F5, reabertura, Sair, edição e exclusão no ambiente institucional. Próximas versões possíveis: v0.7.1 para correções ou v0.8.0 para novas funcionalidades.
+
+## v0.6.3 — Ícones e tons suaves nos indicadores de Locais — entrega de 20/10/2026
+
+**Resumo para a chefia:** melhora a identificação dos seis indicadores, mantendo a disposição atual da tela.
+
+- Versão anterior: v0.6.2. Nova versão: v0.6.3. Publicação autorizada em 20/10/2026; conferir integração e GitHub Pages separadamente.
+- Antes: cards brancos com rótulos sem ícones.
+- Depois: um ícone por indicador e fundos discretos alternando somente azul e verde, com opacidade de 5,5% e borda de 16%. Texto, números e notas mantêm as cores anteriores.
+- Ícones: edifício, pessoas, calendário, presente, cartão e moedas, na ordem dos indicadores. Ícones decorativos; nomes preservados para leitura e acessibilidade.
+- Sem agenda lateral, nova identidade roxa, cores fortes ou reorganização. HTML estático do corpo preservado integralmente após normalizar apenas a versão.
+- Alteração limitada aos seis cards: demais campos, tabela, cabeçalho, consulta, cálculos, cadastros, permissões e regras do Firebase preservados.
+- Teste de navegador verifica seis ícones, moedas no custo, somente azul/verde, baixa opacidade e consulta abaixo do painel, além dos fluxos anteriores.
+- [Execução completa aprovada no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39473507112), commit `bbfee522ef9e3b54dc7c1355b2958fee3250389a`: 70 testes da aplicação, 25 de regras e 2 de autenticação, totalizando **97 aprovações**. Chromium aprovado em desktop e celular: seis ícones, moedas no custo, apenas azul/verde, baixa opacidade e consulta mantida abaixo do painel. Dados simulados; não equivale a homologação em produção.
+- Publicação autorizada. Não exige alteração no Firebase; PR #8 continua separado.
+- Próxima versão sugerida: v0.6.4 para ajustes ou v0.7.0 para funcionalidades; sequência formal a conferir ao publicar.
+
+
+
+## v0.6.2 — Restauração do layout anterior de Locais — 20/10/2026
+
+**Resumo para a chefia:** restaura a interface de Locais da v0.6.0, desfazendo a apresentação visual da v0.6.1 conforme solicitação do usuário.
+
+- Versão anterior publicada: v0.6.1. Nova versão: v0.6.2. O número avança para registrar a reversão; a aparência retorna à v0.6.0.
+- Antes: indicadores com seis cores/ícones, identidade roxa e disponibilidade na lateral direita.
+- Depois: cards, cores e disposição da v0.6.0, com consulta de disponibilidade abaixo do conteúdo.
+- Mantidos: modernização original de Locais, indicadores, filtros, informações, histórico, cadastros e cálculos.
+- Código da interface restaurado a partir de `5efc60fad20ce2bb6376e301eeb4e4bb01389da3`; no HTML só a identificação da versão difere daquela referência.
+- Teste de navegador retorna à validação anterior, que verifica os fluxos e a largura de celular. Conferir resultados da execução vinculada ao PR de reversão.
+- Reversão e publicação autorizadas pelo usuário em 20/10/2026. Confirmar integração e GitHub Pages separadamente.
+- Nenhuma alteração nos dados ou regras do Firebase. PR #8 permanece separado.
+- Próxima versão sugerida: v0.6.3 para ajustes ou v0.7.0 para novas funcionalidades; sequência formal de release a conferir quando registrada.
+
+
+## v0.6.1 — Identificação visual de Locais — entrega de 20/10/2026
+
+**Resumo para a chefia:** facilita reconhecer os indicadores e consultar a agenda enquanto se examina um local.
+
+- Versão anterior: v0.6.0. Nova versão: v0.6.1, ajuste de interface sem nova regra de negócio. Publicação autorizada em 20/10/2026; conferir GitHub Pages separadamente.
+- Próxima versão sugerida: v0.6.2 para ajustes ou v0.7.0 para novas funcionalidades. Sequência da release será conferida quando a publicação for autorizada.
+- Base: main@5efc60fad20ce2bb6376e301eeb4e4bb01389da3. Alteração de usuários do PR #8 permanece separada.
+
+| Antes | Depois |
+| --- | --- |
+| Cards semelhantes, com nomes sem ícones. | Cada indicador combina nome, ícone temático e uma cor própria. |
+| Destaques predominantemente azuis. | Identidade roxa restrita ao módulo Locais, com cores distintas nos indicadores. |
+| Consulta de disponibilidade abaixo de todo o conteúdo. | Painel na lateral direita a partir de 1024 px; abaixo do conteúdo em telas menores. |
+| Rótulos de campos e tabela só em texto. | Ícones também nos cabeçalhos, informações do local, formulário e consulta, preservando os nomes. |
+
+### Identificação dos indicadores
+
+| Indicador | Ícone | Cor |
+| --- | --- | --- |
+| Locais cadastrados | Edifício | Roxo |
+| Capacidade total | Pessoas | Azul |
+| Eventos vinculados | Calendário | Índigo |
+| Locais gratuitos | Presente | Verde |
+| Locais pagos | Cartão | Âmbar |
+| Custo total previsto | Moedas | Rosa |
+
+Os ícones são decorativos para leitores de tela; os nomes permanecem presentes. Cores não substituem os rótulos. Estilos restritos a Locais e aos seus campos no modal.
+
+### Validação e limites
+
+- Sintaxe JavaScript conferida; IDs existentes preservados, sem duplicação.
+- Testes de navegador verificam seis fundos distintos, ícones, ícone de moedas no custo, agenda à direita no computador e abaixo no celular, além dos fluxos anteriores.
+- [Execução completa aprovada no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39470701865), commit `7cb9e1a6bb2bc6f34b96be04850be282defc82b2`: 70 testes da aplicação, 25 de regras e 2 de autenticação, totalizando **97 aprovações**. Chromium também aprovado: seis cores distintas, ícones, moedas no custo, agenda à direita no computador, abaixo no celular e fluxos existentes. Dados simulados; não é homologação em produção.
+- Cálculos, vínculos, permissões, campos, gravações e regras do Firebase preservados. Não exige atualização do Firebase.
+- Entrega autorizada para publicação. O ajuste segue a descrição textual do usuário. Integração, implantação do site e página formal de release são etapas distintas.
+
+
+## v0.6.0 — Locais e planejamento de espaços — entrega de 20/10/2026
+
+**Resumo para a chefia:** moderniza a aba Locais com indicadores, comparação de espaços, filtros, painel de informações e consulta de conflitos na agenda cadastrada.
+
+- Base independente: main@85e439612962626ffa3783879dab18a8ea383e47 (v0.4.0). O PR #8/v0.5.0 continua separado e pendente do Firebase; não foi incorporado nem publicado.
+- Publicação autorizada em 20/10/2026. Versão anterior publicada: v0.4.0; nova versão: v0.6.0. A identificação v0.5.0 pertence ao PR #8, ainda não publicado; deverá ser ajustada antes da sua integração para não reduzir a versão do sistema.
+- Próxima página formal prevista: **Release 02 — v0.6.0**, conforme histórico consultado com apenas Release 01 — v0.4.0. Este arquivo não cria tag/release. Integração, GitHub Pages e release formal são verificações separadas.
+- Próxima versão sugerida: v0.6.1 para correções ou v0.7.0 para funcionalidades.
+- A aplicação continua em um único HTML. Nenhum dado existente é migrado ou alterado automaticamente.
+
+| Antes | Depois |
+| --- | --- |
+| Lista simples de locais. | Seis cards: total, capacidade informada, eventos vinculados, gratuitos, pagos e custo previsto informado por evento. |
+| Busca básica e nenhum filtro específico. | Busca sem distinção de acentos em nome, endereço e contatos; filtros combinados de tipo, capacidade mínima e recurso. |
+| Tabela com seis colunas. | Mantém as colunas originais e acrescenta eventos vinculados e recursos. |
+| Detalhes apenas no modal genérico. | Painel abaixo da tabela com endereço, capacidade/área, responsável, recursos e histórico; edição administrativa permanece acessível. |
+| Sem consulta de agenda. | Consulta por local, data e horários opcionais; conflitos, agenda parcial e lacunas exibidos explicitamente. |
+| Novos locais/eventos só tinham nome e descrição. | Formulários com capacidade, contatos, recursos, tipo/tarifa e vínculo localId, período, situação e custo total da locação por evento. |
+
+### Regras de cálculo e limites
+
+- Capacidade soma apenas números válidos; campos ausentes não são inventados. Gratuito e pago usam o tipo informado ou valor numérico legado; ausência de valor não significa gratuito.
+- Eventos vinculam pelo ID; nome legado só é associado em consulta quando corresponde a um único local (ignorando acentos/caixa/espaços). Não há gravação automática desse vínculo. ID órfão e nome duplicado exigem revisão.
+- Eventos vinculados inclui todos os períodos e cancelados. Custo previsto soma somente custos totais explicitamente informados por evento vinculado, atual/futuro e não cancelado/realizado. Tarifa do local não é multiplicada por diárias ou horas. Ausências e totais parciais são sinalizados.
+- Consulta não é reserva. Sem horários completos, o período inteiro pode estar comprometido. Eventos cancelados não geram conflito. Agendas parciais, erros de carregamento, locais/datas ausentes e vínculos ambíguos impedem afirmar disponibilidade completa.
+- Datas com fuso são tratadas no fuso de Pernambuco. Eventos de vários dias são tratados conservadoramente.
+- Datas passadas não comprovam realização: o histórico diferencia realização registrada de data encerrada a confirmar.
+- Dados de eventos respeitam o acesso existente; somente administrador recebe a agenda completa. Sem módulo Eventos, indicadores de eventos/custo ficam indisponíveis.
+- Não muda firestore.rules. Pode ser revisado/testado sem a atualização do Firebase pendente no PR #8. Concessão de novos acessos não faz parte desta entrega.
+
+### Validação
+
+- [Execução completa aprovada no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39465560736), commit `2b92110ada190203b3464e09740e85fb98993c7c`: **70 testes da aplicação, 25 de regras e 2 de autenticação, total de 97 aprovações sem falhas**.
+- Chromium aprovado com Firebase totalmente interceptado: seis cards, filtros, busca de contato, painel/histórico, conflito por horário, horários adjacentes sem conflito, edição e criação de local.
+- Capturas de desktop (1440 px) e celular (390 px) guardadas no artefato locais-interface da execução. Verificado que a página não transborda na largura do celular; tabela e abas têm rolagem própria. O teste inicial revelou transbordamento da navegação, corrigido antes desta aprovação.
+- Nenhuma operação de teste acessou os dados do Firebase real. A prova inicial V8 foi complementada pela execução oficial; isso não equivale a homologação institucional.
+- Conferência estática preservou todos os 138 IDs originais do HTML; nova página tem 153 IDs, sem duplicação.
+- Pendências: homologar com usuários e revisar os cadastros reais para associar locais e preencher períodos, recursos e custos. Publicação autorizada; conferir a implantação do GitHub Pages separadamente.
 
 
 **Release 01 — v0.4.0:** notas da entrega autorizada para publicação em 20/10/2026. Na conferência anterior à publicação não havia tags nem releases formais. A situação das publicações formais pode ser consultada na [página de releases](https://github.com/arlindossantos-collab/crm-ati-pe/releases); este arquivo não cria uma tag ou release por si só.

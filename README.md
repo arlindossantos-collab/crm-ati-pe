@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.5.0 (proposta).** Adiciona ações diretas de edição/exclusão lógica de usuários e corrige a persistência da sessão.
+**Versão deste código: v0.7.0 (proposta).** Atualiza o PR #8 sobre a v0.6.3, preservando Locais e acrescentando edição/exclusão lógica de usuários e sessão persistente.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -15,7 +15,8 @@ A versão do site depende da integração e da publicação deste código. Uma b
 | Demandas | Cadastro, buscas, filtros, prioridades, responsáveis GRGD, calendário e registros de andamento. |
 | Clientes e órgãos | Cadastros institucionais, contatos, filtros e importação de CSV. |
 | Eventos | Consulta e cadastro de eventos; inscrições associadas ao evento e à pessoa. |
-| Locais e fornecedores | Cadastros e consultas de apoio às atividades. |
+| Locais | Indicadores, filtros, capacidade, contatos, recursos, painel de detalhes, histórico e consulta de agenda. |
+| Fornecedores | Cadastros e consultas de apoio às atividades. |
 | Usuários | Tipos **Interno - GRGD** e **Externo**, situação, perfil e módulos permitidos. |
 | Perfil pessoal | Edição do próprio nome, telefone e endereço, foto enviada do computador e troca de senha com confirmação da senha atual. |
 | Identificação | Foto ou iniciais no cabeçalho e nos registros com vínculo ao identificador da pessoa. |
@@ -25,7 +26,13 @@ Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo
 
 ## O que mudou nesta entrega
 
-A proposta v0.5.0 acrescenta **Editar** e **Excluir** na lista. **Salvar usuário** confirma a edição no formulário. A sessão principal persiste no mesmo navegador após F5 e reabertura; Sair encerra a sessão. Em modo privado ou com armazenamento bloqueado, a persistência pode não estar disponível. A exclusão é lógica, exige confirmação e não permite excluir a própria conta. A versão anterior está documentada abaixo.
+A proposta v0.7.0 acrescenta **Editar** e **Excluir** na lista de usuários e **Salvar usuário** no formulário. A sessão principal usa persistência local após F5 e reabertura; **Sair** encerra a sessão. Exclusão lógica exige confirmação, bloqueia a própria conta e preserva histórico, dados pessoais e conta Auth. O e-mail permanece reservado. Armazenamento bloqueado pode impedir a persistência.
+
+A v0.6.3 acrescenta apenas ícones e fundos discretos em azul/verde aos seis indicadores de Locais. A posição da consulta e a organização atual da tela permanecem iguais. Não altera dados, cálculos ou regras do Firebase.
+
+A v0.6.2 desfaz os ajustes visuais da v0.6.1 por solicitação do usuário: restaura os cards anteriores e a consulta de disponibilidade abaixo do conteúdo. Mantém indicadores, filtros, cadastros, histórico e cálculos da v0.6.0. A numeração avança para registrar a reversão sem apagar o histórico. Dados e regras do Firebase não mudam.
+
+A v0.6.0 moderniza Locais com indicadores, filtros, recursos, detalhes abaixo da tabela e consulta de conflitos por data/horário. Eventos ganham vínculo com o local por ID e custo total previsto. Os indicadores respeitam dados ausentes e agenda parcial; consulta não confirma reserva. Não há mudança de regras do Firebase nesta proposta. O histórico abaixo registra a entrega anterior.
 
 A [Release 01 — v0.4.0](CHANGELOG.md#v040) descreve o antes/depois das funcionalidades, as correções, os testes e as pendências para consulta pela gestão.
 
@@ -90,4 +97,4 @@ A hospedagem futura prevista é uma **VM no DataCenter da ATI**. Essa mudança a
 - Revisar relatórios, importação e recursos exclusivos da versão histórica antes de decidir sua incorporação ou retirada.
 - Definir a publicação coordenada do HTML e das regras, além da operação futura em VM.
 
-Esta proposta altera as regras para suportar exclusão lógica de cadastros antigos. Publicar as regras revisadas junto com o HTML após os testes. A exclusão bloqueia o acesso e retira o usuário da lista, preservando conta Auth, dados pessoais e histórico; não libera o e-mail para novo cadastro.
+A proposta v0.7.0 altera `firestore.rules`: publicar as regras revisadas antes ou junto do HTML. A atualização do GitHub não publica regras no Firebase. Nenhum dado de produção foi alterado nesta preparação.
