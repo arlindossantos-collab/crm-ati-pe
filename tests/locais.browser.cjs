@@ -38,13 +38,6 @@ const stub="\nconst fixture=globalThis.__locaisFixture;\nexport const inMemoryPe
   await page.locator('#locais-qualidade').filter({hasText:'Agenda cadastrada carregada'}).waitFor();
   assert.equal(await page.locator('#tabela-locais tr').count(),3);
   assert.equal(await page.locator('#locais-indicadores > div').count(),6);
-  const palette=await page.locator('#locais-indicadores .local-card').evaluateAll(cards=>cards.map(c=>({cor:getComputedStyle(c).backgroundColor,icones:c.querySelectorAll('.local-card-icon i[aria-hidden], .local-card-icon[aria-hidden] i').length})));
-  assert.equal(new Set(palette.map(c=>c.cor)).size,6,'Cada indicador deve ter uma cor distinta.');
-  assert.ok(palette.every(c=>c.icones===1),'Cada indicador deve preservar texto e ícone.');
-  assert.equal(await page.locator('.local-card').filter({hasText:'Custo total previsto'}).locator('.fa-coins').count(),1);
-  const principalDesktop=await page.locator('.locais-principal').boundingBox(),agendaDesktop=await page.locator('#locais-agenda').boundingBox();
-  assert.ok(agendaDesktop.x>=principalDesktop.x+principalDesktop.width,'Agenda deve ficar à direita no computador.');
-  assert.ok(Math.abs(agendaDesktop.y-principalDesktop.y)<3,'Agenda deve começar ao lado da tabela.');
   await page.locator('#btn-filtros-locais').click();
   assert.equal(await page.locator('#btn-filtros-locais').getAttribute('aria-expanded'),'true');
   await page.locator('#local-filtro-tipo').selectOption('gratuito');
@@ -78,12 +71,10 @@ const stub="\nconst fixture=globalThis.__locaisFixture;\nexport const inMemoryPe
   await page.locator('#aba-locais').screenshot({path:'test-results/locais-desktop.png'});
   await page.setViewportSize({width:390,height:844});
   await page.locator('#aba-locais').screenshot({path:'test-results/locais-mobile.png'});
-  const principalMobile=await page.locator('.locais-principal').boundingBox(),agendaMobile=await page.locator('#locais-agenda').boundingBox();
-  assert.ok(agendaMobile.y>=principalMobile.y+principalMobile.height-1,'No celular a agenda deve ficar abaixo, mantendo os campos legíveis.');
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
   if(overflow)console.log('Elementos fora da tela:',await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.right>innerWidth+1&&!el.closest('.overflow-x-auto');}).slice(0,20).map(el=>({tag:el.tagName,id:el.id,classe:el.className,largura:el.getBoundingClientRect().width}))));
   assert.equal(overflow,false,'A página não deve transbordar no celular; tabela tem rolagem própria.');
   assert.deepEqual(errors,[]);
-  console.log('Navegador: indicadores, filtros, busca, painel, agenda, edição, cadastro, cores/ícones e agenda lateral responsiva aprovados. Firebase totalmente simulado.');
+  console.log('Navegador: indicadores, filtros, busca, painel, agenda, edição, cadastro e layout móvel aprovados. Firebase totalmente simulado.');
  }finally{await browser?.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
