@@ -34,7 +34,7 @@ Os ícones são decorativos para leitores de tela; os nomes permanecem presentes
 
 - Sintaxe JavaScript conferida; IDs existentes preservados, sem duplicação.
 - Testes de navegador verificam seis fundos distintos, ícones, ícone de moedas no custo, agenda à direita no computador e abaixo no celular, além dos fluxos anteriores.
-- Execução completa será registrada no PR após o GitHub Actions.
+- [Execução completa aprovada no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39470701865), commit `7cb9e1a6bb2bc6f34b96be04850be282defc82b2`: 70 testes da aplicação, 25 de regras e 2 de autenticação, totalizando **97 aprovações**. Chromium também aprovado: seis cores distintas, ícones, moedas no custo, agenda à direita no computador, abaixo no celular e fluxos existentes. Dados simulados; não é homologação em produção.
 - Cálculos, vínculos, permissões, campos, gravações e regras do Firebase preservados. Não exige atualização do Firebase.
 - Proposta sem integração ou publicação. A referência de imagem enviada não pôde ser lida nesta sessão; este ajuste segue a descrição textual confirmada pelo usuário.
 
