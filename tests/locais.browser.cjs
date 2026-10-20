@@ -72,6 +72,7 @@ const stub="\nconst fixture=globalThis.__locaisFixture;\nexport const inMemoryPe
   await page.setViewportSize({width:390,height:844});
   await page.locator('#aba-locais').screenshot({path:'test-results/locais-mobile.png'});
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
+  if(overflow)console.log('Elementos fora da tela:',await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.right>innerWidth+1&&!el.closest('.overflow-x-auto');}).slice(0,20).map(el=>({tag:el.tagName,id:el.id,classe:el.className,largura:el.getBoundingClientRect().width}))));
   assert.equal(overflow,false,'A página não deve transbordar no celular; tabela tem rolagem própria.');
   assert.deepEqual(errors,[]);
   console.log('Navegador: indicadores, filtros, busca, painel, agenda, edição, cadastro e layout móvel aprovados. Firebase totalmente simulado.');
