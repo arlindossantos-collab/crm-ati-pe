@@ -32,10 +32,12 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 
 ### Validação
 
-- 70 cenários da aplicação passaram inicialmente em adaptador V8 com dados simulados.
-- Execução oficial Node/emuladores e navegador Chromium será registrada no PR. Não confundir simulação com homologação institucional.
-- Rotina GitHub Actions inclui testes da aplicação, regras, autenticação e navegador isolado com Firebase interceptado e capturas em desktop/celular.
-- Pendências: conferir os resultados completos e revisar os cadastros reais para associar locais e preencher períodos, recursos e custos. Sem publicação nesta etapa.
+- [Execução completa aprovada no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39465560736), commit `2b92110ada190203b3464e09740e85fb98993c7c`: **70 testes da aplicação, 25 de regras e 2 de autenticação, total de 97 aprovações sem falhas**.
+- Chromium aprovado com Firebase totalmente interceptado: seis cards, filtros, busca de contato, painel/histórico, conflito por horário, horários adjacentes sem conflito, edição e criação de local.
+- Capturas de desktop (1440 px) e celular (390 px) guardadas no artefato locais-interface da execução. Verificado que a página não transborda na largura do celular; tabela e abas têm rolagem própria. O teste inicial revelou transbordamento da navegação, corrigido antes desta aprovação.
+- Nenhuma operação de teste acessou os dados do Firebase real. A prova inicial V8 foi complementada pela execução oficial; isso não equivale a homologação institucional.
+- Conferência estática preservou todos os 138 IDs originais do HTML; nova página tem 153 IDs, sem duplicação.
+- Pendências: homologar com usuários e revisar os cadastros reais para associar locais e preencher períodos, recursos e custos. Sem publicação nesta etapa.
 
 
 **Release 01 — v0.4.0:** notas da entrega autorizada para publicação em 20/10/2026. Na conferência anterior à publicação não havia tags nem releases formais. A situação das publicações formais pode ser consultada na [página de releases](https://github.com/arlindossantos-collab/crm-ati-pe/releases); este arquivo não cria uma tag ou release por si só.
