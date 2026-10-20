@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.6.2 - LOCAIS, AGENDA E PLANEJAMENTO DE ESPAÇOS   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.6.3 - LOCAIS, AGENDA E PLANEJAMENTO DE ESPAÇOS   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -22,6 +22,14 @@
         .tab-inactive:hover { color: #0f172a; }
         .post-it { transition: transform 0.15s ease, box-shadow 0.15s ease; }
         .post-it:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+
+        /* Somente os indicadores de Locais: azul e verde com baixa opacidade. */
+        #locais-indicadores .local-card-suave { background-color:rgba(59,130,246,0.055); border-color:rgba(59,130,246,0.16); }
+        #locais-indicadores .local-card-suave[data-tone="verde"] { background-color:rgba(16,185,129,0.055); border-color:rgba(16,185,129,0.16); }
+        #locais-indicadores .local-card-rotulo { display:flex; align-items:flex-start; gap:8px; }
+        #locais-indicadores .local-card-icone { flex:none; font-size:15px; line-height:1.2; color:#4b6d8b; }
+        #locais-indicadores [data-tone="verde"] .local-card-icone { color:#427660; }
+
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
@@ -51,7 +59,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.6.2</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.6.3</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +72,7 @@
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.6.2</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.6.3</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -488,14 +496,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.6.2 -->
+    <!-- Script Principal v0.6.3 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.6.2: Usuários GRGD, perfil pessoal e identificação com foto');
+        console.info('PRGD v0.6.3: Usuários GRGD, perfil pessoal e identificação com foto');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -1843,7 +1851,8 @@
             document.getElementById('count-locais').textContent=filtrados.length;
             const k=indicadoresLocais(), agenda=modulosDoUsuario().includes('eventos') && ['completa','parcial'].includes(agendaLocaisEstado);
             const cards=[['Locais cadastrados',k.total,'Espaços carregados'],['Capacidade total',k.capacidade,'Pessoas • '+k.semCapacidade+' sem informação'],['Eventos vinculados',agenda?k.vinculados:'—','Todos os períodos, inclusive cancelados'],['Locais gratuitos',k.gratuitos,'Gratuidade informada no cadastro'],['Locais pagos',k.pagos,k.semTipo+' sem tipo informado'],['Custo total previsto',agenda?((k.semCusto || k.semData) && !k.custosInformados?'Não informado':moedaLocal(k.custo)):'—','Eventos atuais/futuros • subtotal informado']];
-            document.getElementById('locais-indicadores').innerHTML=cards.map(([label,val,nota])=>'<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-500">'+label+'</p><p class="text-2xl font-bold text-blue-950 mt-2 break-words">'+val+'</p><p class="text-[10px] text-slate-500 mt-2">'+nota+'</p></div>').join('');
+            const iconesIndicadoresLocais=['building','users','calendar-days','gift','credit-card','coins'];
+            document.getElementById('locais-indicadores').innerHTML=cards.map(([label,val,nota],i)=>'<div class="local-card-suave rounded-2xl border shadow-sm p-4" data-tone="'+(i%2===0?'azul':'verde')+'"><div class="local-card-rotulo"><i class="fa-solid fa-'+iconesIndicadoresLocais[i]+' local-card-icone" aria-hidden="true"></i><p class="text-[10px] font-bold uppercase tracking-wide text-slate-500">'+label+'</p></div><p class="text-2xl font-bold text-blue-950 mt-2 break-words">'+val+'</p><p class="text-[10px] text-slate-500 mt-2">'+nota+'</p></div>').join('');
             document.getElementById('locais-qualidade').textContent=textoAgendaLocais()+(agenda?' '+k.semVinculo+' evento(s) sem vínculo confirmado; '+k.semCusto+' evento(s) atual(is)/futuro(s) sem custo informado; '+k.semData+' evento(s) vinculados sem período válido. O custo é a soma dos totais informados por evento, sem multiplicar tarifas do local.':'');
             tbody.innerHTML=filtrados.map(l=>{
                 const cap=numeroLocal(l.capacidade), rs=recursosLocal(l), tipo=tipoLocacaoLocal(l);
