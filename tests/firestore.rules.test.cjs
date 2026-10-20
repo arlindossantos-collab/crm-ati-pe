@@ -214,3 +214,17 @@ test('administrador cria conta de perfil e identificação consistente em lote',
     lote.set(doc(f,'usuarios','novo'),profile('novo'));lote.set(doc(f,'identidadesUsuarios','novo'),identidade('novo'));
     await assertSucceeds(lote.commit());
 });
+
+test('administrador exclui logicamente cadastro legado sem apagar histórico',async()=>{
+    const f=db('admin');
+    await assertSucceeds(updateDoc(doc(f,'usuarios','legado'),{ativo:false,excluido:true}));
+    await assertFails(getDoc(doc(db('legado'),'demandas','d1')));
+    await assertFails(deleteDoc(doc(f,'usuarios','legado')));
+});
+test('exclusão não admite perfil ativo nem autoexclusão nem ação de consulta',async()=>{
+    await assertFails(updateDoc(doc(db('admin'),'usuarios','outro'),{excluido:true}));
+    await assertFails(updateDoc(doc(db('admin'),'usuarios','admin'),{ativo:false,excluido:true}));
+    await assertFails(updateDoc(doc(db('interno'),'usuarios','outro'),{ativo:false,excluido:true}));
+    await assertSucceeds(updateDoc(doc(db('admin'),'usuarios','outro'),{ativo:false,excluido:true}));
+    await assertFails(updateDoc(doc(db('admin'),'usuarios','outro'),{ativo:true}));
+});
