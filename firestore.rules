@@ -3,76 +3,80 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
     function profile() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
+    function active() {
+      return signedIn() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        && profile().get('ativo', true) == true;
+    }
     function isAdmin() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
-        && profile().perfil == 'admin';
+      // Administradores antigos continuam acessando até a classificação manual.
+      return active() && profile().get('tipoUsuario', '') != 'externo' && profile().get('perfil', '') == 'admin';
+    }
+    function canReadModule(module) {
+      return isAdmin() || (active() && module != 'usuarios'
+        && (profile().get('tipoUsuario', '') != 'externo' || module == 'eventos')
+        && module in profile().get('modulosPermitidos', profile().get('tipoUsuario', '') == '' ? ['dashboard','demandas','eventos'] : []));
+    }
+    function validUser(data, uid) {
+      return data.uid == uid && data.nome is string && data.nome.size() > 0 && data.nome.size() <= 150
+        && data.email is string && data.email.matches('^[^ @]+@[^ @]+[.][^ @]+$')
+        && data.tipoUsuario in ['interno','externo'] && data.ativo is bool
+        && data.perfil in ['admin','comum'] && (data.perfil != 'admin' || data.tipoUsuario == 'interno')
+        && data.modulosPermitidos is list
+        && data.modulosPermitidos.hasOnly(['dashboard','demandas','clientes','eventos','locais','fornecedores','usuarios','bases'])
+        && (data.perfil == 'admin' || !data.modulosPermitidos.hasAny(['usuarios']))
+        && (data.tipoUsuario != 'externo' || data.modulosPermitidos.hasOnly(['eventos']))
+        && !data.keys().hasAny(['senha','password']);
     }
     function canReadEvent(data) {
-      return isAdmin()
-        || data.eventoPublico == true
-        || !('gruposPermitidos' in data)
-        || data.gruposPermitidos.size() == 0
-        || (data.gruposPermitidos is list && profile().grupos is list && data.gruposPermitidos.hasAny(profile().grupos));
-    }
-    function eventCountChangeOnly() {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['inscritosCount'])
-        && request.resource.data.inscritosCount is number
-        && request.resource.data.inscritosCount >= 0
-        && request.resource.data.inscritosCount <= (resource.data.limiteVagas is number && resource.data.limiteVagas > 0 ? resource.data.limiteVagas : 2147483647);
+      return isAdmin() || data.get('eventoPublico', false) == true
+        || !('gruposPermitidos' in data) || data.gruposPermitidos.size() == 0
+        || (data.gruposPermitidos is list && data.gruposPermitidos.hasAny(profile().get('grupos', [])));
     }
 
     match /usuarios/{uid} {
-      allow read: if signedIn() && (isAdmin() || request.auth.uid == uid || (resource.data.email is string && resource.data.email == request.auth.token.email));
-      allow create: if (isAdmin() && request.resource.data.uid == uid) || (signedIn() && request.auth.uid == uid && request.resource.data.uid == uid && request.resource.data.email == request.auth.token.email);
-      allow update: if isAdmin()
-        || (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome']));
-      allow delete: if isAdmin();
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin()
+        || (canReadModule('demandas') && profile().get('tipoUsuario', '') == 'interno'
+          && resource.data.tipoUsuario == 'interno' && resource.data.ativo == true));
+      allow create: if isAdmin() && validUser(request.resource.data, uid);
+      allow update: if (isAdmin()
+          && (validUser(request.resource.data, uid)
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ativo','atualizadoEm','editadoPor']) && request.resource.data.ativo is bool))
+          && (request.auth.uid != uid || (request.resource.data.ativo == true && request.resource.data.perfil == 'admin' && request.resource.data.tipoUsuario == 'interno')))
+        || (active() && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome'])
+          && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 150);
+      // Inativar o perfil mantém os vínculos e o histórico.
+      allow delete: if false;
     }
-
     match /grupos/{id} {
-      allow read: if signedIn();
+      allow read, create, update, delete: if isAdmin();
+    }
+    match /eventos/{id} {
+      allow read: if canReadModule('eventos') && canReadEvent(resource.data);
       allow create, update, delete: if isAdmin();
     }
-
-    match /eventos/{id} {
-      allow read: if signedIn() && canReadEvent(resource.data);
-      allow create, delete: if isAdmin();
-      allow update: if isAdmin()
-        || (signedIn() && eventCountChangeOnly()
-            && (
-              (request.resource.data.inscritosCount == resource.data.inscritosCount + 1
-                && exists(/databases/$(database)/documents/inscricoes/$(id + '_' + request.auth.uid)))
-              ||
-              (request.resource.data.inscritosCount == resource.data.inscritosCount - 1
-                && exists(/databases/$(database)/documents/inscricoes/$(id + '_' + request.auth.uid)))
-            ));
-    }
-
     match /inscricoes/{id} {
-      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
-      allow create: if signedIn()
-        && request.resource.data.uid == request.auth.uid
+      allow read: if isAdmin() || (canReadModule('eventos') && resource.data.uid == request.auth.uid);
+      allow create: if canReadModule('eventos') && request.resource.data.uid == request.auth.uid
         && request.resource.data.eventId is string
         && exists(/databases/$(database)/documents/eventos/$(request.resource.data.eventId))
         && canReadEvent(get(/databases/$(database)/documents/eventos/$(request.resource.data.eventId)).data);
-      allow delete: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow delete: if isAdmin() || (canReadModule('eventos') && resource.data.uid == request.auth.uid);
       allow update: if false;
     }
-
-    match /{collection}/{id} {
-      allow read: if signedIn() && (
-        isAdmin()
-        || resource.data.publico == true
-        || !('restrito' in resource.data)
-        || resource.data.restrito != true
-        || (resource.data.gruposPermitidos is list && resource.data.gruposPermitidos.size() == 0)
-        || (resource.data.gruposPermitidos is list && profile().grupos is list && resource.data.gruposPermitidos.hasAny(profile().grupos))
-        || (resource.data.tagsPermitidas is list && profile().tags is list && resource.data.tagsPermitidas.hasAny(profile().tags))
-        || resource.data.orgao == profile().orgao
-        || (resource.data.orgaosPermitidos is list && resource.data.orgaosPermitidos.hasAny([profile().orgao]))
-      );
-      allow create, update, delete: if isAdmin();
+    match /{col}/{id} {
+      // A regra genérica não se aplica a usuários, grupos, eventos ou inscrições.
+      function businessCollection() { return col in ['demandas','orgaos','locais','fornecedores','bases']; }
+      function moduleName() { return col == 'orgaos' ? 'clientes' : col; }
+      function visibleRecord(data) {
+        return isAdmin() || data.get('publico', false) == true || data.get('restrito', false) != true
+          || (data.get('gruposPermitidos', null) is list && (data.gruposPermitidos.size() == 0 || data.gruposPermitidos.hasAny(profile().get('grupos', []))))
+          || (data.get('tagsPermitidas', []) is list && data.get('tagsPermitidas', []).hasAny(profile().get('tags', [])))
+          || (data.get('orgao', null) != null && data.orgao == profile().get('orgao', ''))
+          || (data.get('orgaosPermitidos', []) is list && data.get('orgaosPermitidos', []).hasAny([profile().get('orgao', '')]));
+      }
+      allow read: if businessCollection() && canReadModule(moduleName()) && visibleRecord(resource.data);
+      allow create, update, delete: if businessCollection() && isAdmin();
     }
   }
 }

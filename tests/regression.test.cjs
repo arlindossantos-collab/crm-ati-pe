@@ -24,12 +24,13 @@ function app() {
         console: { info() {}, warn() {} }, window: {},
         document: { getElementById: element, createElement() { return {}; }, querySelectorAll() { return []; }, querySelector() { return null; }, addEventListener() {} },
         alert() {}, confirm() { return true; },
-        initializeApp() { return {}; }, getFirestore() { return {}; }, getAuth() { return {}; },
+        initializeApp(config, name = '[DEFAULT]') { return {name}; }, getApps() { return []; }, getFirestore() { return {}; }, getAuth(app) { return app; },
+        async createUserWithEmailAndPassword(auth, email, password) { return {user:{uid:'novo-uid'}}; }, async deleteUser() {},
         inMemoryPersistence: {}, setPersistence() { return Promise.resolve(); },
         signInWithEmailAndPassword() { return Promise.resolve(); }, signOut() { return Promise.resolve(); },
         collection(db, name) { return name; }, doc(db, collection, id) { return { collection, id }; },
         async addDoc(collection, data) { writes.push({ collection, data }); },
-        async setDoc(ref, data) { writes.push({ collection: ref.collection, data }); }, async deleteDoc() {},
+        async setDoc(ref, data, options) { writes.push({ collection: ref.collection, id:ref.id, data, options }); }, async deleteDoc() {},
         onSnapshot(ref, callback, error) { const sub = {ref, callback, error}; snapshots.push(sub); return () => {}; }, async getDoc() { return { exists() { return false; } }; },
         query(...args) { return args; }, where(...args) { return args; }, async getDocs() { return { docs: [] }; },
         onAuthStateChanged(auth, callback) { context.authCallback = callback; },
@@ -191,4 +192,157 @@ test('lista não alterada mantém itens que já contêm vírgulas', async () => 
     a.element('edit-colecao').value='eventos';a.element('edit-doc-id').value='ev';
     a.context.editEvent={preventDefault(){},target:{querySelectorAll:()=>[{name:'gruposPermitidos',value:'grupo, especial, comum',dataset:{fieldType:'string-list'}}]}};
     await a.run('salvarEdicaoAdmin(editEvent)');assert.deepEqual(Array.from(a.writes[0].data.gruposPermitidos),['grupo, especial','comum']);
+});
+
+
+function preencherUsuario(a, dados = {}) {
+    const valores = {nome:'Ana Silva', email:'ana@example.invalid', tipo:'interno', perfil:'comum', ativo:'true', orgao:'ATI', tags:'Equipe', senha:'senha-simulada', ...dados};
+    for (const [chave, valor] of Object.entries(valores)) a.element('usuario-'+chave).value = valor;
+    a.element('usuario-grupos').selectedOptions = [];
+    a.context.document.querySelectorAll = () => [];
+}
+
+test('tipo não concede administração e externo não recebe módulos internos', () => {
+    const a = app();
+    assert.equal(a.run("ehAdministrador({tipoUsuario:'interno',perfil:'comum'})"),false);
+    assert.equal(a.run("ehAdministrador({tipoUsuario:'externo',perfil:'admin'})"),false);
+    assert.equal(a.run("ehAdministrador({tipoUsuario:'interno',perfil:'admin',ativo:false})"),false);
+    assert.deepEqual(Array.from(a.run("modulosDoUsuario({tipoUsuario:'externo',perfil:'admin',modulosPermitidos:['usuarios','demandas','eventos']})")),['eventos']);
+    assert.deepEqual(Array.from(a.run("modulosDoUsuario({tipoUsuario:'interno',perfil:'comum',modulosPermitidos:[]})")),[]);
+    assert.equal(a.run("ehAdministrador({perfil:'admin'})"),true);
+});
+
+test('lista GRGD contém apenas internos explicitamente ativos e distingue nomes iguais', () => {
+    const a=app(); a.run("dbData.usuarios=[{firestoreId:'a',nome:'Ana',tipoUsuario:'interno',ativo:true},{firestoreId:'b',nome:'Ana',tipoUsuario:'interno',ativo:true},{firestoreId:'x',tipoUsuario:'externo',ativo:true},{firestoreId:'i',tipoUsuario:'interno',ativo:false},{firestoreId:'legado',nome:'Ana'}]");
+    assert.deepEqual(Array.from(a.run('internosAtivos().map(uidCadastro)')),['a','b']);
+    const h=a.run("camposResponsaveis('teste',{responsavelGrgd:['Ana']})");
+    assert.ok(h.includes('value="a"'));assert.ok(h.includes('value="b"'));
+    assert.ok(!h.includes('value="a" data-legado="false" checked'));
+    assert.ok(h.includes('value="Ana" data-legado="true" checked'));
+});
+
+test('renomear responsável mantém UID e exibe o novo nome com fallback histórico', () => {
+    const a=app();a.run("dbData.usuarios=[{firestoreId:'u',nome:'Nome novo',tipoUsuario:'interno',ativo:true}];dbData.demandas=[{responsaveisGrgdIds:['u'],responsaveisGrgdSnapshot:[{uid:'u',nome:'Nome original'}],responsaveisGrgdLegados:['Nome legado']}]");
+    assert.deepEqual(Array.from(a.run('nomesResponsaveis(dbData.demandas[0])')),['Nome novo','Nome legado']);
+    a.run('dbData.usuarios=[]');assert.deepEqual(Array.from(a.run('nomesResponsaveis(dbData.demandas[0])')),['Nome original','Nome legado']);
+});
+
+test('vínculo inativo anterior e nomes legados são preservados ao salvar demanda', () => {
+    const a=app();a.run("dbData.usuarios=[{firestoreId:'novo',nome:'Novo',email:'n@example.invalid',tipoUsuario:'interno',ativo:true}]");
+    const dados=a.run("lerResponsaveis([{value:'novo',dataset:{}},{value:'antigo',dataset:{}},{value:'Legado',dataset:{legado:'true'}}],{responsaveisGrgdIds:['antigo'],responsaveisGrgdSnapshot:[{uid:'antigo',nome:'Original'}],responsaveisGrgdLegados:['Legado']})");
+    assert.deepEqual(Array.from(dados.responsaveisGrgdIds),['novo','antigo']);
+    assert.deepEqual(Array.from(dados.responsavelGrgd),['Novo','Original','Legado']);
+});
+
+test('externo, inativo e nome forjado não podem receber uma nova atribuição GRGD', () => {
+    const a=app();a.run("dbData.usuarios=[{firestoreId:'e',tipoUsuario:'externo',ativo:true},{firestoreId:'i',tipoUsuario:'interno',ativo:false}]");
+    for(const uid of ['e','i','inexistente']) assert.throws(()=>a.run(`lerResponsaveis([{value:'${uid}',dataset:{}}])`));
+    assert.throws(()=>a.run("lerResponsaveis([{value:'forjado',dataset:{legado:'true'}}],{responsavelGrgd:['Original']})"));
+});
+
+test('interno novo cria login e perfil no mesmo UID sem desconectar o administrador', async () => {
+    const a=app(); preencherUsuario(a); a.run("currentUser={uid:'admin',perfil:'admin',nome:'Admin'}");
+    const desconexoes=[];let criouEm;
+    a.context.createUserWithEmailAndPassword=async(auth,email,senha)=>{criouEm=auth.name;return {user:{uid:'novo-uid'}};};
+    a.context.signOut=async auth=>desconexoes.push(auth.name);
+    await a.run('criarCadastroUsuario()');
+    assert.equal(criouEm,'prgd-cadastro');assert.deepEqual(desconexoes,['prgd-cadastro']);
+    assert.equal(a.run('currentUser.uid'),'admin'); assert.equal(a.writes[0].id,'novo-uid');
+    assert.equal(a.writes[0].data.uid,'novo-uid');assert.equal(a.writes[0].data.tipoUsuario,'interno');
+    assert.equal(a.writes[0].data.senha,undefined);assert.equal(a.writes[0].data.password,undefined);
+    assert.equal(a.element('usuario-senha').value,'');
+});
+
+test('falha ao gravar perfil remove a conta Auth recém-criada', async () => {
+    const a=app();preencherUsuario(a);a.run("currentUser={uid:'admin',perfil:'admin'}");
+    const removidas=[];a.context.setDoc=async()=>{throw new Error('permission-denied');};
+    a.context.deleteUser=async user=>removidas.push(user.uid);
+    await assert.rejects(a.run('criarCadastroUsuario()'),/permission-denied/);
+    assert.deepEqual(removidas,['novo-uid']);assert.equal(a.run('cadastroUsuarioEmAndamento'),false);
+});
+
+test('cadastro externo começa sem permissões internas e perfil inválido impede criar Auth', async () => {
+    const a=app();preencherUsuario(a,{tipo:'externo'});a.run("currentUser={uid:'admin',perfil:'admin'}");
+    await a.run('criarCadastroUsuario()');
+    assert.equal(a.writes[0].data.perfil,'comum');assert.equal(a.writes[0].data.modulosPermitidos.length,0);
+    preencherUsuario(a,{tipo:'externo',perfil:'admin'});
+    await assert.rejects(a.run('criarCadastroUsuario()'),/Somente usuários internos/);
+    assert.equal(a.writes.length,1);
+});
+
+test('cadastro preserva lista de tags que contém vírgula e valida módulos por tipo', () => {
+    const a=app();preencherUsuario(a,{tags:'grupo, especial, comum'});a.run("currentUser={uid:'admin',perfil:'admin'}");
+    const dados=a.run("lerDadosUsuario({tags:['grupo, especial','comum']})");
+    assert.deepEqual(Array.from(dados.tags),['grupo, especial','comum']);
+    preencherUsuario(a,{tipo:'externo'});a.context.document.querySelectorAll=()=>[{value:'demandas'}];
+    assert.throws(()=>a.run('lerDadosUsuario()'),/Módulo não permitido/);
+});
+
+test('editar usuário legado mantém documento, metadados e campos desconhecidos via merge', async () => {
+    const a=app();preencherUsuario(a);a.run("currentUser={uid:'admin',perfil:'admin',nome:'Admin'};dbData.usuarios=[{firestoreId:'legado',nome:'Original',criadoEm:'2025-01-01',criadoPor:'Origem',campoLegado:'preservado'}]");
+    a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='legado';
+    a.context.editEvent={preventDefault(){},target:{querySelectorAll(){return [];}}};
+    await a.run('salvarEdicaoAdmin(editEvent)');
+    assert.equal(a.writes[0].id,'legado');assert.equal(a.writes[0].data.uid,'legado');assert.equal(a.writes[0].options.merge,true);
+    assert.equal(a.writes[0].data.criadoEm,'2025-01-01');assert.equal(a.writes[0].data.criadoPor,'Origem');
+});
+
+test('administrador não inativa nem rebaixa a própria conta', async () => {
+    const a=app();preencherUsuario(a,{ativo:'false'});a.run("currentUser={uid:'admin',perfil:'admin'}");
+    assert.throws(()=>a.run("lerDadosUsuario({firestoreId:'admin'})"),/própria conta/);
+    a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='admin';
+    await a.run('excluirRegistroUniversal()');assert.equal(a.writes.length,0);
+});
+
+test('inativar usuário preserva o documento e não apaga conta nem demandas', async () => {
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin',nome:'Admin'}");
+    a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='interno';
+    a.context.deleteDoc=async()=>{throw new Error('Não deve excluir');};
+    await a.run('excluirRegistroUniversal()');
+    assert.equal(a.writes[0].data.ativo,false);assert.equal(a.writes[0].id,'interno');assert.equal(a.writes[0].options.merge,true);
+});
+
+test('conta sem perfil ou inativa não ganha permissões por fallback', async () => {
+    for(const perfil of [null,{perfil:'admin',ativo:false}]) {
+        const a=app();a.context.getDoc=async()=>({exists:()=>!!perfil,data:()=>perfil});
+        await a.context.authCallback({uid:'u',email:'u@example.invalid'});
+        assert.equal(a.run('currentUser'),null);assert.equal(a.snapshots.length,0);
+        assert.ok(a.element('login-msg').textContent.includes('inativo'));
+    }
+});
+
+test('externo sem módulos consulta apenas o próprio perfil', () => {
+    const a=app();a.run("currentUser={uid:'externo',tipoUsuario:'externo',perfil:'comum',ativo:true,modulosPermitidos:[]};iniciarSnapshotFirestore()");
+    assert.equal(a.snapshots.length,1);assert.equal(a.snapshots[0].ref.collection,'usuarios');assert.equal(a.snapshots[0].ref.id,'externo');
+    a.run("mudarAba('demandas')");assert.notEqual(a.run('abaAtual'),'demandas');
+});
+
+test('interno com Demandas consulta somente o diretório interno ativo', () => {
+    const a=app();a.run("currentUser={uid:'interno',tipoUsuario:'interno',perfil:'comum',ativo:true,modulosPermitidos:['demandas']};iniciarSnapshotFirestore()");
+    assert.ok(a.snapshots.some(s=>s.ref==='demandas'));
+    const diretorio=a.snapshots.find(s=>Array.isArray(s.ref)&&s.ref[0]==='usuarios');
+    assert.deepEqual(diretorio.ref,[ 'usuarios',['tipoUsuario','==','interno'],['ativo','==',true] ]);
+    assert.ok(!a.snapshots.some(s=>s.ref==='grupos'||s.ref==='inscricoes'||s.ref==='orgaos'));
+});
+
+test('revogar permissão limpa dados e ignora callbacks anteriores na mesma sessão', async () => {
+    const a=app();a.run("currentUser={uid:'u',email:'u@example.invalid',tipoUsuario:'interno',perfil:'comum',ativo:true,modulosPermitidos:['demandas']};dbData.demandas=[{titulo:'Sigiloso'}];iniciarSnapshotFirestore()");
+    const antigo=a.snapshots.find(s=>s.ref==='demandas');
+    const perfil=a.snapshots.find(s=>s.ref.collection==='usuarios');
+    await perfil.callback({id:'u',exists:()=>true,data:()=>({tipoUsuario:'interno',perfil:'comum',ativo:true,modulosPermitidos:[]})});
+    antigo.callback({docs:[{id:'d',data:()=>({titulo:'Atrasado'})}]});
+    assert.equal(a.run('dbData.demandas.length'),0);assert.equal(a.run('modulosDoUsuario().length'),0);
+});
+
+test('filtro de tipo distingue legado sem usar tags como classificação', () => {
+    const a=app();a.run("dbData.usuarios=[{nome:'Interno',tipoUsuario:'interno'},{nome:'Legado',tags:['Internos ATI']},{nome:'Externo',tipoUsuario:'externo'}]");
+    a.listeners.get('filtro-tipo-usuario:change')({target:{value:'interno'}});
+    assert.equal(a.element('count-usuarios').textContent,1);assert.ok(!a.element('tabela-usuarios').innerHTML.includes('Legado'));
+    a.listeners.get('filtro-tipo-usuario:change')({target:{value:'legado'}});
+    assert.equal(a.element('count-usuarios').textContent,1);assert.ok(a.element('tabela-usuarios').innerHTML.includes('A definir'));
+});
+
+test('formulário de conta nova não herda permissões de cadastros legados', () => {
+    const a=app();const html=a.run('camposUsuario({},true)');
+    assert.ok(!/name="usuario-modulo"[^>]*checked/.test(html));
 });
