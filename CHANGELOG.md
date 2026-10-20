@@ -2,6 +2,21 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.6.2 — Restauração do layout anterior de Locais — 20/10/2026
+
+**Resumo para a chefia:** restaura a interface de Locais da v0.6.0, desfazendo a apresentação visual da v0.6.1 conforme solicitação do usuário.
+
+- Versão anterior publicada: v0.6.1. Nova versão: v0.6.2. O número avança para registrar a reversão; a aparência retorna à v0.6.0.
+- Antes: indicadores com seis cores/ícones, identidade roxa e disponibilidade na lateral direita.
+- Depois: cards, cores e disposição da v0.6.0, com consulta de disponibilidade abaixo do conteúdo.
+- Mantidos: modernização original de Locais, indicadores, filtros, informações, histórico, cadastros e cálculos.
+- Código da interface restaurado a partir de `5efc60fad20ce2bb6376e301eeb4e4bb01389da3`; no HTML só a identificação da versão difere daquela referência.
+- Teste de navegador retorna à validação anterior, que verifica os fluxos e a largura de celular. Conferir resultados da execução vinculada ao PR de reversão.
+- Reversão e publicação autorizadas pelo usuário em 20/10/2026. Confirmar integração e GitHub Pages separadamente.
+- Nenhuma alteração nos dados ou regras do Firebase. PR #8 permanece separado.
+- Próxima versão sugerida: v0.6.3 para ajustes ou v0.7.0 para novas funcionalidades; sequência formal de release a conferir quando registrada.
+
+
 ## v0.6.1 — Identificação visual de Locais — entrega de 20/10/2026
 
 **Resumo para a chefia:** facilita reconhecer os indicadores e consultar a agenda enquanto se examina um local.
