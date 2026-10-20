@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.4.0.** A numeração consolida as melhorias recentes de cadastro de usuários, responsáveis GRGD, perfil pessoal e correções da interface.
+**Versão deste código: v0.5.0 (proposta).** Adiciona ações diretas de edição/exclusão lógica de usuários e corrige a persistência da sessão.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -24,6 +24,8 @@ A versão do site depende da integração e da publicação deste código. Uma b
 Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo interno não concede administração automaticamente. Registros antigos sem vínculo continuam preservados, sem associação automática por nome.
 
 ## O que mudou nesta entrega
+
+A proposta v0.5.0 acrescenta **Editar** e **Excluir** na lista. **Salvar usuário** confirma a edição no formulário. A sessão principal persiste no mesmo navegador após F5 e reabertura; Sair encerra a sessão. Em modo privado ou com armazenamento bloqueado, a persistência pode não estar disponível. A exclusão é lógica, exige confirmação e não permite excluir a própria conta. A versão anterior está documentada abaixo.
 
 A [Release 01 — v0.4.0](CHANGELOG.md#v040) descreve o antes/depois das funcionalidades, as correções, os testes e as pendências para consulta pela gestão.
 
@@ -88,4 +90,4 @@ A hospedagem futura prevista é uma **VM no DataCenter da ATI**. Essa mudança a
 - Revisar relatórios, importação e recursos exclusivos da versão histórica antes de decidir sua incorporação ou retirada.
 - Definir a publicação coordenada do HTML e das regras, além da operação futura em VM.
 
-Não há migração de dados, exclusão de arquivos ou mudança de regras do Firebase nesta atualização de documentação e versão.
+Esta proposta altera as regras para suportar exclusão lógica de cadastros antigos. Publicar as regras revisadas junto com o HTML após os testes. A exclusão bloqueia o acesso e retira o usuário da lista, preservando conta Auth, dados pessoais e histórico; não libera o e-mail para novo cadastro.
