@@ -2,6 +2,28 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## Próxima entrega — v0.5.0 — proposta em 20/10/2026
+
+**Resumo para a chefia:** facilita a gestão de usuários e evita pedir login novamente a cada atualização da página.
+
+- Versão anterior: v0.4.0. Nova versão proposta: v0.5.0.
+- Sequência prevista: Release 02, a confirmar no histórico quando a publicação for autorizada. Ainda não publicada.
+- Próxima versão sugerida: v0.5.1 para correções ou v0.6.0 para novas funcionalidades.
+
+| Antes | Depois |
+| --- | --- |
+| Edição acessível somente dentro de Detalhes. | Botão Editar diretamente na lista e Salvar usuário no formulário existente. |
+| Inativação apenas no detalhe, sem remoção da lista. | Excluir retira do cadastro ativo, marca excluido=true e ativo=false, exige confirmação e preserva o histórico. |
+| Sessão em memória se perde no F5. | Persistência local do Firebase; sessão mantida no navegador até Sair, limpeza do armazenamento ou invalidação. |
+| Cadastro auxiliar precisava isolar a conta criada. | Continua em memória, sem trocar a sessão do administrador. |
+
+**Limites da exclusão:** lógica, somente administradores, com bloqueio da própria conta. Conta Auth, e-mail reservado, telefone/endereço e documentos históricos permanecem; não equivale a apagar a pessoa de todo o Firebase. Exclusão definitiva da conta exige backend administrativo e tratamento coordenado dos dados.
+
+**Validação:** 58 cenários da suíte passaram em um adaptador V8 com DOM/Firebase simulados; o 59º, de persistência, foi conferido separadamente por inspeção das duas chamadas. Não executado pelo Node, navegador ou emulador; npm test/test:rules/test:auth pendentes. Sintaxe da aplicação e dos testes compilada. Novos casos de regras adicionados para exclusão de legado, bloqueio de reativação, consulta e autoexclusão; execução em emulador pendente.
+
+**Implantação:** revisar e testar antes de integrar. Esta entrega muda firestore.rules; publicar as regras junto com o HTML. Sem acesso Firebase nesta sessão. Nenhum dado real foi alterado. Confirmar login, F5, reabertura, Sair, edição e exclusão no navegador. Permanência depende de armazenamento disponível; falhas são exibidas no login, sem fallback silencioso para sessão descartável.
+
+
 **Release 01 — v0.4.0:** notas da entrega autorizada para publicação em 20/10/2026. Na conferência anterior à publicação não havia tags nem releases formais. A situação das publicações formais pode ser consultada na [página de releases](https://github.com/arlindossantos-collab/crm-ati-pe/releases); este arquivo não cria uma tag ou release por si só.
 
 <a id="v040"></a>
