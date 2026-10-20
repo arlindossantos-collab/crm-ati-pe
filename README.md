@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.6.1 — identificação visual de Locais.** Cards com nomes, ícones e cores distintas; consulta de disponibilidade à direita no computador e abaixo no celular. O PR #8 continua separado, pendente do Firebase e de atualização de base/versão.
+**Versão deste código: v0.6.2 — restauração do layout de Locais da v0.6.0.** Entrega autorizada em 20/10/2026, a partir da v0.4.0. O PR #8 permanece separado e pendente do Firebase; sua numeração será ajustada antes de integrar para preservar a sequência crescente.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -26,7 +26,7 @@ Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo
 
 ## O que mudou nesta entrega
 
-A v0.6.1 diferencia os indicadores por cor e ícone e reorganiza a consulta em uma lateral à direita. O módulo recebe identidade roxa, preservando os cálculos, campos e permissões da v0.6.0. Não altera regras do Firebase.
+A v0.6.2 desfaz os ajustes visuais da v0.6.1 por solicitação do usuário: restaura os cards anteriores e a consulta de disponibilidade abaixo do conteúdo. Mantém indicadores, filtros, cadastros, histórico e cálculos da v0.6.0. A numeração avança para registrar a reversão sem apagar o histórico. Dados e regras do Firebase não mudam.
 
 A v0.6.0 moderniza Locais com indicadores, filtros, recursos, detalhes abaixo da tabela e consulta de conflitos por data/horário. Eventos ganham vínculo com o local por ID e custo total previsto. Os indicadores respeitam dados ausentes e agenda parcial; consulta não confirma reserva. Não há mudança de regras do Firebase nesta proposta. O histórico abaixo registra a entrega anterior.
 
