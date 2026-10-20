@@ -2,6 +2,43 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.6.1 — Identificação visual de Locais — entrega de 20/10/2026
+
+**Resumo para a chefia:** facilita reconhecer os indicadores e consultar a agenda enquanto se examina um local.
+
+- Versão anterior: v0.6.0. Nova versão: v0.6.1, ajuste de interface sem nova regra de negócio. Publicação autorizada em 20/10/2026; conferir GitHub Pages separadamente.
+- Próxima versão sugerida: v0.6.2 para ajustes ou v0.7.0 para novas funcionalidades. Sequência da release será conferida quando a publicação for autorizada.
+- Base: main@5efc60fad20ce2bb6376e301eeb4e4bb01389da3. Alteração de usuários do PR #8 permanece separada.
+
+| Antes | Depois |
+| --- | --- |
+| Cards semelhantes, com nomes sem ícones. | Cada indicador combina nome, ícone temático e uma cor própria. |
+| Destaques predominantemente azuis. | Identidade roxa restrita ao módulo Locais, com cores distintas nos indicadores. |
+| Consulta de disponibilidade abaixo de todo o conteúdo. | Painel na lateral direita a partir de 1024 px; abaixo do conteúdo em telas menores. |
+| Rótulos de campos e tabela só em texto. | Ícones também nos cabeçalhos, informações do local, formulário e consulta, preservando os nomes. |
+
+### Identificação dos indicadores
+
+| Indicador | Ícone | Cor |
+| --- | --- | --- |
+| Locais cadastrados | Edifício | Roxo |
+| Capacidade total | Pessoas | Azul |
+| Eventos vinculados | Calendário | Índigo |
+| Locais gratuitos | Presente | Verde |
+| Locais pagos | Cartão | Âmbar |
+| Custo total previsto | Moedas | Rosa |
+
+Os ícones são decorativos para leitores de tela; os nomes permanecem presentes. Cores não substituem os rótulos. Estilos restritos a Locais e aos seus campos no modal.
+
+### Validação e limites
+
+- Sintaxe JavaScript conferida; IDs existentes preservados, sem duplicação.
+- Testes de navegador verificam seis fundos distintos, ícones, ícone de moedas no custo, agenda à direita no computador e abaixo no celular, além dos fluxos anteriores.
+- [Execução completa aprovada no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39470701865), commit `7cb9e1a6bb2bc6f34b96be04850be282defc82b2`: 70 testes da aplicação, 25 de regras e 2 de autenticação, totalizando **97 aprovações**. Chromium também aprovado: seis cores distintas, ícones, moedas no custo, agenda à direita no computador, abaixo no celular e fluxos existentes. Dados simulados; não é homologação em produção.
+- Cálculos, vínculos, permissões, campos, gravações e regras do Firebase preservados. Não exige atualização do Firebase.
+- Entrega autorizada para publicação. O ajuste segue a descrição textual do usuário. Integração, implantação do site e página formal de release são etapas distintas.
+
+
 ## v0.6.0 — Locais e planejamento de espaços — entrega de 20/10/2026
 
 **Resumo para a chefia:** moderniza a aba Locais com indicadores, comparação de espaços, filtros, painel de informações e consulta de conflitos na agenda cadastrada.
