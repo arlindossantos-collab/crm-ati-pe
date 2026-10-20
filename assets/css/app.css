@@ -1,0 +1,6 @@
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
+        .tab-active { background-color: #ffffff; color: #1e3a8a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .tab-inactive { color: #64748b; font-weight: 500; }
+        .tab-inactive:hover { color: #0f172a; }
+        .post-it { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .post-it:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
