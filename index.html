@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.6.0 - LOCAIS, AGENDA E PLANEJAMENTO DE ESPAÇOS   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.6.1 - LOCAIS COM CORES, ÍCONES E AGENDA LATERAL   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -22,6 +22,34 @@
         .tab-inactive:hover { color: #0f172a; }
         .post-it { transition: transform 0.15s ease, box-shadow 0.15s ease; }
         .post-it:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+
+        /* Identidade visual restrita ao módulo Locais. */
+        #aba-locais .locais-hero { background: linear-gradient(125deg,#3b176e 0%,#5b21b6 55%,#7c3aed 100%); }
+        #aba-locais .locais-layout { display: grid; gap: 20px; align-items: start; }
+        #aba-locais .locais-principal { min-width: 0; display: grid; gap: 20px; }
+        #aba-locais .local-card { --tone-ink:#5b21b6; --tone-accent:#7c3aed; --tone-soft:#f5f3ff; --tone-line:#ddd6fe; position:relative; min-width:0; padding:18px 15px; background:var(--tone-soft); border:1px solid var(--tone-line); border-top:4px solid var(--tone-accent); border-radius:16px; box-shadow:0 3px 12px #0f172a06; }
+        #aba-locais .local-card[data-tone="sky"] { --tone-ink:#075985; --tone-accent:#0369a1; --tone-soft:#f0f9ff; --tone-line:#bae6fd; }
+        #aba-locais .local-card[data-tone="indigo"] { --tone-ink:#3730a3; --tone-accent:#4f46e5; --tone-soft:#eef2ff; --tone-line:#c7d2fe; }
+        #aba-locais .local-card[data-tone="emerald"] { --tone-ink:#065f46; --tone-accent:#047857; --tone-soft:#ecfdf5; --tone-line:#a7f3d0; }
+        #aba-locais .local-card[data-tone="amber"] { --tone-ink:#92400e; --tone-accent:#b45309; --tone-soft:#fffbeb; --tone-line:#fde68a; }
+        #aba-locais .local-card[data-tone="rose"] { --tone-ink:#9f1239; --tone-accent:#be123c; --tone-soft:#fff1f2; --tone-line:#fecdd3; }
+        #aba-locais .local-card-top { display:flex; align-items:flex-start; gap:10px; }
+        #aba-locais .local-card-icon { flex:none; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; background:var(--tone-accent); color:white; border-radius:11px; font-size:15px; }
+        #aba-locais .local-card-label { color:var(--tone-ink); font-size:11px; font-weight:700; line-height:1.4; }
+        #aba-locais .local-card-value { margin-top:14px; color:var(--tone-ink); font-size:24px; font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+        #aba-locais .local-card-note { margin-top:9px; color:#475569; font-size:10px; line-height:1.5; }
+        #aba-locais .locais-agenda { min-width:0; padding:20px; border:1px solid #ddd6fe; border-top:4px solid #7c3aed; border-radius:18px; background:linear-gradient(180deg,#f5f3ff 0%,#fff 160px); box-shadow:0 4px 18px #5b21b60a; }
+        #aba-locais .local-label-icon, #form-univ-campos .local-label-icon, #edit-campos-dinamicos .local-label-icon { display:inline-block; width:17px; margin-right:5px; color:#7c3aed; text-align:center; }
+        #aba-locais .locais-tabela thead { background:#f5f3ff; color:#5b21b6; }
+        #aba-locais .locais-tabela th { white-space:nowrap; }
+        #aba-locais input:focus-visible, #aba-locais select:focus-visible, #aba-locais button:focus-visible { outline:3px solid #a78bfa; outline-offset:2px; }
+        @media (min-width:1024px) {
+            #aba-locais .locais-layout { grid-template-columns:minmax(0,1fr) 300px; }
+            #aba-locais .locais-agenda { position:sticky; top:96px; }
+        }
+        @media (min-width:1280px) { #aba-locais .locais-layout { grid-template-columns:minmax(0,1fr) 336px; } }
+        @media (max-width:479px) { #aba-locais .local-card-top { flex-direction:column; gap:8px; } }
+
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
@@ -51,7 +79,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.6.0</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.6.1</span></p>
             </div>
         </div>
     </div>
@@ -64,7 +92,7 @@
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.6.0</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.6.1</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -324,47 +352,51 @@
 
         <!-- ABA LOCAIS -->
         <div id="aba-locais" class="hidden min-w-0 max-w-full space-y-5">
-            <section class="rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-900 p-5 sm:p-6 text-white shadow-lg">
+            <section class="locais-hero rounded-2xl p-5 sm:p-6 text-white shadow-lg">
                 <div class="flex flex-wrap items-start justify-between gap-4">
-                    <div><p class="text-[10px] font-bold uppercase tracking-widest text-blue-200">Planejamento de espaços</p><h3 class="mt-1 text-2xl font-bold">Locais e auditórios</h3><p class="mt-2 text-sm text-blue-100">Compare espaços, consulte a agenda e acompanhe as locações.</p></div>
-                    <button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-blue-900 shadow hover:bg-blue-50"><i class="fa-solid fa-plus mr-1"></i> Novo Local / Auditório</button>
+                    <div><p class="text-[10px] font-bold uppercase tracking-widest text-violet-200">Planejamento de espaços</p><h3 class="mt-1 text-2xl font-bold"><i class="fa-solid fa-building-circle-check mr-2" aria-hidden="true"></i>Locais e auditórios</h3><p class="mt-2 text-sm text-violet-100">Compare espaços, consulte a agenda e acompanhe as locações.</p></div>
+                    <button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-violet-900 shadow hover:bg-violet-50"><i class="fa-solid fa-plus mr-1"></i> Novo Local / Auditório</button>
                 </div>
-                <p class="mt-4 text-xs text-blue-200">Indicadores de todos os locais carregados. Os filtros abaixo afetam apenas a tabela.</p>
+                <p class="mt-4 text-xs text-violet-200">Indicadores de todos os locais carregados. Os filtros abaixo afetam apenas a tabela.</p>
             </section>
             <div id="locais-indicadores" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3" aria-label="Indicadores de locais"></div>
             <p id="locais-qualidade" class="text-xs text-slate-500" aria-live="polite"></p>
-            <section class="rounded-2xl bg-white border border-slate-200 shadow-sm p-4 space-y-4">
+            <div id="locais-layout" class="locais-layout">
+            <div class="locais-principal">
+            <section class="locais-tabela rounded-2xl bg-white border border-slate-200 shadow-sm p-4 space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                    <h4 class="font-bold text-slate-800">Espaços cadastrados <span id="count-locais" class="text-blue-700">0</span></h4>
+                    <h4 class="font-bold text-slate-800">Espaços cadastrados <span id="count-locais" class="text-violet-700">0</span></h4>
                     <div class="flex flex-wrap items-center gap-2">
                         <label class="sr-only" for="busca-locais">Buscar nome, endereço ou contato</label>
-                        <input type="search" id="busca-locais" placeholder="Nome, endereço ou contato..." class="p-2.5 border rounded-xl text-xs bg-slate-50 w-full sm:w-72 focus:ring-2 focus:ring-blue-600">
+                        <input type="search" id="busca-locais" placeholder="Nome, endereço ou contato..." class="p-2.5 border rounded-xl text-xs bg-slate-50 w-full sm:w-72 focus:ring-2 focus:ring-violet-600">
                         <button type="button" id="btn-filtros-locais" aria-expanded="false" aria-controls="locais-filtros" class="border rounded-xl p-2.5 text-xs font-bold hover:bg-slate-50"><i class="fa-solid fa-sliders mr-1"></i> Filtros</button>
                     </div>
                 </div>
                 <div id="locais-filtros" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3 bg-slate-50 rounded-xl">
-                    <label class="text-xs font-semibold">Tipo de locação<select id="local-filtro-tipo" class="block w-full p-2 border rounded-lg mt-1"><option value="">Todos</option><option value="gratuito">Gratuito</option><option value="pago">Pago</option><option value="nao-informado">Não informado</option></select></label>
-                    <label class="text-xs font-semibold">Capacidade mínima<input id="local-filtro-capacidade" type="number" min="0" step="1" placeholder="Pessoas" class="block w-full p-2 border rounded-lg mt-1"></label>
-                    <label class="text-xs font-semibold">Recurso necessário<input id="local-filtro-recurso" placeholder="Ex.: projetor" class="block w-full p-2 border rounded-lg mt-1"></label>
+                    <label class="text-xs font-semibold"><i class="fa-solid fa-tag local-label-icon" aria-hidden="true"></i>Tipo de locação<select id="local-filtro-tipo" class="block w-full p-2 border rounded-lg mt-1"><option value="">Todos</option><option value="gratuito">Gratuito</option><option value="pago">Pago</option><option value="nao-informado">Não informado</option></select></label>
+                    <label class="text-xs font-semibold"><i class="fa-solid fa-users local-label-icon" aria-hidden="true"></i>Capacidade mínima<input id="local-filtro-capacidade" type="number" min="0" step="1" placeholder="Pessoas" class="block w-full p-2 border rounded-lg mt-1"></label>
+                    <label class="text-xs font-semibold"><i class="fa-solid fa-plug local-label-icon" aria-hidden="true"></i>Recurso necessário<input id="local-filtro-recurso" placeholder="Ex.: projetor" class="block w-full p-2 border rounded-lg mt-1"></label>
                     <button type="button" id="local-limpar-filtros" class="self-end p-2 border rounded-lg text-xs font-bold bg-white">Limpar filtros e busca</button>
                 </div>
-                <div class="overflow-x-auto"><table class="w-full text-left border-collapse min-w-[1100px]"><thead class="bg-slate-50 border-b text-[10px] text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome / Espaço</th><th class="p-4">Capacidade / Área</th><th class="p-4">Valor Aluguel</th><th class="p-4">Eventos vinculados</th><th class="p-4">Recursos</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-locais" class="divide-y text-sm"></tbody></table></div>
+                <div class="overflow-x-auto"><table class="w-full text-left border-collapse min-w-[1100px]"><thead class="bg-slate-50 border-b text-[10px] text-slate-500 uppercase font-semibold"><tr><th class="p-4"><i class="fa-solid fa-building local-label-icon" aria-hidden="true"></i>Nome / Espaço</th><th class="p-4"><i class="fa-solid fa-users local-label-icon" aria-hidden="true"></i>Capacidade / Área</th><th class="p-4"><i class="fa-solid fa-coins local-label-icon" aria-hidden="true"></i>Valor Aluguel</th><th class="p-4"><i class="fa-solid fa-calendar-days local-label-icon" aria-hidden="true"></i>Eventos vinculados</th><th class="p-4"><i class="fa-solid fa-plug local-label-icon" aria-hidden="true"></i>Recursos</th><th class="p-4"><i class="fa-solid fa-clock-rotate-left local-label-icon" aria-hidden="true"></i>Criação / Modificação</th><th class="p-4"><i class="fa-solid fa-user-pen local-label-icon" aria-hidden="true"></i>Modificado por</th><th class="p-4 text-center"><i class="fa-solid fa-circle-info local-label-icon" aria-hidden="true"></i>Detalhes</th></tr></thead><tbody id="tabela-locais" class="divide-y text-sm"></tbody></table></div>
             </section>
             <section id="local-painel" tabindex="-1" class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5" aria-label="Detalhes do local selecionado">
                 <p class="text-sm text-slate-500">Selecione <strong>Detalhes</strong> na tabela para conhecer o espaço e seu histórico de eventos.</p>
             </section>
-            <section class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-                <h4 class="text-base font-bold text-slate-800"><i class="fa-regular fa-calendar-check text-blue-700 mr-2"></i>Consultar disponibilidade</h4>
+            </div>
+            <aside id="locais-agenda" class="locais-agenda" aria-label="Consulta de disponibilidade do local">
+                <h4 class="text-base font-bold text-slate-800"><i class="fa-regular fa-calendar-check text-violet-700 mr-2" aria-hidden="true"></i>Consultar disponibilidade</h4>
                 <p class="text-xs text-slate-500 mt-1">Consulta a agenda registrada no sistema. Não realiza reserva nem confirma a disponibilidade com o responsável pelo espaço.</p>
-                <form id="form-disponibilidade-local" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-4">
-                    <label class="text-xs font-semibold">Local<select id="disponibilidade-local" required class="w-full block mt-1 border rounded-lg p-2.5"><option value="">Selecione um local</option></select></label>
-                    <label class="text-xs font-semibold">Data pretendida<input type="date" id="disponibilidade-data" required class="w-full block mt-1 border rounded-lg p-2.5"></label>
-                    <label class="text-xs font-semibold">Início (opcional)<input type="time" id="disponibilidade-inicio" class="w-full block mt-1 border rounded-lg p-2.5"></label>
-                    <label class="text-xs font-semibold">Fim (opcional)<input type="time" id="disponibilidade-fim" class="w-full block mt-1 border rounded-lg p-2.5"></label>
-                    <button type="submit" class="self-end rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs p-2.5">Consultar disponibilidade</button>
+                <form id="form-disponibilidade-local" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 mt-4">
+                    <label class="text-xs font-semibold"><i class="fa-solid fa-location-dot local-label-icon" aria-hidden="true"></i>Local<select id="disponibilidade-local" required class="w-full block mt-1 border rounded-lg p-2.5"><option value="">Selecione um local</option></select></label>
+                    <label class="text-xs font-semibold"><i class="fa-solid fa-calendar-day local-label-icon" aria-hidden="true"></i>Data pretendida<input type="date" id="disponibilidade-data" required class="w-full block mt-1 border rounded-lg p-2.5"></label>
+                    <label class="text-xs font-semibold"><i class="fa-solid fa-clock local-label-icon" aria-hidden="true"></i>Início (opcional)<input type="time" id="disponibilidade-inicio" class="w-full block mt-1 border rounded-lg p-2.5"></label>
+                    <label class="text-xs font-semibold"><i class="fa-solid fa-clock local-label-icon" aria-hidden="true"></i>Fim (opcional)<input type="time" id="disponibilidade-fim" class="w-full block mt-1 border rounded-lg p-2.5"></label>
+                    <button type="submit" class="self-end rounded-lg bg-violet-700 hover:bg-violet-800 text-white font-bold text-xs p-2.5"><i class="fa-solid fa-magnifying-glass mr-1" aria-hidden="true"></i>Consultar disponibilidade</button>
                 </form>
                 <div id="disponibilidade-resultado" class="mt-4 text-sm" role="status" aria-live="polite"></div>
-            </section>
+            </aside>
+            </div>
         </div>
 
         <!-- ABA FORNECEDORES -->
@@ -488,14 +520,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.6.0 -->
+    <!-- Script Principal v0.6.1 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.6.0: Usuários GRGD, perfil pessoal e identificação com foto');
+        console.info('PRGD v0.6.1: Usuários GRGD, perfil pessoal e identificação com foto');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -1808,18 +1840,23 @@
                     '<ul class="mt-3 space-y-2">'+r.conflitos.map(ev=>'<li class="text-xs border rounded-lg p-2 bg-white"><b>'+esc(ev.titulo || ev.nome || 'Evento sem título')+'</b><br>'+esc(dataEventoTextoLocal(ev))+'</li>').join('')+'</ul><p class="text-xs mt-2">Confirme a reserva com o responsável pelo local.</p></div>';
             } catch(err){consultaLocalAtiva=false;box.textContent=err.message;}
         }
+        function iconeCampoLocal(chave) {
+            const nomes={nome:'building',endereco:'location-dot',capacidade:'users',area:'ruler-combined',contatoResponsavel:'user-tie',contato:'address-book',telefone:'phone',emailContato:'envelope',tipoLocacao:'tag',valorAluguel:'coins',periodicidadeLocacao:'clock',recursos:'plug',descricao:'align-left',historico:'clock-rotate-left',
+                'Endereço':'location-dot','Capacidade':'users','Área':'ruler-combined','Responsável / Contato':'user-tie','Locação':'coins','Recursos disponíveis':'plug'};
+            return '<i class="fa-solid fa-'+(nomes[chave] || 'circle-info')+' local-label-icon" aria-hidden="true"></i>';
+        }
         function renderPainelLocal() {
             const box=document.getElementById('local-painel');if(!box)return;
             const l=dbData.locais.find(l=>idLocal(l)===localSelecionadoId);
             if(!l){box.innerHTML='<p class="text-sm text-slate-500">Selecione <strong>Detalhes</strong> na tabela para conhecer o espaço e seu histórico de eventos.</p>';return;}
             const lista=eventosDoLocal(l);
             const historico=lista.filter(e=>{const p=intervaloEventoLocal(e);return !eventoCanceladoLocal(e) && (['realizado','realizada','concluido'].includes(normalizarLocal(e.status)) || (p && p.fim<hojeLocais()));});
-            const info=(titulo,valor)=>'<div class="rounded-xl bg-slate-50 border p-3"><dt class="text-[10px] uppercase tracking-wide text-slate-500 font-bold">'+titulo+'</dt><dd class="text-sm mt-1 whitespace-pre-wrap">'+esc(valor ?? 'Não informado')+'</dd></div>';
+            const info=(titulo,valor)=>'<div class="rounded-xl bg-slate-50 border p-3"><dt class="text-[10px] uppercase tracking-wide text-slate-500 font-bold">'+iconeCampoLocal(titulo)+titulo+'</dt><dd class="text-sm mt-1 whitespace-pre-wrap">'+esc(valor ?? 'Não informado')+'</dd></div>';
             const extra=Object.entries(l).filter(([k])=>!['firestoreId','nome','endereco','capacidade','area','areaM2','valorAluguel','tipoLocacao','periodicidadeLocacao','contato','contatoResponsavel','telefone','emailContato','recursos','descricao'].includes(k));
-            box.innerHTML='<div class="flex flex-wrap justify-between items-start gap-3"><div><p class="text-[10px] text-blue-700 font-bold uppercase tracking-widest">Detalhes do espaço</p><h4 class="font-bold text-xl mt-1">'+esc(l.nome || 'Local sem nome')+'</h4></div><div class="flex gap-2">'+(ehAdministrador()?'<button type="button" data-local-editar="'+esc(idLocal(l))+'" class="border border-blue-200 bg-blue-50 text-blue-900 rounded-lg px-3 py-2 text-xs font-bold">Editar cadastro</button>':'')+'<button type="button" id="local-fechar-painel" class="border rounded-lg px-3 py-2 text-xs">Fechar</button></div></div>'+
+            box.innerHTML='<div class="flex flex-wrap justify-between items-start gap-3"><div><p class="text-[10px] text-violet-700 font-bold uppercase tracking-widest">Detalhes do espaço</p><h4 class="font-bold text-xl mt-1">'+esc(l.nome || 'Local sem nome')+'</h4></div><div class="flex gap-2">'+(ehAdministrador()?'<button type="button" data-local-editar="'+esc(idLocal(l))+'" class="border border-violet-200 bg-violet-50 text-violet-900 rounded-lg px-3 py-2 text-xs font-bold">Editar cadastro</button>':'')+'<button type="button" id="local-fechar-painel" class="border rounded-lg px-3 py-2 text-xs">Fechar</button></div></div>'+
                 '<dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">'+info('Endereço',l.endereco || null)+info('Capacidade',numeroLocal(l.capacidade)===null?null:l.capacidade+' pessoas')+info('Área',l.area || (l.areaM2?l.areaM2+' m²':null))+info('Responsável / Contato',[l.contatoResponsavel,l.contato,l.telefone,l.emailContato].filter(Boolean).join('\n') || null)+info('Locação',(tipoLocacaoLocal(l)==='nao-informado'?'Tipo não informado':tipoLocacaoLocal(l)==='gratuito'?'Gratuito':'Pago')+' • '+valorLocacaoTexto(l)+(l.periodicidadeLocacao?' / '+l.periodicidadeLocacao:''))+info('Recursos disponíveis',recursosLocal(l).join(', ') || null)+'</dl>'+
                 '<p class="text-sm text-slate-600 whitespace-pre-wrap mt-4">'+esc(l.descricao || 'Descrição não informada.')+'</p>'+
-                '<div class="mt-5 pt-4 border-t"><h5 class="font-bold text-sm">Histórico de eventos</h5><p class="text-xs text-slate-500 mt-1">'+esc(textoAgendaLocais())+' Datas passadas sem status de realização exigem confirmação.</p><ul class="mt-3 space-y-2">'+historico.sort((a,b)=>(String(b.dataInicio || '')).localeCompare(String(a.dataInicio || ''))).map(ev=>'<li class="p-3 border rounded-xl bg-slate-50 text-xs"><b>'+esc(ev.titulo || ev.nome || 'Evento')+'</b><br>'+esc(dataEventoTextoLocal(ev))+'<br><span class="text-slate-500">'+(['realizado','realizada','concluido'].includes(normalizarLocal(ev.status))?'Realização registrada':'Data encerrada; realização a confirmar')+'</span></li>').join('')+'</ul>'+(historico.length?'':'<p class="text-xs text-slate-500 mt-3">Nenhum evento passado identificado entre os registros carregados.</p>')+'</div>'+
+                '<div class="mt-5 pt-4 border-t"><h5 class="font-bold text-sm">"+iconeCampoLocal("historico")+"Histórico de eventos</h5><p class="text-xs text-slate-500 mt-1">'+esc(textoAgendaLocais())+' Datas passadas sem status de realização exigem confirmação.</p><ul class="mt-3 space-y-2">'+historico.sort((a,b)=>(String(b.dataInicio || '')).localeCompare(String(a.dataInicio || ''))).map(ev=>'<li class="p-3 border rounded-xl bg-slate-50 text-xs"><b>'+esc(ev.titulo || ev.nome || 'Evento')+'</b><br>'+esc(dataEventoTextoLocal(ev))+'<br><span class="text-slate-500">'+(['realizado','realizada','concluido'].includes(normalizarLocal(ev.status))?'Realização registrada':'Data encerrada; realização a confirmar')+'</span></li>').join('')+'</ul>'+(historico.length?'':'<p class="text-xs text-slate-500 mt-3">Nenhum evento passado identificado entre os registros carregados.</p>')+'</div>'+
                 '<details class="mt-4 border-t pt-3"><summary class="text-xs font-bold cursor-pointer">Demais informações cadastradas</summary><dl class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">'+extra.map(([k,v])=>info(esc(k),typeof v==='object'?JSON.stringify(v):String(v))).join('')+'</dl></details>';
         }
         function selecionarLocal(id) {
@@ -1843,11 +1880,15 @@
             document.getElementById('count-locais').textContent=filtrados.length;
             const k=indicadoresLocais(), agenda=modulosDoUsuario().includes('eventos') && ['completa','parcial'].includes(agendaLocaisEstado);
             const cards=[['Locais cadastrados',k.total,'Espaços carregados'],['Capacidade total',k.capacidade,'Pessoas • '+k.semCapacidade+' sem informação'],['Eventos vinculados',agenda?k.vinculados:'—','Todos os períodos, inclusive cancelados'],['Locais gratuitos',k.gratuitos,'Gratuidade informada no cadastro'],['Locais pagos',k.pagos,k.semTipo+' sem tipo informado'],['Custo total previsto',agenda?((k.semCusto || k.semData) && !k.custosInformados?'Não informado':moedaLocal(k.custo)):'—','Eventos atuais/futuros • subtotal informado']];
-            document.getElementById('locais-indicadores').innerHTML=cards.map(([label,val,nota])=>'<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-500">'+label+'</p><p class="text-2xl font-bold text-blue-950 mt-2 break-words">'+val+'</p><p class="text-[10px] text-slate-500 mt-2">'+nota+'</p></div>').join('');
+            const estilosCardsLocais=[['violet','building'],['sky','users'],['indigo','calendar-days'],['emerald','gift'],['amber','credit-card'],['rose','coins']];
+            document.getElementById('locais-indicadores').innerHTML=cards.map(([label,val,nota],i)=>{
+                const [tone,icone]=estilosCardsLocais[i];
+                return '<div class="local-card" data-tone="'+tone+'"><div class="local-card-top"><span class="local-card-icon" aria-hidden="true"><i class="fa-solid fa-'+icone+'"></i></span><p class="local-card-label">'+label+'</p></div><p class="local-card-value">'+val+'</p><p class="local-card-note">'+nota+'</p></div>';
+            }).join('');
             document.getElementById('locais-qualidade').textContent=textoAgendaLocais()+(agenda?' '+k.semVinculo+' evento(s) sem vínculo confirmado; '+k.semCusto+' evento(s) atual(is)/futuro(s) sem custo informado; '+k.semData+' evento(s) vinculados sem período válido. O custo é a soma dos totais informados por evento, sem multiplicar tarifas do local.':'');
             tbody.innerHTML=filtrados.map(l=>{
                 const cap=numeroLocal(l.capacidade), rs=recursosLocal(l), tipo=tipoLocacaoLocal(l);
-                return '<tr class="hover:bg-blue-50/40"><td class="p-4"><b class="text-blue-950">'+esc(l.nome || 'Sem nome')+'</b><p class="text-[11px] text-slate-500 mt-1">'+esc(l.endereco || 'Endereço não informado')+'</p></td><td class="p-4 text-xs">'+(cap===null?'Não informada':esc(cap)+' pessoas')+'<br><span class="text-slate-500">'+esc(l.area || (l.areaM2?l.areaM2+' m²':''))+'</span></td><td class="p-4 text-xs font-semibold">'+esc(valorLocacaoTexto(l))+'<br><span class="font-normal text-slate-500">'+(tipo==='nao-informado'?'Tipo não informado':tipo==='gratuito'?'Gratuito':'Pago')+(l.periodicidadeLocacao?' / '+esc(l.periodicidadeLocacao):'')+'</span></td><td class="p-4"><span class="bg-blue-50 text-blue-800 rounded-full px-2.5 py-1 text-xs font-bold">'+(agenda?eventosDoLocal(l).length:'—')+'</span></td><td class="p-4 text-xs">'+(rs.length?rs.map(r=>'<span class="inline-block m-0.5 bg-slate-100 rounded-md px-2 py-1">'+esc(r)+'</span>').join(''):'Não informados')+'</td><td class="p-4">'+renderAuditInfo(l).dataHtml+'</td><td class="p-4">'+renderAuditInfo(l).autorHtml+'</td><td class="p-4 text-center"><button type="button" class="text-xs bg-blue-50 px-3 py-2 rounded-lg font-semibold text-blue-900" data-local-detalhes="'+esc(idLocal(l))+'">Detalhes</button></td></tr>';
+                return '<tr class="hover:bg-violet-50/40"><td class="p-4"><b class="text-blue-950">'+esc(l.nome || 'Sem nome')+'</b><p class="text-[11px] text-slate-500 mt-1">'+esc(l.endereco || 'Endereço não informado')+'</p></td><td class="p-4 text-xs">'+(cap===null?'Não informada':esc(cap)+' pessoas')+'<br><span class="text-slate-500">'+esc(l.area || (l.areaM2?l.areaM2+' m²':''))+'</span></td><td class="p-4 text-xs font-semibold">'+esc(valorLocacaoTexto(l))+'<br><span class="font-normal text-slate-500">'+(tipo==='nao-informado'?'Tipo não informado':tipo==='gratuito'?'Gratuito':'Pago')+(l.periodicidadeLocacao?' / '+esc(l.periodicidadeLocacao):'')+'</span></td><td class="p-4"><span class="bg-violet-50 text-violet-800 rounded-full px-2.5 py-1 text-xs font-bold">'+(agenda?eventosDoLocal(l).length:'—')+'</span></td><td class="p-4 text-xs">'+(rs.length?rs.map(r=>'<span class="inline-block m-0.5 bg-slate-100 rounded-md px-2 py-1">'+esc(r)+'</span>').join(''):'Não informados')+'</td><td class="p-4">'+renderAuditInfo(l).dataHtml+'</td><td class="p-4">'+renderAuditInfo(l).autorHtml+'</td><td class="p-4 text-center"><button type="button" class="text-xs bg-violet-50 px-3 py-2 rounded-lg font-semibold text-violet-900" data-local-detalhes="'+esc(idLocal(l))+'">Detalhes</button></td></tr>';
             }).join('') || '<tr><td colspan="8" class="text-center text-sm text-slate-500 p-8">Nenhum local encontrado. Ajuste os filtros ou cadastre um espaço.</td></tr>';
             const sel=document.getElementById('disponibilidade-local'), atual=sel.value;
             sel.innerHTML='<option value="">Selecione um local</option>'+dbData.locais.map(l=>'<option value="'+esc(idLocal(l))+'">'+esc(l.nome || 'Local sem nome')+'</option>').join('');
@@ -1858,13 +1899,13 @@
 
         function camposCadastroLocal(item={},novo=false) {
             const prefix=novo?'novo-local-':'editar-local-';
-            const campo=(key,label,type='text',extra='')=>'<label class="block text-xs font-bold">'+label+'<input id="'+(novo && key==='nome'?'uc-1':prefix+key)+'" type="'+type+'" value="'+esc(item[key] ?? '')+'" '+extra+' class="block w-full p-2.5 border rounded-lg mt-1 font-normal"></label>';
+            const campo=(key,label,type='text',extra='')=>'<label class="block text-xs font-bold">'+iconeCampoLocal(key)+label+'<input id="'+(novo && key==='nome'?'uc-1':prefix+key)+'" type="'+type+'" value="'+esc(item[key] ?? '')+'" '+extra+' class="block w-full p-2.5 border rounded-lg mt-1 font-normal"></label>';
             return '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs max-h-[65vh] overflow-y-auto p-1">'+campo('nome','Nome do local','text','required maxlength="180"')+campo('capacidade','Capacidade (pessoas)','number','min="0" step="1"')+
                 campo('endereco','Endereço','text','maxlength="500"')+campo('area','Área (descrição ou m²)','text','maxlength="150"')+campo('contatoResponsavel','Nome / contato do responsável','text','maxlength="200"')+campo('contato','Outros contatos','text','maxlength="200"')+campo('telefone','Telefone','tel','maxlength="40"')+campo('emailContato','E-mail do contato','email','maxlength="200"')+
-                '<label class="font-bold">Tipo de locação<select id="'+prefix+'tipoLocacao" class="block w-full p-2.5 border rounded-lg mt-1 font-normal"><option value="nao-informado">Não informado</option><option value="gratuito" '+(tipoLocacaoLocal(item)==='gratuito'?'selected':'')+'>Gratuito</option><option value="pago" '+(tipoLocacaoLocal(item)==='pago'?'selected':'')+'>Pago</option></select></label>'+campo('valorAluguel','Valor de referência da locação (R$)','text','inputmode="decimal" placeholder="Ex.: 1.200,00"')+
+                '<label class="font-bold">'+iconeCampoLocal('tipoLocacao')+'Tipo de locação<select id="'+prefix+'tipoLocacao" class="block w-full p-2.5 border rounded-lg mt-1 font-normal"><option value="nao-informado">Não informado</option><option value="gratuito" '+(tipoLocacaoLocal(item)==='gratuito'?'selected':'')+'>Gratuito</option><option value="pago" '+(tipoLocacaoLocal(item)==='pago'?'selected':'')+'>Pago</option></select></label>'+campo('valorAluguel','Valor de referência da locação (R$)','text','inputmode="decimal" placeholder="Ex.: 1.200,00"')+
                 campo('periodicidadeLocacao','Unidade / condição do valor','text','placeholder="Ex.: hora, diária, evento; confirmar" maxlength="150"')+
-                '<label class="font-bold">Recursos (um por linha ou separados por vírgula)<textarea id="'+prefix+'recursos" rows="3" class="block w-full p-2.5 border rounded-lg mt-1 font-normal" placeholder="Projetor, Wi-Fi, acessibilidade">'+esc(recursosLocal(item).join('\n'))+'</textarea></label>'+
-                '<label class="sm:col-span-2 font-bold">Descrição e orientações<textarea id="'+(novo?'uc-2':prefix+'descricao')+'" rows="3" maxlength="4000" class="block w-full p-2.5 border rounded-lg mt-1 font-normal">'+esc(item.descricao || '')+'</textarea></label><p class="sm:col-span-2 text-slate-500">Campos opcionais vazios permanecem sem informação. O valor de referência não é multiplicado para estimar despesas dos eventos.</p></div>';
+                '<label class="font-bold">'+iconeCampoLocal('recursos')+'Recursos (um por linha ou separados por vírgula)<textarea id="'+prefix+'recursos" rows="3" class="block w-full p-2.5 border rounded-lg mt-1 font-normal" placeholder="Projetor, Wi-Fi, acessibilidade">'+esc(recursosLocal(item).join('\n'))+'</textarea></label>'+
+                '<label class="sm:col-span-2 font-bold">'+iconeCampoLocal('descricao')+'Descrição e orientações<textarea id="'+(novo?'uc-2':prefix+'descricao')+'" rows="3" maxlength="4000" class="block w-full p-2.5 border rounded-lg mt-1 font-normal">'+esc(item.descricao || '')+'</textarea></label><p class="sm:col-span-2 text-slate-500">Campos opcionais vazios permanecem sem informação. O valor de referência não é multiplicado para estimar despesas dos eventos.</p></div>';
         }
         function lerCadastroLocal(novo=false,anterior={}) {
             const prefix=novo?'novo-local-':'editar-local-';
