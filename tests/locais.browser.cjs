@@ -38,6 +38,20 @@ const stub="\nconst fixture=globalThis.__locaisFixture;\nexport const inMemoryPe
   await page.locator('#locais-qualidade').filter({hasText:'Agenda cadastrada carregada'}).waitFor();
   assert.equal(await page.locator('#tabela-locais tr').count(),3);
   assert.equal(await page.locator('#locais-indicadores > div').count(),6);
+  assert.equal(await page.locator('#locais-indicadores .local-card-icone[aria-hidden="true"]').count(),6);
+  assert.equal(await page.locator('.local-card-suave').filter({hasText:'Custo total previsto'}).locator('.fa-coins').count(),1);
+  const tons=await page.locator('#locais-indicadores .local-card-suave').evaluateAll(cards=>cards.map(c=>({tom:c.dataset.tone,fundo:getComputedStyle(c).backgroundColor})));
+  assert.deepEqual([...new Set(tons.map(c=>c.tom))].sort(),['azul','verde']);
+  for(const c of tons){
+    const alpha=Number(c.fundo.split(',').at(-1).replace(')',''));
+    assert.ok(alpha>0 && alpha<=0.1,'O fundo deve manter baixa opacidade.');
+  }
+  const posicao=await page.evaluate(()=>{
+    const painel=document.getElementById('local-painel').getBoundingClientRect();
+    const agenda=document.getElementById('form-disponibilidade-local').parentElement.getBoundingClientRect();
+    return {fimPainel:painel.bottom,inicioAgenda:agenda.top};
+  });
+  assert.ok(posicao.inicioAgenda>=posicao.fimPainel,'A consulta permanece abaixo, sem mudar o layout.');
   await page.locator('#btn-filtros-locais').click();
   assert.equal(await page.locator('#btn-filtros-locais').getAttribute('aria-expanded'),'true');
   await page.locator('#local-filtro-tipo').selectOption('gratuito');
