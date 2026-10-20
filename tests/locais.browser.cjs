@@ -26,7 +26,7 @@ const stub="\nconst fixture=globalThis.__locaisFixture;\nexport const inMemoryPe
   page.on('dialog',d=>d.accept());
   await page.addInitScript(f=>{globalThis.__locaisFixture=f;globalThis.__testWrites=[];},fixture);
   // Firebase totalmente interceptado: nenhum acesso ao projeto real.
-  await page.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'application/javascript',body:stub}));
+  await page.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
   await page.route('**/*',async r=>{
    const url=r.request().url();
    if(/googleapis\.com|firebaseio\.com|firebaseapp\.com/.test(url))return r.abort();
