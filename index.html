@@ -113,7 +113,7 @@
         <div id="aba-dashboard" class="block space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Demandas Ativas</p><h3 id="dash-tot-demandas" class="text-3xl font-bold text-blue-900 mt-1">0</h3></div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Eventos Programados</p><h3 id="dash-tot-eventos" class="text-3xl font-bold text-amber-600 mt-1">0</h3></div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Eventos Carregados</p><h3 id="dash-tot-eventos" class="text-3xl font-bold text-amber-600 mt-1">0</h3></div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Locais Auditórios</p><h3 id="dash-tot-locais" class="text-3xl font-bold text-purple-600 mt-1">0</h3></div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Clientes Cadastrados</p><h3 id="dash-tot-clientes" class="text-3xl font-bold text-indigo-600 mt-1">0</h3></div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Fornecedores TIC</p><h3 id="dash-tot-fornecedores" class="text-3xl font-bold text-emerald-600 mt-1">0</h3></div>
@@ -453,6 +453,7 @@
         setPersistence(auth, inMemoryPersistence).catch(console.warn);
 
         let currentUser = null;
+        let versaoSessao = 0;
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
         let abaAtual = 'dashboard';
         let filtroEventoAtual = 'futuros';
@@ -619,12 +620,22 @@
         }
 
         function formatarData(dataStr) {
-            if (!dataStr) return '-';
-            try {
-                const d = new Date(dataStr + 'T00:00:00');
-                if (isNaN(d.getTime())) return dataStr;
+            if (typeof dataStr !== 'string' || !dataStr) return '-';
+            const data = dataStr.trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(data)) {
+                const d = new Date(data + 'T12:00:00');
+                if (isNaN(d.getTime()) || d.getFullYear() !== Number(data.slice(0, 4))
+                    || d.getMonth() + 1 !== Number(data.slice(5, 7)) || d.getDate() !== Number(data.slice(8, 10))) return '-';
                 return d.toLocaleDateString('pt-BR');
-            } catch(e) { return dataStr; }
+            }
+            if (!/^\d{4}-\d{2}-\d{2}T/.test(data)) return '-';
+            const d = new Date(data);
+            return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('pt-BR', { timeZone: 'America/Recife' });
+        }
+
+        function obterClasseCorCard(valor) {
+            return CORES_CARD_DEMANDA.some(cor => cor.id === valor)
+                ? valor : 'bg-white border-slate-200 text-slate-900';
         }
 
         function calcularInfoSemana(dataStr) {
@@ -726,9 +737,21 @@
 
         let eventosCacheMap = {};
         function atualizarEventosVisiveis(lista) {
-            lista.forEach(e => eventosCacheMap[e.id] = e);
+            // Esta consulta entrega a lista completa dos eventos públicos a cada snapshot.
+            eventosCacheMap = Object.fromEntries(lista.map(e => [e.firestoreId || e.id, e]));
             dbData.eventos = Object.values(eventosCacheMap);
             renderEventos();
+            renderDashboardKPIs();
+            atualizarContadoresAbas();
+        }
+
+        function observarFirestore(ref, aoReceber, aoFalhar = err => console.warn('Firestore:', err.message)) {
+            const versaoAtual = versaoSessao;
+            return onSnapshot(ref, snap => {
+                if (versaoAtual === versaoSessao && currentUser) aoReceber(snap);
+            }, err => {
+                if (versaoAtual === versaoSessao && currentUser) aoFalhar(err);
+            });
         }
 
         function iniciarSnapshotFirestore() {
@@ -736,26 +759,26 @@
             eventosCacheMap = {};
             if (!currentUser) return;
             ['demandas','locais','orgaos','fornecedores','bases','usuarios'].forEach(col => {
-                const unsub = onSnapshot(collection(db, col), snap => {
+                const unsub = observarFirestore(collection(db, col), snap => {
                     dbData[col] = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
                     renderizarTudo();
                 }, err => console.warn('Firestore '+col+':', err.message));
                 snapshotUnsubs.push(unsub);
             });
 
-            snapshotUnsubs.push(onSnapshot(query(collection(db,'eventos'), where('eventoPublico','==',true)), snap => {
+            snapshotUnsubs.push(observarFirestore(query(collection(db,'eventos'), where('eventoPublico','==',true)), snap => {
                 atualizarEventosVisiveis(snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data()})));
             }));
             if (currentUser.uid) {
-                snapshotUnsubs.push(onSnapshot(doc(db,'usuarios',currentUser.uid), snap => {
-                    if (snap.exists()) { currentUser = { ...currentUser, ...snap.data(), uid: currentUser.uid }; renderizarTudo(); }
+                snapshotUnsubs.push(observarFirestore(doc(db,'usuarios',currentUser.uid), snap => {
+                    if (snap.exists()) { currentUser = { ...currentUser, ...snap.data(), uid: currentUser.uid, email: currentUser.email }; renderizarTudo(); }
                 }));
             }
-            snapshotUnsubs.push(onSnapshot(collection(db,'grupos'), snap => {
+            snapshotUnsubs.push(observarFirestore(collection(db,'grupos'), snap => {
                 dbData.grupos = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
                 renderGrupos(); renderUsuarios();
             }));
-            snapshotUnsubs.push(onSnapshot(collection(db,'inscricoes'), snap => {
+            snapshotUnsubs.push(observarFirestore(collection(db,'inscricoes'), snap => {
                 dbData.inscricoes = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
                 renderEventos();
             }));
@@ -763,6 +786,7 @@
 
         function renderizarTudo() {
             renderUsuarios(); renderClientes(); renderBases(); renderDemandas(); renderEventos(); renderLocais(); renderFornecedores(); renderDashboardKPIs(); preencherSelectClientes(); atualizarVisibilidadeAbas(); preencherFiltrosUsuarios(); renderGrupos(); atualizarContadoresAbas();
+            if (abaAtual === 'dashboard') renderCharts();
         }
 
         function atualizarContadoresAbas() {
@@ -790,6 +814,17 @@
         }
 
         function preencherFiltrosUsuarios() {
+            const selectOrgao = document.getElementById('filtro-orgao-usuario');
+            if (selectOrgao) {
+                const valorAtual = selectOrgao.value;
+                const orgaos = [...new Set(dbData.usuarios.map(u => u.orgao).filter(Boolean))].sort();
+                selectOrgao.innerHTML = '<option value="">Filtrar por Cliente / Secretaria</option>';
+                orgaos.forEach(orgao => {
+                    const opt = document.createElement('option');
+                    opt.value = orgao; opt.textContent = orgao; selectOrgao.appendChild(opt);
+                });
+                selectOrgao.value = valorAtual;
+            }
             const selectTag = document.getElementById('filtro-tag-usuario');
             if (selectTag) {
                 const valAtual = selectTag.value;
@@ -814,8 +849,8 @@
             document.getElementById('count-usuarios').textContent = us.length;
             tbody.innerHTML = us.map(u => {
                 const audit = renderAuditInfo(u);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button></td></tr>`;
-            }).join('') || '<tr><td colspan="7" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(', ') : u.tags || '-')}</td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button></td></tr>`;
+            }).join('') || '<tr><td colspan="8" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
         function renderClientes() {
@@ -911,7 +946,9 @@
             const tbody = document.getElementById('tabela-bases');
             if (!tbody) return;
             document.getElementById('count-bases').textContent = dbData.bases.length;
-            tbody.innerHTML = dbData.bases.map(b => {
+            const filtrados = dbData.bases.filter(b => !buscaBasesVal || [b.nome, b.categoria, b.sigla].filter(Boolean).join(' ').toLowerCase().includes(buscaBasesVal));
+            document.getElementById('count-bases').textContent = filtrados.length;
+            tbody.innerHTML = filtrados.map(b => {
                 const audit = renderAuditInfo(b);
                 return `<tr class="hover:bg-slate-50"><td class="p-4 font-semibold text-blue-900">${esc(b.categoria)}</td><td class="p-4 font-mono text-xs">${esc(b.sigla || '-')}</td><td class="p-4 font-bold">${esc(b.nome)}</td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="bases" data-id="${b.firestoreId}">Detalhes</button></td></tr>`;
             }).join('');
@@ -949,7 +986,7 @@
                 const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
                 const iconeStatus = renderizarIconeStatus(d.status);
                 const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
-                const corLinhaClara = d.corCard || 'bg-white';
+                const corLinhaClara = obterClasseCorCard(d.corCard);
                 const dataVal = d.dataLimite || d.dataInicio || '';
                 const diaSemanaVal = d.diaSemana || '';
                 const { badgeOutraSemana } = calcularInfoSemana(dataVal);
@@ -1061,7 +1098,8 @@
                 html += `<div class="bg-slate-50/50 border border-slate-100 rounded-lg p-2 min-h-[90px] opacity-40"></div>`;
             }
 
-            const hojeStr = new Date().toISOString().split('T')[0];
+            const hoje = new Date();
+            const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
             for (let dia = 1; dia <= diasNoMes; dia++) {
                 const mesStr = String(mes + 1).padStart(2, '0');
@@ -1077,7 +1115,7 @@
                     </div>
                     <div class="space-y-1 overflow-y-auto max-h-24 flex-1">
                         ${demandasDoDia.map(d => {
-                            const corCard = d.corCard || 'bg-blue-50 border-blue-200 text-blue-900';
+                            const corCard = obterClasseCorCard(d.corCard);
                             return `<div class="p-1 rounded ${corCard} text-[10px] font-semibold truncate cursor-pointer tr-detalhe shadow-sm" data-colecao="demandas" data-id="${esc(d.firestoreId)}" title="${esc(d.titulo)}">
                                 ${esc(d.titulo)}
                             </div>`;
@@ -1090,11 +1128,11 @@
         }
 
         document.getElementById('btn-mes-anterior')?.addEventListener('click', () => {
-            dataMensalAtual.setMonth(dataMensalAtual.getMonth() - 1);
+            dataMensalAtual = new Date(dataMensalAtual.getFullYear(), dataMensalAtual.getMonth() - 1, 1);
             renderDemandas();
         });
         document.getElementById('btn-mes-proximo')?.addEventListener('click', () => {
-            dataMensalAtual.setMonth(dataMensalAtual.getMonth() + 1);
+            dataMensalAtual = new Date(dataMensalAtual.getFullYear(), dataMensalAtual.getMonth() + 1, 1);
             renderDemandas();
         });
         document.getElementById('btn-mes-hoje')?.addEventListener('click', () => {
@@ -1105,7 +1143,7 @@
         function criarPostItHtml(d) {
             const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
             const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
-            const corCard = d.corCard || 'bg-blue-50 border-blue-200 text-blue-900';
+            const corCard = obterClasseCorCard(d.corCard);
             const dataVal = d.dataLimite || d.dataInicio || '';
             const diaSemanaVal = d.diaSemana || '';
             const { badgeOutraSemana } = calcularInfoSemana(dataVal);
@@ -1208,15 +1246,17 @@
         function renderLocais() {
             const tbody = document.getElementById('tabela-locais');
             if (!tbody) return;
-            document.getElementById('count-locais').textContent = dbData.locais.length;
-            tbody.innerHTML = dbData.locais.map(l => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="locais" data-id="${esc(l.firestoreId)}">Detalhes</button></td></tr>`).join('');
+            const filtrados = dbData.locais.filter(l => !buscaLocaisVal || [l.nome, l.endereco, l.contato, l.contatoResponsavel].filter(Boolean).join(' ').toLowerCase().includes(buscaLocaisVal));
+            document.getElementById('count-locais').textContent = filtrados.length;
+            tbody.innerHTML = filtrados.map(l => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="locais" data-id="${esc(l.firestoreId)}">Detalhes</button></td></tr>`).join('');
         }
 
         function renderFornecedores() {
             const tbody = document.getElementById('tabela-fornecedores');
             if (!tbody) return;
-            document.getElementById('count-fornecedores').textContent = dbData.fornecedores.length;
-            tbody.innerHTML = dbData.fornecedores.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.firestoreId)}">Detalhes</button></td></tr>`).join('');
+            const filtrados = dbData.fornecedores.filter(f => !buscaFornecedoresVal || [f.nome, f.nomeFantasia, f.razaoSocial, f.cnpj, f.produtoServicoPrincipal, f.servicoPrincipal].filter(Boolean).join(' ').toLowerCase().includes(buscaFornecedoresVal));
+            document.getElementById('count-fornecedores').textContent = filtrados.length;
+            tbody.innerHTML = filtrados.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.firestoreId)}">Detalhes</button></td></tr>`).join('');
         }
 
         function renderGrupos() {
@@ -1226,7 +1266,11 @@
         }
 
         function renderDashboardKPIs() {
-            document.getElementById('dash-tot-demandas').textContent = dbData.demandas.length;
+            // Ativas: todas as demandas que não estão concluídas ou canceladas.
+            document.getElementById('dash-tot-demandas').textContent = dbData.demandas.filter(d => {
+                const status = String(d.status || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                return status !== 'concluido' && status !== 'cancelado';
+            }).length;
             document.getElementById('dash-tot-eventos').textContent = dbData.eventos.length;
             document.getElementById('dash-tot-locais').textContent = dbData.locais.length;
             document.getElementById('dash-tot-clientes').textContent = dbData.orgaos.length;
@@ -1240,7 +1284,7 @@
             if (ctx1) {
                 if (chartCatInstance) chartCatInstance.destroy();
                 const counts = {}; dbData.demandas.forEach(d => { const c = d.categoria || 'Geral'; counts[c] = (counts[c] || 0) + 1; });
-                chartCatInstance = new Chart(ctx1, { type: 'bar', data: { labels: Object.keys(counts).length ? Object.keys(counts) : ['Infra'], datasets: [{ data: Object.keys(counts).length ? Object.values(counts) : [10], backgroundColor: '#1e3a8a' }] }, options: { plugins: { legend: { display: false } } } });
+                chartCatInstance = new Chart(ctx1, { type: 'bar', data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts), backgroundColor: '#1e3a8a' }] }, options: { plugins: { legend: { display: false } } } });
             }
             const ctx2 = document.getElementById('chartStatus')?.getContext('2d');
             if (ctx2) {
@@ -1340,7 +1384,29 @@
                 return;
             }
 
-            c.innerHTML = Object.entries(item).filter(([k])=>k!=='id' && k!=='firestoreId').map(([k,v])=>`<div><label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label><input type="text" name="${esc(k)}" value="${esc(Array.isArray(v)?v.join(', '):v)}" class="w-full p-2 border rounded-lg text-xs bg-white"></div>`).join('');
+            c.innerHTML = Object.entries(item).filter(([k]) => k !== 'id' && k !== 'firestoreId').map(([k, v]) => {
+                const classe = 'w-full p-2 border rounded-lg text-xs bg-white';
+                const label = `<label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label>`;
+                if (['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid'].includes(k)) {
+                    return `<div>${label}<input type="text" name="${esc(k)}" value="${esc(v)}" readonly class="${classe}"></div>`;
+                }
+                if (typeof v === 'boolean') {
+                    return `<div>${label}<select name="${esc(k)}" data-field-type="boolean" class="${classe}"><option value="true" ${v ? 'selected' : ''}>Sim</option><option value="false" ${!v ? 'selected' : ''}>Não</option></select></div>`;
+                }
+                if (typeof v === 'number') {
+                    return `<div>${label}<input type="number" step="any" name="${esc(k)}" data-field-type="number" value="${esc(v)}" required class="${classe}"></div>`;
+                }
+                if (Array.isArray(v)) {
+                    if (!['historicoAcoes', 'versoesAnteriores'].includes(k) && v.every(x => typeof x === 'string')) {
+                        return `<div>${label}<input type="text" name="${esc(k)}" data-field-type="string-list" value="${esc(v.join(', '))}" class="${classe}"><span class="text-slate-500">Separe os itens por vírgula.</span></div>`;
+                    }
+                    return `<div>${label}<p class="p-2 border rounded-lg text-slate-500">${v.length} registro(s) preservado(s). Edição disponível no fluxo específico.</p></div>`;
+                }
+                if (v !== null && typeof v === 'object') {
+                    return `<div>${label}<p class="p-2 border rounded-lg text-slate-500">Dados estruturados preservados. Edição disponível no fluxo específico.</p></div>`;
+                }
+                return `<div>${label}<input type="text" name="${esc(k)}" value="${esc(v)}" class="${classe}"></div>`;
+            }).join('');
         }
 
         function detalharRegistro(colecao, firestoreId){
@@ -1520,17 +1586,29 @@
                 criadoPor: itemAntigo.criadoPor || autorAtual
             };
 
-            form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el => {
-                if(el.name === 'responsavelGrgdCheckbox') return;
-                if(el.name) obj[el.name] = el.value;
-            });
-
-            if (colecao === 'demandas') {
-                const respCheckboxes = form.querySelectorAll('input[name="responsavelGrgdCheckbox"]:checked');
-                obj.responsavelGrgd = Array.from(respCheckboxes).map(cb => cb.value);
-            }
-
             try {
+                form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el => {
+                    if (!el.name || el.name === 'responsavelGrgdCheckbox' || ['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid'].includes(el.name)) return;
+                    const tipo = el.dataset.fieldType;
+                    if (tipo === 'boolean') {
+                        if (!['true', 'false'].includes(el.value)) throw new Error('Selecione Sim ou Não para ' + el.name + '.');
+                        obj[el.name] = el.value === 'true';
+                    }
+                    else if (tipo === 'number') {
+                        if (!el.value.trim() || !Number.isFinite(Number(el.value))) throw new Error('Informe um número válido para ' + el.name + '.');
+                        obj[el.name] = Number(el.value);
+                    } else if (tipo === 'string-list') {
+                        const anterior = itemAntigo[el.name];
+                        obj[el.name] = Array.isArray(anterior) && el.value === anterior.join(', ')
+                            ? anterior : el.value.split(',').map(x => x.trim()).filter(Boolean);
+                    }
+                    else if (itemAntigo[el.name] === null && !el.value) obj[el.name] = null;
+                    else obj[el.name] = el.value;
+                });
+                if (colecao === 'demandas') {
+                    const respCheckboxes = form.querySelectorAll('input[name="responsavelGrgdCheckbox"]:checked');
+                    obj.responsavelGrgd = Array.from(respCheckboxes).map(cb => cb.value);
+                }
                 await setDoc(doc(db, colecao, String(firestoreId)), obj, { merge: true });
                 alert('Alterações salvas na nuvem com sucesso!');
                 fecharModal('modal-detalhes');
@@ -1718,7 +1796,9 @@
                         editadoPor: autor
                     });
                 } else {
-                    await addDoc(collection(db, tipo + 's'), { id: 'OBJ-' + Date.now(), nome: val('uc-1'), descricao: val('uc-2'), criadoEm: agora, atualizadoEm: agora, criadoPor: autor, editadoPor: autor });
+                    const colecoes = { evento: 'eventos', local: 'locais', fornecedor: 'fornecedores', usuario: 'usuarios', base: 'bases' };
+                    if (!Object.hasOwn(colecoes, tipo)) throw new Error('Tipo de cadastro não suportado.');
+                    await addDoc(collection(db, colecoes[tipo]), { id: 'OBJ-' + Date.now(), nome: val('uc-1'), descricao: val('uc-2'), criadoEm: agora, atualizadoEm: agora, criadoPor: autor, editadoPor: autor });
                 }
                 alert('Salvo na nuvem com sucesso!');
                 fecharModal('modal-form-universal');
@@ -1814,6 +1894,12 @@
             byId('filtro-gestor-modalidade')?.addEventListener('change', e => { filtroGestorModalidadeAtual = e.target.value; renderClientes(); });
             byId('filtro-situacao-cliente')?.addEventListener('change', e => { filtroSituacaoClienteAtual = e.target.value; renderClientes(); });
 
+            byId('busca-locais')?.addEventListener('input', e => { buscaLocaisVal = e.target.value.toLowerCase().trim(); renderLocais(); });
+            byId('busca-fornecedores')?.addEventListener('input', e => { buscaFornecedoresVal = e.target.value.toLowerCase().trim(); renderFornecedores(); });
+            byId('busca-usuarios')?.addEventListener('input', e => { buscaUsuariosVal = e.target.value.toLowerCase().trim(); renderUsuarios(); });
+            byId('busca-bases')?.addEventListener('input', e => { buscaBasesVal = e.target.value.toLowerCase().trim(); renderBases(); });
+            byId('filtro-tag-usuario')?.addEventListener('change', e => { filtroTagAtual = e.target.value; renderUsuarios(); });
+            byId('filtro-orgao-usuario')?.addEventListener('change', e => { filtroOrgaoUsuarioAtual = e.target.value; renderUsuarios(); });
             byId('busca-eventos')?.addEventListener('input', e => { buscaEventosVal = e.target.value.toLowerCase().trim(); renderEventos(); });
             byId('filtro-evento-futuros')?.addEventListener('click', () => { filtroEventoAtual = 'futuros'; renderEventos(); });
             byId('filtro-evento-realizados')?.addEventListener('click', () => { filtroEventoAtual = 'realizados'; renderEventos(); });
@@ -1978,16 +2064,47 @@
             }
         });
 
+        function limparDadosSessao() {
+            currentUser = null;
+            dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
+            eventosCacheMap = {};
+            buscaDemandasVal = buscaEventosVal = buscaLocaisVal = buscaClientesVal = buscaFornecedoresVal = buscaBasesVal = buscaUsuariosVal = '';
+            filtroTagAtual = filtroOrgaoUsuarioAtual = filtroGestorModalidadeAtual = filtroSituacaoClienteAtual = filtroDemandaStatusAtual = filtroDemandaPrioAtual = '';
+            ['busca-demandas', 'busca-eventos', 'busca-locais', 'busca-clientes', 'busca-fornecedores', 'busca-bases', 'busca-usuarios', 'filtro-tag-usuario', 'filtro-orgao-usuario', 'filtro-gestor-modalidade', 'filtro-situacao-cliente', 'filtro-demanda-status', 'filtro-demanda-prio'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            document.getElementById('main-content')?.classList.add('hidden');
+            ['modal-detalhes', 'modal-observacoes', 'modal-form-universal'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+            ['detalhe-conteudo', 'edit-campos-dinamicos', 'form-univ-campos', 'obs-historico-lista', 'obs-demanda-titulo'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = '';
+            });
+            ['obs-demanda-id', 'obs-novo-texto', 'login-senha', 'edit-colecao', 'edit-doc-id'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            ['user-name-display', 'user-role-display', 'badge-perfil-acesso'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '';
+            });
+            renderizarTudo();
+        }
+
         onAuthStateChanged(auth, async user => {
-            currentUser = user;
+            const versaoAtual = ++versaoSessao;
             pararSnapshots();
+            limparDadosSessao();
+            currentUser = user;
             if (!user) {
                 document.getElementById('main-content')?.classList.add('hidden');
                 document.getElementById('modal-login')?.classList.remove('hidden');
                 return;
             }
             try {
-                currentUser = await carregarPerfilFirebase(user);
+                const perfilCarregado = await carregarPerfilFirebase(user);
+                if (versaoAtual !== versaoSessao) return;
+                currentUser = perfilCarregado;
                 document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
                 document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
                 document.getElementById('main-content')?.classList.remove('hidden');
@@ -1996,6 +2113,7 @@
                 iniciarSnapshotFirestore();
                 renderizarTudo();
             } catch(err) {
+                if (versaoAtual !== versaoSessao) return;
                 currentUser = { uid: user.uid, id: user.uid, email: user.email || '', nome: user.email || 'Usuário', perfil: 'comum', orgao: 'GERAL', modulosPermitidos: ['dashboard','demandas','eventos','clientes'] };
                 document.getElementById('main-content')?.classList.remove('hidden');
                 document.getElementById('modal-login')?.classList.add('hidden');
@@ -2009,7 +2127,7 @@
             const ref = doc(db, 'usuarios', user.uid);
             try {
                 const snap = await getDoc(ref);
-                if (snap.exists()) return { uid: user.uid, id: snap.id, ...snap.data(), email: snap.data().email || user.email };
+                if (snap.exists()) return { ...snap.data(), uid: user.uid, id: snap.id, email: user.email };
             } catch (e) {}
             return { uid: user.uid, id: user.uid, email: user.email, nome: user.email, perfil: 'comum', orgao: 'GERAL', modulosPermitidos: ['dashboard','demandas','eventos','clientes'] };
         }
