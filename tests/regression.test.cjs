@@ -28,9 +28,11 @@ function app() {
         async createUserWithEmailAndPassword(auth, email, password) { return {user:{uid:'novo-uid'}}; }, async deleteUser() {},
         inMemoryPersistence: {}, setPersistence() { return Promise.resolve(); },
         signInWithEmailAndPassword() { return Promise.resolve(); }, signOut() { return Promise.resolve(); },
-        collection(db, name) { return name; }, doc(db, collection, id) { return { collection, id }; },
+        collection(db, name) { return name; }, doc(db, collection, id, ...segments) { return { collection, id, path:[collection,id,...segments].join('/') }; },
+        writeBatch() { const pending=[]; return {set(ref,data,options){pending.push({ref,data,options});},async commit(){ for(const w of pending)await context.setDoc(w.ref,w.data,w.options); }}; },
+        EmailAuthProvider:{credential(email,password){return {email,password};}}, async reauthenticateWithCredential(){},async updatePassword(){},
         async addDoc(collection, data) { writes.push({ collection, data }); },
-        async setDoc(ref, data, options) { writes.push({ collection: ref.collection, id:ref.id, data, options }); }, async deleteDoc() {},
+        async setDoc(ref, data, options) { writes.push({ collection: ref.collection, id:ref.id, path:ref.path, data, options }); }, async deleteDoc() {},
         onSnapshot(ref, callback, error) { const sub = {ref, callback, error}; snapshots.push(sub); return () => {}; }, async getDoc() { return { exists() { return false; } }; },
         query(...args) { return args; }, where(...args) { return args; }, async getDocs() { return { docs: [] }; },
         onAuthStateChanged(auth, callback) { context.authCallback = callback; },
@@ -267,7 +269,7 @@ test('cadastro externo começa sem permissões internas e perfil inválido imped
     assert.equal(a.writes[0].data.perfil,'comum');assert.equal(a.writes[0].data.modulosPermitidos.length,0);
     preencherUsuario(a,{tipo:'externo',perfil:'admin'});
     await assert.rejects(a.run('criarCadastroUsuario()'),/Somente usuários internos/);
-    assert.equal(a.writes.length,1);
+    assert.equal(a.writes.filter(w=>w.collection==='usuarios').length,1);
 });
 
 test('cadastro preserva lista de tags que contém vírgula e valida módulos por tipo', () => {
@@ -311,17 +313,17 @@ test('conta sem perfil ou inativa não ganha permissões por fallback', async ()
     }
 });
 
-test('externo sem módulos consulta apenas o próprio perfil', () => {
+test('externo sem módulos consulta apenas o próprio perfil e seus dados privados', () => {
     const a=app();a.run("currentUser={uid:'externo',tipoUsuario:'externo',perfil:'comum',ativo:true,modulosPermitidos:[]};iniciarSnapshotFirestore()");
-    assert.equal(a.snapshots.length,1);assert.equal(a.snapshots[0].ref.collection,'usuarios');assert.equal(a.snapshots[0].ref.id,'externo');
+    assert.equal(a.snapshots.length,2);assert.equal(a.snapshots[0].ref.collection,'usuarios');assert.equal(a.snapshots[0].ref.id,'externo');
     a.run("mudarAba('demandas')");assert.notEqual(a.run('abaAtual'),'demandas');
 });
 
 test('interno com Demandas consulta somente o diretório interno ativo', () => {
     const a=app();a.run("currentUser={uid:'interno',tipoUsuario:'interno',perfil:'comum',ativo:true,modulosPermitidos:['demandas']};iniciarSnapshotFirestore()");
     assert.ok(a.snapshots.some(s=>s.ref==='demandas'));
-    const diretorio=a.snapshots.find(s=>Array.isArray(s.ref)&&s.ref[0]==='usuarios');
-    assert.deepEqual(diretorio.ref,[ 'usuarios',['tipoUsuario','==','interno'],['ativo','==',true] ]);
+    const diretorio=a.snapshots.find(s=>Array.isArray(s.ref)&&s.ref[0]==='identidadesUsuarios');
+    assert.deepEqual(diretorio.ref,[ 'identidadesUsuarios',['tipoUsuario','==','interno'],['ativo','==',true] ]);
     assert.ok(!a.snapshots.some(s=>s.ref==='grupos'||s.ref==='inscricoes'||s.ref==='orgaos'));
 });
 
@@ -345,4 +347,106 @@ test('filtro de tipo distingue legado sem usar tags como classificação', () =>
 test('formulário de conta nova não herda permissões de cadastros legados', () => {
     const a=app();const html=a.run('camposUsuario({},true)');
     assert.ok(!/name="usuario-modulo"[^>]*checked/.test(html));
+});
+
+
+function perfilAberto(a) {
+    a.run("currentUser={uid:'pessoa',nome:'Original',email:'pessoa@example.invalid',tipoUsuario:'interno',perfil:'comum',ativo:true,modulosPermitidos:['demandas']};dadosPessoaisPerfil={telefone:'111',endereco:'Original'};abrirMeuPerfil()");
+}
+
+test('perfil pessoal salva nome e foto sem alterar permissões e separa endereço/telefone', async () => {
+    const a=app();perfilAberto(a);a.element('perfil-nome').value='Novo nome';a.element('perfil-telefone').value='(81) 99999-1111';a.element('perfil-endereco').value='Rua de teste';
+    await a.run('salvarMeuPerfil({preventDefault(){}})');
+    assert.equal(a.writes.length,3);
+    const root=a.writes.find(w=>w.path==='usuarios/pessoa');const privado=a.writes.find(w=>w.path==='usuarios/pessoa/privado/perfil');const identidade=a.writes.find(w=>w.collection==='identidadesUsuarios');
+    assert.equal(root.data.nome,'Novo nome');assert.equal(root.data.perfil,undefined);assert.equal(root.data.modulosPermitidos,undefined);assert.equal(root.data.telefone,undefined);
+    assert.equal(privado.data.telefone,'(81) 99999-1111');assert.equal(privado.data.endereco,'Rua de teste');
+    assert.deepEqual(Object.keys(identidade.data).sort(),['ativo','fotoPerfil','nome','tipoUsuario','uid']);
+    assert.equal(a.run('currentUser.perfil'),'comum');assert.equal(a.run('currentUser.nome'),'Novo nome');
+});
+test('dados privados ainda não carregados e foto sendo processada impedem salvar', async () => {
+    const a=app();a.run("currentUser={uid:'u',nome:'Pessoa'};abrirMeuPerfil()");
+    await a.run('salvarMeuPerfil({preventDefault(){}})');assert.equal(a.writes.length,0);
+    perfilAberto(a);a.run('perfilEmEdicao.carregandoFoto=true');await a.run('salvarMeuPerfil({preventDefault(){}})');assert.equal(a.writes.length,0);
+});
+test('falha ao salvar perfil não troca foto/nome no cache local', async () => {
+    const a=app();perfilAberto(a);a.context.setDoc=async()=>{throw new Error('permission-denied');};a.element('perfil-nome').value='Não confirmado';
+    await a.run('salvarMeuPerfil({preventDefault(){}})');assert.equal(a.run('currentUser.nome'),'Original');assert.ok(a.element('perfil-msg').textContent.includes('Permissão negada'));
+});
+test('fotos remotas, SVG, HTML e imagens acima do limite não entram no avatar', () => {
+    const a=app();for(const foto of ['javascript:alert(1)','https://externo/foto.jpg','data:image/svg+xml;base64,PHN2Zz4=','data:image/jpeg;base64,AA==" onload="x','data:image/jpeg;base64,'+'A'.repeat(45000)])assert.equal(a.run(`fotoPerfilSegura(${JSON.stringify(foto)})`),'');
+    const html=a.run("avatarUsuario({nome:'<img src=x>',fotoPerfil:'data:image/svg+xml;base64,PHN2Zz4='})");
+    assert.ok(html.includes('&lt;img src=x&gt;'));assert.ok(!html.includes('<img'));
+});
+test('mesmo nome não associa foto de outra pessoa; UID mantém responsável correto', () => {
+    const a=app();a.run("identidadesUsuarios=[{uid:'a',nome:'Ana',fotoPerfil:'data:image/jpeg;base64,QQ=='},{uid:'b',nome:'Ana',fotoPerfil:'data:image/jpeg;base64,Qg=='}]");
+    assert.ok(a.run("avatarUsuario({uid:'b',nome:'Ana'})").includes('Qg=='));
+    assert.ok(!a.run("avatarUsuario({nome:'Ana'})").includes('<img'));
+    assert.ok(a.run("renderizarBadgesResponsaveis(pessoasResponsaveis({responsaveisGrgdIds:['a'],responsaveisGrgdSnapshot:[{uid:'a',nome:'Ana'}]}))").includes('QQ=='));
+});
+test('avatar é reutilizado na listagem, autoria e histórico com UID', () => {
+    const a=app();a.run("dbData.usuarios=[{firestoreId:'a',nome:'Ana',fotoPerfil:'data:image/jpeg;base64,QQ=='}];renderUsuarios()");
+    assert.ok(a.element('tabela-usuarios').innerHTML.includes('data-avatar'));
+    assert.ok(a.run("renderAuditInfo({editadoPor:'Ana',editadoPorUid:'a'}).autorHtml").includes('QQ=='));
+    assert.ok(!a.run("renderAuditInfo({editadoPor:'Ana',criadoPorUid:'a'}).autorHtml").includes('<img'));
+    assert.ok(a.run("historicoDemandaHtml({historicoAcoes:[{autor:'Ana',autorUid:'a',texto:'<b>texto</b>'}]})").includes('QQ=='));
+    assert.ok(a.run("historicoDemandaHtml({historicoAcoes:[{autor:'Ana',texto:'<b>texto</b>'}]})").includes('&lt;b&gt;texto&lt;/b&gt;'));
+});
+test('upload rejeita tipo e tamanho inválidos antes de decodificar', async () => {
+    const a=app();let decodificou=false;a.context.createImageBitmap=async()=>{decodificou=true;};
+    for(const arquivo of [{type:'image/svg+xml',size:10},{type:'image/jpeg',size:9*1024*1024}])await assert.rejects(a.run(`prepararFotoPerfil(${JSON.stringify(arquivo)})`));
+    assert.equal(decodificou,false);
+});
+test('upload recorta e reduz imagem para JPEG pequeno e libera bitmap', async () => {
+    const a=app();let fechado=false;const chamadas=[];
+    a.context.createImageBitmap=async()=>({width:800,height:400,close(){fechado=true;}});
+    a.context.document.createElement=()=>({getContext:()=>({fillRect(){},drawImage(...args){chamadas.push(args.slice(1));}}),toDataURL:()=>'data:image/jpeg;base64,QQ=='});
+    const foto=await a.run("prepararFotoPerfil({type:'image/png',size:1000})");
+    assert.equal(foto,'data:image/jpeg;base64,QQ==');assert.equal(fechado,true);assert.deepEqual(chamadas[0],[200,0,400,400,0,0,192,192]);
+});
+test('upload atrasado não altera novo modal nem outra sessão', async () => {
+    const a=app();perfilAberto(a);let resolver;a.context.createImageBitmap=()=>new Promise(resolve=>{resolver=resolve;});
+    a.context.document.createElement=()=>({getContext:()=>({fillRect(){},drawImage(){}}),toDataURL:()=>'data:image/jpeg;base64,QQ=='});
+    a.context.fileEvent={target:{files:[{type:'image/png',size:100}],value:'foto'}};
+    const pendente=a.run('selecionarFotoPerfil(fileEvent)');a.run("fecharModal('modal-perfil');abrirMeuPerfil()");
+    resolver({width:10,height:10,close(){}});await pendente;
+    assert.equal(a.run('perfilEmEdicao.foto'),'');assert.equal(a.writes.length,0);
+});
+test('remover foto exige salvar para persistir e volta às iniciais', async () => {
+    const a=app();perfilAberto(a);a.run("perfilEmEdicao.foto='data:image/jpeg;base64,QQ==';removerFotoPerfil()");
+    assert.equal(a.writes.length,0);assert.equal(a.run('perfilEmEdicao.foto'),'');
+    await a.run('salvarMeuPerfil({preventDefault(){}})');assert.equal(a.writes[0].data.fotoPerfil,'');
+});
+test('troca de senha reautentica a própria conta, usa Auth e limpa campos secretos', async () => {
+    const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid'}");
+    a.element('perfil-senha-atual').value='senha-atual';a.element('perfil-senha-nova').value='senha-nova';a.element('perfil-senha-confirmar').value='senha-nova';
+    const chamadas=[];a.context.reauthenticateWithCredential=async(u,c)=>chamadas.push(['confirmar',u.uid,c.password]);a.context.updatePassword=async(u,p)=>chamadas.push(['trocar',u.uid,p]);
+    await a.run('alterarMinhaSenha({preventDefault(){}})');
+    assert.deepEqual(chamadas,[['confirmar','pessoa','senha-atual'],['trocar','pessoa','senha-nova']]);assert.equal(a.writes.length,0);assert.equal(a.element('perfil-senha-atual').value,'');assert.equal(a.element('perfil-senha-nova').value,'');
+});
+test('senha atual incorreta e confirmação divergente não alteram a senha', async () => {
+    const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid'}");let alterou=false;
+    a.context.updatePassword=async()=>{alterou=true;};a.context.reauthenticateWithCredential=async()=>{throw new Error('auth/wrong-password');};
+    for(const [atual,nova,confirmar] of [['atual','nova-senha','diferente'],['atual','nova-senha','nova-senha']]){
+        a.element('perfil-senha-atual').value=atual;a.element('perfil-senha-nova').value=nova;a.element('perfil-senha-confirmar').value=confirmar;await a.run('alterarMinhaSenha({preventDefault(){}})');
+    }
+    assert.equal(alterou,false);assert.ok(a.element('perfil-senha-msg').textContent.includes('incorreta'));assert.equal(a.element('perfil-senha-atual').value,'');
+});
+test('troca de conta durante confirmação não altera senha nem campos da nova sessão', async () => {
+    const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid'}");
+    a.element('perfil-senha-atual').value='atual';a.element('perfil-senha-nova').value='nova-senha';a.element('perfil-senha-confirmar').value='nova-senha';
+    let resolver,alterou=false;a.context.reauthenticateWithCredential=()=>new Promise(resolve=>{resolver=resolve;});a.context.updatePassword=async()=>{alterou=true;};
+    const pendente=a.run('alterarMinhaSenha({preventDefault(){}})');
+    a.run("++versaoSessao;currentUser={uid:'outra'};auth.currentUser={uid:'outra'}");a.element('perfil-senha-atual').value='outra sessão';resolver();await pendente;
+    assert.equal(alterou,false);assert.equal(a.element('perfil-senha-atual').value,'outra sessão');
+});
+test('logout limpa foto em edição, dados pessoais e senhas', async () => {
+    const a=app();perfilAberto(a);a.element('perfil-senha-atual').value='secreta';a.run("perfilEmEdicao.foto='data:image/jpeg;base64,QQ=='");
+    await a.context.authCallback(null);
+    assert.equal(a.run('dadosPessoaisPerfil'),null);assert.equal(a.run('perfilEmEdicao'),null);assert.equal(a.element('perfil-telefone').value,'');assert.equal(a.element('perfil-senha-atual').value,'');assert.equal(a.element('user-avatar').innerHTML,'');
+});
+
+test('locais e fornecedores mostram autoria com foto nas colunas existentes', () => {
+    const a=app();a.run("identidadesUsuarios=[{uid:'u',nome:'Usuário',fotoPerfil:'data:image/jpeg;base64,QQ=='}];dbData.locais=[{nome:'Local',editadoPor:'Usuário',editadoPorUid:'u'}];dbData.fornecedores=[{nome:'Fornecedor',editadoPor:'Usuário',editadoPorUid:'u'}];renderLocais();renderFornecedores()");
+    for(const id of ['tabela-locais','tabela-fornecedores'])assert.ok(a.element(id).innerHTML.includes('data-avatar'));
 });

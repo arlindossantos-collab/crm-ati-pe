@@ -61,7 +61,7 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <div class="bg-white text-blue-900 px-3 py-1.5 rounded-lg font-bold text-xl tracking-wider">PRGD</div>
-                <div>
+                <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
                         <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.3.4</span>
@@ -70,8 +70,9 @@
                 </div>
             </div>
             <div id="auth-actions">
-                <div id="user-logged" class="flex items-center gap-3">
-                    <div class="text-right">
+                <div id="user-logged" class="flex items-center gap-2 sm:gap-3">
+                    <button id="btn-meu-perfil" type="button" class="hidden flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-blue-800 focus-visible:ring-2 focus-visible:ring-white" aria-label="Abrir meu perfil"><span id="user-avatar"></span><span class="text-xs font-semibold">Perfil</span></button>
+                    <div class="text-right hidden sm:block">
                         <p id="user-name-display" class="text-xs font-bold text-white"></p>
                         <p id="user-role-display" class="text-[10px] text-blue-200 uppercase tracking-wider font-bold"></p>
                     </div>
@@ -389,6 +390,31 @@
         </div>
     </main>
 
+    <div id="modal-perfil" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 z-10 bg-white flex items-center justify-between border-b pb-3 mb-4"><h2 id="perfil-titulo" class="font-bold text-lg text-blue-900">Meu perfil</h2><button type="button" data-target="modal-perfil" class="btn-fechar-modal px-3 py-1 rounded-lg hover:bg-slate-100" aria-label="Fechar perfil">✕</button></div>
+            <form id="form-meu-perfil" class="space-y-4">
+                <div class="flex flex-wrap items-center gap-4"><div id="perfil-foto-preview"></div><div class="space-y-2 flex-1 min-w-0"><label for="perfil-foto" class="block text-sm font-semibold">Foto do perfil</label><label for="perfil-foto" class="inline-flex cursor-pointer px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-900">Escolher foto</label><input id="perfil-foto" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" aria-describedby="perfil-foto-ajuda"><p id="perfil-foto-ajuda" class="text-xs text-slate-500">Escolha uma foto do computador. JPG, PNG ou WebP, até 8 MB. O enquadramento será quadrado e centralizado.</p><button type="button" id="perfil-remover-foto" class="text-xs text-red-700 underline disabled:opacity-40">Remover foto</button></div></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div><label for="perfil-nome" class="block font-semibold mb-1">Nome</label><input id="perfil-nome" required maxlength="150" autocomplete="name" class="w-full p-2 border rounded-lg"></div>
+                    <div><label for="perfil-email" class="block font-semibold mb-1">E-mail de acesso</label><input id="perfil-email" type="email" readonly class="w-full p-2 border rounded-lg bg-slate-50 text-slate-500"></div>
+                    <div><label for="perfil-telefone" class="block font-semibold mb-1">Telefone</label><input id="perfil-telefone" type="tel" maxlength="40" autocomplete="tel" class="w-full p-2 border rounded-lg"></div>
+                    <div class="sm:col-span-2"><label for="perfil-endereco" class="block font-semibold mb-1">Endereço</label><textarea id="perfil-endereco" rows="2" maxlength="400" autocomplete="street-address" class="w-full p-2 border rounded-lg"></textarea></div>
+                </div>
+                <p class="text-xs text-slate-500">Nome e foto identificam você no sistema. Telefone e endereço ficam no seu perfil pessoal.</p>
+                <p id="perfil-msg" role="status" aria-live="polite" class="hidden"></p>
+                <div class="flex justify-end"><button id="perfil-salvar" type="submit" disabled class="px-4 py-2 rounded-lg bg-blue-900 text-white font-semibold text-sm disabled:opacity-50">Salvar perfil</button></div>
+            </form>
+            <form id="form-minha-senha" class="space-y-3 mt-5 border-t pt-4 text-sm">
+                <h3 class="font-bold text-slate-800">Alterar senha</h3>
+                <div><label for="perfil-senha-atual" class="block font-semibold mb-1">Senha atual</label><input id="perfil-senha-atual" type="password" required autocomplete="current-password" class="w-full p-2 border rounded-lg"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label for="perfil-senha-nova" class="block font-semibold mb-1">Nova senha</label><input id="perfil-senha-nova" type="password" required minlength="8" autocomplete="new-password" class="w-full p-2 border rounded-lg"></div><div><label for="perfil-senha-confirmar" class="block font-semibold mb-1">Confirmar nova senha</label><input id="perfil-senha-confirmar" type="password" required minlength="8" autocomplete="new-password" class="w-full p-2 border rounded-lg"></div></div>
+                <p class="text-xs text-slate-500">Use pelo menos 8 caracteres. A alteração da senha é confirmada separadamente dos dados do perfil.</p><p id="perfil-senha-msg" role="status" aria-live="polite" class="hidden"></p>
+                <div class="flex justify-end"><button id="perfil-alterar-senha" type="submit" class="px-4 py-2 rounded-lg bg-slate-800 text-white font-semibold disabled:opacity-50">Alterar senha</button></div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modais -->
     <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-5xl w-full p-6 max-h-[90vh] overflow-y-auto">
@@ -432,8 +458,8 @@
     <!-- Script Principal v0.3.4 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
         console.info('PRGD v0.3.4: Homologação - Banner Azul Corporativo e Fachada Dinámica');
@@ -520,7 +546,7 @@
                 : String(demanda.responsavelGrgd || '').split(',').map(n => n.trim()).filter(Boolean);
         }
         function dadosResponsavel(uid, demanda = {}) {
-            return dbData.usuarios.find(u => uidCadastro(u) === uid)
+            return pessoaPorUid(uid)
                 || (demanda.responsaveisGrgdSnapshot || []).find(u => u.uid === uid) || {nome: 'Cadastro indisponível'};
         }
         function nomesResponsaveis(demanda = {}) {
@@ -532,7 +558,7 @@
             const ids = demanda.responsaveisGrgdIds || [];
             const ativos = internosAtivos();
             const anteriores = ids.filter(uid => !ativos.some(u => uidCadastro(u) === uid));
-            const checkbox = (valor, texto, marcado, legado = false) => `<label class="flex items-start gap-2 text-xs cursor-pointer"><input type="checkbox" name="${esc(nomeCampo)}" value="${esc(valor)}" data-legado="${legado}" ${marcado ? 'checked' : ''} class="rounded text-blue-900"><span>${esc(texto)}</span></label>`;
+            const checkbox = (valor, texto, marcado, legado = false) => `<label class="flex items-start gap-2 text-xs cursor-pointer"><input type="checkbox" name="${esc(nomeCampo)}" value="${esc(valor)}" data-legado="${legado}" ${marcado ? 'checked' : ''} class="rounded text-blue-900">${avatarUsuario(legado ? {nome:valor} : {...dadosResponsavel(valor,demanda),uid:valor})}<span>${esc(texto)}</span></label>`;
             return ativos.map(u => checkbox(uidCadastro(u), `${u.nome || u.email} (${u.email || uidCadastro(u)})`, ids.includes(uidCadastro(u)))).join('')
                 + anteriores.map(uid => checkbox(uid, `${dadosResponsavel(uid, demanda).nome || uid} — vínculo anterior`, true)).join('')
                 + nomesLegados(demanda).map(nome => checkbox(nome, `${nome} — nome antigo, sem vínculo`, true, true)).join('')
@@ -629,7 +655,7 @@
                 conta = (await createUserWithEmailAndPassword(authCadastro, dados.email, senha)).user;
                 if (sessao !== versaoSessao || !ehAdministrador()) throw new Error('Sua sessão mudou. Entre novamente antes de cadastrar usuários.');
                 const agora = new Date().toISOString(), autor = currentUser.nome || currentUser.email;
-                await setDoc(doc(db, 'usuarios', conta.uid), {...dados, uid: conta.uid, criadoEm: agora, criadoPor: autor, atualizadoEm: agora, editadoPor: autor});
+                await gravarUsuarioComIdentidade(conta.uid, {...dados, uid: conta.uid, criadoEm: agora, criadoPor: autor, criadoPorUid: currentUser?.uid || '', atualizadoEm: agora, editadoPorUid: currentUser?.uid || '', editadoPor: autor});
             } catch (err) {
                 if (conta) {
                     try { await deleteUser(conta); }
@@ -640,6 +666,195 @@
                 if (authCadastro) await signOut(authCadastro).catch(() => {});
                 document.getElementById('usuario-senha') && (document.getElementById('usuario-senha').value = '');
                 cadastroUsuarioEmAndamento = false;
+            }
+        }
+
+        // Perfil privado separado da identificação compartilhada nas telas.
+        let dadosPessoaisPerfil = null;
+        let identidadesUsuarios = [];
+        let perfilEmEdicao = null;
+        let salvandoSenhaPerfil = false;
+        const LIMITE_FOTO_PERFIL = 45000;
+
+        function fotoPerfilSegura(valor) {
+            return typeof valor === 'string' && valor.length <= LIMITE_FOTO_PERFIL
+                && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(valor) ? valor : '';
+        }
+        function pessoaPorUid(uid) {
+            if (!uid) return null;
+            if (currentUser?.uid === uid) return currentUser;
+            return dbData.usuarios.find(u => uidCadastro(u) === uid) || identidadesUsuarios.find(u => u.uid === uid) || null;
+        }
+        function avatarUsuario(pessoa = {}, tamanho = 'sm') {
+            const uid = uidCadastro(pessoa), atual = pessoaPorUid(uid);
+            const nome = pessoa.nome || atual?.nome || pessoa.email || 'Usuário';
+            const foto = fotoPerfilSegura(atual ? atual.fotoPerfil : pessoa.fotoPerfil);
+            const classe = {sm:'w-7 h-7 text-[11px]', md:'w-10 h-10 text-sm', lg:'w-24 h-24 text-2xl'}[tamanho] || 'w-7 h-7 text-[11px]';
+            return `<span role="img" aria-label="${esc(nome)}" title="${esc(nome)}" class="relative inline-flex items-center justify-center shrink-0 rounded-full overflow-hidden font-bold border shadow-sm align-middle ${classe} ${obterCorResponsavel(nome)}"><span aria-hidden="true">${esc(gerarIniciais(nome))}</span>${foto ? `<img data-avatar src="${esc(foto)}" alt="" class="absolute inset-0 w-full h-full object-cover" decoding="async">` : ''}</span>`;
+        }
+        function identificacaoUsuario(pessoa = {}) {
+            return `<span class="inline-flex items-center gap-2 min-w-0">${avatarUsuario(pessoa)}<span class="break-words">${esc(pessoa.nome || pessoa.email || 'Usuário')}</span></span>`;
+        }
+        function historicoDemandaHtml(demanda) {
+            const lista = demanda.historicoAcoes || [];
+            return lista.length ? `<section class="border-t pt-3 space-y-2"><h4 class="font-bold text-sm">Andamentos</h4>${lista.map(h => `<article class="p-3 rounded-lg bg-slate-50 border text-xs"><div class="flex flex-wrap justify-between gap-2">${identificacaoUsuario({uid:h.autorUid,nome:h.autor || 'Sistema'})}<span class="text-slate-500">${formatarData(h.data)}</span></div><p class="mt-2 whitespace-pre-wrap">${esc(h.texto)}</p></article>`).join('')}</section>` : '';
+        }
+        function inscricoesEventoHtml(evento) {
+            const ids = [String(evento.id),String(evento.firestoreId || evento.id)];
+            const lista = dbData.inscricoes.filter(i => ids.includes(String(i.eventId)));
+            return `<section class="border-t pt-3 mt-4"><h4 class="font-bold text-sm mb-2">${ehAdministrador() ? 'Inscrições' : 'Minha inscrição'}</h4><div class="space-y-2">${lista.map(i => `<div class="p-2 rounded-lg bg-slate-50 text-xs">${identificacaoUsuario({uid:i.uid,nome:i.nome || i.email || 'Participante'})}</div>`).join('') || '<p class="text-xs text-slate-500">Nenhuma inscrição disponível.</p>'}</div></section>`;
+        }
+        function pessoasResponsaveis(demanda = {}) {
+            return [...(demanda.responsaveisGrgdIds || []).map(uid => ({...dadosResponsavel(uid, demanda), uid})),
+                ...nomesLegados(demanda).map(nome => ({nome}))];
+        }
+        function identidadePublica(uid, usuario) {
+            return {uid, nome:usuario.nome || '', fotoPerfil:fotoPerfilSegura(usuario.fotoPerfil),
+                tipoUsuario:usuario.tipoUsuario || '', ativo:usuario.ativo !== false};
+        }
+        async function gravarUsuarioComIdentidade(uid, dados, anterior = {}, privado = null) {
+            const lote = writeBatch(db);
+            lote.set(doc(db,'usuarios',uid), dados, {merge:true});
+            lote.set(doc(db,'identidadesUsuarios',uid), identidadePublica(uid, {...anterior,...dados}));
+            if (privado) lote.set(doc(db,'usuarios',uid,'privado','perfil'), privado);
+            await lote.commit();
+        }
+        function atualizarIdentidadeSessao() {
+            document.getElementById('btn-meu-perfil')?.classList.toggle('hidden', !currentUser);
+            const avatar = document.getElementById('user-avatar');
+            if (avatar) avatar.innerHTML = currentUser ? avatarUsuario(currentUser,'md') : '';
+            if (!currentUser) return;
+            document.getElementById('user-name-display').textContent = currentUser.nome || currentUser.email;
+            document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
+        }
+        function mensagemPerfil(texto, erro = false, senha = false) {
+            const el = document.getElementById(senha ? 'perfil-senha-msg' : 'perfil-msg');
+            el.textContent = texto;
+            el.className = 'text-xs p-2 rounded-lg ' + (erro ? 'bg-red-50 text-red-800' : 'bg-blue-50 text-blue-900');
+            el.classList.toggle('hidden', !texto);
+        }
+        function sessaoPerfilAtual(edicao) {
+            return !!edicao && edicao === perfilEmEdicao && edicao.uid === currentUser?.uid && edicao.sessao === versaoSessao;
+        }
+        function atualizarFormularioPerfil() {
+            const edicao = perfilEmEdicao;
+            if (!sessaoPerfilAtual(edicao)) return;
+            if (dadosPessoaisPerfil !== null && !edicao.privadoPreenchido) {
+                document.getElementById('perfil-telefone').value = dadosPessoaisPerfil.telefone || '';
+                document.getElementById('perfil-endereco').value = dadosPessoaisPerfil.endereco || '';
+                edicao.privadoPreenchido = true;
+                mensagemPerfil('');
+            }
+            document.getElementById('perfil-foto-preview').innerHTML = avatarUsuario({nome:document.getElementById('perfil-nome').value, fotoPerfil:edicao.foto}, 'lg');
+            document.getElementById('perfil-salvar').disabled = !edicao.privadoPreenchido || edicao.carregandoFoto || edicao.salvando;
+            document.getElementById('perfil-nome').disabled = edicao.salvando;
+            ['perfil-telefone','perfil-endereco'].forEach(id => { document.getElementById(id).disabled = edicao.salvando || !edicao.privadoPreenchido; });
+            document.getElementById('perfil-foto').disabled = edicao.salvando;
+            document.getElementById('perfil-remover-foto').disabled = !edicao.foto || edicao.salvando;
+        }
+        function limparSenhasPerfil() {
+            ['perfil-senha-atual','perfil-senha-nova','perfil-senha-confirmar'].forEach(id => { document.getElementById(id).value = ''; });
+        }
+        function abrirMeuPerfil() {
+            if (!currentUser || currentUser.ativo === false) return;
+            perfilEmEdicao = {uid:currentUser.uid, sessao:versaoSessao, foto:fotoPerfilSegura(currentUser.fotoPerfil), tokenFoto:0, salvando:false, carregandoFoto:false, privadoPreenchido:false};
+            document.getElementById('perfil-nome').value = currentUser.nome || '';
+            document.getElementById('perfil-email').value = currentUser.email || '';
+            document.getElementById('perfil-telefone').value = '';
+            document.getElementById('perfil-endereco').value = '';
+            document.getElementById('perfil-foto').value = '';
+            limparSenhasPerfil(); mensagemPerfil('',false,true);
+            document.getElementById('perfil-alterar-senha').disabled = salvandoSenhaPerfil;
+            ['perfil-senha-atual','perfil-senha-nova','perfil-senha-confirmar'].forEach(id => { document.getElementById(id).disabled = salvandoSenhaPerfil; });
+            mensagemPerfil(dadosPessoaisPerfil === null ? 'Carregando seus dados pessoais…' : '');
+            atualizarFormularioPerfil();
+            document.getElementById('modal-perfil').classList.remove('hidden');
+            document.getElementById('perfil-nome').focus?.();
+        }
+        async function prepararFotoPerfil(arquivo) {
+            if (!arquivo || !['image/jpeg','image/png','image/webp'].includes(arquivo.type)) throw new Error('Escolha uma foto JPG, PNG ou WebP.');
+            if (arquivo.size > 8 * 1024 * 1024) throw new Error('A foto deve ter no máximo 8 MB.');
+            let imagem;
+            try { imagem = await createImageBitmap(arquivo); }
+            catch (err) { throw new Error('Não foi possível abrir essa imagem. Escolha outra foto.'); }
+            try {
+                if (!imagem.width || !imagem.height) throw new Error('Imagem inválida.');
+                const canvas = document.createElement('canvas'); canvas.width = canvas.height = 192;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) throw new Error('Não foi possível preparar a foto neste navegador.');
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,192,192);
+                const lado = Math.min(imagem.width,imagem.height);
+                ctx.drawImage(imagem,(imagem.width-lado)/2,(imagem.height-lado)/2,lado,lado,0,0,192,192);
+                for (const qualidade of [0.82,0.65,0.45]) {
+                    const foto = fotoPerfilSegura(canvas.toDataURL('image/jpeg',qualidade));
+                    if (foto) return foto;
+                }
+                throw new Error('A foto continua muito grande. Escolha outra imagem.');
+            } finally { imagem.close?.(); }
+        }
+        async function selecionarFotoPerfil(e) {
+            const edicao = perfilEmEdicao, arquivo = e.target.files?.[0];
+            if (!sessaoPerfilAtual(edicao) || !arquivo || edicao.salvando) return;
+            const token = ++edicao.tokenFoto; edicao.carregandoFoto = true; mensagemPerfil('Preparando foto…'); atualizarFormularioPerfil();
+            try {
+                const foto = await prepararFotoPerfil(arquivo);
+                if (!sessaoPerfilAtual(edicao) || token !== edicao.tokenFoto) return;
+                edicao.foto = foto; mensagemPerfil('Foto preparada. Clique em Salvar perfil para confirmar.');
+            } catch (err) {
+                if (sessaoPerfilAtual(edicao) && token === edicao.tokenFoto) mensagemPerfil(traduzirErroSistema(err),true);
+            } finally {
+                if (sessaoPerfilAtual(edicao) && token === edicao.tokenFoto) { edicao.carregandoFoto = false; e.target.value = ''; atualizarFormularioPerfil(); }
+            }
+        }
+        function removerFotoPerfil() {
+            if (!sessaoPerfilAtual(perfilEmEdicao) || perfilEmEdicao.salvando) return;
+            ++perfilEmEdicao.tokenFoto; perfilEmEdicao.foto = ''; perfilEmEdicao.carregandoFoto = false;
+            atualizarFormularioPerfil(); mensagemPerfil('Clique em Salvar perfil para confirmar a remoção da foto.');
+        }
+        async function salvarMeuPerfil(e) {
+            e.preventDefault(); const edicao = perfilEmEdicao;
+            if (!sessaoPerfilAtual(edicao) || edicao.salvando) return;
+            try {
+                if (!edicao.privadoPreenchido || edicao.carregandoFoto) throw new Error('Aguarde o carregamento dos dados e da foto.');
+                const nome = document.getElementById('perfil-nome').value.trim();
+                const telefone = document.getElementById('perfil-telefone').value.trim();
+                const endereco = document.getElementById('perfil-endereco').value.trim();
+                if (!nome || nome.length > 150) throw new Error('Informe seu nome, com até 150 caracteres.');
+                if (telefone.length > 40 || endereco.length > 400) throw new Error('Use até 40 caracteres no telefone e 400 no endereço.');
+                if (edicao.foto && !fotoPerfilSegura(edicao.foto)) throw new Error('Escolha uma foto válida.');
+                edicao.salvando = true; atualizarFormularioPerfil();
+                const agora = new Date().toISOString();
+                const dados = {nome,fotoPerfil:edicao.foto,perfilAtualizadoEm:agora};
+                const privado = {telefone,endereco,atualizadoEm:agora};
+                await gravarUsuarioComIdentidade(edicao.uid,dados,currentUser,privado);
+                if (!sessaoPerfilAtual(edicao)) return;
+                currentUser = {...currentUser,...dados}; dadosPessoaisPerfil = privado;
+                const usuario = dbData.usuarios.find(u => uidCadastro(u) === edicao.uid);
+                if (usuario) Object.assign(usuario,dados);
+                renderizarTudo(); mensagemPerfil('Perfil atualizado com sucesso.');
+            } catch (err) { if (sessaoPerfilAtual(edicao)) mensagemPerfil(traduzirErroSistema(err),true); }
+            finally { if (sessaoPerfilAtual(edicao)) { edicao.salvando = false; atualizarFormularioPerfil(); } }
+        }
+        async function alterarMinhaSenha(e) {
+            e.preventDefault(); const uid = currentUser?.uid, sessao = versaoSessao, usuarioAuth = auth.currentUser;
+            if (!uid || usuarioAuth?.uid !== uid || salvandoSenhaPerfil) return;
+            const aindaAtual = () => sessao === versaoSessao && currentUser?.uid === uid && auth.currentUser?.uid === uid;
+            const atual = document.getElementById('perfil-senha-atual').value;
+            const nova = document.getElementById('perfil-senha-nova').value;
+            const confirmar = document.getElementById('perfil-senha-confirmar').value;
+            try {
+                if (!atual || nova.length < 8 || nova !== confirmar || atual === nova) throw new Error('Informe a senha atual e uma senha nova diferente, com pelo menos 8 caracteres. Repita a nova senha corretamente.');
+                salvandoSenhaPerfil = true; document.getElementById('perfil-alterar-senha').disabled = true;
+                ['perfil-senha-atual','perfil-senha-nova','perfil-senha-confirmar'].forEach(id => { document.getElementById(id).disabled = true; });
+                await reauthenticateWithCredential(usuarioAuth,EmailAuthProvider.credential(usuarioAuth.email,atual));
+                if (!aindaAtual()) return;
+                await updatePassword(usuarioAuth,nova);
+                if (aindaAtual()) mensagemPerfil('Senha alterada com sucesso. Use a nova senha no próximo acesso.',false,true);
+            } catch (err) { if (aindaAtual()) mensagemPerfil(traduzirErroSistema(err),true,true); }
+            finally {
+                if (aindaAtual()) limparSenhasPerfil();
+                salvandoSenhaPerfil = false; document.getElementById('perfil-alterar-senha').disabled = false;
+                ['perfil-senha-atual','perfil-senha-nova','perfil-senha-confirmar'].forEach(id => { document.getElementById(id).disabled = false; });
             }
         }
 
@@ -703,6 +918,9 @@
             if (msg.includes('longer than') || msg.includes('bytes')) return 'A imagem selecionada é muito pesada para o banco de dados. Limite máximo: 500 KB.';
             if (msg.includes('permission-denied')) return 'Permissão negada. Você não tem autorização para realizar esta operação.';
             if (msg.includes('auth/email-already-in-use')) return 'Este e-mail já possui conta de acesso. Edite o cadastro existente; cadastros antigos sem perfil vinculado precisam ser conferidos no Firebase Authentication.';
+            if (msg.includes('auth/requires-recent-login')) return 'Entre novamente para confirmar a alteração da senha.';
+            if (msg.includes('auth/wrong-password')) return 'A senha atual está incorreta.';
+            if (msg.includes('auth/too-many-requests')) return 'Muitas tentativas. Aguarde um pouco antes de tentar novamente.';
             if (msg.includes('auth/weak-password')) return 'A senha não atende à política do Firebase Authentication.';
             if (msg.includes('auth/invalid-credential')) return 'E-mail ou senha incorretos. Verifique suas credenciais.';
             return 'Erro ao processar a operação: ' + msg;
@@ -737,11 +955,7 @@
             const lista = Array.isArray(responsaveis) ? responsaveis : String(responsaveis).split(',').map(s => s.trim()).filter(Boolean);
             if (lista.length === 0) return '<span class="text-xs text-slate-400">Não atribuído</span>';
             
-            return `<div class="flex items-center gap-1.5 flex-wrap">` + lista.map(resp => {
-                const iniciais = gerarIniciais(resp);
-                const classeCor = obterCorResponsavel(resp);
-                return `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full font-bold text-[11px] shadow-sm border ${classeCor}" title="${esc(resp)}">${esc(iniciais)}</span>`;
-            }).join('') + `</div>`;
+            return `<div class="flex items-center gap-1.5 flex-wrap">` + lista.map(resp => avatarUsuario(typeof resp === 'string' ? {nome:resp} : resp)).join('') + `</div>`;
         }
 
         function renderizarBolinhaPrioridade(prio) {
@@ -821,12 +1035,13 @@
             const autor = item.editadoPor || item.criadoPor || 'Sistema';
             return {
                 dataHtml: `<span class="text-[11px] font-semibold text-slate-700">${modificado}</span>`,
-                autorHtml: `<span class="text-[10px] font-medium text-slate-500 block">${esc(autor)}</span>`
+                autorHtml: `<span class="text-[10px] font-medium text-slate-500 block">${identificacaoUsuario({nome:autor,uid:item.editadoPor ? item.editadoPorUid : item.criadoPorUid})}</span>`
             };
         }
 
         function fecharModal(id) {
             document.getElementById(id).classList.add('hidden');
+            if (id === 'modal-perfil') { perfilEmEdicao = null; limparSenhasPerfil(); document.getElementById('perfil-foto').value = ''; }
             if (id === 'modal-form-universal') document.getElementById('form-univ-campos').innerHTML = '';
         }
 
@@ -922,9 +1137,8 @@
                 }));
             });
             const admin = ehAdministrador();
-            const diretorio = currentUser.tipoUsuario === 'interno' && modulos.includes('demandas');
-            if (admin || diretorio) {
-                const ref = admin ? collection(db,'usuarios') : query(collection(db,'usuarios'), where('tipoUsuario','==','interno'), where('ativo','==',true));
+            if (admin) {
+                const ref = collection(db,'usuarios');
                 snapshotUnsubs.push(observarFirestore(ref, snap => {
                     dbData.usuarios = snap.docs.map(d => ({...d.data(), firestoreId: d.id, id: d.data().id || d.id}));
                     renderizarTudo();
@@ -945,6 +1159,12 @@
                 dbData.grupos = snap.docs.map(d => ({...d.data(), firestoreId:d.id, id:d.data().id || d.id}));
                 renderGrupos(); renderUsuarios();
             }));
+            if (modulos.length && !admin) {
+                const identidades = query(collection(db,'identidadesUsuarios'),where('tipoUsuario','==','interno'),where('ativo','==',true));
+                snapshotUnsubs.push(observarFirestore(identidades,snap => {
+                    identidadesUsuarios = snap.docs.map(d => ({...d.data(),uid:d.id})); renderizarTudo();
+                }));
+            }
             if (currentUser.uid) snapshotUnsubs.push(observarFirestore(doc(db,'usuarios',currentUser.uid), async snap => {
                 if (!snap.exists() || snap.data().ativo === false) { await bloquearSessao('Cadastro inativo ou não encontrado. Procure o administrador.'); return; }
                 const atualizado = {...snap.data(), uid:currentUser.uid, id:snap.id, email:currentUser.email};
@@ -957,9 +1177,17 @@
                 document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
                 renderizarTudo();
             }, () => { bloquearSessao('Não foi possível confirmar suas permissões. Entre novamente.'); }));
+            if (currentUser.uid) snapshotUnsubs.push(observarFirestore(doc(db,'usuarios',currentUser.uid,'privado','perfil'),snap => {
+                dadosPessoaisPerfil = snap.exists() ? snap.data() : {};
+                atualizarFormularioPerfil();
+            }, () => {
+                dadosPessoaisPerfil = null;
+                if (perfilEmEdicao) { mensagemPerfil('Não foi possível carregar seus dados pessoais. Verifique o acesso e entre novamente.',true); document.getElementById('perfil-salvar').disabled = true; }
+            }));
         }
 
         function renderizarTudo() {
+            atualizarIdentidadeSessao();
             renderUsuarios(); renderClientes(); renderBases(); renderDemandas(); renderEventos(); renderLocais(); renderFornecedores(); renderDashboardKPIs(); preencherSelectClientes(); atualizarVisibilidadeAbas(); preencherFiltrosUsuarios(); renderGrupos(); atualizarContadoresAbas();
             if (abaAtual === 'dashboard') renderCharts();
         }
@@ -1025,7 +1253,7 @@
             document.getElementById('count-usuarios').textContent = us.length;
             tbody.innerHTML = us.map(u => {
                 const audit = renderAuditInfo(u);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4 text-xs"><b>${nomeTipoUsuario(u)}</b><br>${u.ativo === false ? 'Inativo' : 'Ativo'}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(', ') : u.tags || '-')}</td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${identificacaoUsuario({...u,uid:uidCadastro(u)})}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4 text-xs"><b>${nomeTipoUsuario(u)}</b><br>${u.ativo === false ? 'Inativo' : 'Ativo'}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(', ') : u.tags || '-')}</td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button></td></tr>`;
             }).join('') || '<tr><td colspan="9" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
@@ -1161,7 +1389,7 @@
                 const audit = renderAuditInfo(d);
                 const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
                 const iconeStatus = renderizarIconeStatus(d.status);
-                const badgesResp = renderizarBadgesResponsaveis(nomesResponsaveis(d));
+                const badgesResp = renderizarBadgesResponsaveis(pessoasResponsaveis(d));
                 const corLinhaClara = obterClasseCorCard(d.corCard);
                 const dataVal = d.dataLimite || d.dataInicio || '';
                 const diaSemanaVal = d.diaSemana || '';
@@ -1317,7 +1545,7 @@
         });
 
         function criarPostItHtml(d) {
-            const badgesResp = renderizarBadgesResponsaveis(nomesResponsaveis(d));
+            const badgesResp = renderizarBadgesResponsaveis(pessoasResponsaveis(d));
             const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
             const corCard = obterClasseCorCard(d.corCard);
             const dataVal = d.dataLimite || d.dataInicio || '';
@@ -1400,7 +1628,7 @@
                     <div class="p-5 flex flex-col flex-1">
                         <div class="flex justify-between gap-2 items-center"><span class="${real ? 'bg-slate-200 text-slate-700' : 'bg-amber-100 text-amber-800'} text-[10px] font-bold px-2.5 py-1 rounded-full">${esc(e.tipoEvento || 'Capacitação')}</span><span class="text-[10px] font-bold ${real ? 'text-slate-600 bg-slate-200 px-2 py-0.5 rounded' : 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded'}">${real ? 'Realizado' : 'Futuro'}</span></div>
                         <h4 class="font-bold text-base mt-2 ${real ? 'text-slate-700' : 'text-slate-900'}">${esc(e.titulo)}</h4>
-                        <p class="text-xs ${real ? 'text-slate-600' : 'text-indigo-900'} font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> ${esc(e.palestrante || 'Equipe ATI')}</p>
+                        <p class="text-xs ${real ? 'text-slate-600' : 'text-indigo-900'} font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> ${identificacaoUsuario({nome:e.palestrante || 'Equipe ATI',uid:e.palestranteUid})}</p>
                         <p class="text-xs text-slate-500 mt-2 line-clamp-2">${esc(e.descricao || e.textoCard || '')}</p>
                         <div class="mt-3 text-xs space-y-1.5 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
                             <div><i class="fa-solid fa-calendar text-blue-800 mr-1.5"></i> ${formatarData(e.dataInicio)}</div>
@@ -1425,7 +1653,7 @@
             if (!tbody) return;
             const filtrados = dbData.locais.filter(l => !buscaLocaisVal || [l.nome, l.endereco, l.contato, l.contatoResponsavel].filter(Boolean).join(' ').toLowerCase().includes(buscaLocaisVal));
             document.getElementById('count-locais').textContent = filtrados.length;
-            tbody.innerHTML = filtrados.map(l => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="locais" data-id="${esc(l.firestoreId)}">Detalhes</button></td></tr>`).join('');
+            tbody.innerHTML = filtrados.map(l => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-purple-900">${esc(l.nome)}</td><td class="p-4 text-xs">${esc(l.capacidade || 0)} pessoas</td><td class="p-4 font-semibold">${esc(l.valorAluguel || '-')}</td><td class="p-4">${renderAuditInfo(l).dataHtml}</td><td class="p-4">${renderAuditInfo(l).autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="locais" data-id="${esc(l.firestoreId)}">Detalhes</button></td></tr>`).join('');
         }
 
         function renderFornecedores() {
@@ -1433,7 +1661,7 @@
             if (!tbody) return;
             const filtrados = dbData.fornecedores.filter(f => !buscaFornecedoresVal || [f.nome, f.nomeFantasia, f.razaoSocial, f.cnpj, f.produtoServicoPrincipal, f.servicoPrincipal].filter(Boolean).join(' ').toLowerCase().includes(buscaFornecedoresVal));
             document.getElementById('count-fornecedores').textContent = filtrados.length;
-            tbody.innerHTML = filtrados.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.firestoreId)}">Detalhes</button></td></tr>`).join('');
+            tbody.innerHTML = filtrados.map(f => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-emerald-900">${esc(f.nome)}</td><td class="p-4 text-xs">${esc(f.cnpj || '-')}</td><td class="p-4 text-xs">${esc(f.produtoServicoPrincipal || '-')}</td><td class="p-4">${renderAuditInfo(f).dataHtml}</td><td class="p-4">${renderAuditInfo(f).autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="fornecedores" data-id="${esc(f.firestoreId)}">Detalhes</button></td></tr>`).join('');
         }
 
         function renderGrupos() {
@@ -1559,7 +1787,7 @@
             c.innerHTML = Object.entries(item).filter(([k]) => k !== 'id' && k !== 'firestoreId').map(([k, v]) => {
                 const classe = 'w-full p-2 border rounded-lg text-xs bg-white';
                 const label = `<label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label>`;
-                if (['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid'].includes(k)) {
+                if (['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid', 'criadoPorUid', 'editadoPorUid', 'perfilAtualizadoEm'].includes(k)) {
                     return `<div>${label}<input type="text" name="${esc(k)}" value="${esc(v)}" readonly class="${classe}"></div>`;
                 }
                 if (typeof v === 'boolean') {
@@ -1727,7 +1955,7 @@
                     <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border text-xs">
                         <div><b>Solicitante:</b> ${esc(item.solicitante || '-')}</div>
                         <div><b>Órgão / Local:</b> ${esc(item.orgao || '-')}</div>
-                        <div class="col-span-2"><b>Responsável GRGD:</b> ${renderizarBadgesResponsaveis(nomesResponsaveis(item))}</div>
+                        <div class="col-span-2"><b>Responsável GRGD:</b> ${renderizarBadgesResponsaveis(pessoasResponsaveis(item))}</div>
                         <div><b>Status:</b> <span class="uppercase">${esc(item.status || '-')}</span></div>
                         <div><b>Prioridade:</b> <span class="uppercase">${esc(item.prioridade || '-')}</span></div>
                         <div class="col-span-2"><b>Título:</b> ${esc(item.titulo || '-')}</div>
@@ -1735,9 +1963,11 @@
                     </div>
                 `;
             } else {
-                document.getElementById('detalhe-conteudo').innerHTML = Object.entries(item).filter(([k])=>k!=='firestoreId').map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
+                document.getElementById('detalhe-conteudo').innerHTML = (colecao === 'usuarios' ? `<div class="flex items-center gap-3">${avatarUsuario({...item,uid:uidCadastro(item)},'lg')}<b>${esc(item.nome || item.email)}</b></div>` : '') + Object.entries(item).filter(([k])=>k!=='firestoreId' && k!=='fotoPerfil').map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${['criadoPor','editadoPor'].includes(k) ? identificacaoUsuario({nome:v,uid:item[k+'Uid']}) : Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
             }
 
+            if (colecao === 'demandas') document.getElementById('detalhe-conteudo').innerHTML += historicoDemandaHtml(item);
+            if (colecao === 'eventos') document.getElementById('detalhe-conteudo').innerHTML += inscricoesEventoHtml(item);
             document.getElementById('btn-excluir-registro').textContent = colecao === 'usuarios' ? 'Inativar usuário' : 'Excluir registro';
             document.getElementById('btn-salvar-edicao').textContent = colecao === 'usuarios' ? 'Salvar usuário' : 'Salvar na Nuvem (Firestore)';
             document.getElementById('detalhe-area-admin').classList.toggle('hidden', !ehAdministrador());
@@ -1756,8 +1986,10 @@
             const obj = {
                 atualizadoEm: agora,
                 editadoPor: autorAtual,
+                editadoPorUid: currentUser.uid,
                 criadoEm: itemAntigo.criadoEm || agora,
-                criadoPor: itemAntigo.criadoPor || autorAtual
+                criadoPor: itemAntigo.criadoPor || autorAtual,
+                ...(itemAntigo.criadoPorUid ? {criadoPorUid:itemAntigo.criadoPorUid} : !itemAntigo.criadoPor ? {criadoPorUid:currentUser.uid} : {})
             };
 
             try {
@@ -1765,7 +1997,7 @@
                     Object.assign(obj, lerDadosUsuario(itemAntigo));
                     obj.uid = String(firestoreId);
                 } else form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el => {
-                    if (!el.name || el.name === 'responsavelGrgdCheckbox' || ['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid'].includes(el.name)) return;
+                    if (!el.name || el.name === 'responsavelGrgdCheckbox' || ['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid', 'criadoPorUid', 'editadoPorUid', 'perfilAtualizadoEm'].includes(el.name)) return;
                     const tipo = el.dataset.fieldType;
                     if (tipo === 'boolean') {
                         if (!['true', 'false'].includes(el.value)) throw new Error('Selecione Sim ou Não para ' + el.name + '.');
@@ -1786,7 +2018,8 @@
                     const respCheckboxes = form.querySelectorAll('input[name="responsavelGrgdCheckbox"]:checked');
                     Object.assign(obj, lerResponsaveis(respCheckboxes, itemAntigo));
                 }
-                await setDoc(doc(db, colecao, String(firestoreId)), obj, { merge: true });
+                if (colecao === 'usuarios') await gravarUsuarioComIdentidade(String(firestoreId),obj,itemAntigo);
+                else await setDoc(doc(db, colecao, String(firestoreId)), obj, { merge: true });
                 alert('Alterações salvas na nuvem com sucesso!');
                 fecharModal('modal-detalhes');
             } catch(err) {
@@ -1820,9 +2053,9 @@
             if(!demandaObj) return;
             const agora = new Date().toISOString();
             const autor = currentUser?.nome || currentUser?.email || 'Sistema';
-            const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto }];
+            const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, autorUid:currentUser?.uid || '', texto }];
             try {
-                await setDoc(doc(db, 'demandas', String(demandaId)), { historicoAcoes, atualizadoEm: agora, editadoPor: autor }, { merge: true });
+                await setDoc(doc(db, 'demandas', String(demandaId)), { historicoAcoes, atualizadoEm: agora, editadoPorUid: currentUser?.uid || '', editadoPor: autor }, { merge: true });
                 document.getElementById('obs-novo-texto').value = '';
                 alert('Andamento registrado com sucesso!');
             } catch(err) { alert(traduzirErroSistema(err)); }
@@ -1947,8 +2180,8 @@
                         gestorModalidadeSelecionada: 'Órgão',
                         criadoEm: agora,
                         atualizadoEm: agora,
-                        criadoPor: autor,
-                        editadoPor: autor
+                        criadoPor: autor, criadoPorUid: currentUser?.uid || '',
+                        editadoPorUid: currentUser?.uid || '', editadoPor: autor
                     });
                 } else if (tipo === 'demanda') {
                     const dataNova = val('uc-demanda-data');
@@ -1970,13 +2203,13 @@
                         status: 'Em Andamento',
                         criadoEm: agora,
                         atualizadoEm: agora,
-                        criadoPor: autor,
-                        editadoPor: autor
+                        criadoPor: autor, criadoPorUid: currentUser?.uid || '',
+                        editadoPorUid: currentUser?.uid || '', editadoPor: autor
                     });
                 } else {
                     const colecoes = { evento: 'eventos', local: 'locais', fornecedor: 'fornecedores', base: 'bases' };
                     if (!Object.hasOwn(colecoes, tipo)) throw new Error('Tipo de cadastro não suportado.');
-                    await addDoc(collection(db, colecoes[tipo]), { id: 'OBJ-' + Date.now(), nome: val('uc-1'), descricao: val('uc-2'), criadoEm: agora, atualizadoEm: agora, criadoPor: autor, editadoPor: autor });
+                    await addDoc(collection(db, colecoes[tipo]), { id: 'OBJ-' + Date.now(), nome: val('uc-1'), descricao: val('uc-2'), criadoEm: agora, atualizadoEm: agora, criadoPor: autor, criadoPorUid: currentUser?.uid || '', editadoPorUid: currentUser?.uid || '', editadoPor: autor });
                 }
                 alert('Salvo na nuvem com sucesso!');
                 fecharModal('modal-form-universal');
@@ -2029,8 +2262,8 @@
                         gestorModalidadeSelecionada: 'Órgão',
                         criadoEm: agora,
                         atualizadoEm: agora,
-                        criadoPor: autor,
-                        editadoPor: autor
+                        criadoPor: autor, criadoPorUid: currentUser?.uid || '',
+                        editadoPorUid: currentUser?.uid || '', editadoPor: autor
                     };
                     try {
                         await addDoc(collection(db, 'orgaos'), obj);
@@ -2051,7 +2284,7 @@
             if (!confirm(colecao === 'usuarios' ? 'Inativar este usuário? O histórico das demandas será preservado.' : 'Deseja realmente excluir este registro da nuvem?')) return;
             try {
                 if (colecao === 'usuarios') {
-                    await setDoc(doc(db, colecao, String(firestoreId)), {ativo: false, atualizadoEm: new Date().toISOString(), editadoPor: currentUser.nome || currentUser.email}, {merge: true});
+                    await gravarUsuarioComIdentidade(String(firestoreId), {ativo: false, atualizadoEm: new Date().toISOString(), editadoPor: currentUser.nome || currentUser.email, editadoPorUid:currentUser.uid}, dbData.usuarios.find(u => uidCadastro(u) === String(firestoreId)) || {});
                 } else await deleteDoc(doc(db, colecao, String(firestoreId)));
                 alert(colecao === 'usuarios' ? 'Usuário inativado. Histórico preservado.' : 'Registro excluído!');
                 fecharModal('modal-detalhes');
@@ -2060,6 +2293,12 @@
 
         function configurarInterface() {
             const byId = id => document.getElementById(id);
+            byId('btn-meu-perfil')?.addEventListener('click',abrirMeuPerfil);
+            byId('form-meu-perfil')?.addEventListener('submit',salvarMeuPerfil);
+            byId('form-minha-senha')?.addEventListener('submit',alterarMinhaSenha);
+            byId('perfil-nome')?.addEventListener('input',atualizarFormularioPerfil);
+            byId('perfil-foto')?.addEventListener('change',selecionarFotoPerfil);
+            byId('perfil-remover-foto')?.addEventListener('click',removerFotoPerfil);
             byId('login-form')?.addEventListener('submit', fazerLoginLocal);
             byId('btn-executar-logout')?.addEventListener('click', async () => { await signOut(auth); });
             byId('form-univ-body')?.addEventListener('submit', salvarCadastroUniversal);
@@ -2109,6 +2348,8 @@
         }
 
         configurarInterface();
+        document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && perfilEmEdicao) { fecharModal('modal-perfil'); document.getElementById('btn-meu-perfil').focus?.(); } });
+        document.addEventListener('error', ev => { if (ev.target.matches?.('img[data-avatar]')) ev.target.remove(); },true);
 
         document.addEventListener('change', async ev => {
             if (['usuario-tipo','usuario-perfil'].includes(ev.target.id)) atualizarControlesUsuario();
@@ -2124,14 +2365,14 @@
                     const agora = new Date().toISOString();
                     const autor = currentUser?.nome || currentUser?.email || 'Sistema';
                     const { diaSemana } = calcularInfoSemana(novaData);
-                    const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Data alterada para ${novaData} (${diaSemana || 'fim de semana/outro'})` }];
+                    const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, autorUid:currentUser?.uid || '', texto: `Data alterada para ${novaData} (${diaSemana || 'fim de semana/outro'})` }];
                     
                     await setDoc(doc(db, 'demandas', String(firestoreId)), { 
                         dataLimite: novaData, 
                         diaSemana: diaSemana || '',
                         historicoAcoes, 
                         atualizadoEm: agora, 
-                        editadoPor: autor 
+                        editadoPorUid: currentUser?.uid || '', editadoPor: autor
                     }, { merge: true });
 
                     demandaObj.dataLimite = novaData;
@@ -2152,13 +2393,13 @@
                 try {
                     const agora = new Date().toISOString();
                     const autor = currentUser?.nome || currentUser?.email || 'Sistema';
-                    const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, texto: `Movido para o dia da semana: ${novoDia || 'Nenhum'}` }];
+                    const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, autorUid:currentUser?.uid || '', texto: `Movido para o dia da semana: ${novoDia || 'Nenhum'}` }];
                     
                     await setDoc(doc(db, 'demandas', String(firestoreId)), { 
                         diaSemana: novoDia,
                         historicoAcoes, 
                         atualizadoEm: agora, 
-                        editadoPor: autor 
+                        editadoPorUid: currentUser?.uid || '', editadoPor: autor
                     }, { merge: true });
 
                     demandaObj.diaSemana = novoDia;
@@ -2181,7 +2422,7 @@
                     await setDoc(doc(db, 'orgaos', String(firestoreId)), { 
                         gestorModalidadeSelecionada: novaModalidade, 
                         atualizadoEm: agora, 
-                        editadoPor: autor 
+                        editadoPorUid: currentUser?.uid || '', editadoPor: autor
                     }, { merge: true });
 
                     orgaoObj.gestorModalidadeSelecionada = novaModalidade;
@@ -2253,6 +2494,9 @@
 
         function limparDadosSessao() {
             currentUser = null;
+            dadosPessoaisPerfil = null; identidadesUsuarios = []; perfilEmEdicao = null; limparSenhasPerfil();
+            ['perfil-nome','perfil-email','perfil-telefone','perfil-endereco','perfil-foto'].forEach(id => { document.getElementById(id).value = ''; });
+            document.getElementById('perfil-foto-preview').innerHTML = '';
             dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
             eventosCacheMap = {};
             buscaDemandasVal = buscaEventosVal = buscaLocaisVal = buscaClientesVal = buscaFornecedoresVal = buscaBasesVal = buscaUsuariosVal = '';
@@ -2262,7 +2506,7 @@
                 if (el) el.value = '';
             });
             document.getElementById('main-content')?.classList.add('hidden');
-            ['modal-detalhes', 'modal-observacoes', 'modal-form-universal'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+            ['modal-perfil','modal-detalhes', 'modal-observacoes', 'modal-form-universal'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
             ['detalhe-conteudo', 'edit-campos-dinamicos', 'form-univ-campos', 'obs-historico-lista', 'obs-demanda-titulo'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = '';
@@ -2315,4 +2559,5 @@
     </script>
 </body>
 </html>
+
 
