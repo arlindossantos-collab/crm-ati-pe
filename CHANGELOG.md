@@ -2,6 +2,42 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.6.0 — Locais e planejamento de espaços — proposta
+
+**Resumo para a chefia:** moderniza a aba Locais com indicadores, comparação de espaços, filtros, painel de informações e consulta de conflitos na agenda cadastrada.
+
+- Base independente: main@85e439612962626ffa3783879dab18a8ea383e47 (v0.4.0). O PR #8/v0.5.0 continua separado e pendente do Firebase; não foi incorporado nem publicado.
+- v0.6.0 é proposta para esta funcionalidade. Sequência da release e versão anterior efetiva serão conferidas quando a publicação for autorizada. Próxima versão sugerida: v0.6.1 para correções ou v0.7.0 para funcionalidades.
+- A aplicação continua em um único HTML. Nenhum dado existente é migrado ou alterado automaticamente.
+
+| Antes | Depois |
+| --- | --- |
+| Lista simples de locais. | Seis cards: total, capacidade informada, eventos vinculados, gratuitos, pagos e custo previsto informado por evento. |
+| Busca básica e nenhum filtro específico. | Busca sem distinção de acentos em nome, endereço e contatos; filtros combinados de tipo, capacidade mínima e recurso. |
+| Tabela com seis colunas. | Mantém as colunas originais e acrescenta eventos vinculados e recursos. |
+| Detalhes apenas no modal genérico. | Painel abaixo da tabela com endereço, capacidade/área, responsável, recursos e histórico; edição administrativa permanece acessível. |
+| Sem consulta de agenda. | Consulta por local, data e horários opcionais; conflitos, agenda parcial e lacunas exibidos explicitamente. |
+| Novos locais/eventos só tinham nome e descrição. | Formulários com capacidade, contatos, recursos, tipo/tarifa e vínculo localId, período, situação e custo total da locação por evento. |
+
+### Regras de cálculo e limites
+
+- Capacidade soma apenas números válidos; campos ausentes não são inventados. Gratuito e pago usam o tipo informado ou valor numérico legado; ausência de valor não significa gratuito.
+- Eventos vinculam pelo ID; nome legado só é associado em consulta quando corresponde a um único local (ignorando acentos/caixa/espaços). Não há gravação automática desse vínculo. ID órfão e nome duplicado exigem revisão.
+- Eventos vinculados inclui todos os períodos e cancelados. Custo previsto soma somente custos totais explicitamente informados por evento vinculado, atual/futuro e não cancelado/realizado. Tarifa do local não é multiplicada por diárias ou horas. Ausências e totais parciais são sinalizados.
+- Consulta não é reserva. Sem horários completos, o período inteiro pode estar comprometido. Eventos cancelados não geram conflito. Agendas parciais, erros de carregamento, locais/datas ausentes e vínculos ambíguos impedem afirmar disponibilidade completa.
+- Datas com fuso são tratadas no fuso de Pernambuco. Eventos de vários dias são tratados conservadoramente.
+- Datas passadas não comprovam realização: o histórico diferencia realização registrada de data encerrada a confirmar.
+- Dados de eventos respeitam o acesso existente; somente administrador recebe a agenda completa. Sem módulo Eventos, indicadores de eventos/custo ficam indisponíveis.
+- Não muda firestore.rules. Pode ser revisado/testado sem a atualização do Firebase pendente no PR #8. Concessão de novos acessos não faz parte desta entrega.
+
+### Validação
+
+- 70 cenários da aplicação passaram inicialmente em adaptador V8 com dados simulados.
+- Execução oficial Node/emuladores e navegador Chromium será registrada no PR. Não confundir simulação com homologação institucional.
+- Rotina GitHub Actions inclui testes da aplicação, regras, autenticação e navegador isolado com Firebase interceptado e capturas em desktop/celular.
+- Pendências: conferir os resultados completos e revisar os cadastros reais para associar locais e preencher períodos, recursos e custos. Sem publicação nesta etapa.
+
+
 **Release 01 — v0.4.0:** notas da entrega autorizada para publicação em 20/10/2026. Na conferência anterior à publicação não havia tags nem releases formais. A situação das publicações formais pode ser consultada na [página de releases](https://github.com/arlindossantos-collab/crm-ati-pe/releases); este arquivo não cria uma tag ou release por si só.
 
 <a id="v040"></a>
