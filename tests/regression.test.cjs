@@ -26,7 +26,7 @@ function app() {
         alert() {}, confirm() { return true; },
         initializeApp(config, name = '[DEFAULT]') { return {name}; }, getApps() { return []; }, getFirestore() { return {}; }, getAuth(app) { return app; },
         async createUserWithEmailAndPassword(auth, email, password) { return {user:{uid:'novo-uid'}}; }, async deleteUser() {},
-        inMemoryPersistence: {}, setPersistence() { return Promise.resolve(); },
+        browserLocalPersistence: {tipo:'local'}, inMemoryPersistence: {tipo:'memory'}, setPersistence() { return Promise.resolve(); },
         signInWithEmailAndPassword() { return Promise.resolve(); }, signOut() { return Promise.resolve(); },
         collection(db, name) { return name; }, doc(db, collection, id, ...segments) { return { collection, id, path:[collection,id,...segments].join('/') }; },
         writeBatch() { const pending=[]; return {set(ref,data,options){pending.push({ref,data,options});},async commit(){ for(const w of pending)await context.setDoc(w.ref,w.data,w.options); }}; },
@@ -449,4 +449,35 @@ test('logout limpa foto em edição, dados pessoais e senhas', async () => {
 test('locais e fornecedores mostram autoria com foto nas colunas existentes', () => {
     const a=app();a.run("identidadesUsuarios=[{uid:'u',nome:'Usuário',fotoPerfil:'data:image/jpeg;base64,QQ=='}];dbData.locais=[{nome:'Local',editadoPor:'Usuário',editadoPorUid:'u'}];dbData.fornecedores=[{nome:'Fornecedor',editadoPor:'Usuário',editadoPorUid:'u'}];renderLocais();renderFornecedores()");
     for(const id of ['tabela-locais','tabela-fornecedores'])assert.ok(a.element(id).innerHTML.includes('data-avatar'));
+});
+
+test('sessão principal persiste e cadastro auxiliar continua em memória', () => {
+    const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+    assert.ok(html.includes('setPersistence(auth, browserLocalPersistence)'));
+    assert.ok(html.includes('setPersistence(authCadastro, inMemoryPersistence)'));
+});
+test('usuário excluído sai da lista e do contador, preservando os dados carregados', () => {
+    const a=app();
+    a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno'};dbData.usuarios=[{firestoreId:'a',nome:'Ana'},{firestoreId:'b',nome:'Bruno',ativo:false,excluido:true}];renderizarTudo()");
+    assert.equal(a.element('count-usuarios').textContent,1);
+    assert.equal(a.element('cnt-tab-usuarios').textContent,1);
+    assert.doesNotMatch(a.element('tabela-usuarios').innerHTML,/Bruno/);
+    assert.equal(a.run('dbData.usuarios.length'),2);
+});
+test('exclusão lógica bloqueia acesso e mantém identidade e histórico', async () => {
+    const a=app();a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='outro';
+    a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno',nome:'Admin'};dbData.usuarios=[{uid:'outro',nome:'Outro',tipoUsuario:'interno'}]");
+    await a.run('excluirRegistroUniversal()');
+    assert.equal(a.writes[0].data.ativo,false);assert.equal(a.writes[0].data.excluido,true);
+    assert.equal(a.writes[1].data.ativo,false);assert.equal(a.writes[1].data.nome,'Outro');
+});
+test('administrador não exclui a própria conta', async () => {
+    const a=app();a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='admin';
+    a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno'}");
+    await a.run('excluirRegistroUniversal()');assert.equal(a.writes.length,0);
+});
+test('consulta não exclui usuários', async () => {
+    const a=app();a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='outro';
+    a.run("currentUser={uid:'comum',perfil:'comum',tipoUsuario:'interno'}");
+    await a.run('excluirRegistroUniversal()');assert.equal(a.writes.length,0);
 });
