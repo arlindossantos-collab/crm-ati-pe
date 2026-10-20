@@ -85,6 +85,7 @@
 
     <!-- Main Container -->
     <main id="main-content" class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full hidden">
+        <p id="aviso-sem-modulos" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm">Seu cadastro está ativo, mas ainda não há módulos liberados. Aguarde a definição de acesso pelo administrador.</p>
         <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
             <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Sincronizado em Tempo Real com Firestore Cloud</span></span>
             <span id="badge-perfil-acesso" class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold uppercase"></span>
@@ -350,6 +351,7 @@
                 <div class="flex items-center gap-3 flex-wrap">
                     <h3 class="text-base font-bold text-slate-800">Usuários (<span id="count-usuarios">0</span>)</h3>
                     <input type="text" id="busca-usuarios" placeholder="Buscar nome ou e-mail..." class="p-2 border rounded-lg text-xs bg-white w-48 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    <select id="filtro-tipo-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium" aria-label="Filtrar tipo de usuário"><option value="">Todos os tipos</option><option value="interno">Internos</option><option value="externo">Externos</option><option value="legado">A definir</option></select>
                     <select id="filtro-orgao-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
                         <option value="">Filtrar por Cliente / Secretaria</option>
                     </select>
@@ -364,7 +366,7 @@
                     <button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail Institucional</th><th class="p-4">Cliente</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail de acesso</th><th class="p-4">Tipo / Situação</th><th class="p-4">Cliente</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
                 <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários (Acesso Restrito a Eventos)</h4><p class="text-xs text-slate-500">Crie grupos para controlar quais usuários enxergam os eventos restritos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
                 <div id="lista-grupos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -397,7 +399,7 @@
             <div id="detalhe-conteudo" class="space-y-4 text-sm mb-4"></div>
             <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl">
                 <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Gerenciamento Cloud</p><button type="button" id="btn-excluir-registro" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer">Excluir Registro</button></div>
-                <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-72 overflow-y-auto space-y-2"></div><div class="flex justify-end gap-2 pt-3 border-t"><button type="submit" class="px-4 py-2 bg-blue-900 text-white font-bold rounded cursor-pointer">Salvar na Nuvem (Firestore)</button></div></form>
+                <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-72 overflow-y-auto space-y-2"></div><div class="flex justify-end gap-2 pt-3 border-t"><button id="btn-salvar-edicao" type="submit" class="px-4 py-2 bg-blue-900 text-white font-bold rounded cursor-pointer">Salvar na Nuvem (Firestore)</button></div></form>
             </div>
         </div>
     </div>
@@ -415,7 +417,7 @@
                 <input type="hidden" id="obs-demanda-id">
                 <label class="block text-xs font-bold text-slate-700">Registrar novo status ou andamento:</label>
                 <textarea id="obs-novo-texto" rows="3" placeholder="Digite o registro do status ou andamento..." class="w-full p-2.5 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-600 focus:outline-none"></textarea>
-                <button type="button" id="btn-salvar-nova-observacao" class="w-full py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition cursor-pointer">Salvar no Histórico Ilimitado</button>
+                <button type="button" id="btn-salvar-nova-observacao" class="btn-admin-only w-full py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition cursor-pointer">Salvar no Histórico Ilimitado</button>
             </div>
         </div>
     </div>
@@ -423,15 +425,15 @@
     <div id="modal-form-universal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="form-univ-titulo" class="text-base font-bold">Novo Cadastro</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600" data-target="modal-form-universal"><i class="fa-solid fa-xmark text-lg"></i></button></div>
-            <form id="form-univ-body" class="space-y-3 text-sm"><input type="hidden" id="form-univ-tipo"><div id="form-univ-campos"></div><button type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold cursor-pointer">Salvar na Nuvem (Firestore)</button></form>
+            <form id="form-univ-body" class="space-y-3 text-sm"><input type="hidden" id="form-univ-tipo"><div id="form-univ-campos"></div><button id="btn-salvar-cadastro" type="submit" class="w-full mt-5 py-2.5 bg-blue-900 text-white rounded-lg text-sm font-semibold cursor-pointer">Salvar na Nuvem (Firestore)</button></form>
         </div>
     </div>
 
     <!-- Script Principal v0.3.4 -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
         console.info('PRGD v0.3.4: Homologação - Banner Azul Corporativo e Fachada Dinámica');
@@ -458,6 +460,7 @@
         let abaAtual = 'dashboard';
         let filtroEventoAtual = 'futuros';
         let filtroTagAtual = '';
+        let filtroTipoUsuarioAtual = '';
         let filtroOrgaoUsuarioAtual = '';
         let filtroGestorModalidadeAtual = '';
         let filtroSituacaoClienteAtual = '';
@@ -487,18 +490,158 @@
             { id: 'bases', nome: 'Bases' }
         ];
 
-        const RESPONSAVEIS_GRGD_DISPONIVEIS = [
-            'Arlindo Santos',
-            'Richard Lima',
-            'Eronita Leidjen',
-            'Tino Perazzo',
-            'João Inácio',
-            'Lívia Kelly',
-            'Rebeca Medeiros',
-            'Lorena Gouveia',
-            'Clarissa Borba',
-            'Antônio'
-        ];
+        // Tipo de usuário e perfil são independentes. Cadastros antigos são classificados pelo administrador.
+        function ehAdministrador(usuario = currentUser) {
+            return !!usuario && usuario.ativo !== false && usuario.tipoUsuario !== 'externo' && usuario.perfil === 'admin';
+        }
+
+        function modulosDoUsuario(usuario = currentUser) {
+            if (!usuario || usuario.ativo === false) return [];
+            if (ehAdministrador(usuario)) return MÓDULOS_SISTEMA.map(m => m.id);
+            const legados = usuario.tipoUsuario ? [] : ['dashboard', 'demandas', 'eventos'];
+            const modulos = Array.isArray(usuario.modulosPermitidos) ? usuario.modulosPermitidos : legados;
+            return modulos.filter(id => id !== 'usuarios' && MÓDULOS_SISTEMA.some(m => m.id === id)
+                && (usuario.tipoUsuario !== 'externo' || id === 'eventos'));
+        }
+
+        function nomeTipoUsuario(usuario) {
+            return {interno: 'Interno', externo: 'Externo'}[usuario.tipoUsuario] || 'A definir';
+        }
+
+        function uidCadastro(usuario) { return String(usuario.firestoreId || usuario.uid || ''); }
+        function internosAtivos() {
+            return dbData.usuarios.filter(u => u.tipoUsuario === 'interno' && u.ativo === true && uidCadastro(u))
+                .sort((a,b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR'));
+        }
+        function nomesLegados(demanda = {}) {
+            if (Array.isArray(demanda.responsaveisGrgdLegados)) return demanda.responsaveisGrgdLegados;
+            if (Array.isArray(demanda.responsaveisGrgdIds)) return [];
+            return Array.isArray(demanda.responsavelGrgd) ? demanda.responsavelGrgd
+                : String(demanda.responsavelGrgd || '').split(',').map(n => n.trim()).filter(Boolean);
+        }
+        function dadosResponsavel(uid, demanda = {}) {
+            return dbData.usuarios.find(u => uidCadastro(u) === uid)
+                || (demanda.responsaveisGrgdSnapshot || []).find(u => u.uid === uid) || {nome: 'Cadastro indisponível'};
+        }
+        function nomesResponsaveis(demanda = {}) {
+            return [...(demanda.responsaveisGrgdIds || []).map(uid => {
+                const u = dadosResponsavel(uid, demanda); return u.nome || u.email || 'Sem nome';
+            }), ...nomesLegados(demanda)];
+        }
+        function camposResponsaveis(nomeCampo, demanda = {}) {
+            const ids = demanda.responsaveisGrgdIds || [];
+            const ativos = internosAtivos();
+            const anteriores = ids.filter(uid => !ativos.some(u => uidCadastro(u) === uid));
+            const checkbox = (valor, texto, marcado, legado = false) => `<label class="flex items-start gap-2 text-xs cursor-pointer"><input type="checkbox" name="${esc(nomeCampo)}" value="${esc(valor)}" data-legado="${legado}" ${marcado ? 'checked' : ''} class="rounded text-blue-900"><span>${esc(texto)}</span></label>`;
+            return ativos.map(u => checkbox(uidCadastro(u), `${u.nome || u.email} (${u.email || uidCadastro(u)})`, ids.includes(uidCadastro(u)))).join('')
+                + anteriores.map(uid => checkbox(uid, `${dadosResponsavel(uid, demanda).nome || uid} — vínculo anterior`, true)).join('')
+                + nomesLegados(demanda).map(nome => checkbox(nome, `${nome} — nome antigo, sem vínculo`, true, true)).join('')
+                + (!ativos.length ? '<p class="col-span-full text-xs text-slate-500">Nenhum usuário interno ativo. Cadastre ou classifique os usuários na aba Usuários.</p>' : '');
+        }
+        function lerResponsaveis(controles, anterior = {}) {
+            const ids = [], legados = [], snapshot = [];
+            for (const campo of controles) {
+                if (campo.dataset.legado === 'true') {
+                    if (!nomesLegados(anterior).includes(campo.value)) throw new Error('Nome antigo inválido. Reabra a demanda.');
+                    legados.push(campo.value); continue;
+                }
+                const uid = campo.value;
+                const usuario = internosAtivos().find(u => uidCadastro(u) === uid);
+                if (!usuario && !(anterior.responsaveisGrgdIds || []).includes(uid)) throw new Error('Selecione somente usuários internos ativos. Reabra a demanda para atualizar a lista.');
+                if (ids.includes(uid)) continue;
+                ids.push(uid);
+                const pessoa = usuario || dadosResponsavel(uid, anterior);
+                snapshot.push({uid, nome: pessoa.nome || pessoa.email || 'Sem nome', email: pessoa.email || ''});
+            }
+            return {responsaveisGrgdIds: ids, responsaveisGrgdSnapshot: snapshot,
+                responsaveisGrgdLegados: [...new Set(legados)], responsavelGrgd: [...snapshot.map(u => u.nome), ...new Set(legados)]};
+        }
+
+        function camposUsuario(usuario = {}, novo = false) {
+            const cls = 'w-full p-2 border rounded-lg text-xs bg-white';
+            const modulos = novo ? [] : modulosDoUsuario(usuario);
+            const lista = chave => Array.isArray(usuario[chave]) ? usuario[chave].join(', ') : (usuario[chave] || '');
+            return `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs max-h-[65vh] overflow-y-auto p-1">
+                <div><label for="usuario-nome" class="block font-bold mb-1">Nome completo</label><input id="usuario-nome" value="${esc(usuario.nome || '')}" required maxlength="150" class="${cls}"></div>
+                <div><label for="usuario-email" class="block font-bold mb-1">E-mail de acesso</label><input id="usuario-email" type="email" value="${esc(usuario.email || '')}" required ${!novo && usuario.email ? 'readonly' : ''} class="${cls}">${!novo ? '<p class="mt-1 text-slate-500">Alterações no e-mail de acesso exigem ajuste no Firebase Authentication.</p>' : ''}</div>
+                <div><label for="usuario-tipo" class="block font-bold mb-1">Tipo de usuário</label><select id="usuario-tipo" required class="${cls}"><option value="">Selecione</option><option value="interno" ${usuario.tipoUsuario === 'interno' ? 'selected' : ''}>Interno</option><option value="externo" ${usuario.tipoUsuario === 'externo' ? 'selected' : ''}>Externo</option></select></div>
+                <div><label for="usuario-ativo" class="block font-bold mb-1">Situação</label><select id="usuario-ativo" class="${cls}"><option value="true" ${usuario.ativo !== false ? 'selected' : ''}>Ativo</option><option value="false" ${usuario.ativo === false ? 'selected' : ''}>Inativo</option></select></div>
+                <div><label for="usuario-perfil" class="block font-bold mb-1">Perfil do sistema</label><select id="usuario-perfil" class="${cls}"><option value="comum">Consulta</option><option value="admin" ${ehAdministrador(usuario) ? 'selected' : ''}>Administrador</option></select></div>
+                <div><label for="usuario-orgao" class="block font-bold mb-1">Cliente / Secretaria</label><input id="usuario-orgao" value="${esc(usuario.orgao || '')}" class="${cls}"></div>
+                <div><label for="usuario-tags" class="block font-bold mb-1">Tags / Categorias (separe por vírgula)</label><input id="usuario-tags" value="${esc(lista('tags'))}" class="${cls}"></div>
+                <div><label for="usuario-grupos" class="block font-bold mb-1">Grupos de eventos</label><select id="usuario-grupos" multiple class="${cls}" aria-describedby="usuario-grupos-ajuda">${[...new Map([...dbData.grupos.map(g => [String(g.firestoreId || g.id), g.nome || g.id]), ...(Array.isArray(usuario.grupos) ? usuario.grupos : []).map(id => [id, dbData.grupos.find(g => String(g.firestoreId || g.id) === id)?.nome || id])]).entries()].map(([id,nome]) => `<option value="${esc(id)}" ${(usuario.grupos || []).includes(id) ? 'selected' : ''}>${esc(nome)}</option>`).join('')}</select><p id="usuario-grupos-ajuda" class="text-slate-500 mt-1">Use Ctrl ou Command para selecionar vários.</p></div>
+                <fieldset class="md:col-span-2 border rounded-lg p-3"><legend class="font-bold px-1">Módulos permitidos</legend><p id="usuario-permissoes-ajuda" class="text-slate-500 mb-2"></p><div class="grid grid-cols-2 gap-2">${MÓDULOS_SISTEMA.filter(m => m.id !== 'usuarios').map(m => `<label class="flex items-center gap-2"><input type="checkbox" name="usuario-modulo" value="${m.id}" ${modulos.includes(m.id) ? 'checked' : ''}>${m.nome}</label>`).join('')}</div></fieldset>
+                ${novo ? `<div class="md:col-span-2"><label for="usuario-senha" class="block font-bold mb-1">Senha inicial de acesso (mínimo 8 caracteres)</label><input id="usuario-senha" type="password" autocomplete="new-password" minlength="8" required class="${cls}"><p class="text-slate-500 mt-1">A senha é enviada apenas ao Firebase Authentication. Não é gravada no cadastro.</p></div>` : `<p class="md:col-span-2 text-slate-500">Identificador do cadastro: ${esc(uidCadastro(usuario))}. A inativação bloqueia o acesso e preserva os vínculos anteriores.</p>`}
+            </div>`;
+        }
+        function atualizarControlesUsuario() {
+            const tipo = document.getElementById('usuario-tipo');
+            const perfil = document.getElementById('usuario-perfil');
+            if (!tipo || !perfil) return;
+            const externo = tipo.value === 'externo';
+            if (externo) perfil.value = 'comum';
+            perfil.disabled = externo;
+            const admin = !externo && perfil.value === 'admin';
+            document.querySelectorAll('input[name="usuario-modulo"]').forEach(cb => {
+                if (externo && cb.value !== 'eventos') cb.checked = false;
+                cb.disabled = admin || (externo && cb.value !== 'eventos');
+            });
+            document.getElementById('usuario-permissoes-ajuda').textContent = admin
+                ? 'Administrador: acesso e edição em todos os módulos, incluindo Usuários.'
+                : externo ? 'Externo: sem acesso interno. A consulta a eventos pode ser liberada; as demais permissões externas serão definidas depois.'
+                : 'Consulta nos módulos selecionados. Alterações nos dados são exclusivas do perfil Administrador. Internos ativos aparecem como responsáveis GRGD.';
+        }
+        function lerDadosUsuario(anterior = {}) {
+            const val = id => (document.getElementById(id)?.value || '').trim();
+            const tipoUsuario = val('usuario-tipo');
+            const perfil = val('usuario-perfil');
+            const nome = val('usuario-nome'), email = val('usuario-email').toLowerCase();
+            if (!nome || nome.length > 150 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Informe nome completo e e-mail válido.');
+            if (!['interno','externo'].includes(tipoUsuario)) throw new Error('Selecione o tipo Interno ou Externo.');
+            if (!['admin','comum'].includes(perfil) || (tipoUsuario === 'externo' && perfil === 'admin')) throw new Error('Somente usuários internos podem ser administradores.');
+            if (!['true','false'].includes(val('usuario-ativo'))) throw new Error('Selecione a situação do usuário.');
+            const ativo = val('usuario-ativo') === 'true';
+            if (uidCadastro(anterior) === currentUser?.uid && (!ativo || perfil !== 'admin' || tipoUsuario !== 'interno')) throw new Error('Sua própria conta deve permanecer ativa como administrador interno. Solicite a outro administrador a alteração.');
+            if (anterior.email && email !== anterior.email.toLowerCase()) throw new Error('Altere o e-mail pelo fluxo do Firebase Authentication.');
+            const selecionados = Array.from(document.querySelectorAll('input[name="usuario-modulo"]:checked')).map(cb => cb.value);
+            if (selecionados.some(id => !MÓDULOS_SISTEMA.some(m => m.id === id) || id === 'usuarios' || (tipoUsuario === 'externo' && id !== 'eventos'))) throw new Error('Módulo não permitido para este usuário.');
+            const modulosPermitidos = perfil === 'admin' ? MÓDULOS_SISTEMA.map(m => m.id) : [...new Set(selecionados)];
+            const tagsTexto = val('usuario-tags');
+            const tags = Array.isArray(anterior.tags) && tagsTexto === anterior.tags.join(', ') ? anterior.tags : tagsTexto.split(',').map(t => t.trim()).filter(Boolean);
+            const grupos = Array.from(document.getElementById('usuario-grupos')?.selectedOptions || []).map(o => o.value);
+            return {nome, email, tipoUsuario, ativo, perfil, modulosPermitidos, orgao: val('usuario-orgao'), tags, grupos};
+        }
+
+        let cadastroUsuarioEmAndamento = false;
+        async function criarCadastroUsuario() {
+            if (!ehAdministrador()) throw new Error('Somente administradores podem cadastrar usuários.');
+            if (cadastroUsuarioEmAndamento) throw new Error('Aguarde a conclusão do cadastro em andamento.');
+            const dados = lerDadosUsuario();
+            const senha = document.getElementById('usuario-senha').value;
+            if (senha.length < 8) throw new Error('A senha inicial deve ter pelo menos 8 caracteres.');
+            cadastroUsuarioEmAndamento = true;
+            const sessao = versaoSessao;
+            let conta = null, authCadastro;
+            try {
+                const appCadastro = getApps().find(a => a.name === 'prgd-cadastro') || initializeApp(firebaseConfig, 'prgd-cadastro');
+                authCadastro = getAuth(appCadastro);
+                await setPersistence(authCadastro, inMemoryPersistence);
+                conta = (await createUserWithEmailAndPassword(authCadastro, dados.email, senha)).user;
+                if (sessao !== versaoSessao || !ehAdministrador()) throw new Error('Sua sessão mudou. Entre novamente antes de cadastrar usuários.');
+                const agora = new Date().toISOString(), autor = currentUser.nome || currentUser.email;
+                await setDoc(doc(db, 'usuarios', conta.uid), {...dados, uid: conta.uid, criadoEm: agora, criadoPor: autor, atualizadoEm: agora, editadoPor: autor});
+            } catch (err) {
+                if (conta) {
+                    try { await deleteUser(conta); }
+                    catch (rollback) { throw new Error(`O perfil não foi confirmado e a conta de login não pôde ser removida. Verifique o UID ${conta.uid} no Firebase Authentication antes de tentar novamente.`); }
+                }
+                throw err;
+            } finally {
+                if (authCadastro) await signOut(authCadastro).catch(() => {});
+                document.getElementById('usuario-senha') && (document.getElementById('usuario-senha').value = '');
+                cadastroUsuarioEmAndamento = false;
+            }
+        }
 
         const CORES_CARD_DEMANDA = [
             { id: 'bg-blue-50 border-blue-200 text-blue-900', nome: 'Azul Claro' },
@@ -559,6 +702,8 @@
             const msg = String(err?.message || err || '');
             if (msg.includes('longer than') || msg.includes('bytes')) return 'A imagem selecionada é muito pesada para o banco de dados. Limite máximo: 500 KB.';
             if (msg.includes('permission-denied')) return 'Permissão negada. Você não tem autorização para realizar esta operação.';
+            if (msg.includes('auth/email-already-in-use')) return 'Este e-mail já possui conta de acesso. Edite o cadastro existente; cadastros antigos sem perfil vinculado precisam ser conferidos no Firebase Authentication.';
+            if (msg.includes('auth/weak-password')) return 'A senha não atende à política do Firebase Authentication.';
             if (msg.includes('auth/invalid-credential')) return 'E-mail ou senha incorretos. Verifique suas credenciais.';
             return 'Erro ao processar a operação: ' + msg;
         }
@@ -680,7 +825,10 @@
             };
         }
 
-        function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function fecharModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            if (id === 'modal-form-universal') document.getElementById('form-univ-campos').innerHTML = '';
+        }
 
         function verificarAutenticacaoObrigatoria() {
             const mainEl = document.getElementById('main-content');
@@ -697,8 +845,8 @@
         function atualizarVisibilidadeAbas() {
             verificarAutenticacaoObrigatoria();
             if (!currentUser) return;
-            const isAdmin = currentUser.perfil === 'admin';
-            const permitidos = isAdmin ? MÓDULOS_SISTEMA.map(m=>m.id) : (currentUser.modulosPermitidos || ['dashboard', 'demandas', 'eventos']);
+            const isAdmin = ehAdministrador();
+            const permitidos = modulosDoUsuario();
             
             MÓDULOS_SISTEMA.forEach(mod => {
                 const btnTab = document.querySelector(`[data-tab="${mod.id}"]`);
@@ -707,14 +855,17 @@
             document.querySelectorAll('.btn-admin-only').forEach(btn => {
                 if (isAdmin) btn.classList.remove('hidden'); else btn.classList.add('hidden');
             });
+            document.querySelectorAll('.input-data-demanda, .select-diaselect-demanda, .select-modalidade-gestor, #obs-novo-texto').forEach(el => { el.disabled = !isAdmin; });
 
             const badgePerfil = document.getElementById('badge-perfil-acesso');
             if (badgePerfil) badgePerfil.textContent = 'PERFIL: ' + (currentUser.perfil || 'comum').toUpperCase() + ' | CLIENTE: ' + (currentUser.orgao || 'GERAL');
 
-            if (!permitidos.includes(abaAtual)) mudarAba(permitidos[0] || 'dashboard');
+            if (!permitidos.includes(abaAtual)) mudarAba(permitidos[0] || '');
+            document.getElementById('aviso-sem-modulos')?.classList.toggle('hidden', permitidos.length > 0);
         }
 
         function mudarAba(aba) {
+            if (aba && !modulosDoUsuario().includes(aba)) return;
             abaAtual = aba;
             MÓDULOS_SISTEMA.forEach(mod => {
                 const el = document.getElementById('aba-' + mod.id);
@@ -754,34 +905,58 @@
             });
         }
 
+        function assinaturaAcesso(usuario) {
+            return JSON.stringify([usuario?.ativo !== false, ehAdministrador(usuario), usuario?.tipoUsuario || '', modulosDoUsuario(usuario), usuario?.grupos || []]);
+        }
+
         function iniciarSnapshotFirestore() {
             pararSnapshots();
             eventosCacheMap = {};
             if (!currentUser) return;
-            ['demandas','locais','orgaos','fornecedores','bases','usuarios'].forEach(col => {
-                const unsub = observarFirestore(collection(db, col), snap => {
-                    dbData[col] = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
+            const modulos = modulosDoUsuario();
+            const colecoes = {demandas:'demandas', locais:'locais', orgaos:'clientes', fornecedores:'fornecedores', bases:'bases'};
+            Object.entries(colecoes).filter(([,modulo]) => modulos.includes(modulo)).forEach(([col]) => {
+                snapshotUnsubs.push(observarFirestore(collection(db, col), snap => {
+                    dbData[col] = snap.docs.map(d => ({...d.data(), firestoreId: d.id, id: d.data().id || d.id}));
                     renderizarTudo();
-                }, err => console.warn('Firestore '+col+':', err.message));
-                snapshotUnsubs.push(unsub);
+                }));
             });
-
-            snapshotUnsubs.push(observarFirestore(query(collection(db,'eventos'), where('eventoPublico','==',true)), snap => {
-                atualizarEventosVisiveis(snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data()})));
-            }));
-            if (currentUser.uid) {
-                snapshotUnsubs.push(observarFirestore(doc(db,'usuarios',currentUser.uid), snap => {
-                    if (snap.exists()) { currentUser = { ...currentUser, ...snap.data(), uid: currentUser.uid, email: currentUser.email }; renderizarTudo(); }
+            const admin = ehAdministrador();
+            const diretorio = currentUser.tipoUsuario === 'interno' && modulos.includes('demandas');
+            if (admin || diretorio) {
+                const ref = admin ? collection(db,'usuarios') : query(collection(db,'usuarios'), where('tipoUsuario','==','interno'), where('ativo','==',true));
+                snapshotUnsubs.push(observarFirestore(ref, snap => {
+                    dbData.usuarios = snap.docs.map(d => ({...d.data(), firestoreId: d.id, id: d.data().id || d.id}));
+                    renderizarTudo();
                 }));
             }
-            snapshotUnsubs.push(observarFirestore(collection(db,'grupos'), snap => {
-                dbData.grupos = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
+            if (modulos.includes('eventos')) {
+                const ref = admin ? collection(db,'eventos') : query(collection(db,'eventos'), where('eventoPublico','==',true));
+                snapshotUnsubs.push(observarFirestore(ref, snap => {
+                    atualizarEventosVisiveis(snap.docs.map(d => ({...d.data(), firestoreId: d.id, id: d.data().id || d.id})));
+                }));
+                const inscricoes = admin ? collection(db,'inscricoes') : query(collection(db,'inscricoes'), where('uid','==',currentUser.uid));
+                snapshotUnsubs.push(observarFirestore(inscricoes, snap => {
+                    dbData.inscricoes = snap.docs.map(d => ({...d.data(), firestoreId:d.id, id:d.data().id || d.id}));
+                    renderEventos();
+                }));
+            }
+            if (admin) snapshotUnsubs.push(observarFirestore(collection(db,'grupos'), snap => {
+                dbData.grupos = snap.docs.map(d => ({...d.data(), firestoreId:d.id, id:d.data().id || d.id}));
                 renderGrupos(); renderUsuarios();
             }));
-            snapshotUnsubs.push(observarFirestore(collection(db,'inscricoes'), snap => {
-                dbData.inscricoes = snap.docs.map(d => ({ firestoreId: d.id, id: d.data().id || d.id, ...d.data() }));
-                renderEventos();
-            }));
+            if (currentUser.uid) snapshotUnsubs.push(observarFirestore(doc(db,'usuarios',currentUser.uid), async snap => {
+                if (!snap.exists() || snap.data().ativo === false) { await bloquearSessao('Cadastro inativo ou não encontrado. Procure o administrador.'); return; }
+                const atualizado = {...snap.data(), uid:currentUser.uid, id:snap.id, email:currentUser.email};
+                const mudouAcesso = assinaturaAcesso(atualizado) !== assinaturaAcesso(currentUser);
+                if (mudouAcesso) {
+                    ++versaoSessao; pararSnapshots(); limparDadosSessao(); currentUser = atualizado;
+                    iniciarSnapshotFirestore();
+                } else currentUser = atualizado;
+                document.getElementById('user-name-display').textContent = currentUser.nome || currentUser.email;
+                document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
+                renderizarTudo();
+            }, () => { bloquearSessao('Não foi possível confirmar suas permissões. Entre novamente.'); }));
         }
 
         function renderizarTudo() {
@@ -844,13 +1019,14 @@
                 const matchTag = !filtroTagAtual || (u.tags || []).includes(filtroTagAtual);
                 const matchOrgao = !filtroOrgaoUsuarioAtual || u.orgao === filtroOrgaoUsuarioAtual;
                 const matchBusca = !buscaUsuariosVal || (u.nome || '').toLowerCase().includes(buscaUsuariosVal) || (u.email || '').toLowerCase().includes(buscaUsuariosVal);
-                return matchTag && matchOrgao && matchBusca;
+                const matchTipo = !filtroTipoUsuarioAtual || (filtroTipoUsuarioAtual === 'legado' ? !['interno','externo'].includes(u.tipoUsuario) : u.tipoUsuario === filtroTipoUsuarioAtual);
+                return matchTag && matchOrgao && matchBusca && matchTipo;
             });
             document.getElementById('count-usuarios').textContent = us.length;
             tbody.innerHTML = us.map(u => {
                 const audit = renderAuditInfo(u);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(', ') : u.tags || '-')}</td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button></td></tr>`;
-            }).join('') || '<tr><td colspan="8" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${esc(u.nome || u.email)}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4 text-xs"><b>${nomeTipoUsuario(u)}</b><br>${u.ativo === false ? 'Inativo' : 'Ativo'}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(', ') : u.tags || '-')}</td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button></td></tr>`;
+            }).join('') || '<tr><td colspan="9" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
         function renderClientes() {
@@ -915,7 +1091,7 @@
                         <div class="text-[10px] text-slate-500 font-normal">Gestor do Órgão</div>
                     </td>
                     <td class="p-3">
-                        <select class="select-modalidade-gestor p-1.5 border rounded text-xs bg-white font-semibold text-blue-900 cursor-pointer" data-firestore-id="${esc(o.firestoreId)}" title="Escolha o gestor desejado">
+                        <select ${ehAdministrador() ? '' : 'disabled'} class="select-modalidade-gestor p-1.5 border rounded text-xs bg-white font-semibold text-blue-900 cursor-pointer" data-firestore-id="${esc(o.firestoreId)}" title="Escolha o gestor desejado">
                             <option value="Órgão" ${modalidadeAtual==='Órgão'?'selected':''}>Gestor do Órgão</option>
                             <option value="NSI" ${modalidadeAtual==='NSI'?'selected':''}>Gestor do NSI</option>
                             <option value="Telemática" ${modalidadeAtual==='Telemática'?'selected':''}>Gestor de Telemática</option>
@@ -964,7 +1140,7 @@
                 const txt = buscaDemandasVal.trim().toLowerCase();
                 let matchBusca = true;
                 if (txt) {
-                    const respStr = Array.isArray(d.responsavelGrgd) ? d.responsavelGrgd.join(' ') : String(d.responsavelGrgd || '');
+                    const respStr = nomesResponsaveis(d).join(' ');
                     const histStr = (d.historicoAcoes || []).map(h => `${h.autor} ${h.texto}`).join(' ');
                     const textoConsolidado = [d.titulo, d.orgao, d.solicitante, d.descricao, d.categoria, d.prioridade, d.status, respStr, histStr].filter(Boolean).join(' ').toLowerCase();
                     matchBusca = textoConsolidado.includes(txt);
@@ -985,7 +1161,7 @@
                 const audit = renderAuditInfo(d);
                 const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
                 const iconeStatus = renderizarIconeStatus(d.status);
-                const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
+                const badgesResp = renderizarBadgesResponsaveis(nomesResponsaveis(d));
                 const corLinhaClara = obterClasseCorCard(d.corCard);
                 const dataVal = d.dataLimite || d.dataInicio || '';
                 const diaSemanaVal = d.diaSemana || '';
@@ -1000,13 +1176,13 @@
                     
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-1 flex-wrap">
-                            <input type="date" class="input-data-demanda p-1 border rounded text-xs bg-white font-medium text-blue-900 cursor-pointer shadow-sm" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Escolha uma data específica">
+                            <input type="date" ${ehAdministrador() ? '' : 'disabled'} class="input-data-demanda p-1 border rounded text-xs bg-white font-medium text-blue-900 cursor-pointer shadow-sm" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Escolha uma data específica">
                             ${badgeOutraSemanaHtml}
                         </div>
                     </td>
 
                     <td class="p-4 text-center">
-                        <select class="select-diaselect-demanda p-1 border rounded text-xs bg-white font-medium text-blue-900 cursor-pointer shadow-sm" data-firestore-id="${esc(d.firestoreId)}" title="Escolha o dia da semana">
+                        <select ${ehAdministrador() ? '' : 'disabled'} class="select-diaselect-demanda p-1 border rounded text-xs bg-white font-medium text-blue-900 cursor-pointer shadow-sm" data-firestore-id="${esc(d.firestoreId)}" title="Escolha o dia da semana">
                             <option value="" ${!diaSemanaVal ? 'selected' : ''}>-- Selecionar --</option>
                             <option value="segunda" ${diaSemanaVal==='segunda'?'selected':''}>Segunda</option>
                             <option value="terca" ${diaSemanaVal==='terca'?'selected':''}>Terça</option>
@@ -1141,7 +1317,7 @@
         });
 
         function criarPostItHtml(d) {
-            const badgesResp = renderizarBadgesResponsaveis(d.responsavelGrgd);
+            const badgesResp = renderizarBadgesResponsaveis(nomesResponsaveis(d));
             const bolinhaPrio = renderizarBolinhaPrioridade(d.prioridade);
             const corCard = obterClasseCorCard(d.corCard);
             const dataVal = d.dataLimite || d.dataInicio || '';
@@ -1161,8 +1337,8 @@
                     <div class="flex justify-between items-center"><span class="text-[10px] font-semibold opacity-75">${esc(d.solicitante || 'ATI')}</span><div class="scale-90 origin-right">${badgesResp}</div></div>
                     <div class="flex items-center justify-between gap-1 pt-1 bg-white/60 p-1 rounded border border-black/5 flex-wrap">
                         <span class="text-[10px] font-bold text-slate-700">Data/Dia:</span>
-                        <input type="date" class="input-data-demanda text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Data Específica">
-                        <select class="select-diaselect-demanda text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}" title="Dia da Semana">
+                        <input type="date" ${ehAdministrador() ? '' : 'disabled'} class="input-data-demanda text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Data Específica">
+                        <select ${ehAdministrador() ? '' : 'disabled'} class="select-diaselect-demanda text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}" title="Dia da Semana">
                             <option value="" ${!diaSemanaVal ? 'selected' : ''}>Dia</option>
                             <option value="segunda" ${diaSemanaVal==='segunda'?'selected':''}>Seg</option>
                             <option value="terca" ${diaSemanaVal==='terca'?'selected':''}>Ter</option>
@@ -1209,12 +1385,13 @@
                 const fim = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
                 const real = fim < agora;
                 const vagas = Number(e.limiteVagas || 0);
-                const inscritosReal = (dbData.inscricoes || []).filter(i => String(i.eventId) === String(e.id)).length;
-                const lotado = vagas > 0 && inscritosReal >= vagas;
-                const minha = !!(dbData.inscricoes || []).some(i => String(i.eventId) === String(e.id) && i.uid === currentUser?.uid);
+                const idsEvento = [String(e.id), String(e.firestoreId || e.id)];
+                const inscritosReal = ehAdministrador() ? (dbData.inscricoes || []).filter(i => idsEvento.includes(String(i.eventId))).length : (Number.isFinite(e.inscritosCount) ? e.inscritosCount : null);
+                const lotado = vagas > 0 && inscritosReal !== null && inscritosReal >= vagas;
+                const minha = !!(dbData.inscricoes || []).some(i => idsEvento.includes(String(i.eventId)) && i.uid === currentUser?.uid);
                 const bannerImg = normalizarUrl(e.imagemCard);
                 const audit = renderAuditInfo(e);
-                const isAdmin = currentUser?.perfil === 'admin';
+                const isAdmin = ehAdministrador();
                 const cardBgClass = real ? 'bg-slate-100 border-slate-300 opacity-95 grayscale-[20%]' : 'bg-white border-slate-200';
                 const headerBgClass = real ? 'bg-slate-700 text-slate-200' : 'bg-blue-900 text-white';
 
@@ -1228,11 +1405,11 @@
                         <div class="mt-3 text-xs space-y-1.5 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
                             <div><i class="fa-solid fa-calendar text-blue-800 mr-1.5"></i> ${formatarData(e.dataInicio)}</div>
                             <div><i class="fa-solid fa-location-dot text-purple-700 mr-1.5"></i> ${esc(e.localEvento || 'Local não informado')}</div>
-                            <div><i class="fa-solid fa-users text-emerald-700 mr-1.5"></i> ${vagas ? `${inscritosReal}/${vagas} vagas` : `${inscritosReal} inscritos`}</div>
+                            <div><i class="fa-solid fa-users text-emerald-700 mr-1.5"></i> ${inscritosReal === null ? (vagas ? `Capacidade: ${vagas} vagas` : 'Vagas não informadas') : (vagas ? `${inscritosReal}/${vagas} vagas` : `${inscritosReal} inscritos`)}</div>
                         </div>
                         <div class="pt-3 border-t mt-3 flex justify-between text-[11px] text-slate-500"><span>${audit.dataHtml}</span><span>Por: ${audit.autorHtml}</span></div>
                         <div class="mt-auto pt-4 flex flex-wrap gap-2 items-center">
-                            ${!minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrever-se</button>` : ''}
+                            ${!minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.firestoreId || e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrever-se</button>` : ''}
                             <div class="flex items-center gap-1 ml-auto">
                                 ${isAdmin ? `<button type="button" data-relatorio-evento="${esc(e.id)}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-2.5 py-2 rounded-xl font-bold cursor-pointer" title="Relatório"><i class="fa-solid fa-file-excel"></i></button>` : ''}
                                 <button type="button" class="tr-detalhe border bg-white hover:bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-xl font-bold cursor-pointer" data-colecao="eventos" data-id="${esc(e.firestoreId || e.id)}">Detalhes</button>
@@ -1310,6 +1487,7 @@
             const c = document.getElementById('edit-campos-dinamicos');
             const common = (label,key,type='text',cls='',extraClass='') => `<div class="${cls}"><label class="block font-bold text-[11px] uppercase mb-1">${label}</label><input type="${type}" name="${key}" value="${esc(item[key] || '')}" class="w-full p-2 border rounded-lg text-xs bg-white ${extraClass}"></div>`;
             
+            if (colecao === 'usuarios') { document.getElementById('form-univ-campos').innerHTML = ''; c.innerHTML = camposUsuario(item); atualizarControlesUsuario(); return; }
             if(colecao === 'orgaos'){
                 c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     ${common('Nome do Cliente / Órgão','nome')}
@@ -1356,19 +1534,13 @@
             }
 
             if(colecao === 'demandas'){
-                const respAtuais = Array.isArray(item.responsavelGrgd) ? item.responsavelGrgd : String(item.responsavelGrgd || '').split(',').map(s => s.trim()).filter(Boolean);
                 c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     ${common('Solicitante','solicitante')} 
                     ${common('Órgão / Local','orgao')} 
                     <div class="md:col-span-2">
                         <label class="block font-bold text-[11px] uppercase mb-1">Quem da GRGD é responsável por acompanhar (Múltiplos)</label>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-lg border">
-                            ${RESPONSAVEIS_GRGD_DISPONIVEIS.map(resp => `
-                                <label class="flex items-center gap-2 text-xs font-medium cursor-pointer">
-                                    <input type="checkbox" name="responsavelGrgdCheckbox" value="${esc(resp)}" ${respAtuais.includes(resp) ? 'checked' : ''} class="rounded text-blue-900 focus:ring-blue-600">
-                                    <span>${esc(resp)}</span>
-                                </label>
-                            `).join('')}
+                            ${camposResponsaveis('responsavelGrgdCheckbox', item)}
                         </div>
                     </div>
                     ${common('Data Específica','dataLimite','date')}
@@ -1555,7 +1727,7 @@
                     <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border text-xs">
                         <div><b>Solicitante:</b> ${esc(item.solicitante || '-')}</div>
                         <div><b>Órgão / Local:</b> ${esc(item.orgao || '-')}</div>
-                        <div class="col-span-2"><b>Responsável GRGD:</b> ${renderizarBadgesResponsaveis(item.responsavelGrgd)}</div>
+                        <div class="col-span-2"><b>Responsável GRGD:</b> ${renderizarBadgesResponsaveis(nomesResponsaveis(item))}</div>
                         <div><b>Status:</b> <span class="uppercase">${esc(item.status || '-')}</span></div>
                         <div><b>Prioridade:</b> <span class="uppercase">${esc(item.prioridade || '-')}</span></div>
                         <div class="col-span-2"><b>Título:</b> ${esc(item.titulo || '-')}</div>
@@ -1566,12 +1738,14 @@
                 document.getElementById('detalhe-conteudo').innerHTML = Object.entries(item).filter(([k])=>k!=='firestoreId').map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
             }
 
-            document.getElementById('detalhe-area-admin').classList.toggle('hidden', currentUser?.perfil !== 'admin');
+            document.getElementById('btn-excluir-registro').textContent = colecao === 'usuarios' ? 'Inativar usuário' : 'Excluir registro';
+            document.getElementById('btn-salvar-edicao').textContent = colecao === 'usuarios' ? 'Salvar usuário' : 'Salvar na Nuvem (Firestore)';
+            document.getElementById('detalhe-area-admin').classList.toggle('hidden', !ehAdministrador());
             document.getElementById('modal-detalhes').classList.remove('hidden');
         }
 
         async function salvarEdicaoAdmin(e){
-            e.preventDefault(); if(currentUser?.perfil !== 'admin'){ alert('Somente administradores.'); return; }
+            e.preventDefault(); if(!ehAdministrador()){ alert('Somente administradores.'); return; }
             const colecao = document.getElementById('edit-colecao').value;
             const firestoreId = document.getElementById('edit-doc-id').value;
             const form = e.target;
@@ -1587,7 +1761,10 @@
             };
 
             try {
-                form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el => {
+                if (colecao === 'usuarios') {
+                    Object.assign(obj, lerDadosUsuario(itemAntigo));
+                    obj.uid = String(firestoreId);
+                } else form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el => {
                     if (!el.name || el.name === 'responsavelGrgdCheckbox' || ['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid'].includes(el.name)) return;
                     const tipo = el.dataset.fieldType;
                     if (tipo === 'boolean') {
@@ -1607,7 +1784,7 @@
                 });
                 if (colecao === 'demandas') {
                     const respCheckboxes = form.querySelectorAll('input[name="responsavelGrgdCheckbox"]:checked');
-                    obj.responsavelGrgd = Array.from(respCheckboxes).map(cb => cb.value);
+                    Object.assign(obj, lerResponsaveis(respCheckboxes, itemAntigo));
                 }
                 await setDoc(doc(db, colecao, String(firestoreId)), obj, { merge: true });
                 alert('Alterações salvas na nuvem com sucesso!');
@@ -1635,6 +1812,7 @@
         }
 
         async function salvarNovaObservacao() {
+            if (!ehAdministrador()) { alert('Somente administradores podem registrar andamentos.'); return; }
             const demandaId = document.getElementById('obs-demanda-id').value;
             const texto = document.getElementById('obs-novo-texto').value.trim();
             if(!texto || !demandaId) return;
@@ -1653,9 +1831,12 @@
         function abrirModalForm(tipo) {
             document.getElementById('form-univ-tipo').value = tipo;
             const container = document.getElementById('form-univ-campos');
-            document.getElementById('form-univ-titulo').textContent = 'Novo Cadastro: ' + tipo.toUpperCase();
+            document.getElementById('form-univ-titulo').textContent = tipo === 'usuario' ? 'Novo usuário' : 'Novo Cadastro: ' + tipo.toUpperCase();
+            document.getElementById('btn-salvar-cadastro').textContent = tipo === 'usuario' ? 'Salvar usuário' : 'Salvar na Nuvem (Firestore)';
 
-            if (tipo === 'cliente') {
+            if (tipo === 'usuario') {
+                document.getElementById('edit-campos-dinamicos').innerHTML = ''; container.innerHTML = camposUsuario({}, true); atualizarControlesUsuario();
+            } else if (tipo === 'cliente') {
                 container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs max-h-[70vh] overflow-y-auto p-1">
                     <div><label class="block mb-1 font-bold">Nome do Órgão / Cliente</label><input id="uc-1" required class="w-full p-2 border rounded"></div>
                     <div><label class="block mb-1 font-bold">Sigla</label><input id="uc-sigla" class="w-full p-2 border rounded"></div>
@@ -1704,12 +1885,7 @@
                     <div>
                         <label class="block mb-1 font-bold">Quem da GRGD é responsável por acompanhar (Múltiplos)</label>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-lg border">
-                            ${RESPONSAVEIS_GRGD_DISPONIVEIS.map(resp => `
-                                <label class="flex items-center gap-2 text-xs font-medium cursor-pointer">
-                                    <input type="checkbox" name="uc-demanda-resp" value="${esc(resp)}" class="rounded text-blue-900 focus:ring-blue-600">
-                                    <span>${esc(resp)}</span>
-                                </label>
-                            `).join('')}
+                            ${camposResponsaveis('uc-demanda-resp')}
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -1735,7 +1911,9 @@
             const autor = currentUser?.nome || currentUser?.email || 'Sistema';
 
             try {
-                if (tipo === 'cliente') {
+                if (tipo === 'usuario') {
+                    await criarCadastroUsuario();
+                } else if (tipo === 'cliente') {
                     await addDoc(collection(db, 'orgaos'), {
                         id: 'CLI-' + Date.now(),
                         nome: val('uc-1'),
@@ -1776,14 +1954,14 @@
                     const dataNova = val('uc-demanda-data');
                     const { diaSemana } = calcularInfoSemana(dataNova);
                     const respCheckboxes = document.querySelectorAll('input[name="uc-demanda-resp"]:checked');
-                    const responsaveisArr = Array.from(respCheckboxes).map(cb => cb.value);
+                    const responsaveis = lerResponsaveis(respCheckboxes);
 
                     await addDoc(collection(db, 'demandas'), {
                         id: 'DEM-' + Date.now(),
                         titulo: val('uc-demanda-titulo'),
                         solicitante: val('uc-demanda-solicitante'),
                         orgao: val('uc-demanda-orgao'),
-                        responsavelGrgd: responsaveisArr,
+                        ...responsaveis,
                         dataLimite: dataNova,
                         diaSemana: diaSemana || '',
                         prioridade: val('uc-demanda-prio') || 'Média',
@@ -1796,7 +1974,7 @@
                         editadoPor: autor
                     });
                 } else {
-                    const colecoes = { evento: 'eventos', local: 'locais', fornecedor: 'fornecedores', usuario: 'usuarios', base: 'bases' };
+                    const colecoes = { evento: 'eventos', local: 'locais', fornecedor: 'fornecedores', base: 'bases' };
                     if (!Object.hasOwn(colecoes, tipo)) throw new Error('Tipo de cadastro não suportado.');
                     await addDoc(collection(db, colecoes[tipo]), { id: 'OBJ-' + Date.now(), nome: val('uc-1'), descricao: val('uc-2'), criadoEm: agora, atualizadoEm: agora, criadoPor: autor, editadoPor: autor });
                 }
@@ -1806,7 +1984,7 @@
         }
 
         document.getElementById('btn-limpar-clientes')?.addEventListener('click', async () => {
-            if (currentUser?.perfil !== 'admin') { alert('Somente administradores podem limpar a base.'); return; }
+            if (!ehAdministrador()) { alert('Somente administradores podem limpar a base.'); return; }
             if (!confirm('ATENÇÃO: Deseja realmente apagar TODOS os clientes cadastrados na nuvem? Esta ação não pode ser desfeita.')) return;
             
             try {
@@ -1868,10 +2046,14 @@
         async function excluirRegistroUniversal() {
             const colecao = document.getElementById('edit-colecao').value;
             const firestoreId = document.getElementById('edit-doc-id').value;
-            if (!confirm('Deseja realmente excluir este registro da nuvem?')) return;
+            if (!ehAdministrador()) { alert('Somente administradores.'); return; }
+            if (colecao === 'usuarios' && firestoreId === currentUser.uid) { alert('Você não pode inativar sua própria conta.'); return; }
+            if (!confirm(colecao === 'usuarios' ? 'Inativar este usuário? O histórico das demandas será preservado.' : 'Deseja realmente excluir este registro da nuvem?')) return;
             try {
-                await deleteDoc(doc(db, colecao, String(firestoreId)));
-                alert('Registro excluído!');
+                if (colecao === 'usuarios') {
+                    await setDoc(doc(db, colecao, String(firestoreId)), {ativo: false, atualizadoEm: new Date().toISOString(), editadoPor: currentUser.nome || currentUser.email}, {merge: true});
+                } else await deleteDoc(doc(db, colecao, String(firestoreId)));
+                alert(colecao === 'usuarios' ? 'Usuário inativado. Histórico preservado.' : 'Registro excluído!');
                 fecharModal('modal-detalhes');
             } catch(err) { alert(traduzirErroSistema(err)); }
         }
@@ -1898,6 +2080,7 @@
             byId('busca-fornecedores')?.addEventListener('input', e => { buscaFornecedoresVal = e.target.value.toLowerCase().trim(); renderFornecedores(); });
             byId('busca-usuarios')?.addEventListener('input', e => { buscaUsuariosVal = e.target.value.toLowerCase().trim(); renderUsuarios(); });
             byId('busca-bases')?.addEventListener('input', e => { buscaBasesVal = e.target.value.toLowerCase().trim(); renderBases(); });
+            byId('filtro-tipo-usuario')?.addEventListener('change', e => { filtroTipoUsuarioAtual = e.target.value; renderUsuarios(); });
             byId('filtro-tag-usuario')?.addEventListener('change', e => { filtroTagAtual = e.target.value; renderUsuarios(); });
             byId('filtro-orgao-usuario')?.addEventListener('change', e => { filtroOrgaoUsuarioAtual = e.target.value; renderUsuarios(); });
             byId('busca-eventos')?.addEventListener('input', e => { buscaEventosVal = e.target.value.toLowerCase().trim(); renderEventos(); });
@@ -1928,8 +2111,10 @@
         configurarInterface();
 
         document.addEventListener('change', async ev => {
+            if (['usuario-tipo','usuario-perfil'].includes(ev.target.id)) atualizarControlesUsuario();
             const inputData = ev.target.closest?.('.input-data-demanda');
             if (inputData) {
+                if (!ehAdministrador()) return;
                 const firestoreId = inputData.getAttribute('data-firestore-id');
                 const novaData = inputData.value;
                 const demandaObj = dbData.demandas.find(x => String(x.firestoreId) === String(firestoreId) || String(x.id) === String(firestoreId));
@@ -1958,6 +2143,7 @@
 
             const selectDia = ev.target.closest?.('.select-diaselect-demanda');
             if (selectDia) {
+                if (!ehAdministrador()) return;
                 const firestoreId = selectDia.getAttribute('data-firestore-id');
                 const novoDia = selectDia.value;
                 const demandaObj = dbData.demandas.find(x => String(x.firestoreId) === String(firestoreId) || String(x.id) === String(firestoreId));
@@ -1983,6 +2169,7 @@
 
             const selectMod = ev.target.closest?.('.select-modalidade-gestor');
             if (selectMod) {
+                if (!ehAdministrador()) return;
                 const firestoreId = selectMod.getAttribute('data-firestore-id');
                 const novaModalidade = selectMod.value;
                 const orgaoObj = dbData.orgaos.find(x => String(x.firestoreId) === String(firestoreId) || String(x.id) === String(firestoreId));
@@ -2069,8 +2256,8 @@
             dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
             eventosCacheMap = {};
             buscaDemandasVal = buscaEventosVal = buscaLocaisVal = buscaClientesVal = buscaFornecedoresVal = buscaBasesVal = buscaUsuariosVal = '';
-            filtroTagAtual = filtroOrgaoUsuarioAtual = filtroGestorModalidadeAtual = filtroSituacaoClienteAtual = filtroDemandaStatusAtual = filtroDemandaPrioAtual = '';
-            ['busca-demandas', 'busca-eventos', 'busca-locais', 'busca-clientes', 'busca-fornecedores', 'busca-bases', 'busca-usuarios', 'filtro-tag-usuario', 'filtro-orgao-usuario', 'filtro-gestor-modalidade', 'filtro-situacao-cliente', 'filtro-demanda-status', 'filtro-demanda-prio'].forEach(id => {
+            filtroTipoUsuarioAtual = filtroTagAtual = filtroOrgaoUsuarioAtual = filtroGestorModalidadeAtual = filtroSituacaoClienteAtual = filtroDemandaStatusAtual = filtroDemandaPrioAtual = '';
+            ['busca-demandas', 'busca-eventos', 'busca-locais', 'busca-clientes', 'busca-fornecedores', 'busca-bases', 'busca-usuarios', 'filtro-tipo-usuario', 'filtro-tag-usuario', 'filtro-orgao-usuario', 'filtro-gestor-modalidade', 'filtro-situacao-cliente', 'filtro-demanda-status', 'filtro-demanda-prio'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
@@ -2091,46 +2278,41 @@
             renderizarTudo();
         }
 
+        async function bloquearSessao(mensagem) {
+            ++versaoSessao; pararSnapshots(); limparDadosSessao();
+            document.getElementById('modal-login')?.classList.remove('hidden');
+            const msg = document.getElementById('login-msg');
+            if (msg) { msg.textContent = mensagem; msg.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
+            await signOut(auth).catch(() => {});
+        }
+
         onAuthStateChanged(auth, async user => {
             const versaoAtual = ++versaoSessao;
-            pararSnapshots();
-            limparDadosSessao();
-            currentUser = user;
+            pararSnapshots(); limparDadosSessao();
             if (!user) {
-                document.getElementById('main-content')?.classList.add('hidden');
                 document.getElementById('modal-login')?.classList.remove('hidden');
                 return;
             }
             try {
                 const perfilCarregado = await carregarPerfilFirebase(user);
                 if (versaoAtual !== versaoSessao) return;
+                if (!perfilCarregado || perfilCarregado.ativo === false) {
+                    await bloquearSessao('Seu cadastro está inativo ou ainda não foi autorizado. Procure o administrador.'); return;
+                }
                 currentUser = perfilCarregado;
                 document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
                 document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
-                document.getElementById('main-content')?.classList.remove('hidden');
-                document.getElementById('modal-login')?.classList.add('hidden');
-                atualizarVisibilidadeAbas();
-                iniciarSnapshotFirestore();
-                renderizarTudo();
+                atualizarVisibilidadeAbas(); iniciarSnapshotFirestore(); renderizarTudo();
             } catch(err) {
-                if (versaoAtual !== versaoSessao) return;
-                currentUser = { uid: user.uid, id: user.uid, email: user.email || '', nome: user.email || 'Usuário', perfil: 'comum', orgao: 'GERAL', modulosPermitidos: ['dashboard','demandas','eventos','clientes'] };
-                document.getElementById('main-content')?.classList.remove('hidden');
-                document.getElementById('modal-login')?.classList.add('hidden');
-                atualizarVisibilidadeAbas();
-                iniciarSnapshotFirestore();
-                renderizarTudo();
+                if (versaoAtual === versaoSessao) await bloquearSessao('Não foi possível confirmar seu cadastro. Tente novamente ou procure o administrador.');
             }
         });
 
         async function carregarPerfilFirebase(user) {
-            const ref = doc(db, 'usuarios', user.uid);
-            try {
-                const snap = await getDoc(ref);
-                if (snap.exists()) return { ...snap.data(), uid: user.uid, id: snap.id, email: user.email };
-            } catch (e) {}
-            return { uid: user.uid, id: user.uid, email: user.email, nome: user.email, perfil: 'comum', orgao: 'GERAL', modulosPermitidos: ['dashboard','demandas','eventos','clientes'] };
+            const snap = await getDoc(doc(db, 'usuarios', user.uid));
+            return snap.exists() ? {...snap.data(), uid:user.uid, id:snap.id, email:user.email} : null;
         }
     </script>
 </body>
 </html>
+
