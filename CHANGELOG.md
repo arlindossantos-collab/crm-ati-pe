@@ -13,7 +13,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 - Sem agenda lateral, nova identidade roxa, cores fortes ou reorganização. HTML estático do corpo preservado integralmente após normalizar apenas a versão.
 - Alteração limitada aos seis cards: demais campos, tabela, cabeçalho, consulta, cálculos, cadastros, permissões e regras do Firebase preservados.
 - Teste de navegador verifica seis ícones, moedas no custo, somente azul/verde, baixa opacidade e consulta abaixo do painel, além dos fluxos anteriores.
-- Validação completa será registrada no PR. Testes usam dados simulados; não equivalem a homologação institucional.
+- [Execução completa aprovada no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39473507112), commit `bbfee522ef9e3b54dc7c1355b2958fee3250389a`: 70 testes da aplicação, 25 de regras e 2 de autenticação, totalizando **97 aprovações**. Chromium aprovado em desktop e celular: seis ícones, moedas no custo, apenas azul/verde, baixa opacidade e consulta mantida abaixo do painel. Dados simulados; não equivale a homologação em produção.
 - Proposta sem publicação. Não exige alteração no Firebase; PR #8 continua separado.
 - Próxima versão sugerida: v0.6.4 para ajustes ou v0.7.0 para funcionalidades; sequência formal a conferir ao publicar.
 
