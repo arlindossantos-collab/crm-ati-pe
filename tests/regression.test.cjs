@@ -43,7 +43,7 @@ function app() {
 }
 
 test('cadastro de local grava na mesma coleção lida pelo módulo', async () => {
-    const a = app(); a.element('form-univ-tipo').value = 'local'; a.element('uc-1').value = 'Auditório';
+    const a = app(); a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno'}"); a.element('form-univ-tipo').value = 'local'; a.element('uc-1').value = 'Auditório';
     await a.run('salvarCadastroUniversal({preventDefault(){}})');
     assert.equal(a.writes[0].collection, 'locais');
 });
@@ -449,4 +449,100 @@ test('logout limpa foto em edição, dados pessoais e senhas', async () => {
 test('locais e fornecedores mostram autoria com foto nas colunas existentes', () => {
     const a=app();a.run("identidadesUsuarios=[{uid:'u',nome:'Usuário',fotoPerfil:'data:image/jpeg;base64,QQ=='}];dbData.locais=[{nome:'Local',editadoPor:'Usuário',editadoPorUid:'u'}];dbData.fornecedores=[{nome:'Fornecedor',editadoPor:'Usuário',editadoPorUid:'u'}];renderLocais();renderFornecedores()");
     for(const id of ['tabela-locais','tabela-fornecedores'])assert.ok(a.element(id).innerHTML.includes('data-avatar'));
+});
+
+function agendaLocalTeste(a) {
+    a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno'};agendaLocaisEstado='completa';dbData.locais=[{firestoreId:'l1',nome:'Auditório Azul',capacidade:100,valorAluguel:0,recursos:['Projetor','Wi-Fi']},{firestoreId:'l2',nome:'Sala Verde',capacidade:null,valorAluguel:'1.200,00',endereco:'Recife',contato:'Ana'}];");
+}
+test('locais diferenciam valor zero, falta de valor e moeda brasileira sem extrair números de textos',()=>{
+    const a=app();for(const [v,n] of [[null,null],['',null],[0,0],['R$ 1.234,50',1234.5],['50.25',50.25],['a combinar',null],['100 por dia',null],[-1,null],['12,345',null]])assert.equal(a.run('numeroLocal('+JSON.stringify(v)+')'),n);
+    assert.equal(a.run("tipoLocacaoLocal({valorAluguel:0})"),'gratuito');
+    assert.equal(a.run("tipoLocacaoLocal({})"),'nao-informado');
+});
+test('indicadores usam custos explícitos por evento, não multiplicam tarifa e expõem lacunas',()=>{
+    const a=app();agendaLocalTeste(a);
+    a.run("dbData.eventos=[{localId:'l1',dataInicio:'2030-01-01',custoLocacaoPrevisto:0},{localId:'l2',dataInicio:'2030-01-01',custoLocacaoPrevisto:'1.500,00'},{localId:'l2',dataInicio:'2030-01-02'},{localId:'l2',dataInicio:'2030-01-02',status:'Cancelado',custoLocacaoPrevisto:900},{localId:'l1',dataInicio:'2020-01-01',custoLocacaoPrevisto:500},{localId:'l1',custoLocacaoPrevisto:200},{titulo:'Sem local',dataInicio:'2030-01-01'}]");
+    const k=a.run("indicadoresLocais(dbData.locais,dbData.eventos,'2026-10-20')");
+    assert.equal(k.total,2);assert.equal(k.capacidade,100);assert.equal(k.semCapacidade,1);assert.equal(k.gratuitos,1);assert.equal(k.pagos,1);assert.equal(k.vinculados,6);assert.equal(k.custo,1500);assert.equal(k.semCusto,1);assert.equal(k.semVinculo,1);assert.equal(k.semData,1);
+});
+test('vínculo por ID sobrevive a renomeação; nomes duplicados e IDs órfãos não são associados',()=>{
+    const a=app();agendaLocalTeste(a);
+    assert.equal(a.run("vinculoEventoLocal({localId:'l1',localEvento:'Nome antigo'}).id"),'l1');
+    assert.equal(a.run("vinculoEventoLocal({localEvento:'AUDITORIO AZUL'}).id"),'l1');
+    a.run("dbData.locais.push({firestoreId:'l3',nome:'Auditório Azul'})");
+    assert.equal(a.run("vinculoEventoLocal({localEvento:'Auditório Azul'}).origem"),'ambiguo');
+    assert.equal(a.run("vinculoEventoLocal({localId:'removido',localEvento:'Sala Verde'}).id"),'');
+});
+test('conflitos consideram sobreposição, limites adjacentes, dia inteiro e cancelamentos',()=>{
+    const a=app();agendaLocalTeste(a);
+    a.run("dbData.eventos=[{localId:'l1',dataInicio:'2030-01-01',horaInicio:'09:00',horaFim:'11:00'},{localId:'l1',dataInicio:'2030-01-01',status:'Cancelado'},{localId:'l2',dataInicio:'2030-01-01'}]");
+    assert.equal(a.run("consultarConflitosLocal('l1','2030-01-01','10:00','12:00').conflitos.length"),1);
+    assert.equal(a.run("consultarConflitosLocal('l1','2030-01-01','11:00','12:00').conflitos.length"),0);
+    assert.equal(a.run("consultarConflitosLocal('l1','2030-01-01').conflitos.length"),1);
+    a.run("dbData.eventos.push({localId:'l1',dataInicio:'2030-01-01'})");
+    assert.equal(a.run("consultarConflitosLocal('l1','2030-01-01','15:00','16:00').conflitos.length"),1);
+});
+test('eventos de vários dias e dados incompletos não produzem disponibilidade falsa',()=>{
+    const a=app();agendaLocalTeste(a);
+    a.run("dbData.eventos=[{localId:'l1',dataInicio:'2030-01-01',dataFim:'2030-01-03'},{localId:'l1'},{localEvento:'Desconhecido',dataInicio:'2030-01-02'}]");
+    const r=a.run("consultarConflitosLocal('l1','2030-01-02')");
+    assert.equal(r.conflitos.length,1);assert.equal(r.pendencias.length,2);
+    a.run("agendaLocaisEstado='parcial'");
+    assert.equal(a.run("consultarConflitosLocal('l1','2030-01-02').completa"),false);
+    a.run("agendaLocaisEstado='erro'");
+    assert.equal(a.run("consultarConflitosLocal('l1','2030-01-02').completa"),false);
+});
+test('consulta valida data real, existência do local e par de horários',()=>{
+    const a=app();agendaLocalTeste(a);
+    for(const code of ["consultarConflitosLocal('l1','2030-02-30')","consultarConflitosLocal('naoexiste','2030-01-01')","consultarConflitosLocal('l1','2030-01-01','10:00','')","consultarConflitosLocal('l1','2030-01-01','10:00','09:00')","consultarConflitosLocal('l1','2030-01-01','29:00','30:00')"])assert.throws(()=>a.run(code));
+});
+test('consulta sem módulo Eventos nunca declara agenda completa',()=>{
+    const a=app();agendaLocalTeste(a);a.run("currentUser={uid:'u',perfil:'comum',tipoUsuario:'interno',modulosPermitidos:['locais']}");
+    assert.equal(a.run("consultarConflitosLocal('l1','2030-01-01').completa"),false);
+    assert.ok(a.run('textoAgendaLocais()').includes('Sem acesso'));
+});
+test('filtros combinam capacidade, recursos, tipo e busca de endereço ou contato sem acento',()=>{
+    const a=app();agendaLocalTeste(a);
+    a.element('local-filtro-capacidade').value='50';a.element('local-filtro-recurso').value='projetor';a.element('local-filtro-tipo').value='gratuito';a.run('renderLocais()');
+    assert.equal(a.element('count-locais').textContent,1);
+    a.element('local-filtro-capacidade').value='';a.element('local-filtro-recurso').value='';a.element('local-filtro-tipo').value='';
+    a.run("buscaLocaisVal='recife';renderLocais()");assert.equal(a.element('count-locais').textContent,1);
+    a.run("buscaLocaisVal='ana';renderLocais()");assert.ok(a.element('tabela-locais').innerHTML.includes('Sala Verde'));
+});
+test('painel preserva dados legados e não chama data passada de realização confirmada',()=>{
+    const a=app();agendaLocalTeste(a);a.run("dbData.locais[0].campoAntigo='Preservado';dbData.eventos=[{localId:'l1',titulo:'Evento <antigo>',dataInicio:'2020-01-01'}];localSelecionadoId='l1';renderPainelLocal()");
+    const html=a.element('local-painel').innerHTML;
+    assert.ok(html.includes('Preservado'));assert.ok(html.includes('realização a confirmar'));assert.ok(html.includes('&lt;antigo&gt;'));
+});
+test('renderização de local escapa nomes, contatos e recursos',()=>{
+    const a=app();agendaLocalTeste(a);a.run("dbData.locais=[{firestoreId:'l1',nome:'<img onerror=1>',recursos:['<script>ruim</script>']}];renderLocais()");
+    const html=a.element('tabela-locais').innerHTML;assert.ok(html.includes('&lt;img'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('<script>ruim'));
+});
+test('edição estruturada disponibiliza campos opcionais sem substituir o cadastro inteiro',()=>{
+    const a=app();a.run("montarEdicaoEstruturada('locais',{nome:'Local',capacidade:0,valorAluguel:0})");
+    const html=a.element('edit-campos-dinamicos').innerHTML;assert.ok(html.includes('editar-local-recursos'));assert.ok(html.includes('editar-local-endereco'));assert.ok(html.includes('value="0"'));
+});
+test('novo local grava capacidade e recursos tipados e não inventa valor desconhecido',async()=>{
+    const a=app();agendaLocalTeste(a);a.element('form-univ-tipo').value='local';a.element('uc-1').value='Novo';a.element('novo-local-capacidade').value='60';a.element('novo-local-recursos').value='Projetor, Wi-Fi\nProjetor';
+    await a.run('salvarCadastroUniversal({preventDefault(){}})');
+    assert.equal(a.writes[0].collection,'locais');assert.equal(a.writes[0].data.capacidade,60);assert.equal(a.writes[0].data.valorAluguel,null);assert.deepEqual(Array.from(a.writes[0].data.recursos),['Projetor','Wi-Fi']);
+});
+test('formulário de local recusa capacidade fracionária e gratuidade com tarifa positiva',()=>{
+    const a=app();a.element('uc-1').value='Local';a.element('novo-local-capacidade').value='1.5';assert.throws(()=>a.run('lerCadastroLocal(true)'));
+    a.element('novo-local-capacidade').value='100';a.element('novo-local-tipoLocacao').value='gratuito';a.element('novo-local-valorAluguel').value='100';assert.throws(()=>a.run('lerCadastroLocal(true)'));
+});
+test('evento cadastrado vincula local por ID e registra custo total sem tarifa implícita',async()=>{
+    const a=app();agendaLocalTeste(a);a.element('form-univ-tipo').value='evento';a.element('uc-1').value='Novo evento';a.element('evt-local-id').value='l2';a.element('evt-data-inicio').value='2030-01-01';a.element('evt-custo').value='900,50';
+    await a.run('salvarCadastroUniversal({preventDefault(){}})');
+    assert.equal(a.writes[0].collection,'eventos');assert.equal(a.writes[0].data.localId,'l2');assert.equal(a.writes[0].data.localEvento,'Sala Verde');assert.equal(a.writes[0].data.custoLocacaoPrevisto,900.5);
+});
+test('datas UTC são consultadas no fuso de Pernambuco',()=>{
+    const a=app();
+    assert.equal(a.run("diaEventoLocal('2030-01-02T01:00:00Z')"),'2030-01-01');
+    assert.equal(a.run("horarioEventoLocal({dataInicio:'2030-01-02T01:00:00Z'},'dataInicio')"),'22:00');
+});
+test('logout limpa painel, filtros e consulta de locais',async()=>{
+    const a=app();agendaLocalTeste(a);a.run("localSelecionadoId='l1';consultaLocalAtiva=true");a.element('disponibilidade-data').value='2030-01-01';a.element('local-filtro-tipo').value='pago';
+    await a.context.authCallback(null);
+    assert.equal(a.run('localSelecionadoId'),'');assert.equal(a.run('consultaLocalAtiva'),false);assert.equal(a.element('disponibilidade-data').value,'');assert.equal(a.element('local-filtro-tipo').value,'');
 });
