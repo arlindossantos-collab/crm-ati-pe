@@ -2,6 +2,46 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.6.0 — Locais e planejamento de espaços — entrega de 20/10/2026
+
+**Resumo para a chefia:** moderniza a aba Locais com indicadores, comparação de espaços, filtros, painel de informações e consulta de conflitos na agenda cadastrada.
+
+- Base independente: main@85e439612962626ffa3783879dab18a8ea383e47 (v0.4.0). O PR #8/v0.5.0 continua separado e pendente do Firebase; não foi incorporado nem publicado.
+- Publicação autorizada em 20/10/2026. Versão anterior publicada: v0.4.0; nova versão: v0.6.0. A identificação v0.5.0 pertence ao PR #8, ainda não publicado; deverá ser ajustada antes da sua integração para não reduzir a versão do sistema.
+- Próxima página formal prevista: **Release 02 — v0.6.0**, conforme histórico consultado com apenas Release 01 — v0.4.0. Este arquivo não cria tag/release. Integração, GitHub Pages e release formal são verificações separadas.
+- Próxima versão sugerida: v0.6.1 para correções ou v0.7.0 para funcionalidades.
+- A aplicação continua em um único HTML. Nenhum dado existente é migrado ou alterado automaticamente.
+
+| Antes | Depois |
+| --- | --- |
+| Lista simples de locais. | Seis cards: total, capacidade informada, eventos vinculados, gratuitos, pagos e custo previsto informado por evento. |
+| Busca básica e nenhum filtro específico. | Busca sem distinção de acentos em nome, endereço e contatos; filtros combinados de tipo, capacidade mínima e recurso. |
+| Tabela com seis colunas. | Mantém as colunas originais e acrescenta eventos vinculados e recursos. |
+| Detalhes apenas no modal genérico. | Painel abaixo da tabela com endereço, capacidade/área, responsável, recursos e histórico; edição administrativa permanece acessível. |
+| Sem consulta de agenda. | Consulta por local, data e horários opcionais; conflitos, agenda parcial e lacunas exibidos explicitamente. |
+| Novos locais/eventos só tinham nome e descrição. | Formulários com capacidade, contatos, recursos, tipo/tarifa e vínculo localId, período, situação e custo total da locação por evento. |
+
+### Regras de cálculo e limites
+
+- Capacidade soma apenas números válidos; campos ausentes não são inventados. Gratuito e pago usam o tipo informado ou valor numérico legado; ausência de valor não significa gratuito.
+- Eventos vinculam pelo ID; nome legado só é associado em consulta quando corresponde a um único local (ignorando acentos/caixa/espaços). Não há gravação automática desse vínculo. ID órfão e nome duplicado exigem revisão.
+- Eventos vinculados inclui todos os períodos e cancelados. Custo previsto soma somente custos totais explicitamente informados por evento vinculado, atual/futuro e não cancelado/realizado. Tarifa do local não é multiplicada por diárias ou horas. Ausências e totais parciais são sinalizados.
+- Consulta não é reserva. Sem horários completos, o período inteiro pode estar comprometido. Eventos cancelados não geram conflito. Agendas parciais, erros de carregamento, locais/datas ausentes e vínculos ambíguos impedem afirmar disponibilidade completa.
+- Datas com fuso são tratadas no fuso de Pernambuco. Eventos de vários dias são tratados conservadoramente.
+- Datas passadas não comprovam realização: o histórico diferencia realização registrada de data encerrada a confirmar.
+- Dados de eventos respeitam o acesso existente; somente administrador recebe a agenda completa. Sem módulo Eventos, indicadores de eventos/custo ficam indisponíveis.
+- Não muda firestore.rules. Pode ser revisado/testado sem a atualização do Firebase pendente no PR #8. Concessão de novos acessos não faz parte desta entrega.
+
+### Validação
+
+- [Execução completa aprovada no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39465560736), commit `2b92110ada190203b3464e09740e85fb98993c7c`: **70 testes da aplicação, 25 de regras e 2 de autenticação, total de 97 aprovações sem falhas**.
+- Chromium aprovado com Firebase totalmente interceptado: seis cards, filtros, busca de contato, painel/histórico, conflito por horário, horários adjacentes sem conflito, edição e criação de local.
+- Capturas de desktop (1440 px) e celular (390 px) guardadas no artefato locais-interface da execução. Verificado que a página não transborda na largura do celular; tabela e abas têm rolagem própria. O teste inicial revelou transbordamento da navegação, corrigido antes desta aprovação.
+- Nenhuma operação de teste acessou os dados do Firebase real. A prova inicial V8 foi complementada pela execução oficial; isso não equivale a homologação institucional.
+- Conferência estática preservou todos os 138 IDs originais do HTML; nova página tem 153 IDs, sem duplicação.
+- Pendências: homologar com usuários e revisar os cadastros reais para associar locais e preencher períodos, recursos e custos. Publicação autorizada; conferir a implantação do GitHub Pages separadamente.
+
+
 **Release 01 — v0.4.0:** notas da entrega autorizada para publicação em 20/10/2026. Na conferência anterior à publicação não havia tags nem releases formais. A situação das publicações formais pode ser consultada na [página de releases](https://github.com/arlindossantos-collab/crm-ati-pe/releases); este arquivo não cria uma tag ou release por si só.
 
 <a id="v040"></a>
