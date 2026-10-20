@@ -2,12 +2,14 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.6.0 — Locais e planejamento de espaços — proposta
+## v0.6.0 — Locais e planejamento de espaços — entrega de 20/10/2026
 
 **Resumo para a chefia:** moderniza a aba Locais com indicadores, comparação de espaços, filtros, painel de informações e consulta de conflitos na agenda cadastrada.
 
 - Base independente: main@85e439612962626ffa3783879dab18a8ea383e47 (v0.4.0). O PR #8/v0.5.0 continua separado e pendente do Firebase; não foi incorporado nem publicado.
-- v0.6.0 é proposta para esta funcionalidade. Sequência da release e versão anterior efetiva serão conferidas quando a publicação for autorizada. Próxima versão sugerida: v0.6.1 para correções ou v0.7.0 para funcionalidades.
+- Publicação autorizada em 20/10/2026. Versão anterior publicada: v0.4.0; nova versão: v0.6.0. A identificação v0.5.0 pertence ao PR #8, ainda não publicado; deverá ser ajustada antes da sua integração para não reduzir a versão do sistema.
+- Próxima página formal prevista: **Release 02 — v0.6.0**, conforme histórico consultado com apenas Release 01 — v0.4.0. Este arquivo não cria tag/release. Integração, GitHub Pages e release formal são verificações separadas.
+- Próxima versão sugerida: v0.6.1 para correções ou v0.7.0 para funcionalidades.
 - A aplicação continua em um único HTML. Nenhum dado existente é migrado ou alterado automaticamente.
 
 | Antes | Depois |
@@ -37,7 +39,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 - Capturas de desktop (1440 px) e celular (390 px) guardadas no artefato locais-interface da execução. Verificado que a página não transborda na largura do celular; tabela e abas têm rolagem própria. O teste inicial revelou transbordamento da navegação, corrigido antes desta aprovação.
 - Nenhuma operação de teste acessou os dados do Firebase real. A prova inicial V8 foi complementada pela execução oficial; isso não equivale a homologação institucional.
 - Conferência estática preservou todos os 138 IDs originais do HTML; nova página tem 153 IDs, sem duplicação.
-- Pendências: homologar com usuários e revisar os cadastros reais para associar locais e preencher períodos, recursos e custos. Sem publicação nesta etapa.
+- Pendências: homologar com usuários e revisar os cadastros reais para associar locais e preencher períodos, recursos e custos. Publicação autorizada; conferir a implantação do GitHub Pages separadamente.
 
 
 **Release 01 — v0.4.0:** notas da entrega autorizada para publicação em 20/10/2026. Na conferência anterior à publicação não havia tags nem releases formais. A situação das publicações formais pode ser consultada na [página de releases](https://github.com/arlindossantos-collab/crm-ati-pe/releases); este arquivo não cria uma tag ou release por si só.
