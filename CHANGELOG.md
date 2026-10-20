@@ -14,7 +14,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 
 **Limites:** somente administradores podem excluir; autoexclusão bloqueada. Conta Auth, dados pessoais, e-mail reservado e histórico permanecem. Exclusão definitiva exige implementação administrativa separada.
 
-**Validação:** execução das suítes atualizadas no GitHub Actions pendente nesta preparação. Os 88 testes da proposta antiga não validam esta integração. Regras e autenticação são verificadas em emuladores; a interface usa Firebase simulado. Persistência real e homologação institucional permanecem pendentes.
+**Validação:** [GitHub Actions aprovado](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39476011701), commit `d38143255337955aeddc3013e2022f2cb4f9f499`: **75 testes da aplicação, 27 de regras e 2 de autenticação, total 104 aprovações sem falhas**. Locais também aprovado em Chromium, incluindo layout móvel, com Firebase totalmente simulado. Regras e autenticação verificadas em emuladores. Persistência real e homologação institucional permanecem pendentes.
 
 **Implantação:** proposta ainda não publicada. Publicar as novas regras do Firestore antes ou junto do HTML. Sem acesso Firebase nesta sessão; nenhum usuário real alterado. Confirmar login, F5, reabertura, Sair, edição e exclusão no ambiente institucional. Próximas versões possíveis: v0.7.1 para correções ou v0.8.0 para novas funcionalidades.
 
