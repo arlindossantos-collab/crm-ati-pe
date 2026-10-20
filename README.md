@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.4.0.** A numeração consolida as melhorias recentes de cadastro de usuários, responsáveis GRGD, perfil pessoal e correções da interface.
+**Versão deste código: v0.6.0 — proposta de modernização de Locais.** Base independente da v0.4.0; o PR #8/v0.5.0 permanece separado e pendente do Firebase.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -15,7 +15,8 @@ A versão do site depende da integração e da publicação deste código. Uma b
 | Demandas | Cadastro, buscas, filtros, prioridades, responsáveis GRGD, calendário e registros de andamento. |
 | Clientes e órgãos | Cadastros institucionais, contatos, filtros e importação de CSV. |
 | Eventos | Consulta e cadastro de eventos; inscrições associadas ao evento e à pessoa. |
-| Locais e fornecedores | Cadastros e consultas de apoio às atividades. |
+| Locais | Indicadores, filtros, capacidade, contatos, recursos, painel de detalhes, histórico e consulta de agenda. |
+| Fornecedores | Cadastros e consultas de apoio às atividades. |
 | Usuários | Tipos **Interno - GRGD** e **Externo**, situação, perfil e módulos permitidos. |
 | Perfil pessoal | Edição do próprio nome, telefone e endereço, foto enviada do computador e troca de senha com confirmação da senha atual. |
 | Identificação | Foto ou iniciais no cabeçalho e nos registros com vínculo ao identificador da pessoa. |
@@ -24,6 +25,8 @@ A versão do site depende da integração e da publicação deste código. Uma b
 Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo interno não concede administração automaticamente. Registros antigos sem vínculo continuam preservados, sem associação automática por nome.
 
 ## O que mudou nesta entrega
+
+A proposta v0.6.0 moderniza Locais com indicadores, filtros, recursos, detalhes abaixo da tabela e consulta de conflitos por data/horário. Eventos ganham vínculo com o local por ID e custo total previsto. Os indicadores respeitam dados ausentes e agenda parcial; consulta não confirma reserva. Não há mudança de regras do Firebase nesta proposta. O histórico abaixo registra a entrega anterior.
 
 A [Release 01 — v0.4.0](CHANGELOG.md#v040) descreve o antes/depois das funcionalidades, as correções, os testes e as pendências para consulta pela gestão.
 
@@ -88,4 +91,4 @@ A hospedagem futura prevista é uma **VM no DataCenter da ATI**. Essa mudança a
 - Revisar relatórios, importação e recursos exclusivos da versão histórica antes de decidir sua incorporação ou retirada.
 - Definir a publicação coordenada do HTML e das regras, além da operação futura em VM.
 
-Não há migração de dados, exclusão de arquivos ou mudança de regras do Firebase nesta atualização de documentação e versão.
+Nesta proposta de Locais não há migração automática, exclusão de arquivos ou mudança de regras do Firebase. Revisar vínculos, datas e custos existentes antes de interpretar os totais como completos.
