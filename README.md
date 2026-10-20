@@ -25,7 +25,7 @@ Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo
 
 ## O que mudou nesta entrega
 
-A [proposta de Release 01 — v0.4.0](CHANGELOG.md#v040) descreve o antes/depois das funcionalidades, as correções, os testes e as pendências para consulta pela gestão.
+A [Release 01 — v0.4.0](CHANGELOG.md#v040) descreve o antes/depois das funcionalidades, as correções, os testes e as pendências para consulta pela gestão.
 
 As funcionalidades foram integradas nos PRs #2, #3, #4 e #6 quando a aplicação ainda mostrava v0.3.4. Esta atualização corrige a identificação da versão e consolida seu histórico; não apresenta esses recursos como desenvolvidos novamente.
 

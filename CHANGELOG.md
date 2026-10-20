@@ -2,18 +2,18 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-**Publicação em preparação:** Release 01 — v0.4.0. Na conferência de 20/10/2026 não havia tags nem releases formais no repositório. A numeração abaixo é uma proposta; esta documentação não cria a tag nem publica a release.
+**Release 01 — v0.4.0:** notas da entrega autorizada para publicação em 20/10/2026. Na conferência anterior à publicação não havia tags nem releases formais. A situação das publicações formais pode ser consultada na [página de releases](https://github.com/arlindossantos-collab/crm-ati-pe/releases); este arquivo não cria uma tag ou release por si só.
 
 <a id="v040"></a>
-## Release 01 — v0.4.0 — proposta de consolidação em 20/10/2026
+## Release 01 — v0.4.0 — 20/10/2026
 
 **Resumo para a chefia:** o sistema passou a cadastrar contas internas e externas, vincular os responsáveis GRGD às demandas e permitir que cada pessoa mantenha seu perfil com foto e senha. Também recebeu correções de calendário, consultas, edição e troca de sessão.
 
 - **Versão anterior declarada:** v0.3.4.
-- **Nova versão preparada:** v0.4.0.
+- **Nova versão:** v0.4.0.
 - **Motivo do incremento:** consolidar funcionalidades adicionadas desde a identificação anterior, além das correções já integradas.
 - **Base examinada:** `main@c2c13c3b31b9765930f1e32ea04d416aa79846cf`.
-- **Situação:** proposta em branch própria; publicação e release formal pendentes.
+- **Situação:** entrega autorizada para publicação em 20/10/2026. A implantação do site e o registro da release no GitHub são verificações separadas.
 - **Próxima versão sugerida:** v0.4.1 se o próximo lote trouxer apenas correções; v0.5.0 se adicionar funcionalidades. Não é compromisso de entrega.
 
 ### Antes e depois
@@ -55,7 +55,7 @@ As funcionalidades acima já estavam no código examinado. Este lote corrige a i
 
 - Esta revisão não muda `firestore.rules` nem configurações do Firebase.
 - Conferir login e versão no cabeçalho após integrar e publicar a proposta.
-- Ao publicar a release, substituir o estado de proposta por publicada, associar a tag `v0.4.0` ao commit final revisado e informar a data efetiva.
+- A tag `v0.4.0` deve identificar o commit final integrado e revisado. A data efetiva e a confirmação da publicação formal ficam na página da release.
 - Reverter apenas o código não restaura dados do Firebase. Não aplicar regras históricas sem revisão de compatibilidade e acesso aos novos documentos.
 
 ### Pendências
