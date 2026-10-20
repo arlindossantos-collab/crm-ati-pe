@@ -351,7 +351,7 @@
                 <div class="flex items-center gap-3 flex-wrap">
                     <h3 class="text-base font-bold text-slate-800">Usuários (<span id="count-usuarios">0</span>)</h3>
                     <input type="text" id="busca-usuarios" placeholder="Buscar nome ou e-mail..." class="p-2 border rounded-lg text-xs bg-white w-48 focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    <select id="filtro-tipo-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium" aria-label="Filtrar tipo de usuário"><option value="">Todos os tipos</option><option value="interno">Internos</option><option value="externo">Externos</option><option value="legado">A definir</option></select>
+                    <select id="filtro-tipo-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium" aria-label="Filtrar tipo de usuário"><option value="">Todos os tipos</option><option value="interno">Interno - GRGD</option><option value="externo">Externos</option><option value="legado">A definir</option></select>
                     <select id="filtro-orgao-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
                         <option value="">Filtrar por Cliente / Secretaria</option>
                     </select>
@@ -505,7 +505,7 @@
         }
 
         function nomeTipoUsuario(usuario) {
-            return {interno: 'Interno', externo: 'Externo'}[usuario.tipoUsuario] || 'A definir';
+            return {interno: 'Interno - GRGD', externo: 'Externo'}[usuario.tipoUsuario] || 'A definir';
         }
 
         function uidCadastro(usuario) { return String(usuario.firestoreId || usuario.uid || ''); }
@@ -564,7 +564,7 @@
             return `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs max-h-[65vh] overflow-y-auto p-1">
                 <div><label for="usuario-nome" class="block font-bold mb-1">Nome completo</label><input id="usuario-nome" value="${esc(usuario.nome || '')}" required maxlength="150" class="${cls}"></div>
                 <div><label for="usuario-email" class="block font-bold mb-1">E-mail de acesso</label><input id="usuario-email" type="email" value="${esc(usuario.email || '')}" required ${!novo && usuario.email ? 'readonly' : ''} class="${cls}">${!novo ? '<p class="mt-1 text-slate-500">Alterações no e-mail de acesso exigem ajuste no Firebase Authentication.</p>' : ''}</div>
-                <div><label for="usuario-tipo" class="block font-bold mb-1">Tipo de usuário</label><select id="usuario-tipo" required class="${cls}"><option value="">Selecione</option><option value="interno" ${usuario.tipoUsuario === 'interno' ? 'selected' : ''}>Interno</option><option value="externo" ${usuario.tipoUsuario === 'externo' ? 'selected' : ''}>Externo</option></select></div>
+                <div><label for="usuario-tipo" class="block font-bold mb-1">Tipo de usuário</label><select id="usuario-tipo" required class="${cls}"><option value="">Selecione</option><option value="interno" ${usuario.tipoUsuario === 'interno' ? 'selected' : ''}>Interno - GRGD</option><option value="externo" ${usuario.tipoUsuario === 'externo' ? 'selected' : ''}>Externo</option></select></div>
                 <div><label for="usuario-ativo" class="block font-bold mb-1">Situação</label><select id="usuario-ativo" class="${cls}"><option value="true" ${usuario.ativo !== false ? 'selected' : ''}>Ativo</option><option value="false" ${usuario.ativo === false ? 'selected' : ''}>Inativo</option></select></div>
                 <div><label for="usuario-perfil" class="block font-bold mb-1">Perfil do sistema</label><select id="usuario-perfil" class="${cls}"><option value="comum">Consulta</option><option value="admin" ${ehAdministrador(usuario) ? 'selected' : ''}>Administrador</option></select></div>
                 <div><label for="usuario-orgao" class="block font-bold mb-1">Cliente / Secretaria</label><input id="usuario-orgao" value="${esc(usuario.orgao || '')}" class="${cls}"></div>
@@ -597,7 +597,7 @@
             const perfil = val('usuario-perfil');
             const nome = val('usuario-nome'), email = val('usuario-email').toLowerCase();
             if (!nome || nome.length > 150 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Informe nome completo e e-mail válido.');
-            if (!['interno','externo'].includes(tipoUsuario)) throw new Error('Selecione o tipo Interno ou Externo.');
+            if (!['interno','externo'].includes(tipoUsuario)) throw new Error('Selecione o tipo Interno - GRGD ou Externo.');
             if (!['admin','comum'].includes(perfil) || (tipoUsuario === 'externo' && perfil === 'admin')) throw new Error('Somente usuários internos podem ser administradores.');
             if (!['true','false'].includes(val('usuario-ativo'))) throw new Error('Selecione a situação do usuário.');
             const ativo = val('usuario-ativo') === 'true';
