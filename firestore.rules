@@ -39,6 +39,7 @@ service cloud.firestore {
         && data.email is string && data.email.matches('^[^ @]+@[^ @]+[.][^ @]+$')
         && data.tipoUsuario in ['interno','externo'] && data.ativo is bool
         && data.perfil in ['admin','comum'] && (data.perfil != 'admin' || data.tipoUsuario == 'interno')
+        && data.get('excluido', false) is bool && (data.get('excluido', false) != true || data.ativo == false)
         && data.modulosPermitidos is list
         && data.modulosPermitidos.hasOnly(['dashboard','demandas','clientes','eventos','locais','fornecedores','usuarios','bases'])
         && (data.perfil == 'admin' || !data.modulosPermitidos.hasAny(['usuarios']))
@@ -56,7 +57,9 @@ service cloud.firestore {
       allow create: if isAdmin() && validUser(request.resource.data, uid);
       allow update: if (isAdmin()
           && (validUser(request.resource.data, uid)
-            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ativo','atualizadoEm','editadoPor','editadoPorUid']) && request.resource.data.ativo is bool))
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ativo','excluido','atualizadoEm','editadoPor','editadoPorUid']) && request.resource.data.ativo is bool
+              && request.resource.data.get('excluido', false) is bool
+              && (request.resource.data.get('excluido', false) != true || request.resource.data.ativo == false)))
           && (request.auth.uid != uid || (request.resource.data.ativo == true && request.resource.data.perfil == 'admin' && request.resource.data.tipoUsuario == 'interno')))
         || (active() && request.auth.uid == uid
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','fotoPerfil','perfilAtualizadoEm'])
