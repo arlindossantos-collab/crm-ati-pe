@@ -2,11 +2,11 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.6.3 — Ícones e tons suaves nos indicadores de Locais — proposta em 20/10/2026
+## v0.6.3 — Ícones e tons suaves nos indicadores de Locais — entrega de 20/10/2026
 
 **Resumo para a chefia:** melhora a identificação dos seis indicadores, mantendo a disposição atual da tela.
 
-- Versão anterior: v0.6.2. Versão proposta: v0.6.3.
+- Versão anterior: v0.6.2. Nova versão: v0.6.3. Publicação autorizada em 20/10/2026; conferir integração e GitHub Pages separadamente.
 - Antes: cards brancos com rótulos sem ícones.
 - Depois: um ícone por indicador e fundos discretos alternando somente azul e verde, com opacidade de 5,5% e borda de 16%. Texto, números e notas mantêm as cores anteriores.
 - Ícones: edifício, pessoas, calendário, presente, cartão e moedas, na ordem dos indicadores. Ícones decorativos; nomes preservados para leitura e acessibilidade.
@@ -14,7 +14,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 - Alteração limitada aos seis cards: demais campos, tabela, cabeçalho, consulta, cálculos, cadastros, permissões e regras do Firebase preservados.
 - Teste de navegador verifica seis ícones, moedas no custo, somente azul/verde, baixa opacidade e consulta abaixo do painel, além dos fluxos anteriores.
 - [Execução completa aprovada no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39473507112), commit `bbfee522ef9e3b54dc7c1355b2958fee3250389a`: 70 testes da aplicação, 25 de regras e 2 de autenticação, totalizando **97 aprovações**. Chromium aprovado em desktop e celular: seis ícones, moedas no custo, apenas azul/verde, baixa opacidade e consulta mantida abaixo do painel. Dados simulados; não equivale a homologação em produção.
-- Proposta sem publicação. Não exige alteração no Firebase; PR #8 continua separado.
+- Publicação autorizada. Não exige alteração no Firebase; PR #8 continua separado.
 - Próxima versão sugerida: v0.6.4 para ajustes ou v0.7.0 para funcionalidades; sequência formal a conferir ao publicar.
 
 
