@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.8.0 — exclusão com senha, histórico de alterações e restauração da sessão.** Publicação autorizada pelo usuário em 21/10/2026; implantação aguarda a atualização das regras do Firebase e do site. Parte da v0.7.0 e preserva a organização e os tons suaves de Locais.
+**Versão deste código: v0.8.0 — exclusão com senha, histórico de alterações e restauração da sessão.** Publicação autorizada em 21/10/2026 após o usuário informar que publicou as regras do Firebase. Integração e implantação do site acompanhadas no PR #13. Parte da v0.7.0 e preserva a organização e os tons suaves de Locais.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -105,4 +105,4 @@ A hospedagem futura prevista é uma **VM no DataCenter da ATI**. Essa mudança a
 - Revisar relatórios, importação e recursos exclusivos da versão histórica antes de decidir sua incorporação ou retirada.
 - Definir a publicação coordenada do HTML e das regras, além da operação futura em VM.
 
-A v0.8.0 altera novamente `firestore.rules`: as regras publicadas para a v0.7.0 não são suficientes para o novo histórico. Publicar as regras revisadas antes de liberar o novo HTML. Durante a transição, a v0.7.0 não consegue excluir usuários porque não envia o histórico exigido; as demais gravações antigas conservam os acessos existentes. GitHub Pages publica somente o site. A validação integrada no projeto institucional continua pendente; os testes não alteram contas reais.
+A v0.8.0 altera novamente `firestore.rules`: as regras publicadas para a v0.7.0 não são suficientes para o novo histórico. Em 21/10/2026, o usuário informou ter publicado as regras revisadas antes da liberação do HTML; confirmação baseada no relato, sem verificação direta do console nesta sessão. Durante a transição, a v0.7.0 não consegue excluir usuários porque não envia o histórico exigido; as demais gravações antigas conservam os acessos existentes. GitHub Pages publica somente o site. A validação integrada no projeto institucional continua pendente; os testes não alteram contas reais.

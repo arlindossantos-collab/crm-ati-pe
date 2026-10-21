@@ -1,6 +1,6 @@
 # Exclusão com senha, histórico e restauração da sessão
 
-Proposta v0.8.0, preparada em 21/10/2026 sobre a v0.7.0 (`5f444af75e9b35a8f5e67e9efdca573f5c83ae3f`). Publicação autorizada pelo usuário em 21/10/2026; implantação ainda pendente da atualização das regras do Firebase e do site. A aplicação continua concentrada em `index.html`.
+Entrega v0.8.0, preparada em 21/10/2026 sobre a v0.7.0 (`5f444af75e9b35a8f5e67e9efdca573f5c83ae3f`). Em 21/10/2026, o usuário confirmou a publicação das novas regras no Firebase e autorizou a publicação do site. Confirmação das regras baseada no relato do usuário, sem verificação direta do console nesta sessão. Integração e GitHub Pages acompanhados no PR #13. A aplicação continua concentrada em `index.html`.
 
 ## Comportamento para a equipe
 

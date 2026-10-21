@@ -2,9 +2,9 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.8.0 — Exclusão protegida, histórico e restauração da sessão — proposta de 21/10/2026
+## v0.8.0 — Exclusão protegida, histórico e restauração da sessão — entrega de 21/10/2026
 
-**Resumo para a chefia:** reduz exclusões acidentais com confirmação da senha do administrador, identifica quem alterou os cadastros e mantém a aba escolhida ao atualizar a página. Parte de `main@5f444af75e9b35a8f5e67e9efdca573f5c83ae3f` (v0.7.0). Publicação autorizada pelo usuário em 21/10/2026; implantação ainda pendente das regras do Firebase e do GitHub Pages.
+**Resumo para a chefia:** reduz exclusões acidentais com confirmação da senha do administrador, identifica quem alterou os cadastros e mantém a aba escolhida ao atualizar a página. Parte de `main@5f444af75e9b35a8f5e67e9efdca573f5c83ae3f` (v0.7.0). Publicação autorizada pelo usuário em 21/10/2026, após informar que publicou as novas regras no Firebase. Integração e GitHub Pages acompanhados no PR #13.
 
 | Antes | Depois |
 | --- | --- |
@@ -13,11 +13,11 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 | Autoria parcial nos próprios registros, sem consulta central. | Histórico administrativo com pessoa, horário do servidor, ação, registro e nomes dos campos alterados; busca e paginação. |
 | F5 podia mostrar o login durante a restauração e voltar à aba inicial. | Carregamento aguarda o Firebase e as permissões; restaura a aba e a visualização de Demandas na mesma guia. |
 
-**Validação:** 87 testes da aplicação, 34 de regras e 3 de autenticação aprovados localmente (124 aprovações). A conferência adicional em Chromium cobre Locais no computador/celular, senha incorreta, cancelamento, exclusão, histórico, consulta sem exclusão e F5 na mesma aba sem exibição do login; os resultados e as capturas estão nas execuções do [CI do PR #13](https://github.com/arlindossantos-collab/crm-ati-pe/pull/13/checks). Conferência estática preserva todos os 153 IDs anteriores do HTML, agora com 170 IDs sem duplicação. Dados simulados e emuladores; nenhuma exclusão em produção.
+**Validação:** 87 testes da aplicação, 34 de regras e 3 de autenticação aprovados no [GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39633564600) (124 aprovações). A conferência adicional em Chromium cobre Locais no computador/celular, senha incorreta, cancelamento, exclusão, histórico, consulta sem exclusão e F5 na mesma aba sem exibição do login; os resultados e as capturas estão nas execuções do [CI do PR #13](https://github.com/arlindossantos-collab/crm-ati-pe/pull/13/checks). Conferência estática preserva todos os 153 IDs anteriores do HTML, agora com 170 IDs sem duplicação. Dados simulados e emuladores; nenhuma exclusão em produção.
 
 **Limites e pendências:** histórico inicia após a implantação e cobre operações da aplicação; não captura mudanças pelo console Firebase ou programas externos. Guarda nomes de campos, sem os valores anteriores/novos. Troca de senha ocorre no Authentication e seu histórico no Firestore; falha do histórico é informada sem reverter a senha. Perfis já cadastrados não são alterados automaticamente. A restauração cobre aba e visualização de Demandas; formulários e buscas não são recuperados após F5. Homologação institucional pendente.
 
-**Implantação:** exige publicar o novo `firestore.rules` antes do HTML. Durante a transição, a exclusão de usuários pela v0.7.0 é bloqueada por não enviar o histórico obrigatório. Não retirar as novas proteções apenas para liberar um cliente antigo. Ver [procedimento e retorno](docs/seguranca-auditoria-sessao.md). Aplicação permanece em um único HTML; organização e cores de Locais preservadas.
+**Implantação:** usuário confirmou em 21/10/2026 a publicação do novo `firestore.rules` antes do HTML. Confirmação baseada no relato do usuário, sem verificação direta do console nesta sessão. A implantação do GitHub Pages é acompanhada separadamente. Durante a transição, a exclusão de usuários pela v0.7.0 é bloqueada por não enviar o histórico obrigatório. Não retirar as novas proteções apenas para liberar um cliente antigo. Ver [procedimento e retorno](docs/seguranca-auditoria-sessao.md). Aplicação permanece em um único HTML; organização e cores de Locais preservadas.
 
 Próximas versões possíveis: v0.8.1 para correções ou v0.9.0 para novas funcionalidades; sem compromisso de entrega.
 
