@@ -1109,7 +1109,7 @@
         });
 
         function traduzirErroSistema(err) {
-            const msg = String(err?.message || err || '');
+            const msg = [err?.code, err?.message || err].filter(Boolean).join(' ');
             if (msg.includes('longer than') || msg.includes('bytes')) return 'A imagem selecionada é muito pesada para o banco de dados. Limite máximo: 500 KB.';
             if (msg.includes('permission-denied')) return 'Permissão negada. Você não tem autorização para realizar esta operação.';
             if (msg.includes('auth/email-already-in-use')) return 'Este e-mail já possui conta de acesso. Edite o cadastro existente; cadastros antigos sem perfil vinculado precisam ser conferidos no Firebase Authentication.';

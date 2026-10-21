@@ -448,7 +448,7 @@ test('falha no histórico após trocar senha informa que a nova senha já está 
 });
 test('senha atual incorreta e confirmação divergente não alteram a senha', async () => {
     const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid',getIdToken:async()=>''}");let alterou=false;
-    a.context.updatePassword=async()=>{alterou=true;};a.context.reauthenticateWithCredential=async()=>{throw new Error('auth/wrong-password');};
+    a.context.updatePassword=async()=>{alterou=true;};a.context.reauthenticateWithCredential=async()=>{throw {code:'auth/wrong-password'};};
     for(const [atual,nova,confirmar] of [['atual','nova-senha','diferente'],['atual','nova-senha','nova-senha']]){
         a.element('perfil-senha-atual').value=atual;a.element('perfil-senha-nova').value=nova;a.element('perfil-senha-confirmar').value=confirmar;await a.run('alterarMinhaSenha({preventDefault(){}})');
     }
