@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.8.0 — exclusão com senha, histórico de alterações e restauração da sessão.** Proposta de 21/10/2026, ainda sem publicação autorizada. Parte da v0.7.0 e preserva a organização e os tons suaves de Locais.
+**Versão deste código: v0.8.0 — exclusão com senha, histórico de alterações e restauração da sessão.** Publicação autorizada pelo usuário em 21/10/2026; implantação aguarda a atualização das regras do Firebase e do site. Parte da v0.7.0 e preserva a organização e os tons suaves de Locais.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 

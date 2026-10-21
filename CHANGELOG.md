@@ -4,7 +4,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 
 ## v0.8.0 — Exclusão protegida, histórico e restauração da sessão — proposta de 21/10/2026
 
-**Resumo para a chefia:** reduz exclusões acidentais com confirmação da senha do administrador, identifica quem alterou os cadastros e mantém a aba escolhida ao atualizar a página. Parte de `main@5f444af75e9b35a8f5e67e9efdca573f5c83ae3f` (v0.7.0). Publicação desta entrega ainda não autorizada.
+**Resumo para a chefia:** reduz exclusões acidentais com confirmação da senha do administrador, identifica quem alterou os cadastros e mantém a aba escolhida ao atualizar a página. Parte de `main@5f444af75e9b35a8f5e67e9efdca573f5c83ae3f` (v0.7.0). Publicação autorizada pelo usuário em 21/10/2026; implantação ainda pendente das regras do Firebase e do GitHub Pages.
 
 | Antes | Depois |
 | --- | --- |
