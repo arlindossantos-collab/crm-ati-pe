@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.6.3 - LOCAIS, AGENDA E PLANEJAMENTO DE ESPAÇOS   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.7.0 - GESTÃO DE USUÁRIOS E SESSÃO PERSISTENTE   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -59,7 +59,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.6.3</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.7.0</span></p>
             </div>
         </div>
     </div>
@@ -72,7 +72,7 @@
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.6.3</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.7.0</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -496,14 +496,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.6.3 -->
+    <!-- Script Principal v0.7.0 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.6.3: Usuários GRGD, perfil pessoal e identificação com foto');
+        console.info('PRGD v0.7.0: Usuários GRGD, perfil pessoal e identificação com foto');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -519,7 +519,9 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         
-        setPersistence(auth, inMemoryPersistence).catch(console.warn);
+        // A sessão principal persiste no navegador; a conta auxiliar de cadastro continua em memória.
+        const persistenciaSessao = setPersistence(auth, browserLocalPersistence);
+        persistenciaSessao.catch(err => console.warn('Não foi possível configurar a persistência da sessão.', err));
 
         let currentUser = null;
         let versaoSessao = 0;
@@ -668,6 +670,7 @@
             if (!['admin','comum'].includes(perfil) || (tipoUsuario === 'externo' && perfil === 'admin')) throw new Error('Somente usuários internos podem ser administradores.');
             if (!['true','false'].includes(val('usuario-ativo'))) throw new Error('Selecione a situação do usuário.');
             const ativo = val('usuario-ativo') === 'true';
+            if (anterior.excluido === true) throw new Error('Este cadastro foi excluído. Não pode ser reativado pelo formulário de edição.');
             if (uidCadastro(anterior) === currentUser?.uid && (!ativo || perfil !== 'admin' || tipoUsuario !== 'interno')) throw new Error('Sua própria conta deve permanecer ativa como administrador interno. Solicite a outro administrador a alteração.');
             if (anterior.email && email !== anterior.email.toLowerCase()) throw new Error('Altere o e-mail pelo fluxo do Firebase Authentication.');
             const selecionados = Array.from(document.querySelectorAll('input[name="usuario-modulo"]:checked')).map(cb => cb.value);
@@ -1242,7 +1245,7 @@
             document.getElementById('cnt-tab-eventos').textContent = dbData.eventos.length;
             document.getElementById('cnt-tab-locais').textContent = dbData.locais.length;
             document.getElementById('cnt-tab-fornecedores').textContent = dbData.fornecedores.length;
-            document.getElementById('cnt-tab-usuarios').textContent = dbData.usuarios.length;
+            document.getElementById('cnt-tab-usuarios').textContent = dbData.usuarios.filter(u => u.excluido !== true).length;
             document.getElementById('cnt-tab-bases').textContent = dbData.bases.length;
         }
 
@@ -1264,7 +1267,7 @@
             const selectOrgao = document.getElementById('filtro-orgao-usuario');
             if (selectOrgao) {
                 const valorAtual = selectOrgao.value;
-                const orgaos = [...new Set(dbData.usuarios.map(u => u.orgao).filter(Boolean))].sort();
+                const orgaos = [...new Set(dbData.usuarios.filter(u => u.excluido !== true).map(u => u.orgao).filter(Boolean))].sort();
                 selectOrgao.innerHTML = '<option value="">Filtrar por Cliente / Secretaria</option>';
                 orgaos.forEach(orgao => {
                     const opt = document.createElement('option');
@@ -1288,6 +1291,7 @@
             const tbody = document.getElementById('tabela-usuarios');
             if (!tbody) return;
             const us = dbData.usuarios.filter(u => {
+                if (u.excluido === true) return false;
                 const matchTag = !filtroTagAtual || (u.tags || []).includes(filtroTagAtual);
                 const matchOrgao = !filtroOrgaoUsuarioAtual || u.orgao === filtroOrgaoUsuarioAtual;
                 const matchBusca = !buscaUsuariosVal || (u.nome || '').toLowerCase().includes(buscaUsuariosVal) || (u.email || '').toLowerCase().includes(buscaUsuariosVal);
@@ -1297,7 +1301,7 @@
             document.getElementById('count-usuarios').textContent = us.length;
             tbody.innerHTML = us.map(u => {
                 const audit = renderAuditInfo(u);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${identificacaoUsuario({...u,uid:uidCadastro(u)})}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4 text-xs"><b>${nomeTipoUsuario(u)}</b><br>${u.ativo === false ? 'Inativo' : 'Ativo'}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(', ') : u.tags || '-')}</td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button></td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${identificacaoUsuario({...u,uid:uidCadastro(u)})}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4 text-xs"><b>${nomeTipoUsuario(u)}</b><br>${u.ativo === false ? 'Inativo' : 'Ativo'}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(', ') : u.tags || '-')}</td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button>${ehAdministrador() ? `<button type="button" class="ml-1 text-xs bg-blue-100 px-2.5 py-1 rounded font-semibold text-blue-900" data-usuario-editar="${esc(u.firestoreId)}">Editar</button><button type="button" class="ml-1 text-xs bg-red-50 px-2.5 py-1 rounded font-semibold text-red-700" data-usuario-excluir="${esc(u.firestoreId)}" ${uidCadastro(u) === currentUser?.uid ? 'disabled title="Você não pode excluir a própria conta"' : ''}>Excluir</button>` : ''}</td></tr>`;
             }).join('') || '<tr><td colspan="9" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
@@ -2234,7 +2238,7 @@
 
             if (colecao === 'demandas') document.getElementById('detalhe-conteudo').innerHTML += historicoDemandaHtml(item);
             if (colecao === 'eventos') document.getElementById('detalhe-conteudo').innerHTML += inscricoesEventoHtml(item);
-            document.getElementById('btn-excluir-registro').textContent = colecao === 'usuarios' ? 'Inativar usuário' : 'Excluir registro';
+            document.getElementById('btn-excluir-registro').textContent = colecao === 'usuarios' ? 'Excluir usuário' : 'Excluir registro';
             document.getElementById('btn-salvar-edicao').textContent = colecao === 'usuarios' ? 'Salvar usuário' : 'Salvar na Nuvem (Firestore)';
             document.getElementById('detalhe-area-admin').classList.toggle('hidden', !ehAdministrador());
             document.getElementById('modal-detalhes').classList.remove('hidden');
@@ -2295,7 +2299,7 @@
             }
         }
 
-        function fazerLoginLocal(e) {
+        async function fazerLoginLocal(e) {
             if (e?.preventDefault) e.preventDefault();
             const email = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
             const senha = document.getElementById('login-senha')?.value || '';
@@ -2305,7 +2309,7 @@
                 else alert('Informe e-mail e senha.'); 
                 return; 
             }
-            signInWithEmailAndPassword(auth, email, senha).catch(err => {
+            persistenciaSessao.then(() => signInWithEmailAndPassword(auth, email, senha)).catch(err => {
                 const txt = traduzirErroSistema(err);
                 if(msgEl) { msgEl.textContent = txt; msgEl.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
                 else alert(txt);
@@ -2558,13 +2562,13 @@
             const colecao = document.getElementById('edit-colecao').value;
             const firestoreId = document.getElementById('edit-doc-id').value;
             if (!ehAdministrador()) { alert('Somente administradores.'); return; }
-            if (colecao === 'usuarios' && firestoreId === currentUser.uid) { alert('Você não pode inativar sua própria conta.'); return; }
-            if (!confirm(colecao === 'usuarios' ? 'Inativar este usuário? O histórico das demandas será preservado.' : 'Deseja realmente excluir este registro da nuvem?')) return;
+            if (colecao === 'usuarios' && firestoreId === currentUser.uid) { alert('Você não pode excluir sua própria conta.'); return; }
+            if (!confirm(colecao === 'usuarios' ? 'Excluir este usuário do cadastro ativo? O acesso será bloqueado e o histórico preservado. A conta de login e os dados pessoais permanecerão no Firebase.' : 'Deseja realmente excluir este registro da nuvem?')) return;
             try {
                 if (colecao === 'usuarios') {
-                    await gravarUsuarioComIdentidade(String(firestoreId), {ativo: false, atualizadoEm: new Date().toISOString(), editadoPor: currentUser.nome || currentUser.email, editadoPorUid:currentUser.uid}, dbData.usuarios.find(u => uidCadastro(u) === String(firestoreId)) || {});
+                    await gravarUsuarioComIdentidade(String(firestoreId), {ativo: false, excluido: true, atualizadoEm: new Date().toISOString(), editadoPor: currentUser.nome || currentUser.email, editadoPorUid:currentUser.uid}, dbData.usuarios.find(u => uidCadastro(u) === String(firestoreId)) || {});
                 } else await deleteDoc(doc(db, colecao, String(firestoreId)));
-                alert(colecao === 'usuarios' ? 'Usuário inativado. Histórico preservado.' : 'Registro excluído!');
+                alert(colecao === 'usuarios' ? 'Usuário excluído do cadastro ativo. Acesso bloqueado e histórico preservado. A conta de login permanece no Firebase.' : 'Registro excluído!');
                 fecharModal('modal-detalhes');
             } catch(err) { alert(traduzirErroSistema(err)); }
         }
@@ -2753,6 +2757,16 @@
         });
 
         document.addEventListener('click', async ev => {
+            const acaoUsuario = ev.target.closest?.('[data-usuario-editar], [data-usuario-excluir]');
+            if (acaoUsuario) {
+                if (!ehAdministrador()) return;
+                const excluir = acaoUsuario.hasAttribute('data-usuario-excluir');
+                const id = acaoUsuario.getAttribute(excluir ? 'data-usuario-excluir' : 'data-usuario-editar');
+                detalharRegistro('usuarios', id);
+                if (excluir) await excluirRegistroUniversal();
+                else document.getElementById('usuario-nome')?.focus();
+                return;
+            }
             const detalheLocal=ev.target.closest?.('[data-local-detalhes]');
             if(detalheLocal){selecionarLocal(detalheLocal.getAttribute('data-local-detalhes'));return;}
             const editarLocal=ev.target.closest?.('[data-local-editar]');
