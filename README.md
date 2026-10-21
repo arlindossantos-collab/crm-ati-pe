@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.7.0 (proposta).** Atualiza o PR #8 sobre a v0.6.3, preservando Locais e acrescentando edição/exclusão lógica de usuários e sessão persistente.
+**Versão deste código: v0.7.0 — gestão de usuários e sessão persistente.** Publicação autorizada em 21/10/2026. Preserva Locais e acrescenta edição/exclusão lógica de usuários e sessão mantida após F5.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -26,7 +26,7 @@ Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo
 
 ## O que mudou nesta entrega
 
-A proposta v0.7.0 acrescenta **Editar** e **Excluir** na lista de usuários e **Salvar usuário** no formulário. A sessão principal usa persistência local após F5 e reabertura; **Sair** encerra a sessão. Exclusão lógica exige confirmação, bloqueia a própria conta e preserva histórico, dados pessoais e conta Auth. O e-mail permanece reservado. Armazenamento bloqueado pode impedir a persistência.
+A v0.7.0 acrescenta **Editar** e **Excluir** na lista de usuários e **Salvar usuário** no formulário. A sessão principal usa persistência local após F5 e reabertura; **Sair** encerra a sessão. Exclusão lógica exige confirmação, bloqueia a própria conta e preserva histórico, dados pessoais e conta Auth. O e-mail permanece reservado. Armazenamento bloqueado pode impedir a persistência.
 
 A v0.6.3 acrescenta apenas ícones e fundos discretos em azul/verde aos seis indicadores de Locais. A posição da consulta e a organização atual da tela permanecem iguais. Não altera dados, cálculos ou regras do Firebase.
 
@@ -97,4 +97,4 @@ A hospedagem futura prevista é uma **VM no DataCenter da ATI**. Essa mudança a
 - Revisar relatórios, importação e recursos exclusivos da versão histórica antes de decidir sua incorporação ou retirada.
 - Definir a publicação coordenada do HTML e das regras, além da operação futura em VM.
 
-A proposta v0.7.0 altera `firestore.rules`: publicar as regras revisadas antes ou junto do HTML. A atualização do GitHub não publica regras no Firebase. Nenhum dado de produção foi alterado nesta preparação.
+A v0.7.0 altera `firestore.rules`. Em 21/10/2026, o usuário confirmou a publicação das regras no Firebase antes de autorizar o site; essa publicação foi informada pelo usuário, sem verificação direta do console nesta sessão. GitHub Pages publica somente o site. A conferência institucional de login, F5, reabertura, Sair, edição e exclusão permanece pendente.

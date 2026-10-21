@@ -2,7 +2,7 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.7.0 — Gestão de usuários e sessão persistente — proposta de 20/10/2026
+## v0.7.0 — Gestão de usuários e sessão persistente — entrega de 21/10/2026
 
 **Resumo para a chefia:** facilita editar e retirar usuários do cadastro ativo e preserva o login após atualizar a página. Parte da v0.6.3 e mantém os ícones, tons suaves e disposição atual de Locais.
 
@@ -16,7 +16,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 
 **Validação:** [GitHub Actions aprovado](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39476011701), commit `d38143255337955aeddc3013e2022f2cb4f9f499`: **75 testes da aplicação, 27 de regras e 2 de autenticação, total 104 aprovações sem falhas**. Locais também aprovado em Chromium, incluindo layout móvel, com Firebase totalmente simulado. Regras e autenticação verificadas em emuladores. Persistência real e homologação institucional permanecem pendentes.
 
-**Implantação:** proposta ainda não publicada. Publicar as novas regras do Firestore antes ou junto do HTML. Sem acesso Firebase nesta sessão; nenhum usuário real alterado. Confirmar login, F5, reabertura, Sair, edição e exclusão no ambiente institucional. Próximas versões possíveis: v0.7.1 para correções ou v0.8.0 para novas funcionalidades.
+**Implantação:** publicação autorizada em 21/10/2026 após o usuário informar que publicou as regras do Firestore. Confirmação das regras baseada no relato do usuário; o console Firebase não pôde ser verificado diretamente nesta sessão. Integração à main e implantação do GitHub Pages são etapas separadas, acompanhadas no PR #8. Confirmar login, F5, reabertura, Sair, edição e exclusão no ambiente institucional; nenhum usuário real foi excluído pela preparação desta entrega. Próximas versões possíveis: v0.7.1 para correções ou v0.8.0 para novas funcionalidades.
 
 ## v0.6.3 — Ícones e tons suaves nos indicadores de Locais — entrega de 20/10/2026
 
