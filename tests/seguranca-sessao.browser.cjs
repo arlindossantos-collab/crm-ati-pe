@@ -105,7 +105,7 @@ export async function runTransaction(db,fn){
    await page.screenshot({path:'test-results/sessao-apos-f5.png'});
    await context.close();
 
-   const comum=JSON.parse(JSON.stringify(base));comum.me={...comum.usuarios[1],modulosPermitidos:['demandas','locais','eventos']};
+   const comum=JSON.parse(JSON.stringify(base));comum.usuarios[1].modulosPermitidos=['demandas','locais','eventos'];comum.me={...comum.usuarios[1]};
    const leitura=await pageFor(comum);await leitura.page.locator('#main-content').waitFor({state:'visible'});
    assert.equal(await leitura.page.locator('#btn-historico-alteracoes').isVisible(),false);
    assert.equal(await leitura.page.locator('[data-usuario-excluir]').count(),0);
