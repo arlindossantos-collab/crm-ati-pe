@@ -3,14 +3,20 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const {initializeTestEnvironment, assertSucceeds, assertFails} = require('@firebase/rules-unit-testing');
-const {doc, setDoc, getDoc, deleteDoc, updateDoc, collection, getDocs, query, where, writeBatch} = require('firebase/firestore');
+const {doc, setDoc, getDoc, deleteDoc, updateDoc, collection, getDocs, query, where, writeBatch, serverTimestamp} = require('firebase/firestore');
 
 // Somente projeto demo e emulador local. Nunca inicializar com o projeto da produção.
 const projectId = 'demo-prgd-usuarios';
 let env;
 const profile = (uid, extra = {}) => ({uid, nome:uid, email:`${uid}@example.invalid`, ativo:true,
     tipoUsuario:'interno', perfil:'comum', modulosPermitidos:['demandas'], tags:[], grupos:[], ...extra});
-const db = uid => env.authenticatedContext(uid, {email:`${uid}@example.invalid`}).firestore();
+const db = (uid, auth_time = Math.floor(Date.now()/1000)) => env.authenticatedContext(uid, {email:`${uid}@example.invalid`,auth_time}).firestore();
+function excluirComLog(f,uid,extraLog={}) {
+    const lote=writeBatch(f),log=doc(collection(f,'historicoAlteracoes'));
+    lote.update(doc(f,'usuarios',uid),{ativo:false,excluido:true,ultimaAuditoriaId:log.id});
+    lote.set(log,{autorUid:'admin',autorNome:'admin',criadoEm:serverTimestamp(),colecao:'usuarios',registroId:uid,registroNome:uid,acao:'excluir_usuario',campos:['ativo','excluido'],...extraLog});
+    return lote.commit();
+}
 before(async () => {
     assert.ok(process.env.FIRESTORE_EMULATOR_HOST, 'Execute com npm run test:rules, nunca contra produção.');
     env = await initializeTestEnvironment({projectId, firestore:{rules:fs.readFileSync(path.join(__dirname,'..','firestore.rules'),'utf8')}});
@@ -217,7 +223,7 @@ test('administrador cria conta de perfil e identificação consistente em lote',
 
 test('administrador exclui logicamente cadastro legado sem apagar histórico',async()=>{
     const f=db('admin');
-    await assertSucceeds(updateDoc(doc(f,'usuarios','legado'),{ativo:false,excluido:true}));
+    await assertSucceeds(excluirComLog(f,'legado'));
     await assertFails(getDoc(doc(db('legado'),'demandas','d1')));
     await assertFails(deleteDoc(doc(f,'usuarios','legado')));
 });
@@ -225,6 +231,54 @@ test('exclusão não admite perfil ativo nem autoexclusão nem ação de consult
     await assertFails(updateDoc(doc(db('admin'),'usuarios','outro'),{excluido:true}));
     await assertFails(updateDoc(doc(db('admin'),'usuarios','admin'),{ativo:false,excluido:true}));
     await assertFails(updateDoc(doc(db('interno'),'usuarios','outro'),{ativo:false,excluido:true}));
-    await assertSucceeds(updateDoc(doc(db('admin'),'usuarios','outro'),{ativo:false,excluido:true}));
+    await assertSucceeds(excluirComLog(db('admin'),'outro'));
     await assertFails(updateDoc(doc(db('admin'),'usuarios','outro'),{ativo:true}));
+});
+
+test('exclusão de usuário exige autenticação recente e auditoria atômica',async()=>{
+    await assertFails(excluirComLog(db('admin',Math.floor(Date.now()/1000)-3600),'outro'));
+    await assertFails(excluirComLog(db('admin',Math.floor(Date.now()/1000)+3600),'outro'));
+    await assertFails(updateDoc(doc(db('admin'),'usuarios','outro'),{ativo:false,excluido:true}));
+    assert.equal((await getDoc(doc(db('admin'),'usuarios','outro'))).data().ativo,true);
+    await assertSucceeds(excluirComLog(db('admin'),'outro'));
+});
+test('auditoria rejeita autor ou horário forjado e reverte a exclusão inteira',async()=>{
+    const f=db('admin');
+    await assertFails(excluirComLog(f,'outro',{autorUid:'interno'}));
+    await assertFails(excluirComLog(f,'outro',{autorNome:'Outra pessoa'}));
+    await assertFails(excluirComLog(f,'outro',{criadoEm:new Date('2000-01-01')}));
+    assert.equal((await getDoc(doc(f,'usuarios','outro'))).data().ativo,true);
+    assert.equal((await getDocs(collection(f,'historicoAlteracoes'))).size,0);
+});
+test('histórico é somente leitura para administração e não pode ser editado ou apagado',async()=>{
+    const f=db('admin');await assertSucceeds(excluirComLog(f,'outro'));
+    const registro=(await getDocs(collection(f,'historicoAlteracoes'))).docs[0];
+    await assertFails(updateDoc(registro.ref,{autorNome:'Apagar rastros'}));
+    await assertFails(deleteDoc(registro.ref));
+    await assertFails(getDocs(collection(db('interno'),'historicoAlteracoes')));
+    await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),'historicoAlteracoes',registro.id)));
+});
+test('comum registra a própria edição mas não pode atribuir ação a outro usuário',async()=>{
+    const f=db('interno'),data={autorUid:'interno',autorNome:'interno',criadoEm:serverTimestamp(),colecao:'usuarios',registroId:'interno',registroNome:'interno',acao:'editar',campos:['nome']};
+    await assertSucceeds(setDoc(doc(collection(f,'historicoAlteracoes')),data));
+    await assertFails(setDoc(doc(collection(f,'historicoAlteracoes')),{...data,registroId:'outro'}));
+    await assertFails(setDoc(doc(collection(f,'historicoAlteracoes')),{...data,colecao:'demandas'}));
+});
+test('log inválido impede atualização de negócio no mesmo lote',async()=>{
+    const f=db('admin'),lote=writeBatch(f);
+    lote.update(doc(f,'demandas','d1'),{titulo:'Não confirmado'});
+    lote.set(doc(collection(f,'historicoAlteracoes')),{autorUid:'falso'});
+    await assertFails(lote.commit());assert.equal((await getDoc(doc(f,'demandas','d1'))).data().titulo,'Demanda interna');
+});
+test('exclusão física de negócio exige administrador com autenticação recente',async()=>{
+    await assertFails(deleteDoc(doc(db('admin',0),'demandas','d1')));
+    await assertFails(deleteDoc(doc(db('interno'),'demandas','d1')));
+    await assertSucceeds(deleteDoc(doc(db('admin'),'demandas','d1')));
+});
+test('registro de troca de senha exige a própria conta com autenticação recente e não aceita valores secretos',async()=>{
+    const data={autorUid:'interno',autorNome:'interno',criadoEm:serverTimestamp(),colecao:'autenticacao',registroId:'interno',registroNome:'Conta de acesso',acao:'alterar_senha',campos:['senha']};
+    await assertSucceeds(setDoc(doc(collection(db('interno'),'historicoAlteracoes')),data));
+    await assertFails(setDoc(doc(collection(db('interno',0),'historicoAlteracoes')),data));
+    await assertFails(setDoc(doc(collection(db('interno'),'historicoAlteracoes')),{...data,registroId:'outro'}));
+    await assertFails(setDoc(doc(collection(db('interno'),'historicoAlteracoes')),{...data,senha:'valor-secreto'}));
 });

@@ -5,7 +5,7 @@ service cloud.firestore {
     function profile() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
     function active() {
       return signedIn() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
-        && profile().get('ativo', true) == true;
+        && profile().get('ativo', true) == true && profile().get('excluido', false) != true;
     }
     function isAdmin() {
       // Administradores antigos continuam acessando até a classificação manual.
@@ -51,21 +51,53 @@ service cloud.firestore {
         || !('gruposPermitidos' in data) || data.gruposPermitidos.size() == 0
         || (data.gruposPermitidos is list && data.gruposPermitidos.hasAny(profile().get('grupos', [])));
     }
+    function recentAuthentication() {
+      return signedIn() && request.auth.token.get('auth_time', 0) is int
+        && request.auth.token.get('auth_time', 0) <= request.time.toMillis() / 1000
+        && request.time.toMillis() / 1000 - request.auth.token.get('auth_time', 0) < 300;
+    }
+    function auditedUserDeletion(uid) {
+      let auditPath = /databases/$(database)/documents/historicoAlteracoes/$(request.resource.data.get('ultimaAuditoriaId', 'ausente'));
+      let audit = getAfter(auditPath).data;
+      return !exists(auditPath) && audit.autorUid == request.auth.uid && audit.criadoEm == request.time
+        && audit.colecao == 'usuarios' && audit.registroId == uid && audit.acao == 'excluir_usuario'
+        && audit.campos.hasAny(['excluido']);
+    }
+    match /historicoAlteracoes/{id} {
+      allow read: if isAdmin();
+      allow create: if active()
+        && request.resource.data.keys().hasOnly(['autorUid','autorNome','criadoEm','colecao','registroId','registroNome','acao','campos'])
+        && request.resource.data.autorUid == request.auth.uid
+        && request.resource.data.autorNome == (profile().get('nome', '') != '' ? profile().nome : request.auth.token.get('email', request.auth.uid))
+        && request.resource.data.criadoEm == request.time
+        && request.resource.data.registroId is string && request.resource.data.registroId.size() > 0 && request.resource.data.registroId.size() <= 1500
+        && request.resource.data.registroNome is string && request.resource.data.registroNome.size() <= 180
+        && request.resource.data.acao in ['criar','editar','excluir','excluir_usuario','alterar_senha']
+        && request.resource.data.campos is list && request.resource.data.campos.size() <= 128
+        && ((isAdmin() && request.resource.data.colecao in ['usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes','perfilPrivado'])
+          || (request.resource.data.colecao in ['usuarios','perfilPrivado'] && request.resource.data.registroId == request.auth.uid && request.resource.data.acao in ['criar','editar'])
+          || (request.resource.data.colecao == 'inscricoes' && canReadModule('eventos') && request.resource.data.acao in ['criar','excluir'])
+          || (request.resource.data.colecao == 'autenticacao' && request.resource.data.registroId == request.auth.uid && request.resource.data.acao == 'alterar_senha' && recentAuthentication()));
+      // Histórico somente acrescentado: nem administradores podem editar ou apagar entradas.
+      allow update, delete: if false;
+    }
 
     match /usuarios/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if isAdmin() && validUser(request.resource.data, uid);
-      allow update: if (isAdmin()
+      allow update: if ((isAdmin()
           && (validUser(request.resource.data, uid)
-            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ativo','excluido','atualizadoEm','editadoPor','editadoPorUid']) && request.resource.data.ativo is bool
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ativo','excluido','atualizadoEm','editadoPor','editadoPorUid','ultimaAuditoriaId']) && request.resource.data.ativo is bool
               && request.resource.data.get('excluido', false) is bool
               && (request.resource.data.get('excluido', false) != true || request.resource.data.ativo == false)))
           && (request.auth.uid != uid || (request.resource.data.ativo == true && request.resource.data.perfil == 'admin' && request.resource.data.tipoUsuario == 'interno')))
         || (active() && request.auth.uid == uid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','fotoPerfil','perfilAtualizadoEm'])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','fotoPerfil','perfilAtualizadoEm','ultimaAuditoriaId'])
           && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 150
           && validPhoto(request.resource.data.get('fotoPerfil', ''))
-          && request.resource.data.get('perfilAtualizadoEm', '') is string && request.resource.data.get('perfilAtualizadoEm', '').size() <= 40);
+          && request.resource.data.get('perfilAtualizadoEm', '') is string && request.resource.data.get('perfilAtualizadoEm', '').size() <= 40))
+        && (request.resource.data.get('excluido', false) != true || resource.data.get('excluido', false) == true
+          || (recentAuthentication() && auditedUserDeletion(uid)));
       // Inativar o perfil mantém os vínculos e o histórico.
       allow delete: if false;
     }
@@ -82,11 +114,13 @@ service cloud.firestore {
       allow delete: if false;
     }
     match /grupos/{id} {
-      allow read, create, update, delete: if isAdmin();
+      allow read, create, update: if isAdmin();
+      allow delete: if isAdmin() && recentAuthentication();
     }
     match /eventos/{id} {
       allow read: if canReadModule('eventos') && canReadEvent(resource.data);
-      allow create, update, delete: if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin() && recentAuthentication();
     }
     match /inscricoes/{id} {
       allow read: if isAdmin() || (canReadModule('eventos') && resource.data.uid == request.auth.uid);
@@ -109,7 +143,8 @@ service cloud.firestore {
           || (data.get('orgaosPermitidos', []) is list && data.get('orgaosPermitidos', []).hasAny([profile().get('orgao', '')]));
       }
       allow read: if businessCollection() && canReadModule(moduleName()) && visibleRecord(resource.data);
-      allow create, update, delete: if businessCollection() && isAdmin();
+      allow create, update: if businessCollection() && isAdmin();
+      allow delete: if businessCollection() && isAdmin() && recentAuthentication();
     }
   }
 }

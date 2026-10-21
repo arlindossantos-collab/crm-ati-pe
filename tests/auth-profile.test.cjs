@@ -21,7 +21,7 @@ function fluxoReal(uid) {
     const nodes=new Map(),mensagens=[];
     const element=id=>{if(!nodes.has(id))nodes.set(id,{value:'',disabled:false});return nodes.get(id);};
     const context=vm.createContext({auth,currentUser:{uid},versaoSessao:1,salvandoSenhaPerfil:false,EmailAuthProvider,reauthenticateWithCredential,updatePassword,
-        document:{getElementById:element},mensagemPerfil:(texto,erro)=>mensagens.push({texto,erro}),traduzirErroSistema:err=>err.code,
+        registrarMudancaSenha:async()=>{},document:{getElementById:element},mensagemPerfil:(texto,erro)=>mensagens.push({texto,erro}),traduzirErroSistema:err=>err.code,
         limparSenhasPerfil:()=>['perfil-senha-atual','perfil-senha-nova','perfil-senha-confirmar'].forEach(id=>{element(id).value='';})});
     vm.runInContext(html.slice(inicio,fim),context);
     return {element,mensagens,executar:()=>vm.runInContext('alterarMinhaSenha({preventDefault(){}})',context)};
@@ -41,4 +41,28 @@ test('senha atual incorreta não altera o login existente',async()=>{
     fluxo.element('perfil-senha-atual').value='senha-incorreta';fluxo.element('perfil-senha-nova').value='senha-nova-teste';fluxo.element('perfil-senha-confirmar').value='senha-nova-teste';
     await fluxo.executar();assert.ok(fluxo.mensagens.some(m=>m.erro));await signOut(auth);
     const entrada=await signInWithEmailAndPassword(auth,email,inicial);assert.equal(entrada.user.uid,user.uid);await signOut(auth);
+});
+
+function fluxoExclusaoReal(user) {
+    const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+    const inicio=html.indexOf('        async function confirmarExclusao(e)'),fim=html.indexOf('        function configurarInterface()',inicio);
+    assert.ok(inicio>0&&fim>inicio);
+    const nodes=new Map(),writes=[];
+    const element=id=>{if(!nodes.has(id))nodes.set(id,{value:'',disabled:false,textContent:''});return nodes.get(id);};
+    const context=vm.createContext({auth,currentUser:{uid:user.uid,perfil:'admin',nome:'Admin'},versaoSessao:1,exclusaoEmCurso:false,
+      exclusaoPendente:{colecao:'usuarios',id:'alvo',uid:user.uid,sessao:1,item:{nome:'Alvo'}},
+      EmailAuthProvider,reauthenticateWithCredential,document:{getElementById:element},ehAdministrador:()=>true,
+      gravarUsuarioComIdentidade:async(uid,data)=>writes.push({uid,data}),fecharModal(){},alert(){},
+      cancelarExclusao(){context.exclusaoPendente=null;},traduzirErroSistema:err=>err.code});
+    vm.runInContext(html.slice(inicio,fim),context);
+    return {element,writes,executar:()=>vm.runInContext('confirmarExclusao({preventDefault(){}})',context)};
+}
+test('exclusão valida a senha real do autor no Auth antes de gravar o usuário alvo',async()=>{
+    const {user}=await createUserWithEmailAndPassword(auth,'exclusao@example.invalid','senha-exclusao-teste');
+    const fluxo=fluxoExclusaoReal(user);
+    fluxo.element('exclusao-senha').value='senha-incorreta';await fluxo.executar();
+    assert.equal(fluxo.writes.length,0);assert.ok(fluxo.element('exclusao-erro').textContent);assert.equal(fluxo.element('exclusao-senha').value,'');
+    fluxo.element('exclusao-senha').value='senha-exclusao-teste';await fluxo.executar();
+    assert.equal(fluxo.writes.length,1);assert.equal(fluxo.writes[0].uid,'alvo');assert.equal(fluxo.writes[0].data.excluido,true);
+    assert.ok(!JSON.stringify(fluxo.writes).includes('senha-exclusao-teste'));await signOut(auth);
 });

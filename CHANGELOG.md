@@ -2,6 +2,25 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.8.0 — Exclusão protegida, histórico e restauração da sessão — proposta de 21/10/2026
+
+**Resumo para a chefia:** reduz exclusões acidentais com confirmação da senha do administrador, identifica quem alterou os cadastros e mantém a aba escolhida ao atualizar a página. Parte de `main@5f444af75e9b35a8f5e67e9efdca573f5c83ae3f` (v0.7.0). Publicação desta entrega ainda não autorizada.
+
+| Antes | Depois |
+| --- | --- |
+| Confirmação simples para excluir, com controles que o usuário relatou ver em outras contas. | Controles ocultos por padrão fora da administração; painel pede a senha da própria conta antes de excluir. |
+| Exclusão de usuário sem vínculo obrigatório com histórico. | Regras exigem autenticação recente e registro de histórico no mesmo envio da exclusão lógica. |
+| Autoria parcial nos próprios registros, sem consulta central. | Histórico administrativo com pessoa, horário do servidor, ação, registro e nomes dos campos alterados; busca e paginação. |
+| F5 podia mostrar o login durante a restauração e voltar à aba inicial. | Carregamento aguarda o Firebase e as permissões; restaura a aba e a visualização de Demandas na mesma guia. |
+
+**Validação:** 87 testes da aplicação, 34 de regras e 3 de autenticação aprovados localmente (124 aprovações). Conferência em Chromium pendente de execução no GitHub Actions. Dados simulados e emuladores; nenhuma exclusão em produção.
+
+**Limites e pendências:** histórico inicia após a implantação e cobre operações da aplicação; não captura mudanças pelo console Firebase ou programas externos. Guarda nomes de campos, sem os valores anteriores/novos. Troca de senha ocorre no Authentication e seu histórico no Firestore; falha do histórico é informada sem reverter a senha. Perfis já cadastrados não são alterados automaticamente. A restauração cobre aba e visualização de Demandas; formulários e buscas não são recuperados após F5. Homologação institucional pendente.
+
+**Implantação:** exige publicar o novo `firestore.rules` antes do HTML. Durante a transição, a exclusão de usuários pela v0.7.0 é bloqueada por não enviar o histórico obrigatório. Não retirar as novas proteções apenas para liberar um cliente antigo. Ver [procedimento e retorno](docs/seguranca-auditoria-sessao.md). Aplicação permanece em um único HTML; organização e cores de Locais preservadas.
+
+Próximas versões possíveis: v0.8.1 para correções ou v0.9.0 para novas funcionalidades; sem compromisso de entrega.
+
 ## v0.7.0 — Gestão de usuários e sessão persistente — entrega de 21/10/2026
 
 **Resumo para a chefia:** facilita editar e retirar usuários do cadastro ativo e preserva o login após atualizar a página. Parte da v0.6.3 e mantém os ícones, tons suaves e disposição atual de Locais.

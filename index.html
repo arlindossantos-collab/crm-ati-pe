@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.7.0 - GESTÃO DE USUÁRIOS E SESSÃO PERSISTENTE   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.8.0 - EXCLUSÃO PROTEGIDA, HISTÓRICO E SESSÃO   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -17,6 +17,9 @@
     
     <style>
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
+        .hidden { display: none !important; }
+        body:not([data-admin="true"]) .btn-admin-only { display: none !important; }
+        [hidden] { display: none !important; }
         .tab-active { background-color: #ffffff; color: #1e3a8a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .tab-inactive { color: #64748b; font-weight: 500; }
         .tab-inactive:hover { color: #0f172a; }
@@ -34,8 +37,12 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
-    <!-- Modal Login Obrigatório -->
-    <div id="modal-login" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex justify-center items-center p-4 z-50">
+    <div id="sessao-carregando" role="status" aria-live="polite" class="fixed inset-0 bg-slate-50 flex flex-col justify-center items-center gap-4 z-50">
+        <span class="bg-blue-900 text-white font-black text-2xl px-4 py-2 rounded-xl">PRGD</span>
+        <p class="text-sm text-slate-600">Restaurando sua sessão…</p>
+    </div>
+    <!-- O login só aparece após a recuperação inicial da autenticação. -->
+    <div id="modal-login" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 flex flex-col justify-between">
             <div>
                 <div class="text-center mb-6">
@@ -59,7 +66,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.7.0</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.8.0</span></p>
             </div>
         </div>
     </div>
@@ -72,7 +79,7 @@
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.7.0</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.8.0</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -113,6 +120,7 @@
                 <button type="button" data-tab="bases" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-database mr-1"></i> Bases <span id="cnt-tab-bases" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
             </div>
             <div class="flex items-center gap-2">
+                <button type="button" id="btn-historico-alteracoes" class="btn-admin-only hidden bg-blue-50 border border-blue-200 text-blue-900 text-xs px-3 py-2 rounded-lg font-medium"><i class="fa-solid fa-clock-rotate-left mr-1" aria-hidden="true"></i> Histórico de alterações</button>
                 <button type="button" id="btn-export-csv" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-file-csv"></i> Exportar Dados
                 </button>
@@ -465,10 +473,31 @@
 
             <div id="detalhe-conteudo" class="space-y-4 text-sm mb-4"></div>
             <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl">
-                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Gerenciamento Cloud</p><button type="button" id="btn-excluir-registro" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer">Excluir Registro</button></div>
+                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Gerenciamento Cloud</p><button type="button" id="btn-excluir-registro" class="btn-admin-only hidden bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer">Excluir Registro</button></div>
                 <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-72 overflow-y-auto space-y-2"></div><div class="flex justify-end gap-2 pt-3 border-t"><button id="btn-salvar-edicao" type="submit" class="px-4 py-2 bg-blue-900 text-white font-bold rounded cursor-pointer">Salvar na Nuvem (Firestore)</button></div></form>
             </div>
         </div>
+    </div>
+
+    <div id="modal-confirmar-exclusao" role="dialog" aria-modal="true" aria-labelledby="exclusao-titulo" class="fixed inset-0 bg-slate-900/70 hidden flex justify-center items-center p-4 z-[60]">
+        <form id="form-confirmar-exclusao" class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <h2 id="exclusao-titulo" class="text-lg font-bold text-blue-900">Confirmar exclusão</h2>
+            <p id="exclusao-descricao" class="text-sm text-slate-700"></p>
+            <p class="text-xs text-slate-500">Informe a senha da sua própria conta para confirmar esta ação.</p>
+            <label for="exclusao-senha" class="block text-sm font-semibold">Sua senha de acesso<input id="exclusao-senha" type="password" autocomplete="current-password" required class="mt-1 block w-full p-2.5 border rounded-lg"></label>
+            <p id="exclusao-erro" role="alert" class="text-sm text-red-700"></p>
+            <div class="flex justify-end gap-2"><button type="button" id="exclusao-cancelar" class="border rounded-lg px-4 py-2 text-sm">Cancelar</button><button type="submit" id="exclusao-confirmar" class="bg-red-700 text-white rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">Confirmar exclusão</button></div>
+        </form>
+    </div>
+    <div id="modal-historico-alteracoes" role="dialog" aria-modal="true" aria-labelledby="historico-titulo" class="fixed inset-0 bg-slate-900/60 hidden flex justify-center items-center p-4 z-50">
+        <section class="bg-white rounded-2xl shadow-xl max-w-5xl w-full p-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center gap-3 mb-4"><h2 id="historico-titulo" class="text-lg font-bold text-blue-900">Histórico de alterações</h2><button type="button" data-target="modal-historico-alteracoes" class="btn-fechar-modal border rounded-lg px-3 py-1.5" aria-label="Fechar histórico">Fechar</button></div>
+            <p class="text-xs text-slate-500 mb-3">Registros a partir desta versão. Horários de Recife. Senhas e valores dos dados pessoais não são armazenados aqui.</p>
+            <div class="flex flex-wrap gap-2 mb-4"><input id="historico-busca" type="search" placeholder="Buscar usuário, registro ou campo carregado…" aria-label="Buscar no histórico carregado" class="p-2 border rounded-lg text-sm flex-1 min-w-0"><button id="historico-atualizar" type="button" class="border rounded-lg px-3 text-sm">Atualizar</button></div>
+            <p id="historico-mensagem" role="status" class="text-sm text-slate-600 mb-3"></p>
+            <div class="overflow-x-auto"><table class="w-full text-left text-xs min-w-[720px]"><thead class="bg-blue-50"><tr><th class="p-3">Data e hora</th><th class="p-3">Usuário</th><th class="p-3">Ação / Registro</th><th class="p-3">Modificação</th></tr></thead><tbody id="historico-registros" class="divide-y"></tbody></table></div>
+            <button id="historico-mais" type="button" class="mt-4 border rounded-lg px-3 py-2 text-sm disabled:opacity-50">Carregar mais</button>
+        </section>
     </div>
 
     <!-- Modal de Observações -->
@@ -496,14 +525,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.7.0 -->
+    <!-- Script Principal v0.8.0 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, getDoc, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, onSnapshot, getDoc, query, where, getDocs, runTransaction, serverTimestamp, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.7.0: Usuários GRGD, perfil pessoal e identificação com foto');
+        console.info('PRGD v0.8.0: Exclusão com senha, histórico de alterações e restauração de sessão');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -524,6 +553,9 @@
         persistenciaSessao.catch(err => console.warn('Não foi possível configurar a persistência da sessão.', err));
 
         let currentUser = null;
+        let restaurandoSessao = true;
+        let exclusaoPendente = null, exclusaoEmCurso = false;
+        let historicoRegistros = [], historicoUltimo = null, historicoCarregando = false, historicoVersao = 0;
         let versaoSessao = 0;
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
         let abaAtual = 'dashboard';
@@ -561,11 +593,128 @@
 
         // Tipo de usuário e perfil são independentes. Cadastros antigos são classificados pelo administrador.
         function ehAdministrador(usuario = currentUser) {
-            return !!usuario && usuario.ativo !== false && usuario.tipoUsuario !== 'externo' && usuario.perfil === 'admin';
+            return !!usuario && usuario.ativo !== false && usuario.excluido !== true && usuario.tipoUsuario !== 'externo' && usuario.perfil === 'admin';
+        }
+
+        // Apenas navegação: nenhum perfil, senha ou dado de negócio vai para este armazenamento.
+        function guardarNavegacao() {
+            if (!currentUser || restaurandoSessao) return;
+            try { sessionStorage.setItem('prgd:navegacao:' + currentUser.uid, JSON.stringify({aba:abaAtual, visao:visaoDemandasAtual})); } catch (_) {}
+        }
+        function restaurarNavegacao() {
+            let salvo = {};
+            try { salvo = JSON.parse(sessionStorage.getItem('prgd:navegacao:' + currentUser.uid) || '{}'); } catch (_) {}
+            const permitidos = modulosDoUsuario();
+            const aba = permitidos.includes(salvo?.aba) ? salvo.aba : permitidos[0] || '';
+            const calendario = salvo?.visao === 'calendario';
+            document.getElementById(calendario ? 'btn-visao-calendario' : 'btn-visao-tabela')?.click?.();
+            mudarAba(aba);
+        }
+        function finalizarRestauracao() {
+            restaurandoSessao = false;
+            document.getElementById('sessao-carregando')?.classList.add('hidden');
+            verificarAutenticacaoObrigatoria();
+        }
+
+        const COLECOES_AUDITADAS = ['usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes'];
+        const METADADOS_AUDITORIA = ['ultimaAuditoriaId','criadoEm','criadoPor','criadoPorUid','atualizadoEm','editadoPor','editadoPorUid','perfilAtualizadoEm'];
+        function dadosRegistroAuditoria(ref, antes, depois, remover = false) {
+            const partes = ref.path.split('/');
+            const privado = partes.length === 4 && partes[0] === 'usuarios' && partes[2] === 'privado';
+            const colecao = privado ? 'perfilPrivado' : partes[0], registroId = privado ? partes[1] : ref.id;
+            const acao = remover ? 'excluir' : depois.excluido === true && antes?.excluido !== true ? 'excluir_usuario' : antes ? 'editar' : 'criar';
+            const campos = [...new Set([...Object.keys(antes || {}), ...Object.keys(depois || {})])]
+                .filter(k => !METADADOS_AUDITORIA.includes(k) && (remover || JSON.stringify(antes?.[k]) !== JSON.stringify(depois?.[k]))).sort();
+            const item = depois || antes || {};
+            return {colecao,registroId,acao,campos,registroNome:String(privado ? 'Perfil pessoal' : item.nome || item.titulo || item.id || registroId).slice(0,180)};
+        }
+        async function gravarComHistorico(operacoes) {
+            const uid = currentUser?.uid, sessao = versaoSessao;
+            if (!uid) throw new Error('Entre no sistema antes de alterar um registro.');
+            const autorNome = currentUser.nome || currentUser.email || uid;
+            // Referências criadas fora da transação mantêm o mesmo ID se o Firestore repetir a tentativa.
+            const itens = operacoes.map(op => ({...op, logRef:op.ref.path.startsWith('identidadesUsuarios/') ? null : doc(collection(db,'historicoAlteracoes'))}));
+            await runTransaction(db, async transacao => {
+                const carregados = [];
+                for (const op of itens) {
+                    const snap = op.novo || !op.logRef ? null : await transacao.get(op.ref);
+                    carregados.push(snap?.exists() ? snap.data() : null);
+                }
+                if (sessao !== versaoSessao || currentUser?.uid !== uid) throw new Error('Sua sessão mudou. Nenhuma alteração foi confirmada.');
+                const logs = [];
+                itens.forEach((op,i) => {
+                    const antes = carregados[i];
+                    if (op.remover && !antes) throw new Error('Este registro já foi excluído.');
+                    let dados = {...op.dados};
+                    const depois = op.remover ? null : op.options?.merge ? {...antes,...dados} : dados;
+                    if (op.logRef) {
+                        const registro = dadosRegistroAuditoria(op.ref,antes,depois,op.remover);
+                        if (!COLECOES_AUDITADAS.includes(registro.colecao) && registro.colecao !== 'perfilPrivado') throw new Error('Coleção não permitida para alteração.');
+                        logs.push({ref:op.logRef,dados:{...registro,autorUid:uid,autorNome,criadoEm:serverTimestamp()}});
+                        if (registro.colecao === 'usuarios' && !op.remover) dados.ultimaAuditoriaId = op.logRef.id;
+                    }
+                    if (op.remover) transacao.delete(op.ref);
+                    else if (op.options) transacao.set(op.ref,dados,op.options);
+                    else transacao.set(op.ref,dados);
+                });
+                logs.forEach(log => transacao.set(log.ref,log.dados));
+            });
+        }
+        async function adicionarComHistorico(ref,dados) {
+            const registro = doc(ref);
+            await gravarComHistorico([{ref:registro,dados,novo:true}]);
+            return registro;
+        }
+        async function salvarComHistorico(ref,dados,options) { await gravarComHistorico([{ref,dados,options}]); }
+        async function excluirComHistorico(ref) { await gravarComHistorico([{ref,remover:true}]); }
+
+        async function registrarMudancaSenha(uid,sessao) {
+            if (sessao !== versaoSessao || currentUser?.uid !== uid || auth.currentUser?.uid !== uid) return;
+            await auth.currentUser.getIdToken(true);
+            if (sessao !== versaoSessao || currentUser?.uid !== uid) return;
+            const registro = {colecao:'autenticacao',registroId:uid,registroNome:'Conta de acesso',acao:'alterar_senha',campos:['senha'],autorUid:uid,autorNome:currentUser.nome || currentUser.email || uid,criadoEm:serverTimestamp()};
+            await runTransaction(db,async transacao=>transacao.set(doc(collection(db,'historicoAlteracoes')),registro));
+        }
+        const NOMES_COLECOES = {usuarios:'Usuários',orgaos:'Clientes',demandas:'Demandas',eventos:'Eventos',locais:'Locais',fornecedores:'Fornecedores',bases:'Bases',grupos:'Grupos',inscricoes:'Inscrições',perfilPrivado:'Perfil pessoal',autenticacao:'Conta de acesso'};
+        const NOMES_ACOES = {criar:'Criou',editar:'Editou',excluir:'Excluiu',excluir_usuario:'Excluiu do cadastro ativo',alterar_senha:'Alterou a própria senha (valor não registrado)'};
+        function renderHistoricoAlteracoes() {
+            if (!ehAdministrador()) return;
+            const busca = (document.getElementById('historico-busca').value || '').toLocaleLowerCase('pt-BR');
+            const registros = historicoRegistros.filter(r => [r.autorNome,r.autorUid,r.registroNome,r.registroId,NOMES_COLECOES[r.colecao],...(r.campos || [])].join(' ').toLocaleLowerCase('pt-BR').includes(busca));
+            document.getElementById('historico-registros').innerHTML = registros.map(r => {
+                const data = r.criadoEm?.toDate?.();
+                const horario = data ? data.toLocaleString('pt-BR',{timeZone:'America/Recife',hour12:false}) : 'Aguardando horário do servidor';
+                return `<tr><td class="p-3 whitespace-nowrap">${esc(horario)}</td><td class="p-3">${esc(r.autorNome)}<br><span class="text-slate-500">${esc(r.autorUid)}</span></td><td class="p-3"><b>${esc(NOMES_ACOES[r.acao] || r.acao)}</b> · ${esc(NOMES_COLECOES[r.colecao] || r.colecao)}<br>${esc(r.registroNome)}<br><span class="text-slate-500">${esc(r.registroId)}</span></td><td class="p-3">${esc((r.campos || []).join(', ') || 'Metadados do registro')}</td></tr>`;
+            }).join('') || '<tr><td colspan="4" class="p-4 text-slate-500">Nenhuma alteração encontrada nos registros carregados.</td></tr>';
+        }
+        async function carregarHistoricoAlteracoes(reiniciar = false) {
+            if (!ehAdministrador() || historicoCarregando) return;
+            const uid = currentUser.uid, sessao = versaoSessao, versao = ++historicoVersao;
+            historicoCarregando = true;
+            const msg = document.getElementById('historico-mensagem'), mais = document.getElementById('historico-mais');
+            msg.textContent = 'Carregando alterações…'; mais.disabled = true;
+            if (reiniciar) { historicoRegistros = []; historicoUltimo = null; }
+            try {
+                const args = [orderBy('criadoEm','desc'),limit(50)];
+                if (historicoUltimo) args.push(startAfter(historicoUltimo));
+                const snap = await getDocs(query(collection(db,'historicoAlteracoes'),...args));
+                if (versao !== historicoVersao || sessao !== versaoSessao || currentUser?.uid !== uid || !ehAdministrador()) return;
+                historicoRegistros.push(...snap.docs.map(d=>({...d.data(),id:d.id})));
+                historicoUltimo = snap.docs.at(-1) || historicoUltimo;
+                mais.hidden = snap.docs.length < 50;
+                msg.textContent = `${historicoRegistros.length} registro(s) carregado(s). A busca considera os registros carregados.`;
+                renderHistoricoAlteracoes();
+            } catch (err) { if (versao === historicoVersao && sessao === versaoSessao && ehAdministrador()) msg.textContent = traduzirErroSistema(err); }
+            finally { if (versao === historicoVersao) { historicoCarregando = false; mais.disabled = false; } }
+        }
+        function abrirHistoricoAlteracoes() {
+            if (!ehAdministrador()) return;
+            document.getElementById('modal-historico-alteracoes').classList.remove('hidden');
+            carregarHistoricoAlteracoes(true);
         }
 
         function modulosDoUsuario(usuario = currentUser) {
-            if (!usuario || usuario.ativo === false) return [];
+            if (!usuario || usuario.ativo === false || usuario.excluido === true) return [];
             if (ehAdministrador(usuario)) return MÓDULOS_SISTEMA.map(m => m.id);
             const legados = usuario.tipoUsuario ? [] : ['dashboard', 'demandas', 'eventos'];
             const modulos = Array.isArray(usuario.modulosPermitidos) ? usuario.modulosPermitidos : legados;
@@ -757,11 +906,10 @@
                 tipoUsuario:usuario.tipoUsuario || '', ativo:usuario.ativo !== false};
         }
         async function gravarUsuarioComIdentidade(uid, dados, anterior = {}, privado = null) {
-            const lote = writeBatch(db);
-            lote.set(doc(db,'usuarios',uid), dados, {merge:true});
-            lote.set(doc(db,'identidadesUsuarios',uid), identidadePublica(uid, {...anterior,...dados}));
-            if (privado) lote.set(doc(db,'usuarios',uid,'privado','perfil'), privado);
-            await lote.commit();
+            const operacoes = [{ref:doc(db,'usuarios',uid),dados,options:{merge:true}},
+                {ref:doc(db,'identidadesUsuarios',uid),dados:identidadePublica(uid,{...anterior,...dados})}];
+            if (privado) operacoes.push({ref:doc(db,'usuarios',uid,'privado','perfil'),dados:privado});
+            await gravarComHistorico(operacoes);
         }
         function atualizarIdentidadeSessao() {
             document.getElementById('btn-meu-perfil')?.classList.toggle('hidden', !currentUser);
@@ -893,6 +1041,9 @@
                 await reauthenticateWithCredential(usuarioAuth,EmailAuthProvider.credential(usuarioAuth.email,atual));
                 if (!aindaAtual()) return;
                 await updatePassword(usuarioAuth,nova);
+                if (!aindaAtual()) return;
+                try { await registrarMudancaSenha(uid,sessao); }
+                catch (_) { if (aindaAtual()) mensagemPerfil('Senha alterada. Não foi possível registrar a alteração no histórico; informe ao administrador. Use a nova senha no próximo acesso.',true,true); return; }
                 if (aindaAtual()) mensagemPerfil('Senha alterada com sucesso. Use a nova senha no próximo acesso.',false,true);
             } catch (err) { if (aindaAtual()) mensagemPerfil(traduzirErroSistema(err),true,true); }
             finally {
@@ -1084,6 +1235,7 @@
         }
 
         function fecharModal(id) {
+            if (id === 'modal-confirmar-exclusao') { cancelarExclusao(); return; }
             document.getElementById(id).classList.add('hidden');
             if (id === 'modal-perfil') { perfilEmEdicao = null; limparSenhasPerfil(); document.getElementById('perfil-foto').value = ''; }
             if (id === 'modal-form-universal') document.getElementById('form-univ-campos').innerHTML = '';
@@ -1094,7 +1246,7 @@
             const loginModal = document.getElementById('modal-login');
             if (!currentUser) {
                 if (mainEl) mainEl.classList.add('hidden');
-                if (loginModal) loginModal.classList.remove('hidden');
+                if (loginModal) loginModal.classList.toggle('hidden', restaurandoSessao);
             } else {
                 if (mainEl) mainEl.classList.remove('hidden');
                 if (loginModal) loginModal.classList.add('hidden');
@@ -1103,6 +1255,14 @@
 
         function atualizarVisibilidadeAbas() {
             verificarAutenticacaoObrigatoria();
+            document.body?.setAttribute('data-admin', String(ehAdministrador()));
+            document.getElementById('detalhe-area-admin')?.classList.toggle('hidden', !ehAdministrador());
+            document.getElementById('btn-excluir-registro').disabled = !ehAdministrador();
+            if (!ehAdministrador()) {
+                document.getElementById('modal-historico-alteracoes')?.classList.add('hidden');
+                document.getElementById('historico-registros').innerHTML = '';
+                cancelarExclusao(true);
+            }
             if (!currentUser) return;
             const isAdmin = ehAdministrador();
             const permitidos = modulosDoUsuario();
@@ -1140,6 +1300,7 @@
             if (aba === 'fornecedores') renderFornecedores();
             if (aba === 'usuarios') { renderGrupos(); renderUsuarios(); }
             if (aba === 'bases') renderBases();
+            guardarNavegacao();
         }
 
         let snapshotUnsubs = [];
@@ -1213,7 +1374,7 @@
                 }));
             }
             if (currentUser.uid) snapshotUnsubs.push(observarFirestore(doc(db,'usuarios',currentUser.uid), async snap => {
-                if (!snap.exists() || snap.data().ativo === false) { await bloquearSessao('Cadastro inativo ou não encontrado. Procure o administrador.'); return; }
+                if (!snap.exists() || snap.data().ativo === false || snap.data().excluido === true) { await bloquearSessao('Cadastro inativo ou não encontrado. Procure o administrador.'); return; }
                 const atualizado = {...snap.data(), uid:currentUser.uid, id:snap.id, email:currentUser.email};
                 const mudouAcesso = assinaturaAcesso(atualizado) !== assinaturaAcesso(currentUser);
                 if (mudouAcesso) {
@@ -2056,7 +2217,7 @@
             c.innerHTML = Object.entries(item).filter(([k]) => k !== 'id' && k !== 'firestoreId' && !(colecao === 'eventos' && ['localId','localEvento','dataInicio','dataFim','horaInicio','horaFim','custoLocacaoPrevisto','status'].includes(k))).map(([k, v]) => {
                 const classe = 'w-full p-2 border rounded-lg text-xs bg-white';
                 const label = `<label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label>`;
-                if (['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid', 'criadoPorUid', 'editadoPorUid', 'perfilAtualizadoEm'].includes(k)) {
+                if (['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid', 'criadoPorUid', 'editadoPorUid', 'perfilAtualizadoEm', 'ultimaAuditoriaId'].includes(k)) {
                     return `<div>${label}<input type="text" name="${esc(k)}" value="${esc(v)}" readonly class="${classe}"></div>`;
                 }
                 if (typeof v === 'boolean') {
@@ -2268,7 +2429,7 @@
                     obj.uid = String(firestoreId);
                 } else if (colecao === 'locais') Object.assign(obj,lerCadastroLocal(false,itemAntigo));
                 else form.querySelectorAll('input[name],select[name],textarea[name]').forEach(el => {
-                    if (!el.name || el.name === 'responsavelGrgdCheckbox' || ['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid', 'criadoPorUid', 'editadoPorUid', 'perfilAtualizadoEm'].includes(el.name)) return;
+                    if (!el.name || el.name === 'responsavelGrgdCheckbox' || ['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid', 'criadoPorUid', 'editadoPorUid', 'perfilAtualizadoEm', 'ultimaAuditoriaId'].includes(el.name)) return;
                     const tipo = el.dataset.fieldType;
                     if (tipo === 'boolean') {
                         if (!['true', 'false'].includes(el.value)) throw new Error('Selecione Sim ou Não para ' + el.name + '.');
@@ -2291,7 +2452,7 @@
                     Object.assign(obj, lerResponsaveis(respCheckboxes, itemAntigo));
                 }
                 if (colecao === 'usuarios') await gravarUsuarioComIdentidade(String(firestoreId),obj,itemAntigo);
-                else await setDoc(doc(db, colecao, String(firestoreId)), obj, { merge: true });
+                else await salvarComHistorico(doc(db, colecao, String(firestoreId)), obj, { merge: true });
                 alert('Alterações salvas na nuvem com sucesso!');
                 fecharModal('modal-detalhes');
             } catch(err) {
@@ -2327,7 +2488,7 @@
             const autor = currentUser?.nome || currentUser?.email || 'Sistema';
             const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, autorUid:currentUser?.uid || '', texto }];
             try {
-                await setDoc(doc(db, 'demandas', String(demandaId)), { historicoAcoes, atualizadoEm: agora, editadoPorUid: currentUser?.uid || '', editadoPor: autor }, { merge: true });
+                await salvarComHistorico(doc(db, 'demandas', String(demandaId)), { historicoAcoes, atualizadoEm: agora, editadoPorUid: currentUser?.uid || '', editadoPor: autor }, { merge: true });
                 document.getElementById('obs-novo-texto').value = '';
                 alert('Andamento registrado com sucesso!');
             } catch(err) { alert(traduzirErroSistema(err)); }
@@ -2427,9 +2588,9 @@
                     if (!ehAdministrador()) throw new Error('Somente administradores podem cadastrar locais e eventos.');
                     const dados=tipo==='local' ? lerCadastroLocal(true) : {titulo:val('uc-1').trim(),nome:val('uc-1').trim(),descricao:val('uc-2'),...lerAgendaEvento({},true)};
                     if(tipo==='evento' && !dados.titulo)throw new Error('Informe o título do evento.');
-                    await addDoc(collection(db,tipo==='local'?'locais':'eventos'),{...dados,criadoEm:agora,atualizadoEm:agora,criadoPor:autor,criadoPorUid:currentUser.uid,editadoPor:autor,editadoPorUid:currentUser.uid});
+                    await adicionarComHistorico(collection(db,tipo==='local'?'locais':'eventos'),{...dados,criadoEm:agora,atualizadoEm:agora,criadoPor:autor,criadoPorUid:currentUser.uid,editadoPor:autor,editadoPorUid:currentUser.uid});
                 } else if (tipo === 'cliente') {
-                    await addDoc(collection(db, 'orgaos'), {
+                    await adicionarComHistorico(collection(db, 'orgaos'), {
                         id: 'CLI-' + Date.now(),
                         nome: val('uc-1'),
                         sigla: val('uc-sigla'),
@@ -2471,7 +2632,7 @@
                     const respCheckboxes = document.querySelectorAll('input[name="uc-demanda-resp"]:checked');
                     const responsaveis = lerResponsaveis(respCheckboxes);
 
-                    await addDoc(collection(db, 'demandas'), {
+                    await adicionarComHistorico(collection(db, 'demandas'), {
                         id: 'DEM-' + Date.now(),
                         titulo: val('uc-demanda-titulo'),
                         solicitante: val('uc-demanda-solicitante'),
@@ -2491,28 +2652,21 @@
                 } else {
                     const colecoes = { evento: 'eventos', local: 'locais', fornecedor: 'fornecedores', base: 'bases' };
                     if (!Object.hasOwn(colecoes, tipo)) throw new Error('Tipo de cadastro não suportado.');
-                    await addDoc(collection(db, colecoes[tipo]), { id: 'OBJ-' + Date.now(), nome: val('uc-1'), descricao: val('uc-2'), criadoEm: agora, atualizadoEm: agora, criadoPor: autor, criadoPorUid: currentUser?.uid || '', editadoPorUid: currentUser?.uid || '', editadoPor: autor });
+                    await adicionarComHistorico(collection(db, colecoes[tipo]), { id: 'OBJ-' + Date.now(), nome: val('uc-1'), descricao: val('uc-2'), criadoEm: agora, atualizadoEm: agora, criadoPor: autor, criadoPorUid: currentUser?.uid || '', editadoPorUid: currentUser?.uid || '', editadoPor: autor });
                 }
                 alert('Salvo na nuvem com sucesso!');
                 fecharModal('modal-form-universal');
             } catch (err) { alert(traduzirErroSistema(err)); }
         }
 
-        document.getElementById('btn-limpar-clientes')?.addEventListener('click', async () => {
-            if (!ehAdministrador()) { alert('Somente administradores podem limpar a base.'); return; }
-            if (!confirm('ATENÇÃO: Deseja realmente apagar TODOS os clientes cadastrados na nuvem? Esta ação não pode ser desfeita.')) return;
-            
-            try {
-                const snapshot = await getDocs(collection(db, 'orgaos'));
-                let apagados = 0;
-                for (const docSnap of snapshot.docs) {
-                    await deleteDoc(doc(db, 'orgaos', docSnap.id));
-                    apagados++;
-                }
-                alert(`Base de clientes limpa com sucesso! ${apagados} registros removidos.`);
-            } catch (err) {
-                alert(traduzirErroSistema(err));
-            }
+        document.getElementById('btn-limpar-clientes')?.addEventListener('click', () => {
+            if (!ehAdministrador() || exclusaoEmCurso) return;
+            exclusaoPendente = Object.freeze({colecao:'orgaos',id:'*',emLote:true,uid:currentUser.uid,sessao:versaoSessao});
+            document.getElementById('exclusao-descricao').textContent = 'Excluir TODOS os clientes cadastrados. Cada remoção será registrada no histórico. Esta ação não pode ser desfeita.';
+            document.getElementById('exclusao-senha').value = '';
+            document.getElementById('exclusao-erro').textContent = '';
+            document.getElementById('modal-confirmar-exclusao').classList.remove('hidden');
+            document.getElementById('exclusao-senha').focus?.();
         });
 
         document.getElementById('input-import-orgaos-csv')?.addEventListener('change', async e => {
@@ -2548,7 +2702,7 @@
                         editadoPorUid: currentUser?.uid || '', editadoPor: autor
                     };
                     try {
-                        await addDoc(collection(db, 'orgaos'), obj);
+                        await adicionarComHistorico(collection(db, 'orgaos'), obj);
                         importados++;
                     } catch(err) {}
                 }
@@ -2558,23 +2712,73 @@
             reader.readAsText(file, 'UTF-8');
         });
 
-        async function excluirRegistroUniversal() {
+        function cancelarExclusao(forcar = false) {
+            if (exclusaoEmCurso && !forcar) return;
+            exclusaoPendente = null;
+            document.getElementById('exclusao-senha').value = '';
+            document.getElementById('exclusao-erro').textContent = '';
+            document.getElementById('modal-confirmar-exclusao').classList.add('hidden');
+        }
+        function excluirRegistroUniversal() {
             const colecao = document.getElementById('edit-colecao').value;
             const firestoreId = document.getElementById('edit-doc-id').value;
             if (!ehAdministrador()) { alert('Somente administradores.'); return; }
-            if (colecao === 'usuarios' && firestoreId === currentUser.uid) { alert('Você não pode excluir sua própria conta.'); return; }
-            if (!confirm(colecao === 'usuarios' ? 'Excluir este usuário do cadastro ativo? O acesso será bloqueado e o histórico preservado. A conta de login e os dados pessoais permanecerão no Firebase.' : 'Deseja realmente excluir este registro da nuvem?')) return;
+            if (exclusaoEmCurso || !COLECOES_AUDITADAS.includes(colecao) || !firestoreId) return;
+            const item = dbData[colecao]?.find(u => String(u.firestoreId || u.id || u.uid) === firestoreId);
+            if (!item) { alert('Aguarde o registro carregar antes de excluir.'); return; }
+            if (colecao === 'usuarios' && (firestoreId === currentUser.uid || item.uid === currentUser.uid)) { alert('Você não pode excluir sua própria conta.'); return; }
+            exclusaoPendente = Object.freeze({colecao,id:firestoreId,uid:currentUser.uid,sessao:versaoSessao,item:{...item}});
+            document.getElementById('exclusao-descricao').textContent = (colecao === 'usuarios' ? 'Excluir do cadastro ativo: ' : 'Excluir registro: ') + (item.nome || item.titulo || firestoreId) + (colecao === 'usuarios' ? '. O acesso será bloqueado. A conta de login e o histórico permanecem.' : '. Esta ação remove o registro.');
+            document.getElementById('exclusao-senha').value = '';
+            document.getElementById('exclusao-erro').textContent = '';
+            document.getElementById('modal-confirmar-exclusao').classList.remove('hidden');
+            document.getElementById('exclusao-senha').focus?.();
+        }
+        async function confirmarExclusao(e) {
+            e.preventDefault();
+            const alvo = exclusaoPendente, usuarioAuth = auth.currentUser;
+            const senha = document.getElementById('exclusao-senha').value;
+            if (!alvo || exclusaoEmCurso || !ehAdministrador()) return;
+            const atual = () => exclusaoPendente === alvo && alvo.sessao === versaoSessao && currentUser?.uid === alvo.uid && usuarioAuth?.uid === alvo.uid && auth.currentUser?.uid === alvo.uid && ehAdministrador();
+            if (!atual()) { cancelarExclusao(true); return; }
+            if (!senha) { document.getElementById('exclusao-erro').textContent = 'Informe sua senha de acesso.'; return; }
+            exclusaoEmCurso = true;
+            ['exclusao-confirmar','exclusao-cancelar','exclusao-senha'].forEach(id=>document.getElementById(id).disabled=true);
             try {
-                if (colecao === 'usuarios') {
-                    await gravarUsuarioComIdentidade(String(firestoreId), {ativo: false, excluido: true, atualizadoEm: new Date().toISOString(), editadoPor: currentUser.nome || currentUser.email, editadoPorUid:currentUser.uid}, dbData.usuarios.find(u => uidCadastro(u) === String(firestoreId)) || {});
-                } else await deleteDoc(doc(db, colecao, String(firestoreId)));
-                alert(colecao === 'usuarios' ? 'Usuário excluído do cadastro ativo. Acesso bloqueado e histórico preservado. A conta de login permanece no Firebase.' : 'Registro excluído!');
+                await reauthenticateWithCredential(usuarioAuth,EmailAuthProvider.credential(usuarioAuth.email,senha));
+                document.getElementById('exclusao-senha').value = '';
+                if (!atual()) return;
+                await usuarioAuth.getIdToken(true);
+                if (!atual()) return;
+                if (alvo.emLote) {
+                    const snapshot = await getDocs(collection(db,'orgaos'));
+                    for (const registro of snapshot.docs) {
+                        if (!atual()) return;
+                        await excluirComHistorico(doc(db,'orgaos',registro.id));
+                    }
+                } else if (alvo.colecao === 'usuarios') {
+                    await gravarUsuarioComIdentidade(alvo.id, {ativo:false,excluido:true,atualizadoEm:new Date().toISOString(),editadoPor:currentUser.nome || currentUser.email,editadoPorUid:currentUser.uid},alvo.item);
+                } else await excluirComHistorico(doc(db,alvo.colecao,alvo.id));
+                if (!atual()) return;
+                cancelarExclusao(true);
                 fecharModal('modal-detalhes');
-            } catch(err) { alert(traduzirErroSistema(err)); }
+                alert(alvo.colecao === 'usuarios' ? 'Usuário excluído do cadastro ativo. Histórico preservado.' : 'Registro excluído. Alteração registrada no histórico.');
+            } catch(err) { if (atual()) document.getElementById('exclusao-erro').textContent = traduzirErroSistema(err); }
+            finally {
+                document.getElementById('exclusao-senha').value = '';
+                exclusaoEmCurso = false;
+                ['exclusao-confirmar','exclusao-cancelar','exclusao-senha'].forEach(id=>document.getElementById(id).disabled=false);
+            }
         }
 
         function configurarInterface() {
             const byId = id => document.getElementById(id);
+            byId('form-confirmar-exclusao')?.addEventListener('submit',confirmarExclusao);
+            byId('exclusao-cancelar')?.addEventListener('click',()=>cancelarExclusao());
+            byId('btn-historico-alteracoes')?.addEventListener('click',abrirHistoricoAlteracoes);
+            byId('historico-busca')?.addEventListener('input',renderHistoricoAlteracoes);
+            byId('historico-atualizar')?.addEventListener('click',()=>carregarHistoricoAlteracoes(true));
+            byId('historico-mais')?.addEventListener('click',()=>carregarHistoricoAlteracoes());
             byId('btn-filtros-locais')?.addEventListener('click',()=>{
                 const btn=byId('btn-filtros-locais'), abrir=btn.getAttribute('aria-expanded')!=='true';
                 btn.setAttribute('aria-expanded',String(abrir));byId('locais-filtros').classList.toggle('hidden',!abrir);
@@ -2618,6 +2822,7 @@
 
             byId('btn-visao-tabela')?.addEventListener('click', () => {
                 visaoDemandasAtual = 'tabela';
+                guardarNavegacao();
                 byId('container-visao-tabela').classList.remove('hidden');
                 byId('container-visao-calendario').classList.add('hidden');
                 byId('btn-visao-tabela').className = 'px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition font-bold';
@@ -2625,6 +2830,7 @@
             });
             byId('btn-visao-calendario')?.addEventListener('click', () => {
                 visaoDemandasAtual = 'calendario';
+                guardarNavegacao();
                 byId('container-visao-tabela').classList.add('hidden');
                 byId('container-visao-calendario').classList.remove('hidden');
                 byId('btn-visao-calendario').className = 'px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition font-bold';
@@ -2638,7 +2844,11 @@
         }
 
         configurarInterface();
-        document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && perfilEmEdicao) { fecharModal('modal-perfil'); document.getElementById('btn-meu-perfil').focus?.(); } });
+        document.addEventListener('keydown', ev => {
+            if (ev.key !== 'Escape') return;
+            if (exclusaoPendente) { cancelarExclusao(); return; }
+            if (perfilEmEdicao) { fecharModal('modal-perfil'); document.getElementById('btn-meu-perfil').focus?.(); }
+        });
         document.addEventListener('error', ev => { if (ev.target.matches?.('img[data-avatar]')) ev.target.remove(); },true);
 
         document.addEventListener('change', async ev => {
@@ -2657,7 +2867,7 @@
                     const { diaSemana } = calcularInfoSemana(novaData);
                     const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, autorUid:currentUser?.uid || '', texto: `Data alterada para ${novaData} (${diaSemana || 'fim de semana/outro'})` }];
                     
-                    await setDoc(doc(db, 'demandas', String(firestoreId)), { 
+                    await salvarComHistorico(doc(db, 'demandas', String(firestoreId)), {
                         dataLimite: novaData, 
                         diaSemana: diaSemana || '',
                         historicoAcoes, 
@@ -2685,7 +2895,7 @@
                     const autor = currentUser?.nome || currentUser?.email || 'Sistema';
                     const historicoAcoes = [...(demandaObj.historicoAcoes || []), { data: agora, autor, autorUid:currentUser?.uid || '', texto: `Movido para o dia da semana: ${novoDia || 'Nenhum'}` }];
                     
-                    await setDoc(doc(db, 'demandas', String(firestoreId)), { 
+                    await salvarComHistorico(doc(db, 'demandas', String(firestoreId)), {
                         diaSemana: novoDia,
                         historicoAcoes, 
                         atualizadoEm: agora, 
@@ -2709,7 +2919,7 @@
                 try {
                     const agora = new Date().toISOString();
                     const autor = currentUser?.nome || currentUser?.email || 'Sistema';
-                    await setDoc(doc(db, 'orgaos', String(firestoreId)), { 
+                    await salvarComHistorico(doc(db, 'orgaos', String(firestoreId)), {
                         gestorModalidadeSelecionada: novaModalidade, 
                         atualizadoEm: agora, 
                         editadoPorUid: currentUser?.uid || '', editadoPor: autor
@@ -2784,7 +2994,7 @@
                 const eventId = btnInscricao.getAttribute('data-acao-inscricao');
                 if (!currentUser) return;
                 try {
-                    await addDoc(collection(db, 'inscricoes'), {
+                    await adicionarComHistorico(collection(db, 'inscricoes'), {
                         eventId: String(eventId),
                         uid: currentUser.uid,
                         nome: currentUser.nome || currentUser.email,
@@ -2799,6 +3009,13 @@
 
         function limparDadosSessao() {
             currentUser = null;
+            document.body?.setAttribute('data-admin','false');
+            cancelarExclusao(true);
+            ++historicoVersao; historicoRegistros=[]; historicoUltimo=null; historicoCarregando=false;
+            document.getElementById('historico-registros').innerHTML='';
+            document.getElementById('historico-busca').value='';
+            document.getElementById('historico-mensagem').textContent='';
+            document.getElementById('modal-historico-alteracoes').classList.add('hidden');
             localSelecionadoId='';agendaLocaisEstado='aguardando';consultaLocalAtiva=false;
             ['local-filtro-tipo','local-filtro-capacidade','local-filtro-recurso','disponibilidade-local','disponibilidade-data','disponibilidade-inicio','disponibilidade-fim'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
             document.getElementById('disponibilidade-resultado').textContent='';
@@ -2832,6 +3049,7 @@
 
         async function bloquearSessao(mensagem) {
             ++versaoSessao; pararSnapshots(); limparDadosSessao();
+            finalizarRestauracao();
             document.getElementById('modal-login')?.classList.remove('hidden');
             const msg = document.getElementById('login-msg');
             if (msg) { msg.textContent = mensagem; msg.className = 'mt-4 p-3 rounded-lg text-xs font-medium bg-red-100 text-red-800 block'; }
@@ -2839,22 +3057,27 @@
         }
 
         onAuthStateChanged(auth, async user => {
+            if (user?.uid && currentUser?.uid === user.uid && currentUser.ativo !== false) return;
+            const uidAnterior = currentUser?.uid;
             const versaoAtual = ++versaoSessao;
             pararSnapshots(); limparDadosSessao();
             if (!user) {
-                document.getElementById('modal-login')?.classList.remove('hidden');
+                if (uidAnterior) { try { sessionStorage.removeItem('prgd:navegacao:' + uidAnterior); } catch (_) {} }
+                finalizarRestauracao();
                 return;
             }
             try {
                 const perfilCarregado = await carregarPerfilFirebase(user);
                 if (versaoAtual !== versaoSessao) return;
-                if (!perfilCarregado || perfilCarregado.ativo === false) {
+                if (!perfilCarregado || perfilCarregado.ativo === false || perfilCarregado.excluido === true) {
                     await bloquearSessao('Seu cadastro está inativo ou ainda não foi autorizado. Procure o administrador.'); return;
                 }
                 currentUser = perfilCarregado;
                 document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
                 document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
+                restaurarNavegacao();
                 atualizarVisibilidadeAbas(); iniciarSnapshotFirestore(); renderizarTudo();
+                finalizarRestauracao(); guardarNavegacao();
             } catch(err) {
                 if (versaoAtual === versaoSessao) await bloquearSessao('Não foi possível confirmar seu cadastro. Tente novamente ou procure o administrador.');
             }
