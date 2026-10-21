@@ -2394,7 +2394,7 @@
                     </div>
                 `;
             } else {
-                document.getElementById('detalhe-conteudo').innerHTML = (colecao === 'usuarios' ? `<div class="flex items-center gap-3">${avatarUsuario({...item,uid:uidCadastro(item)},'lg')}<b>${esc(item.nome || item.email)}</b></div>` : '') + Object.entries(item).filter(([k])=>k!=='firestoreId' && k!=='fotoPerfil').map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${['criadoPor','editadoPor'].includes(k) ? identificacaoUsuario({nome:v,uid:item[k+'Uid']}) : Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
+                document.getElementById('detalhe-conteudo').innerHTML = (colecao === 'usuarios' ? `<div class="flex items-center gap-3">${avatarUsuario({...item,uid:uidCadastro(item)},'lg')}<b>${esc(item.nome || item.email)}</b></div>` : '') + Object.entries(item).filter(([k])=>!['firestoreId','fotoPerfil','ultimaAuditoriaId'].includes(k)).map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${['criadoPor','editadoPor'].includes(k) ? identificacaoUsuario({nome:v,uid:item[k+'Uid']}) : Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
             }
 
             if (colecao === 'demandas') document.getElementById('detalhe-conteudo').innerHTML += historicoDemandaHtml(item);
