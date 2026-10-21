@@ -9,12 +9,15 @@ function app() {
     const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
     const source = html.match(/<script type="module">([\s\S]*?)<\/script>/)[1]
         .replace(/^\s*import .*?;\s*$/gm, '');
-    const nodes = new Map(), writes = [], charts = [], listeners = new Map(), snapshots = [];
+    const nodes = new Map(), writes = [], audits = [], charts = [], listeners = new Map(), snapshots = [], storage = new Map();
+    let autoId = 0;
     const element = id => {
         if (!nodes.has(id)) nodes.set(id, {
             value: '', textContent: '', innerHTML: '', style: {}, dataset: {},
-            classList: { add() {}, remove() {}, toggle() {} },
+            classList: { values:new Set(), add(...v) {v.forEach(x=>this.values.add(x));}, remove(...v) {v.forEach(x=>this.values.delete(x));}, toggle(v,force) { const on=force ?? !this.values.has(v);on?this.values.add(v):this.values.delete(v); }, contains(v){return this.values.has(v);} },
             addEventListener(type, fn) { listeners.set(id + ':' + type, fn); },
+            click() { listeners.get(id + ':click')?.(); },
+            setAttribute() {},
             appendChild() {},
             getContext() { return {}; }
         });
@@ -22,13 +25,16 @@ function app() {
     };
     const context = vm.createContext({
         console: { info() {}, warn() {} }, window: {},
-        document: { getElementById: element, createElement() { return {}; }, querySelectorAll() { return []; }, querySelector() { return null; }, addEventListener() {} },
+        document: { body:{setAttribute(){}},getElementById: element, createElement() { return {}; }, querySelectorAll() { return []; }, querySelector() { return null; }, addEventListener() {} },
+        sessionStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},
         alert() {}, confirm() { return true; },
         initializeApp(config, name = '[DEFAULT]') { return {name}; }, getApps() { return []; }, getFirestore() { return {}; }, getAuth(app) { return app; },
         async createUserWithEmailAndPassword(auth, email, password) { return {user:{uid:'novo-uid'}}; }, async deleteUser() {},
         browserLocalPersistence: {tipo:'local'}, inMemoryPersistence: {tipo:'memory'}, setPersistence() { return Promise.resolve(); },
         signInWithEmailAndPassword() { return Promise.resolve(); }, signOut() { return Promise.resolve(); },
-        collection(db, name) { return name; }, doc(db, collection, id, ...segments) { return { collection, id, path:[collection,id,...segments].join('/') }; },
+        collection(db, name) { return name; }, doc(db, collection, id, ...segments) { if(arguments.length===1){collection=db;id='auto-'+(++autoId);} return { collection, id, path:[collection,id,...segments].join('/') }; },
+        serverTimestamp(){return {servidor:true};},orderBy(...v){return v;},limit(n){return n;},startAfter(v){return v;},
+        async runTransaction(db, fn) {const pending=[];await fn({get:ref=>context.getDoc(ref),set:(ref,data,options)=>pending.push({ref,data,options}),delete:ref=>pending.push({ref,remover:true})});for(const w of pending){if(w.ref.collection==='historicoAlteracoes')audits.push(w.data);else if(w.remover)await context.deleteDoc(w.ref);else await context.setDoc(w.ref,w.data,w.options);}},
         writeBatch() { const pending=[]; return {set(ref,data,options){pending.push({ref,data,options});},async commit(){ for(const w of pending)await context.setDoc(w.ref,w.data,w.options); }}; },
         EmailAuthProvider:{credential(email,password){return {email,password};}}, async reauthenticateWithCredential(){},async updatePassword(){},
         async addDoc(collection, data) { writes.push({ collection, data }); },
@@ -39,7 +45,13 @@ function app() {
         Chart: function(ctx, config) { charts.push(config); this.destroy = () => {}; }
     });
     vm.runInContext(source, context);
-    return { run: code => vm.runInContext(code, context), element, writes, charts, listeners, snapshots, context };
+    return { run: code => vm.runInContext(code, context), element, writes, audits, charts, listeners, snapshots, context,storage };
+}
+
+async function confirmarExclusaoTeste(a) {
+    a.run("auth.currentUser={uid:currentUser.uid,email:'admin@example.invalid',getIdToken:async()=>''}");
+    await a.run('excluirRegistroUniversal()');a.element('exclusao-senha').value='senha-de-teste';
+    await a.run('confirmarExclusao({preventDefault(){}})');
 }
 
 test('cadastro de local grava na mesma coleção lida pelo módulo', async () => {
@@ -190,7 +202,7 @@ test('número inválido impede a gravação inteira da edição', async () => {
 });
 
 test('lista não alterada mantém itens que já contêm vírgulas', async () => {
-    const a=app();a.run("currentUser={perfil:'admin'};dbData.eventos=[{firestoreId:'ev',gruposPermitidos:['grupo, especial','comum']}]");
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin'};dbData.eventos=[{firestoreId:'ev',gruposPermitidos:['grupo, especial','comum']}]");
     a.element('edit-colecao').value='eventos';a.element('edit-doc-id').value='ev';
     a.context.editEvent={preventDefault(){},target:{querySelectorAll:()=>[{name:'gruposPermitidos',value:'grupo, especial, comum',dataset:{fieldType:'string-list'}}]}};
     await a.run('salvarEdicaoAdmin(editEvent)');assert.deepEqual(Array.from(a.writes[0].data.gruposPermitidos),['grupo, especial','comum']);
@@ -297,10 +309,10 @@ test('administrador não inativa nem rebaixa a própria conta', async () => {
 });
 
 test('inativar usuário preserva o documento e não apaga conta nem demandas', async () => {
-    const a=app();a.run("currentUser={uid:'admin',perfil:'admin',nome:'Admin'}");
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin',nome:'Admin'};dbData.usuarios=[{firestoreId:'interno',uid:'interno',nome:'Interno'}]");
     a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='interno';
     a.context.deleteDoc=async()=>{throw new Error('Não deve excluir');};
-    await a.run('excluirRegistroUniversal()');
+    await confirmarExclusaoTeste(a);
     assert.equal(a.writes[0].data.ativo,false);assert.equal(a.writes[0].id,'interno');assert.equal(a.writes[0].options.merge,true);
 });
 
@@ -418,22 +430,32 @@ test('remover foto exige salvar para persistir e volta às iniciais', async () =
     await a.run('salvarMeuPerfil({preventDefault(){}})');assert.equal(a.writes[0].data.fotoPerfil,'');
 });
 test('troca de senha reautentica a própria conta, usa Auth e limpa campos secretos', async () => {
-    const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid'}");
+    const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid',getIdToken:async()=>''}");
     a.element('perfil-senha-atual').value='senha-atual';a.element('perfil-senha-nova').value='senha-nova';a.element('perfil-senha-confirmar').value='senha-nova';
     const chamadas=[];a.context.reauthenticateWithCredential=async(u,c)=>chamadas.push(['confirmar',u.uid,c.password]);a.context.updatePassword=async(u,p)=>chamadas.push(['trocar',u.uid,p]);
     await a.run('alterarMinhaSenha({preventDefault(){}})');
     assert.deepEqual(chamadas,[['confirmar','pessoa','senha-atual'],['trocar','pessoa','senha-nova']]);assert.equal(a.writes.length,0);assert.equal(a.element('perfil-senha-atual').value,'');assert.equal(a.element('perfil-senha-nova').value,'');
+    assert.equal(a.audits.length,1);assert.equal(a.audits[0].acao,'alterar_senha');assert.equal(a.audits[0].autorUid,'pessoa');
+    assert.deepEqual(Array.from(a.audits[0].campos),['senha']);assert.ok(!JSON.stringify(a.audits).includes('senha-atual'));assert.ok(!JSON.stringify(a.audits).includes('senha-nova'));
+});
+test('falha no histórico após trocar senha informa que a nova senha já está em vigor', async () => {
+    const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid',getIdToken:async()=>''}");
+    a.element('perfil-senha-atual').value='senha-atual';a.element('perfil-senha-nova').value='senha-nova';a.element('perfil-senha-confirmar').value='senha-nova';
+    let alterou=false;a.context.updatePassword=async()=>{alterou=true;};a.context.runTransaction=async()=>{throw new Error('permission-denied');};
+    await a.run('alterarMinhaSenha({preventDefault(){}})');
+    assert.equal(alterou,true);assert.match(a.element('perfil-senha-msg').textContent,/Senha alterada.*histórico.*nova senha/);
+    assert.equal(a.element('perfil-senha-atual').value,'');assert.equal(a.element('perfil-senha-nova').value,'');assert.equal(a.audits.length,0);
 });
 test('senha atual incorreta e confirmação divergente não alteram a senha', async () => {
-    const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid'}");let alterou=false;
-    a.context.updatePassword=async()=>{alterou=true;};a.context.reauthenticateWithCredential=async()=>{throw new Error('auth/wrong-password');};
+    const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid',getIdToken:async()=>''}");let alterou=false;
+    a.context.updatePassword=async()=>{alterou=true;};a.context.reauthenticateWithCredential=async()=>{throw {code:'auth/wrong-password'};};
     for(const [atual,nova,confirmar] of [['atual','nova-senha','diferente'],['atual','nova-senha','nova-senha']]){
         a.element('perfil-senha-atual').value=atual;a.element('perfil-senha-nova').value=nova;a.element('perfil-senha-confirmar').value=confirmar;await a.run('alterarMinhaSenha({preventDefault(){}})');
     }
     assert.equal(alterou,false);assert.ok(a.element('perfil-senha-msg').textContent.includes('incorreta'));assert.equal(a.element('perfil-senha-atual').value,'');
 });
 test('troca de conta durante confirmação não altera senha nem campos da nova sessão', async () => {
-    const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid'}");
+    const a=app();perfilAberto(a);a.run("auth.currentUser={uid:'pessoa',email:'pessoa@example.invalid',getIdToken:async()=>''}");
     a.element('perfil-senha-atual').value='atual';a.element('perfil-senha-nova').value='nova-senha';a.element('perfil-senha-confirmar').value='nova-senha';
     let resolver,alterou=false;a.context.reauthenticateWithCredential=()=>new Promise(resolve=>{resolver=resolve;});a.context.updatePassword=async()=>{alterou=true;};
     const pendente=a.run('alterarMinhaSenha({preventDefault(){}})');
@@ -467,7 +489,7 @@ test('usuário excluído sai da lista e do contador, preservando os dados carreg
 test('exclusão lógica bloqueia acesso e mantém identidade e histórico', async () => {
     const a=app();a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='outro';
     a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno',nome:'Admin'};dbData.usuarios=[{uid:'outro',nome:'Outro',tipoUsuario:'interno'}]");
-    await a.run('excluirRegistroUniversal()');
+    await confirmarExclusaoTeste(a);
     assert.equal(a.writes[0].data.ativo,false);assert.equal(a.writes[0].data.excluido,true);
     assert.equal(a.writes[1].data.ativo,false);assert.equal(a.writes[1].data.nome,'Outro');
 });
@@ -576,4 +598,83 @@ test('logout limpa painel, filtros e consulta de locais',async()=>{
     const a=app();agendaLocalTeste(a);a.run("localSelecionadoId='l1';consultaLocalAtiva=true");a.element('disponibilidade-data').value='2030-01-01';a.element('local-filtro-tipo').value='pago';
     await a.context.authCallback(null);
     assert.equal(a.run('localSelecionadoId'),'');assert.equal(a.run('consultaLocalAtiva'),false);assert.equal(a.element('disponibilidade-data').value,'');assert.equal(a.element('local-filtro-tipo').value,'');
+});
+
+test('clicar em excluir apenas abre confirmação e nunca grava de imediato',async()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin'};dbData.usuarios=[{firestoreId:'outro',nome:'Outro'}]");
+    a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='outro';
+    a.run('excluirRegistroUniversal()');assert.equal(a.writes.length,0);assert.equal(a.audits.length,0);
+    assert.equal(a.run('exclusaoPendente.id'),'outro');assert.equal(a.element('exclusao-senha').value,'');
+    a.element('exclusao-senha').value='segredo';a.run('cancelarExclusao()');
+    assert.equal(a.run('exclusaoPendente'),null);assert.equal(a.element('exclusao-senha').value,'');
+});
+test('senha incorreta impede exclusão e é removida do campo',async()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin'};dbData.usuarios=[{firestoreId:'outro',nome:'Outro'}]");
+    a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='outro';
+    a.context.reauthenticateWithCredential=async()=>{throw {code:'auth/wrong-password'};};
+    await confirmarExclusaoTeste(a);assert.equal(a.writes.length,0);assert.equal(a.audits.length,0);
+    assert.ok(a.element('exclusao-erro').textContent);assert.equal(a.element('exclusao-senha').value,'');
+});
+test('confirmação usa a conta do autor e o alvo capturado; duplo envio não duplica',async()=>{
+    const a=app(),chamadas=[];let resolver;
+    a.run("currentUser={uid:'admin',perfil:'admin',nome:'Admin'};auth.currentUser={uid:'admin',email:'admin@example.invalid',getIdToken:async()=>{}};dbData.usuarios=[{firestoreId:'outro',nome:'Outro'}]");
+    a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='outro';a.run('excluirRegistroUniversal()');
+    a.element('edit-doc-id').value='alvo-forjado';a.element('exclusao-senha').value='senha-do-admin';
+    a.context.reauthenticateWithCredential=(user,cred)=>{chamadas.push([user.uid,cred.email,cred.password]);return new Promise(r=>resolver=r);};
+    const primeiro=a.run('confirmarExclusao({preventDefault(){}})');await a.run('confirmarExclusao({preventDefault(){}})');resolver();await primeiro;
+    assert.deepEqual(chamadas,[['admin','admin@example.invalid','senha-do-admin']]);
+    assert.equal(a.writes[0].id,'outro');assert.equal(a.audits.length,1);assert.equal(a.audits[0].acao,'excluir_usuario');
+    assert.ok(!JSON.stringify(a.audits).includes('senha-do-admin'));
+});
+test('troca de sessão durante reautenticação cancela a exclusão',async()=>{
+    const a=app();let resolver;
+    a.run("currentUser={uid:'admin',perfil:'admin'};auth.currentUser={uid:'admin',email:'a@example.invalid',getIdToken:async()=>{}};dbData.usuarios=[{firestoreId:'outro'}]");
+    a.element('edit-colecao').value='usuarios';a.element('edit-doc-id').value='outro';a.run('excluirRegistroUniversal()');a.element('exclusao-senha').value='segredo';
+    a.context.reauthenticateWithCredential=()=>new Promise(r=>resolver=r);
+    const pendente=a.run('confirmarExclusao({preventDefault(){}})');a.run("++versaoSessao;currentUser={uid:'nova',perfil:'admin'};auth.currentUser={uid:'nova'}");resolver();await pendente;
+    assert.equal(a.writes.length,0);assert.equal(a.audits.length,0);
+});
+test('revogar administração fecha confirmação e histórico já abertos',()=>{
+    const a=app();a.run("currentUser={uid:'a',perfil:'admin'};exclusaoPendente={id:'outro'};historicoRegistros=[{autorNome:'Restrito'}]");
+    a.element('historico-registros').innerHTML='Restrito';a.run("currentUser={uid:'a',perfil:'comum'};atualizarVisibilidadeAbas()");
+    assert.equal(a.run('exclusaoPendente'),null);assert.equal(a.element('historico-registros').innerHTML,'');
+    assert.ok(a.element('modal-historico-alteracoes').classList.contains('hidden'));assert.equal(a.element('btn-excluir-registro').disabled,true);
+});
+test('auditoria identifica campos alterados sem copiar valores pessoais',async()=>{
+    const a=app();a.run("currentUser={uid:'a',nome:'Autor',perfil:'admin'}");
+    a.context.getDoc=async()=>({exists:()=>true,data:()=>({telefone:'8199999',endereco:'Endereço confidencial',nome:'Antigo',criadoEm:'original'})});
+    await a.run("salvarComHistorico(doc(db,'orgaos','o'),{nome:'Novo',atualizadoEm:'agora'},{merge:true})");
+    assert.equal(a.writes[0].data.nome,'Novo');assert.equal(a.audits[0].autorUid,'a');assert.equal(a.audits[0].acao,'editar');
+    assert.deepEqual(Array.from(a.audits[0].campos),['nome']);
+    assert.ok(!JSON.stringify(a.audits).includes('8199999'));assert.ok(!JSON.stringify(a.audits).includes('confidencial'));
+});
+test('histórico de perfil privado identifica campos sem guardar telefone ou endereço',async()=>{
+    const a=app();a.run("currentUser={uid:'pessoa',nome:'Pessoa',perfil:'comum'}");
+    await a.run("salvarComHistorico(doc(db,'usuarios','pessoa','privado','perfil'),{telefone:'819999999',endereco:'Rua privada',atualizadoEm:'agora'})");
+    assert.equal(a.audits[0].colecao,'perfilPrivado');assert.equal(a.audits[0].registroId,'pessoa');
+    assert.ok(!JSON.stringify(a.audits).includes('819999999'));assert.ok(!JSON.stringify(a.audits).includes('Rua privada'));
+});
+test('restauração mantém aba e visão permitidas por usuário',async()=>{
+    const a=app();a.storage.set('prgd:navegacao:u',JSON.stringify({aba:'demandas',visao:'calendario'}));
+    a.context.getDoc=async()=>({exists:()=>true,data:()=>({nome:'Usuário',perfil:'comum',tipoUsuario:'interno',modulosPermitidos:['demandas','locais']})});
+    await a.context.authCallback({uid:'u',email:'u@example.invalid'});
+    assert.equal(a.run('abaAtual'),'demandas');assert.equal(a.run('visaoDemandasAtual'),'calendario');
+    assert.ok(a.element('modal-login').classList.contains('hidden'));assert.ok(a.element('sessao-carregando').classList.contains('hidden'));
+});
+test('aba salva proibida é descartada e logout remove navegação da conta',async()=>{
+    const a=app();a.storage.set('prgd:navegacao:u',JSON.stringify({aba:'usuarios'}));
+    a.context.getDoc=async()=>({exists:()=>true,data:()=>({nome:'Consulta',perfil:'comum',modulosPermitidos:['eventos'],tipoUsuario:'externo'})});
+    await a.context.authCallback({uid:'u',email:'u@example.invalid'});assert.equal(a.run('abaAtual'),'eventos');
+    await a.context.authCallback(null);assert.equal(a.storage.has('prgd:navegacao:u'),false);assert.equal(a.run('currentUser'),null);
+});
+test('callback da mesma conta não limpa a tela nem a confirmação atual',async()=>{
+    const a=app();a.run("currentUser={uid:'a',ativo:true};exclusaoPendente={id:'outro'};abaAtual='locais'");
+    await a.context.authCallback({uid:'a'});assert.equal(a.run('abaAtual'),'locais');assert.equal(a.run('exclusaoPendente.id'),'outro');
+});
+test('retorno atrasado do histórico após logout não expõe dados',async()=>{
+    const a=app();let resolver;a.run("currentUser={uid:'a',perfil:'admin'}");
+    a.context.getDocs=()=>new Promise(r=>resolver=r);
+    const pendente=a.run('carregarHistoricoAlteracoes(true)');await a.context.authCallback(null);
+    resolver({docs:[{id:'h',data:()=>({autorNome:'Restrito'})}]});await pendente;
+    assert.equal(a.run('historicoRegistros.length'),0);assert.equal(a.element('historico-registros').innerHTML,'');
 });

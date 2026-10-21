@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.7.0 — gestão de usuários e sessão persistente.** Publicação autorizada em 21/10/2026. Preserva Locais e acrescenta edição/exclusão lógica de usuários e sessão mantida após F5.
+**Versão deste código: v0.8.0 — exclusão com senha, histórico de alterações e restauração da sessão.** Publicação autorizada em 21/10/2026 após o usuário informar que publicou as regras do Firebase. Integração e implantação do site acompanhadas no PR #13. Parte da v0.7.0 e preserva a organização e os tons suaves de Locais.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -20,11 +20,18 @@ A versão do site depende da integração e da publicação deste código. Uma b
 | Usuários | Tipos **Interno - GRGD** e **Externo**, situação, perfil e módulos permitidos. |
 | Perfil pessoal | Edição do próprio nome, telefone e endereço, foto enviada do computador e troca de senha com confirmação da senha atual. |
 | Identificação | Foto ou iniciais no cabeçalho e nos registros com vínculo ao identificador da pessoa. |
+| Histórico de alterações | Consulta administrativa com pessoa, data/hora, registro, ação e campos modificados; busca e carregamento por páginas. |
 | Dashboard e bases | Indicadores, gráficos e cadastros auxiliares. |
 
 Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo interno não concede administração automaticamente. Registros antigos sem vínculo continuam preservados, sem associação automática por nome.
 
 ## O que mudou nesta entrega
+
+A v0.8.0 mantém os controles de exclusão visíveis somente para administradores e pede a **senha da própria conta** antes de confirmar. Usuários são retirados do cadastro ativo, com bloqueio da autoexclusão; outros registros seguem a exclusão já existente. As regras passam a exigir autenticação recente para excluir e, na exclusão de usuários, o histórico no mesmo envio. Não altera automaticamente os perfis de acesso cadastrados.
+
+As gravações feitas pela aplicação registram a pessoa, o horário do servidor, a ação e os nomes dos campos alterados. O botão **Histórico de alterações** permite consultar esses registros. Valores de senhas, contatos e fotos não são copiados para o histórico. A troca de senha registra apenas que ocorreu; Authentication e Firestore são serviços separados, portanto uma falha posterior do histórico é informada sem desfazer a nova senha. Não há recuperação retroativa de alterações nem captura de operações feitas diretamente no console ou por outros programas.
+
+Ao atualizar com F5, uma indicação de carregamento aguarda a recuperação da sessão e das permissões, sem exibir o formulário de login no intervalo. A última aba e a visualização de Demandas são restauradas na mesma guia do navegador. **Esta versão altera as regras do Firebase e exige publicação coordenada.** Consulte [implantação e limites](docs/seguranca-auditoria-sessao.md).
 
 A v0.7.0 acrescenta **Editar** e **Excluir** na lista de usuários e **Salvar usuário** no formulário. A sessão principal usa persistência local após F5 e reabertura; **Sair** encerra a sessão. Exclusão lógica exige confirmação, bloqueia a própria conta e preserva histórico, dados pessoais e conta Auth. O e-mail permanece reservado. Armazenamento bloqueado pode impedir a persistência.
 
@@ -57,6 +64,7 @@ O mapa registra o que manter, organizar e avaliar para exclusão. A versão anti
 
 - [Cadastro de usuários e responsáveis GRGD](docs/cadastro-usuarios.md).
 - [Perfil pessoal, foto e privacidade dos dados](docs/perfil-pessoal.md).
+- [Exclusão com senha, histórico e restauração da sessão](docs/seguranca-auditoria-sessao.md).
 - [Registro histórico do primeiro lote de correções](docs/correcoes-primeiro-lote.md).
 - [Mapeamento de arquivos, branches e limpeza](docs/mapa-organizacao.md).
 - [Como alterar, versionar e publicar](CONTRIBUTING.md).
@@ -97,4 +105,4 @@ A hospedagem futura prevista é uma **VM no DataCenter da ATI**. Essa mudança a
 - Revisar relatórios, importação e recursos exclusivos da versão histórica antes de decidir sua incorporação ou retirada.
 - Definir a publicação coordenada do HTML e das regras, além da operação futura em VM.
 
-A v0.7.0 altera `firestore.rules`. Em 21/10/2026, o usuário confirmou a publicação das regras no Firebase antes de autorizar o site; essa publicação foi informada pelo usuário, sem verificação direta do console nesta sessão. GitHub Pages publica somente o site. A conferência institucional de login, F5, reabertura, Sair, edição e exclusão permanece pendente.
+A v0.8.0 altera novamente `firestore.rules`: as regras publicadas para a v0.7.0 não são suficientes para o novo histórico. Em 21/10/2026, o usuário informou ter publicado as regras revisadas antes da liberação do HTML; confirmação baseada no relato, sem verificação direta do console nesta sessão. Durante a transição, a v0.7.0 não consegue excluir usuários porque não envia o histórico exigido; as demais gravações antigas conservam os acessos existentes. GitHub Pages publica somente o site. A validação integrada no projeto institucional continua pendente; os testes não alteram contas reais.
