@@ -563,6 +563,7 @@ test('histórico institucional isolado, adulterado ou com autoria falsa é negad
     await assertFails(setDoc(doc(f,'historicoAlteracoes','solto'),auditoriaLote2('titular','inscricoes',id,p,'inscrever')));
     await assertFails(inscreverLote2('titular',p,{acao:'cancelar_inscricao'}));await inscreverLote2('titular',p);
     const r=await getDoc(doc(f,'inscricoes',id));await assertFails(updateDoc(doc(db('admin'),'historicoAlteracoes',r.data().ultimaAuditoriaId),{autorUid:'outro'}));
+    await assertFails(setDoc(doc(db('admin'),'historicoAlteracoes','cancelamento-sem-transicao'),auditoriaLote2('admin','inscricoes',id,r.data(),'cancelar_inscricao')));
 });
 
 test('vínculo anterior sem liberação expressa não ganha escrita automaticamente',async()=>{

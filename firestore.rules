@@ -179,6 +179,7 @@ service cloud.firestore {
         && log.orgaoId == data.orgaoId && log.setorId == data.setorId
         && log.campos is list && (col == 'colaboradores' ? log.campos.toSet() == participantChangedFields(data) : log.campos == ['situacao']);
     }
+    function portalAuditKind(data) { return data.colecao == 'colaboradores' || data.acao in ['inscrever','cancelar_inscricao']; }
     function portalAuditMatches(id, data) {
       let item = data.colecao in ['colaboradores','inscricoes'] ? getAfter(/databases/$(database)/documents/$(data.colecao)/$(data.registroId)).data : null;
       return item != null
@@ -256,11 +257,11 @@ service cloud.firestore {
         && request.resource.data.registroNome is string && request.resource.data.registroNome.size() <= 180
         && request.resource.data.acao in ['criar','editar','excluir','excluir_usuario','alterar_senha','inscrever','cancelar_inscricao']
         && request.resource.data.campos is list && request.resource.data.campos.size() <= 128
-        && (portalAuditMatches(id, request.resource.data) || (isAdmin() && request.resource.data.colecao in ['usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes','perfilPrivado','setores'])
+        && (portalAuditKind(request.resource.data) ? portalAuditMatches(id, request.resource.data) : ((isAdmin() && request.resource.data.colecao in ['usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes','perfilPrivado','setores'])
           || (request.resource.data.colecao in ['demandas','orgaos','eventos','locais','fornecedores','bases'] && request.resource.data.acao in ['criar','editar'] && canWriteBusiness(request.resource.data.colecao == 'orgaos' ? 'clientes' : request.resource.data.colecao, request.resource.data.acao == 'criar' ? 'criar' : 'editar'))
           || (request.resource.data.colecao in ['usuarios','perfilPrivado'] && request.resource.data.registroId == request.auth.uid && request.resource.data.acao in ['criar','editar'])
           || (request.resource.data.colecao == 'inscricoes' && canReadModule('eventos') && request.resource.data.acao in ['criar','excluir'] && ownRegistrationAudit(request.resource.data))
-          || (request.resource.data.colecao == 'autenticacao' && request.resource.data.registroId == request.auth.uid && request.resource.data.acao == 'alterar_senha' && recentAuthentication()))
+          || (request.resource.data.colecao == 'autenticacao' && request.resource.data.registroId == request.auth.uid && request.resource.data.acao == 'alterar_senha' && recentAuthentication())))
         && validAuditScope(request.resource.data);
       // Histórico somente acrescentado: nem administradores podem editar ou apagar entradas.
       allow update, delete: if false;
