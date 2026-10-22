@@ -1,0 +1,47 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "colaboradores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "orgaoId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "setorId",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "inscricoes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "orgaoId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "setorId",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "historicoAlteracoes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "orgaoId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "setorId",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

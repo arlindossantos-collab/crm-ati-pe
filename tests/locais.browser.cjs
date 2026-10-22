@@ -33,6 +33,7 @@ const stub="\nconst fixture=globalThis.__locaisFixture;\nexport const inMemoryPe
    return r.fallback();
   });
   await page.goto('http://127.0.0.1:'+server.address().port);
+  if(process.env.PRGD_TEST_CSS)await page.addStyleTag({content:fs.readFileSync(process.env.PRGD_TEST_CSS,'utf8')});
   await page.locator('#main-content').waitFor({state:'visible'});
   await page.locator('[data-tab="locais"]').click();
   await page.locator('#locais-qualidade').filter({hasText:'Agenda cadastrada carregada'}).waitFor();

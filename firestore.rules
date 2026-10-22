@@ -4,17 +4,93 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function profile() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
     function active() {
-      return signedIn() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
-        && profile().get('ativo', true) == true && profile().get('excluido', false) != true;
+      let user = profile();
+      return signedIn() && user != null && user.get('ativo', true) == true && user.get('excluido', false) != true;
     }
     function isAdmin() {
       // Administradores antigos continuam acessando até a classificação manual.
-      return active() && profile().get('tipoUsuario', '') != 'externo' && profile().get('perfil', '') == 'admin';
+      let user = profile();
+      return signedIn() && user != null && user.get('ativo', true) == true && user.get('excluido', false) != true
+        && user.get('tipoUsuario', '') != 'externo' && user.get('perfil', '') == 'admin';
+    }
+    function hasInstitutionalAccess() { return profile().get('acessoInstitucional', null) != null; }
+    function baseAccessActive(user) {
+      let v = user.get('acessoInstitucional', {});
+      return user.get('ativo', true) == true && user.get('excluido', false) != true
+        && v is map && v.get('situacao', '') == 'aprovado'
+        && v.get('papel', '') in ['grgd','gestor_nsi','substituto','auditoria']
+        && v.inicio <= request.time.toMillis() && v.fim > request.time.toMillis() && v.revisao > request.time.toMillis()
+        && v.aprovacaoGrgd.responsavel.size() > 0 && v.aprovacaoGrgd.referencia.size() > 0
+        && v.aprovacaoAutoridade.responsavel.size() > 0 && v.aprovacaoAutoridade.referencia.size() > 0;
+    }
+    function validSubstitute(v) {
+      let titular = get(/databases/$(database)/documents/usuarios/$(v.titularUid)).data;
+      let t = titular.acessoInstitucional;
+      return v.titularUid != request.auth.uid && baseAccessActive(titular) && t.papel == 'gestor_nsi'
+        && t.orgaoId == v.orgaoId && v.inicio >= t.inicio && v.fim <= t.fim && v.revisao <= t.revisao && v.acoes.hasOnly(t.acoes)
+        && (t.setoresIds.size() == 0 || (v.setoresIds.size() > 0 && v.setoresIds.hasOnly(t.setoresIds)));
+    }
+    function accessActive() {
+      let user = profile();
+      let v = user.get('acessoInstitucional', {});
+      return baseAccessActive(user)
+        && (v.papel != 'grgd' || user.get('tipoUsuario', '') == 'interno')
+        && (v.papel != 'substituto' || validSubstitute(v));
+    }
+    function institutionalAction(action) {
+      let v = profile().get('acessoInstitucional', null);
+      return v != null && action in v.acoes && accessActive();
+    }
+    function grgdAction(action) {
+      let v = profile().get('acessoInstitucional', null);
+      return v != null && v.papel == 'grgd' && action in v.acoes && accessActive();
+    }
+    function scopedRecord(data) {
+      let v = profile().acessoInstitucional;
+      return accessActive() && data.get('orgaoId', '') == v.orgaoId && v.orgaoId != ''
+        && (v.setoresIds.size() == 0 || data.get('setorId', '') in v.setoresIds);
     }
     function canReadModule(module) {
-      return isAdmin() || (active() && module != 'usuarios'
+      return isAdmin() || (active() && !hasInstitutionalAccess() && module != 'usuarios'
         && (profile().get('tipoUsuario', '') != 'externo' || module == 'eventos')
-        && module in profile().get('modulosPermitidos', profile().get('tipoUsuario', '') == '' ? ['dashboard','demandas','eventos'] : []));
+        && module in profile().get('modulosPermitidos', profile().get('tipoUsuario', '') == '' ? ['dashboard','demandas','eventos'] : []))
+        || grgdAction(module + '.consultar') || (module == 'eventos' && institutionalAction('eventos.consultar'));
+    }
+    function canWriteBusiness(module, action) { return isAdmin() || (grgdAction(module + '.' + action) && module + '.consultar' in profile().acessoInstitucional.acoes); }
+    function validSectorId(id, orgaoId) {
+      let setor = get(/databases/$(database)/documents/setores/$(id)).data;
+      return setor != null && setor.orgaoId == orgaoId && setor.ativo == true;
+    }
+    function validSector(v, index) {
+      return v.setoresIds.size() <= index || (v.setoresIds[index] is string && validSectorId(v.setoresIds[index], v.orgaoId));
+    }
+    function validAccess(user) {
+      let v = user.get('acessoInstitucional', null);
+      return v == null || (v is map && user.perfil != 'admin'
+        && v.keys().hasOnly(['papel','orgaoId','setoresIds','situacao','inicio','fim','revisao','titularUid','acoes','aprovacaoGrgd','aprovacaoAutoridade','registradoPorUid','registradoEm'])
+        && v.papel in ['grgd','gestor_nsi','substituto','auditoria']
+        && v.situacao in ['pendente','aprovado','suspenso'] && v.orgaoId is string && v.orgaoId.size() <= 1500
+        && v.setoresIds is list && v.setoresIds.size() <= 5 && v.acoes is list
+        && v.inicio is int && v.fim is int && v.revisao is int
+        && v.fim > v.inicio && v.revisao > v.inicio && v.revisao <= v.fim
+        && v.registradoPorUid is string && v.registradoEm is timestamp && v.titularUid is string && (v.papel != 'substituto' || v.titularUid != user.uid)
+        && v.aprovacaoGrgd.keys().hasOnly(['responsavel','referencia']) && v.aprovacaoAutoridade.keys().hasOnly(['responsavel','referencia'])
+        && v.aprovacaoGrgd.responsavel is string && v.aprovacaoGrgd.responsavel.size() <= 150
+        && v.aprovacaoGrgd.referencia is string && v.aprovacaoGrgd.referencia.size() <= 300
+        && v.aprovacaoAutoridade.responsavel is string && v.aprovacaoAutoridade.responsavel.size() <= 150
+        && v.aprovacaoAutoridade.referencia is string && v.aprovacaoAutoridade.referencia.size() <= 300
+        && (v.papel == 'grgd' ? (user.tipoUsuario == 'interno' && v.orgaoId == '' && v.setoresIds.size() == 0 && v.acoes.hasOnly(['demandas.consultar','demandas.criar','demandas.editar','clientes.consultar','clientes.criar','clientes.editar','eventos.consultar','eventos.criar','eventos.editar','locais.consultar','locais.criar','locais.editar','fornecedores.consultar','fornecedores.criar','fornecedores.editar','bases.consultar','bases.criar','bases.editar','relatorios.consultar']))
+          : ((v.situacao != 'aprovado' || (v.orgaoId != '' && exists(/databases/$(database)/documents/orgaos/$(v.orgaoId))))
+            && (v.papel == 'auditoria' ? v.acoes.hasOnly(['auditoria.consultar','relatorios.consultar'])
+              : v.acoes.hasOnly(['orgao.consultar','participantes.consultar','participantes.cadastrar','participantes.editar','eventos.consultar','inscricoes.consultar','inscricoes.criar','inscricoes.cancelar','comprovantes.consultar']))))
+        && (v.situacao != 'aprovado' || (validSector(v,0) && validSector(v,1) && validSector(v,2) && validSector(v,3) && validSector(v,4)))
+        && (v.situacao != 'aprovado' || (v.acoes.size() > 0 && v.aprovacaoGrgd.responsavel.size() > 0 && v.aprovacaoGrgd.referencia.size() > 0
+          && v.aprovacaoAutoridade.responsavel.size() > 0 && v.aprovacaoAutoridade.referencia.size() > 0
+          && (v.papel != 'substituto' || validSubstitute(v)))));
+    }
+    function validAccessRegistration(data, previous) {
+      let v = data.get('acessoInstitucional', null);
+      return (previous == null && v == null) || (v != null && (v == previous || (v.registradoPorUid == request.auth.uid && v.registradoEm == request.time)));
     }
     function validPhoto(value) {
       return value is string && value.size() <= 45000
@@ -44,12 +120,13 @@ service cloud.firestore {
         && data.modulosPermitidos.hasOnly(['dashboard','demandas','clientes','eventos','locais','fornecedores','usuarios','bases'])
         && (data.perfil == 'admin' || !data.modulosPermitidos.hasAny(['usuarios']))
         && (data.tipoUsuario != 'externo' || data.modulosPermitidos.hasOnly(['eventos']))
-        && validPhoto(data.get('fotoPerfil', '')) && !data.keys().hasAny(['senha','password']);
+        && validAccess(data) && validPhoto(data.get('fotoPerfil', '')) && !data.keys().hasAny(['senha','password']);
     }
     function canReadEvent(data) {
-      return isAdmin() || data.get('eventoPublico', false) == true
-        || !('gruposPermitidos' in data) || data.gruposPermitidos.size() == 0
-        || (data.gruposPermitidos is list && data.gruposPermitidos.hasAny(profile().get('grupos', [])));
+      return isAdmin() || grgdAction('eventos.consultar') || data.get('eventoPublico', false) == true
+        || (!hasInstitutionalAccess() && (
+        !('gruposPermitidos' in data) || data.gruposPermitidos.size() == 0
+        || (data.gruposPermitidos is list && data.gruposPermitidos.hasAny(profile().get('grupos', [])))));
     }
     function recentAuthentication() {
       return signedIn() && request.auth.token.get('auth_time', 0) is int
@@ -63,10 +140,20 @@ service cloud.firestore {
         && audit.colecao == 'usuarios' && audit.registroId == uid && audit.acao == 'excluir_usuario'
         && audit.campos.hasAny(['excluido']);
     }
+    function auditScopeRecord(data) {
+      let path = /databases/$(database)/documents/$(data.colecao)/$(data.registroId);
+      let item = data.acao == 'excluir' ? get(path).data : getAfter(path).data;
+      return item != null && data.get('orgaoId', '') != '' && data.orgaoId == item.get('orgaoId', '')
+        && (!('setorId' in data) || data.setorId == item.get('setorId', ''));
+    }
+    function validAuditScope(data) {
+      return !data.keys().hasAny(['orgaoId','setorId']) || auditScopeRecord(data);
+    }
     match /historicoAlteracoes/{id} {
-      allow read: if isAdmin();
+      allow read: if isAdmin() || (institutionalAction('auditoria.consultar') && scopedRecord(resource.data));
       allow create: if active()
-        && request.resource.data.keys().hasOnly(['autorUid','autorNome','criadoEm','colecao','registroId','registroNome','acao','campos'])
+        && validAuditScope(request.resource.data)
+        && request.resource.data.keys().hasOnly(['autorUid','autorNome','criadoEm','colecao','registroId','registroNome','acao','campos','orgaoId','setorId'])
         && request.resource.data.autorUid == request.auth.uid
         && request.resource.data.autorNome == (profile().get('nome', '') != '' ? profile().nome : request.auth.token.get('email', request.auth.uid))
         && request.resource.data.criadoEm == request.time
@@ -74,7 +161,8 @@ service cloud.firestore {
         && request.resource.data.registroNome is string && request.resource.data.registroNome.size() <= 180
         && request.resource.data.acao in ['criar','editar','excluir','excluir_usuario','alterar_senha']
         && request.resource.data.campos is list && request.resource.data.campos.size() <= 128
-        && ((isAdmin() && request.resource.data.colecao in ['usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes','perfilPrivado'])
+        && ((isAdmin() && request.resource.data.colecao in ['usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes','perfilPrivado','setores'])
+          || (request.resource.data.colecao in ['demandas','orgaos','eventos','locais','fornecedores','bases'] && request.resource.data.acao in ['criar','editar'] && canWriteBusiness(request.resource.data.colecao == 'orgaos' ? 'clientes' : request.resource.data.colecao, request.resource.data.acao == 'criar' ? 'criar' : 'editar'))
           || (request.resource.data.colecao in ['usuarios','perfilPrivado'] && request.resource.data.registroId == request.auth.uid && request.resource.data.acao in ['criar','editar'])
           || (request.resource.data.colecao == 'inscricoes' && canReadModule('eventos') && request.resource.data.acao in ['criar','excluir'])
           || (request.resource.data.colecao == 'autenticacao' && request.resource.data.registroId == request.auth.uid && request.resource.data.acao == 'alterar_senha' && recentAuthentication()));
@@ -84,9 +172,9 @@ service cloud.firestore {
 
     match /usuarios/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
-      allow create: if isAdmin() && validUser(request.resource.data, uid);
+      allow create: if isAdmin() && validUser(request.resource.data, uid) && validAccessRegistration(request.resource.data, null);
       allow update: if ((isAdmin()
-          && (validUser(request.resource.data, uid)
+          && ((validUser(request.resource.data, uid) && validAccessRegistration(request.resource.data, resource.data.get('acessoInstitucional', null)))
             || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ativo','excluido','atualizadoEm','editadoPor','editadoPorUid','ultimaAuditoriaId']) && request.resource.data.ativo is bool
               && request.resource.data.get('excluido', false) is bool
               && (request.resource.data.get('excluido', false) != true || request.resource.data.ativo == false)))
@@ -109,7 +197,8 @@ service cloud.firestore {
     match /identidadesUsuarios/{uid} {
       allow read: if active() && (isAdmin() || request.auth.uid == uid
         || (resource.data.tipoUsuario == 'interno' && resource.data.ativo == true
-          && (profile().get('tipoUsuario', '') == 'interno' || canReadModule('eventos'))));
+          && ((!hasInstitutionalAccess() && (profile().get('tipoUsuario', '') == 'interno' || canReadModule('eventos')))
+            || (accessActive() && profile().acessoInstitucional.papel == 'grgd'))));
       allow create, update: if (isAdmin() || (active() && request.auth.uid == uid)) && validIdentity(request.resource.data, uid);
       allow delete: if false;
     }
@@ -119,17 +208,32 @@ service cloud.firestore {
     }
     match /eventos/{id} {
       allow read: if canReadModule('eventos') && canReadEvent(resource.data);
-      allow create, update: if isAdmin();
+      allow create: if canWriteBusiness('eventos','criar');
+      allow update: if canWriteBusiness('eventos','editar');
       allow delete: if isAdmin() && recentAuthentication();
     }
     match /inscricoes/{id} {
-      allow read: if isAdmin() || (canReadModule('eventos') && resource.data.uid == request.auth.uid);
-      allow create: if canReadModule('eventos') && request.resource.data.uid == request.auth.uid
+      allow read: if isAdmin() || grgdAction('relatorios.consultar')
+        || ((institutionalAction('inscricoes.consultar') || institutionalAction('relatorios.consultar')) && scopedRecord(resource.data))
+        || (!hasInstitutionalAccess() && canReadModule('eventos') && resource.data.uid == request.auth.uid);
+      allow create: if !hasInstitutionalAccess() && canReadModule('eventos') && request.resource.data.uid == request.auth.uid
         && request.resource.data.eventId is string
         && exists(/databases/$(database)/documents/eventos/$(request.resource.data.eventId))
         && canReadEvent(get(/databases/$(database)/documents/eventos/$(request.resource.data.eventId)).data);
-      allow delete: if isAdmin() || (canReadModule('eventos') && resource.data.uid == request.auth.uid);
+      allow delete: if isAdmin() || (!hasInstitutionalAccess() && canReadModule('eventos') && resource.data.uid == request.auth.uid);
       allow update: if false;
+    }
+    match /setores/{id} {
+      allow read: if isAdmin() || (accessActive() && resource.data.orgaoId == profile().acessoInstitucional.orgaoId);
+      allow create, update: if isAdmin() && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 150
+        && request.resource.data.ativo is bool && request.resource.data.orgaoId is string
+        && exists(/databases/$(database)/documents/orgaos/$(request.resource.data.orgaoId));
+      allow delete: if false;
+    }
+    match /colaboradores/{id} {
+      allow read: if isAdmin() || (institutionalAction('participantes.consultar') && scopedRecord(resource.data));
+      // Cadastro por representação é o próximo lote; não liberar escrita apenas pela tela.
+      allow create, update, delete: if false;
     }
     match /{col}/{id} {
       // A regra genérica não se aplica a usuários, grupos, eventos ou inscrições.
@@ -142,8 +246,10 @@ service cloud.firestore {
           || (data.get('orgao', null) != null && data.orgao == profile().get('orgao', ''))
           || (data.get('orgaosPermitidos', []) is list && data.get('orgaosPermitidos', []).hasAny([profile().get('orgao', '')]));
       }
-      allow read: if businessCollection() && canReadModule(moduleName()) && visibleRecord(resource.data);
-      allow create, update: if businessCollection() && isAdmin();
+      allow read: if businessCollection() && canReadModule(moduleName()) && visibleRecord(resource.data)
+        || (col == 'orgaos' && institutionalAction('orgao.consultar') && id == profile().acessoInstitucional.orgaoId);
+      allow create: if businessCollection() && canWriteBusiness(moduleName(),'criar');
+      allow update: if businessCollection() && canWriteBusiness(moduleName(),'editar');
       allow delete: if businessCollection() && isAdmin() && recentAuthentication();
     }
   }

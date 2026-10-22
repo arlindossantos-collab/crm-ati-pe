@@ -61,7 +61,7 @@ export async function runTransaction(db,fn){
    },fixture);
    await page.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
    await page.route('**/*',r=>/googleapis\.com|firebaseio\.com|firebaseapp\.com/.test(r.request().url())?r.abort():r.fallback());
-   await page.goto('http://127.0.0.1:'+server.address().port);return {page,context};
+   await page.goto('http://127.0.0.1:'+server.address().port);if(process.env.PRGD_TEST_CSS)await page.addStyleTag({content:fs.readFileSync(process.env.PRGD_TEST_CSS,'utf8')});return {page,context};
  }
  try{
    browser=await chromium.launch();
@@ -98,7 +98,7 @@ export async function runTransaction(db,fn){
    assert.ok(lote.some(op=>op.ref.collection==='historicoAlteracoes'&&op.data.acao==='excluir_usuario'));
    assert.ok(lote.some(op=>op.ref.collection==='usuarios'&&op.data.excluido===true));
    assert.ok(!JSON.stringify(lote).includes('senha-valida'));
-   await page.locator('[data-tab="locais"]').click();await page.reload();
+   await page.locator('[data-tab="locais"]').click();await page.reload();if(process.env.PRGD_TEST_CSS)await page.addStyleTag({content:fs.readFileSync(process.env.PRGD_TEST_CSS,'utf8')});
    await page.locator('#main-content').waitFor({state:'visible'});
    assert.equal(await page.locator('#aba-locais').isVisible(),true,'F5 deve restaurar a mesma aba.');
    assert.equal(await page.evaluate(()=>globalThis.__loginApareceu),false,'F5 não deve mostrar o formulário de login.');
