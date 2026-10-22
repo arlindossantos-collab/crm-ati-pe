@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.9.0 - proposta de governança dos vínculos e telas por perfil.** Base: v0.8.0, commit `61cdbf2`. Entrega para revisão, ainda sem integração à main nem publicação do site. Requer homologação e implantação coordenada das regras e dos índices Firebase. A migração LDAP/PostgreSQL permanece planejada, sem integração nesta entrega.
+**Versão deste código: v0.9.0 — governança dos vínculos e telas por perfil.** Base: v0.8.0, commit `61cdbf2`. Publicação autorizada pelo usuário em 22/10/2026, após confirmar que publicou as regras e os índices Firebase. Essa confirmação é baseada no relato do usuário; a validação institucional permanece pendente. Integração e GitHub Pages são acompanhados no [PR #14](https://github.com/arlindossantos-collab/crm-ati-pe/pull/14). A migração LDAP/PostgreSQL permanece planejada, sem integração nesta entrega.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -26,15 +26,15 @@ A versão do site depende da integração e da publicação deste código. Uma b
 Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo interno não concede administração automaticamente. Registros antigos sem vínculo continuam preservados, sem associação automática por nome.
 
 ## O que mudou nesta entrega
-+
-+A v0.9.0 acrescenta vínculos institucionais por órgão e setores, ações por função, referências das aprovações GRGD/autoridade e prazos de validade/revisão. Contatos e autenticação não concedem o papel de NSI automaticamente. O administrador registra as aprovações recebidas e a aplicação protege o escopo também nas regras.
-+
-+O lote entrega consultas de Meu órgão, Colaboradores, Inscrições do órgão e Auditoria autorizada, além da edição GRGD nos módulos explicitamente permitidos. A inscrição por representação, o cadastro de participantes pelo gestor e os comprovantes são o próximo lote; suas ações estão identificadas como em preparação. Usuários antigos são preservados para revisão individual.
-+
-+Abrir a [prévia com dados fictícios](previa-perfis.html) para explorar a matriz de perfis sem conexão a serviços. Consultar [modelo, limites, validação e implantação](docs/perfis-vinculos.md). As alterações propostas ainda não estão disponíveis no site publicado.
-+
-+### Entregas anteriores
-+
+
+A v0.9.0 acrescenta vínculos institucionais por órgão e setores, ações por função, referências das aprovações GRGD/autoridade e prazos de validade/revisão. Contatos e autenticação não concedem o papel de NSI automaticamente. O administrador registra as aprovações recebidas e a aplicação protege o escopo também nas regras.
+
+O lote entrega consultas de Meu órgão, Colaboradores, Inscrições do órgão e Auditoria autorizada, além da edição GRGD nos módulos explicitamente permitidos. A inscrição por representação, o cadastro de participantes pelo gestor e os comprovantes são o próximo lote; suas ações estão identificadas como em preparação. Usuários antigos são preservados para revisão individual.
+
+Abrir a [prévia com dados fictícios](previa-perfis.html) para explorar a matriz de perfis sem conexão a serviços. Consultar [modelo, limites, validação e implantação](docs/perfis-vinculos.md). A disponibilidade no site depende da conclusão da implantação do GitHub Pages, acompanhada no PR #14.
+
+### Entregas anteriores
+
 A v0.8.0 mantém os controles de exclusão visíveis somente para administradores e pede a **senha da própria conta** antes de confirmar. Usuários são retirados do cadastro ativo, com bloqueio da autoexclusão; outros registros seguem a exclusão já existente. As regras passam a exigir autenticação recente para excluir e, na exclusão de usuários, o histórico no mesmo envio. Não altera automaticamente os perfis de acesso cadastrados.
 
 As gravações feitas pela aplicação registram a pessoa, o horário do servidor, a ação e os nomes dos campos alterados. O botão **Histórico de alterações** permite consultar esses registros. Valores de senhas, contatos e fotos não são copiados para o histórico. A troca de senha registra apenas que ocorreu; Authentication e Firestore são serviços separados, portanto uma falha posterior do histórico é informada sem desfazer a nova senha. Não há recuperação retroativa de alterações nem captura de operações feitas diretamente no console ou por outros programas.

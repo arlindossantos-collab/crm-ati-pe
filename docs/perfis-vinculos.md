@@ -65,6 +65,8 @@ O seletor de perfis não existe na aplicação de produção. A prévia não aut
 
 ## Implantação coordenada
 
+Em 22/10/2026, o usuário autorizou a publicação e informou que publicou as regras e os índices no Firebase. Essa informação é baseada no relato do usuário, sem verificação direta do console nesta sessão. A integração e a implantação do GitHub Pages são acompanhadas no PR #14; a homologação institucional continua pendente. O roteiro abaixo permanece como referência para implantação e conferência.
+
 1. Revisar este PR e os campos com a GRGD e a autoridade responsável pela governança.
 2. Usar projeto Firebase de homologação separado, com dados e contas de teste; servir o HTML local não isola a produção por si só.
 3. Publicar as novas regras e os índices no projeto de homologação e testar uma conta de cada papel com dois órgãos e diferentes setores.
