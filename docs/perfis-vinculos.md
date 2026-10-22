@@ -1,6 +1,6 @@
 # Governança dos vínculos e telas por perfil - v0.9.0
 
-Proposta do primeiro lote, baseada em `main@61cdbf259b283071d8d6be8cb27abefc835eaa5e` (v0.8.0). Não é uma publicação do site. A integração, a implantação das regras e a homologação institucional são etapas posteriores.
+Modelo do primeiro lote, baseado em `main@61cdbf259b283071d8d6be8cb27abefc835eaa5e` (v0.8.0). A v0.9.0 foi integrada e publicada pelo PR #14. As operações adicionais propostas para a v0.10.0 estão em [inscrições institucionais](inscricoes-institucionais.md); este documento descreve o primeiro lote de governança.
 
 ## Modelo adotado
 

@@ -22,6 +22,7 @@ export function collection(db,name){return {collection:name};}
 export function doc(db,col,id,...rest){if(arguments.length===1){col=db.collection;id='gerado-'+(++seq);}return {collection:col,id,path:[col,id,...rest].join('/')};}
 export function query(ref,...args){return {...ref,args};}export function where(...args){return args;}
 export function orderBy(...args){return args;}export function limit(n){return n;}export function startAfter(s){return s;}
+export function increment(n){return {__increment:n};}
 export function serverTimestamp(){return {toDate:()=>new Date('2026-10-21T15:00:00Z')};}
 const snap=(id,d)=>({id,exists:()=>!!d,data:()=>d});
 function read(ref){if(ref.path?.includes('/privado/'))return snap(ref.id,{});return snap(ref.id,(f[ref.collection]||[]).find(d=>(d.id||d.uid)===ref.id));}
@@ -41,7 +42,7 @@ export async function runTransaction(db,fn){
   const {ref}=op;if(ref.path.includes('/privado/'))continue;
   const rows=f[ref.collection]||(f[ref.collection]=[]),i=rows.findIndex(d=>(d.id||d.uid)===ref.id);
   if(op.remover){if(i>=0)rows.splice(i,1);continue;}
-  const data={...(op.options?.merge&&i>=0?rows[i]:{}),...op.data,id:ref.id};
+  const data={...(op.options?.merge&&i>=0?rows[i]:{}),...op.data,id:ref.id};for(const [k,v] of Object.entries(data))if(v&&typeof v==='object'&&'__increment' in v)data[k]=(rows[i]?.[k]||0)+v.__increment;
   if(i>=0)rows[i]=data;else rows.push(data);
  }
  watchers.filter(w=>w.active).forEach(w=>w.cb(snapshot(w.ref)));

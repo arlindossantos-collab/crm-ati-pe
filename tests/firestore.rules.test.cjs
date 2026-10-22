@@ -439,3 +439,159 @@ test('histórico de inscrição recusa outro titular e os papéis institucionais
     await assertFails(setDoc(doc(db('titular'),'historicoAlteracoes','sem-fluxo'),log('titular')));
     await assertSucceeds(setDoc(doc(db('admin'),'historicoAlteracoes','administrativo'),log('admin')));
 });
+
+// Lote institucional: todos os casos usam somente o emulador demo.
+const hashLote2=s=>require('node:crypto').createHash('sha256').update(s).digest('hex');
+const pessoaLote2=(email='pessoa@example.invalid',extra={})=>({nome:'Pessoa fictícia',emailInstitucional:email,orgaoId:'orgao-a',setorId:'a1',telefone:'',cargo:'Analista',ativo:true,criadoEm:new Date(),criadoPorUid:'titular',atualizadoEm:new Date(),atualizadoPorUid:'titular',ultimaAuditoriaId:'semente',...extra});
+const idPessoaLote2=p=>hashLote2(p.orgaoId+'|'+p.emailInstitucional);
+const idInscricaoLote2=(eventId,p)=>eventId+'__'+hashLote2(p.emailInstitucional);
+async function seedLote2(extraEvento={}) {
+    const titular=await seedInstitutional();
+    const acoes=['orgao.consultar','participantes.consultar','participantes.cadastrar','participantes.editar','eventos.consultar','inscricoes.consultar','inscricoes.criar','inscricoes.cancelar','comprovantes.consultar'];
+    const p=pessoaLote2(),p2=pessoaLote2('segunda@example.invalid'),outro=pessoaLote2('outra@example.invalid',{orgaoId:'orgao-b',setorId:'b1'});
+    const evento={titulo:'Encontro institucional fictício',dataInicio:'2099-01-01',eventoPublico:false,modeloInscricao:'institucional-v1',inscricoesAbertas:true,inscricaoInicio:Date.now()-60000,inscricaoFim:Date.now()+3600000,limiteVagas:1,inscritosCount:0,orgaosElegiveis:['orgao-a'],status:'Confirmado',...extraEvento};
+    await env.withSecurityRulesDisabled(async ctx=>{
+        const f=ctx.firestore();
+        await updateDoc(doc(f,'usuarios','titular'),{'acessoInstitucional.acoes':acoes,'acessoInstitucional.operacoesVersao':'v1'});
+        await updateDoc(doc(f,'usuarios','sub'),{'acessoInstitucional.acoes':acoes,'acessoInstitucional.operacoesVersao':'v1'});
+        await setDoc(doc(f,'usuarios','gestorB'),profile('gestorB',{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:institutionalAccess({orgaoId:'orgao-b',setoresIds:['b1'],acoes,operacoesVersao:'v1'})}));
+        await Promise.all([setDoc(doc(f,'eventos','institucional'),evento),...[p,p2,outro].map(p=>setDoc(doc(f,'colaboradores',idPessoaLote2(p)),p))]);
+    });
+    return {p,p2,outro,evento,titular};
+}
+function auditoriaLote2(uid,col,id,d,acao) {return {autorUid:uid,autorNome:uid,criadoEm:serverTimestamp(),colecao:col,registroId:id,registroNome:d.nome||d.participanteNome||'Fictício',acao,campos:['situacao'],orgaoId:d.orgaoId,setorId:d.setorId};}
+async function gravarPessoaLote2(uid,p,extra={}) {
+    const f=db(uid),id=extra.id||idPessoaLote2(p),ref=doc(f,'colaboradores',id),log=doc(collection(f,'historicoAlteracoes')),b=writeBatch(f);
+    const dados={...p,criadoEm:serverTimestamp(),criadoPorUid:uid,atualizadoEm:serverTimestamp(),atualizadoPorUid:uid,ultimaAuditoriaId:log.id,...extra.dados};
+    b.set(ref,dados);if(!extra.semLog)b.set(log,{...auditoriaLote2(uid,'colaboradores',id,dados,'criar'),campos:extra.campos||Object.keys(p).filter(k=>!['criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'].includes(k))});return b.commit();
+}
+async function inscreverLote2(uid,p,{cancelar=false,semLog=false,semContador=false,dados={},delta,protocolo,id,acao,eventId='institucional'}={}) {
+    const f=db(uid),regId=id||idInscricaoLote2(eventId,p),ref=doc(f,'inscricoes',regId),evt=doc(f,'eventos',eventId),log=doc(collection(f,'historicoAlteracoes'));
+    return require('firebase/firestore').runTransaction(f,async t=>{
+        const [eSnap,iSnap]=await Promise.all([cancelar?Promise.resolve(null):t.get(evt),t.get(ref)]),e=eSnap?.data(),antes=iSnap.exists()?iSnap.data():null;
+        if(!cancelar&&e.inscritosCount>=e.limiteVagas)throw new Error('lotado');
+        if(!cancelar&&antes?.situacao==='confirmada')throw new Error('duplicada');
+        const d=cancelar?{...antes,situacao:'cancelada'}:{modeloInscricao:'institucional-v1',eventId,participanteId:idPessoaLote2(p),emailInstitucional:p.emailInstitucional,participanteNome:p.nome,orgaoId:p.orgaoId,setorId:p.setorId,eventoTitulo:e.titulo,eventoData:e.dataInicio,protocolo:protocolo||regId,situacao:'confirmada',criadoEm:antes?.criadoEm||serverTimestamp(),criadoPorUid:antes?.criadoPorUid||uid};
+        Object.assign(d,{atualizadoEm:serverTimestamp(),atualizadoPorUid:uid,ultimaAuditoriaId:log.id},dados);
+        t.set(ref,d);if(!semContador)t.update(evt,{inscritosCount:cancelar?require('firebase/firestore').increment(delta??-1):e.inscritosCount+(delta??1),ultimaInscricaoId:regId});
+        if(!semLog)t.set(log,auditoriaLote2(uid,'inscricoes',regId,d,acao||(cancelar?'cancelar_inscricao':'inscrever')));
+    });
+}
+test('gestor cadastra colaborador sem conta Auth com identidade determinística e histórico atômico',async()=>{
+    await seedLote2();const p=pessoaLote2('nova@example.invalid');await assertSucceeds(gravarPessoaLote2('titular',p));
+    const snap=await getDoc(doc(db('titular'),'colaboradores',idPessoaLote2(p)));assert.equal(snap.data().criadoPorUid,'titular');
+    await assertFails(gravarPessoaLote2('titular',p));
+});
+test('cadastro recusa órgão/setor de fora do escopo, identidade arbitrária e ausência de histórico',async()=>{
+    await seedLote2();const p=pessoaLote2('nova@example.invalid');
+    await assertFails(gravarPessoaLote2('titular',{...p,orgaoId:'orgao-b',setorId:'b1'}));
+    await assertFails(gravarPessoaLote2('titular',{...p,setorId:'a2'}));
+    await assertFails(gravarPessoaLote2('titular',p,{id:'id-livre'}));
+    await assertFails(gravarPessoaLote2('titular',p,{semLog:true}));
+    await assertFails(gravarPessoaLote2('titular',p,{campos:['senha']}));
+    await assertFails(gravarPessoaLote2('titular',p,{dados:{emailInstitucional:'NOVA@example.invalid'}}));
+});
+test('auditoria e usuário legado não cadastram colaboradores, mesmo enviando vínculo no payload',async()=>{
+    await seedLote2();for(const uid of ['auditor','eventos'])await assertFails(gravarPessoaLote2(uid,pessoaLote2('nova@example.invalid')));
+});
+test('editar colaborador preserva órgão, setor, e-mail e criação; permite inativação com autoria',async()=>{
+    const {p}=await seedLote2();const f=db('titular'),id=idPessoaLote2(p),log=doc(collection(f,'historicoAlteracoes'));
+    const change=patch=>{const b=writeBatch(f),d={...p,...patch,atualizadoEm:serverTimestamp(),atualizadoPorUid:'titular',ultimaAuditoriaId:log.id};b.set(doc(f,'colaboradores',id),d);b.set(log,{...auditoriaLote2('titular','colaboradores',id,d,'editar'),campos:Object.keys(patch).filter(k=>!['criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'].includes(k))});return b.commit();};
+    await assertFails(change({setorId:'a2'}));await assertFails(change({criadoPorUid:'outra-conta'}));await assertSucceeds(change({nome:'Nome corrigido',ativo:false}));
+    await assertFails(deleteDoc(doc(f,'colaboradores',id)));
+});
+test('gestor inscreve beneficiário sem login e consome vaga com histórico; substituto pode cancelar',async()=>{
+    const {p}=await seedLote2();await assertSucceeds(inscreverLote2('titular',p));
+    const id=idInscricaoLote2('institucional',p),r=await getDoc(doc(db('titular'),'inscricoes',id));assert.equal(r.data().participanteNome,p.nome);assert.equal(r.data().criadoPorUid,'titular');assert.equal(r.data().uid,undefined);
+    await assertSucceeds(inscreverLote2('sub',p,{cancelar:true}));assert.equal((await getDoc(doc(db('admin'),'eventos','institucional'))).data().inscritosCount,0);
+    assert.equal((await getDoc(doc(db('titular'),'inscricoes',id))).data().situacao,'cancelada');
+    await assertSucceeds(inscreverLote2('titular',p));assert.equal((await getDoc(doc(db('admin'),'eventos','institucional'))).data().inscritosCount,1);
+});
+test('inscrição recusa contador ausente/forjado, histórico ausente e protocolo diferente do ID',async()=>{
+    const {p}=await seedLote2();for(const opts of [{semLog:true},{semContador:true},{delta:0},{protocolo:'protocolo-forjado'}])await assertFails(inscreverLote2('titular',p,opts));
+    await assertSucceeds(inscreverLote2('titular',p));
+});
+test('dados do beneficiário e do evento não podem ser falsificados na inscrição',async()=>{
+    const {p}=await seedLote2();for(const dados of [{participanteNome:'Outro nome'},{orgaoId:'orgao-b'},{setorId:'a2'},{participanteId:'outro'},{eventoTitulo:'Evento falso'},{eventoData:'2020-01-01'},{criadoPorUid:'sub'}])await assertFails(inscreverLote2('titular',p,{dados}));
+});
+test('órgão sem elegibilidade, período fechado e colaborador inativo não recebem inscrição',async()=>{
+    const {p,outro}=await seedLote2();await assertFails(getDoc(doc(db('gestorB'),'eventos','institucional')));
+    await assertFails(inscreverLote2('gestorB',outro));
+    for(const patch of [{inscricoesAbertas:false},{inscricaoInicio:Date.now()+3600000},{inscricaoFim:Date.now()-1},{status:'Cancelado'},{status:'Realizado'}]){
+        await seedLote2(patch);await assertFails(inscreverLote2('titular',p));
+    }
+    await seedLote2();await env.withSecurityRulesDisabled(c=>updateDoc(doc(c.firestore(),'colaboradores',idPessoaLote2(p)),{ativo:false}));await assertFails(inscreverLote2('titular',p));
+});
+test('evento privado é consultado por elegibilidade e consultas gerais continuam bloqueadas',async()=>{
+    await seedLote2();const f=db('titular');await assertSucceeds(getDocs(query(collection(f,'eventos'),where('orgaosElegiveis','array-contains','orgao-a'))));
+    await assertFails(getDocs(collection(f,'eventos')));await assertFails(getDoc(doc(db('gestorB'),'colaboradores',idPessoaLote2(pessoaLote2()))));
+});
+test('duas inscrições simultâneas disputando a última vaga confirmam apenas uma',async()=>{
+    const {p,p2}=await seedLote2();const outcomes=await Promise.allSettled([inscreverLote2('titular',p),inscreverLote2('sub',p2)]);
+    assert.equal(outcomes.filter(r=>r.status==='fulfilled').length,1);
+    assert.equal((await getDoc(doc(db('admin'),'eventos','institucional'))).data().inscritosCount,1);
+    const rows=await getDocs(query(collection(db('admin'),'inscricoes'),where('eventId','==','institucional')));assert.equal(rows.size,1);
+});
+test('cancelamento repetido e exclusão física não liberam vagas indevidas',async()=>{
+    const {p}=await seedLote2();await inscreverLote2('titular',p);await inscreverLote2('titular',p,{cancelar:true});
+    await assertFails(inscreverLote2('titular',p,{cancelar:true}));const id=idInscricaoLote2('institucional',p);
+    await assertFails(deleteDoc(doc(db('titular'),'inscricoes',id)));await assertFails(deleteDoc(doc(db('admin'),'inscricoes',id)));
+    await assertFails(updateDoc(doc(db('titular'),'eventos','institucional'),{inscritosCount:0,ultimaInscricaoId:id}));
+});
+test('substituição suspensa ou vencida bloqueia inscrição e cancelamento no servidor',async()=>{
+    const {p}=await seedLote2();await inscreverLote2('titular',p);await env.withSecurityRulesDisabled(c=>updateDoc(doc(c.firestore(),'usuarios','titular'),{'acessoInstitucional.situacao':'suspenso'}));
+    await assertFails(inscreverLote2('sub',p,{cancelar:true}));await assertFails(gravarPessoaLote2('sub',pessoaLote2('nova@example.invalid')));
+});
+test('comprovante consulta apenas registros do escopo; auditoria permanece sem escrita',async()=>{
+    const {p,outro}=await seedLote2({orgaosElegiveis:['orgao-a','orgao-b'],limiteVagas:2});await inscreverLote2('titular',p);await inscreverLote2('gestorB',outro);
+    await assertSucceeds(getDoc(doc(db('titular'),'inscricoes',idInscricaoLote2('institucional',p))));
+    await assertFails(getDoc(doc(db('titular'),'inscricoes',idInscricaoLote2('institucional',outro))));
+    await assertSucceeds(getDoc(doc(db('auditor'),'inscricoes',idInscricaoLote2('institucional',p))));await assertFails(inscreverLote2('auditor',p,{cancelar:true}));
+});
+test('canal legado não inscreve em evento institucional e continua funcionando em evento anterior',async()=>{
+    await seedLote2();const f=db('eventos'),base={uid:'eventos',nome:'eventos',email:'eventos@example.invalid',criadoEm:'2026-10-22'};
+    await assertFails(setDoc(doc(f,'inscricoes','atalho'),{...base,eventId:'institucional'}));await assertSucceeds(setDoc(doc(f,'inscricoes','legada-preservada'),{...base,eventId:'e1'}));
+});
+test('contador não é editável manualmente e modelo institucional não pode ser ativado em evento legado',async()=>{
+    const {evento,p}=await seedLote2();const f=db('admin');await assertFails(updateDoc(doc(f,'eventos','institucional'),{inscritosCount:1}));
+    await assertFails(updateDoc(doc(f,'eventos','e1'),evento));await assertSucceeds(setDoc(doc(f,'eventos','novo-institucional'),evento));
+    await assertFails(setDoc(doc(f,'eventos','novo-contador-falso'),{...evento,inscritosCount:1}));await assertFails(deleteDoc(doc(f,'eventos','institucional')));
+    await inscreverLote2('titular',p);await assertFails(updateDoc(doc(f,'eventos','institucional'),{limiteVagas:0}));await assertSucceeds(updateDoc(doc(f,'eventos','institucional'),{inscricoesAbertas:false}));
+});
+test('histórico institucional isolado, adulterado ou com autoria falsa é negado',async()=>{
+    const {p}=await seedLote2();const f=db('titular'),id=idInscricaoLote2('institucional',p);
+    await assertFails(setDoc(doc(f,'historicoAlteracoes','solto'),auditoriaLote2('titular','inscricoes',id,p,'inscrever')));
+    await assertFails(inscreverLote2('titular',p,{acao:'cancelar_inscricao'}));await inscreverLote2('titular',p);
+    const r=await getDoc(doc(f,'inscricoes',id));await assertFails(updateDoc(doc(db('admin'),'historicoAlteracoes',r.data().ultimaAuditoriaId),{autorUid:'outro'}));
+});
+
+test('vínculo anterior sem liberação expressa não ganha escrita automaticamente',async()=>{
+    const {p}=await seedLote2();await env.withSecurityRulesDisabled(c=>updateDoc(doc(c.firestore(),'usuarios','titular'),{'acessoInstitucional.operacoesVersao':''}));
+    await assertFails(gravarPessoaLote2('titular',pessoaLote2('nova@example.invalid')));await assertFails(inscreverLote2('titular',p));
+    // O substituto não pode usar a versão operacional que não está habilitada no titular.
+    await assertFails(inscreverLote2('sub',p));
+});
+test('substituto liberado com cinco setores cadastra e inscreve com autoria própria',async()=>{
+    const {p}=await seedLote2();
+    await env.withSecurityRulesDisabled(async c=>{const f=c.firestore();await Promise.all(['a3','a4','a5'].map(id=>setDoc(doc(f,'setores',id),{nome:id,orgaoId:'orgao-a',ativo:true})));for(const uid of ['titular','sub'])await updateDoc(doc(f,'usuarios',uid),{'acessoInstitucional.setoresIds':['a1','a2','a3','a4','a5']});});
+    await assertSucceeds(gravarPessoaLote2('sub',pessoaLote2('sub-cadastro@example.invalid')));await assertSucceeds(inscreverLote2('sub',p));
+    assert.equal((await getDoc(doc(db('admin'),'inscricoes',idInscricaoLote2('institucional',p)))).data().criadoPorUid,'sub');
+});
+test('cancelar continua permitido após retirada da elegibilidade e encerramento das inscrições',async()=>{
+    const {p}=await seedLote2();await inscreverLote2('titular',p);
+    await env.withSecurityRulesDisabled(c=>updateDoc(doc(c.firestore(),'eventos','institucional'),{orgaosElegiveis:['orgao-b'],inscricoesAbertas:false}));
+    await assertFails(getDoc(doc(db('titular'),'eventos','institucional')));
+    await assertSucceeds(inscreverLote2('titular',p,{cancelar:true}));
+    assert.equal((await getDoc(doc(db('admin'),'eventos','institucional'))).data().inscritosCount,0);
+});
+test('administrador cancela inscrição quando o vínculo do gestor foi suspenso',async()=>{
+    const {p}=await seedLote2();await inscreverLote2('titular',p);
+    await env.withSecurityRulesDisabled(c=>updateDoc(doc(c.firestore(),'usuarios','titular'),{'acessoInstitucional.situacao':'suspenso'}));
+    await assertSucceeds(inscreverLote2('admin',p,{cancelar:true}));
+});
+test('mesmo e-mail em dois órgãos não gera duas inscrições no mesmo evento',async()=>{
+    const {p}=await seedLote2({orgaosElegiveis:['orgao-a','orgao-b'],limiteVagas:3});
+    const b={...p,orgaoId:'orgao-b',setorId:'b1'};await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'colaboradores',idPessoaLote2(b)),b));
+    await inscreverLote2('titular',p);await assertFails(inscreverLote2('gestorB',b));
+    assert.equal((await getDoc(doc(db('admin'),'eventos','institucional'))).data().inscritosCount,1);
+});
