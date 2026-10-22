@@ -424,3 +424,18 @@ test('edição GRGD e auditoria com escopo são confirmadas na mesma transação
     batch.set(doc(f,'historicoAlteracoes','edicao-grgd'),{autorUid:'operador',autorNome:'operador',criadoEm:serverTimestamp(),colecao:'eventos',registroId:'e1',registroNome:'Evento fictício',acao:'editar',campos:['titulo'],orgaoId:'orgao-a',setorId:'a1'});
     await assertSucceeds(batch.commit());
 });
+
+test('inscrição legada não aceita órgão, setor ou participante arbitrário e mantém criação com histórico próprio',async()=>{
+    await seedInstitutional();const f=db('eventos'),base={uid:'eventos',eventId:'e1',nome:'eventos',email:'eventos@example.invalid',criadoEm:'2026-10-22'};
+    for(const extra of [{orgaoId:'orgao-a'},{setorId:'a1'},{participanteId:'outro'},{operadorUid:'titular'}])await assertFails(setDoc(doc(f,'inscricoes','forjada'),{...base,...extra}));
+    const batch=writeBatch(f);batch.set(doc(f,'inscricoes','propria-nova'),base);
+    batch.set(doc(f,'historicoAlteracoes','inscricao-propria'),{autorUid:'eventos',autorNome:'eventos',criadoEm:serverTimestamp(),colecao:'inscricoes',registroId:'propria-nova',registroNome:'Minha inscrição',acao:'criar',campos:['eventId','uid','nome','email','criadoEm']});
+    await assertSucceeds(batch.commit());
+});
+test('histórico de inscrição recusa outro titular e os papéis institucionais ainda sem escrita por representação',async()=>{
+    await seedInstitutional();
+    const log=uid=>({autorUid:uid,autorNome:uid,criadoEm:serverTimestamp(),colecao:'inscricoes',registroId:'a1',registroNome:'Registro fictício',acao:'criar',campos:['eventId']});
+    await assertFails(setDoc(doc(db('eventos'),'historicoAlteracoes','outro-titular'),log('eventos')));
+    await assertFails(setDoc(doc(db('titular'),'historicoAlteracoes','sem-fluxo'),log('titular')));
+    await assertSucceeds(setDoc(doc(db('admin'),'historicoAlteracoes','administrativo'),log('admin')));
+});

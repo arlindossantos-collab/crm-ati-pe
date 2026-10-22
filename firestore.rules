@@ -149,10 +149,14 @@ service cloud.firestore {
     function validAuditScope(data) {
       return !data.keys().hasAny(['orgaoId','setorId']) || auditScopeRecord(data);
     }
+    function ownRegistrationAudit(data) {
+      let path = /databases/$(database)/documents/inscricoes/$(data.registroId);
+      let item = data.acao == 'excluir' ? get(path).data : getAfter(path).data;
+      return !hasInstitutionalAccess() && item != null && item.uid == request.auth.uid;
+    }
     match /historicoAlteracoes/{id} {
       allow read: if isAdmin() || (institutionalAction('auditoria.consultar') && scopedRecord(resource.data));
       allow create: if active()
-        && validAuditScope(request.resource.data)
         && request.resource.data.keys().hasOnly(['autorUid','autorNome','criadoEm','colecao','registroId','registroNome','acao','campos','orgaoId','setorId'])
         && request.resource.data.autorUid == request.auth.uid
         && request.resource.data.autorNome == (profile().get('nome', '') != '' ? profile().nome : request.auth.token.get('email', request.auth.uid))
@@ -164,8 +168,9 @@ service cloud.firestore {
         && ((isAdmin() && request.resource.data.colecao in ['usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes','perfilPrivado','setores'])
           || (request.resource.data.colecao in ['demandas','orgaos','eventos','locais','fornecedores','bases'] && request.resource.data.acao in ['criar','editar'] && canWriteBusiness(request.resource.data.colecao == 'orgaos' ? 'clientes' : request.resource.data.colecao, request.resource.data.acao == 'criar' ? 'criar' : 'editar'))
           || (request.resource.data.colecao in ['usuarios','perfilPrivado'] && request.resource.data.registroId == request.auth.uid && request.resource.data.acao in ['criar','editar'])
-          || (request.resource.data.colecao == 'inscricoes' && canReadModule('eventos') && request.resource.data.acao in ['criar','excluir'])
-          || (request.resource.data.colecao == 'autenticacao' && request.resource.data.registroId == request.auth.uid && request.resource.data.acao == 'alterar_senha' && recentAuthentication()));
+          || (request.resource.data.colecao == 'inscricoes' && canReadModule('eventos') && request.resource.data.acao in ['criar','excluir'] && ownRegistrationAudit(request.resource.data))
+          || (request.resource.data.colecao == 'autenticacao' && request.resource.data.registroId == request.auth.uid && request.resource.data.acao == 'alterar_senha' && recentAuthentication()))
+        && validAuditScope(request.resource.data);
       // Histórico somente acrescentado: nem administradores podem editar ou apagar entradas.
       allow update, delete: if false;
     }
@@ -217,6 +222,7 @@ service cloud.firestore {
         || ((institutionalAction('inscricoes.consultar') || institutionalAction('relatorios.consultar')) && scopedRecord(resource.data))
         || (!hasInstitutionalAccess() && canReadModule('eventos') && resource.data.uid == request.auth.uid);
       allow create: if !hasInstitutionalAccess() && canReadModule('eventos') && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['eventId','uid','nome','email','criadoEm'])
         && request.resource.data.eventId is string
         && exists(/databases/$(database)/documents/eventos/$(request.resource.data.eventId))
         && canReadEvent(get(/databases/$(database)/documents/eventos/$(request.resource.data.eventId)).data);

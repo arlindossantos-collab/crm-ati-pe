@@ -3,25 +3,27 @@
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
 ## v0.9.0 - Governança dos vínculos e telas por perfil - proposta de 22/10/2026
-+
-+**Resumo para a chefia:** prepara a PRGD para atender equipe GRGD, gestores de NSI, substitutos e auditoria com acessos aprovados por órgão e setor. Participantes permanecem pessoas sem conta obrigatória. Base: `main@61cdbf259b283071d8d6be8cb27abefc835eaa5e` (v0.8.0). Proposta para revisão; site e regras institucionais não foram publicados nesta entrega.
-+
-+| Antes | Depois |
-+| --- | --- |
-+| Interno/externo e administrador/consulta, com órgão em texto livre. | Vínculo adicional com papel, órgão por ID, setores e ações aprovadas; preservação dos cadastros antigos. |
-+| NSI apenas como contato do órgão. | Acesso de NSI e substituto exige referências de aprovação GRGD e autoridade competente, início, validade e próxima revisão. |
-+| Alterações de negócio dependiam de administração completa. | Equipe GRGD pode criar/editar somente módulos expressamente autorizados, sem excluir nem administrar usuários. |
-+| Sem portal próprio para o órgão. | Meu órgão, Colaboradores e Inscrições do órgão com consultas filtradas e bloqueio por ID fora do escopo. |
-+| Histórico apenas administrativo. | Auditoria autorizada em leitura de trilhas identificadas com órgão e setor; sem editar, apagar ou conceder acessos. |
-+| Sem demonstração independente dos perfis. | Prévia autônoma, responsiva e com dados fictícios, sem conexões externas. |
-+
-+**Governança:** administrador registra aprovações institucionais recebidas, seus responsáveis/referências e a autoria do registro. Não implementa assinatura eletrônica ou validação automática de protocolos. Alterar escopo no formulário exige nova revisão das aprovações. Não deduz privilégios do LDAP, de e-mail ou do cadastro de contatos.
-+
-+**Validação:** regressão da aplicação, regras e Auth em emuladores de demonstração; navegador com Firebase simulado para NSI, auditoria, edição GRGD, aprovação, F5/logout e prévia em computador/celular. Testes não alteram dados institucionais. Detalhes em `docs/perfis-vinculos.md`.
-+
-+**Implantação e limites:** mudanças de regras e índices exigem homologação separada e publicação coordenada. Primeiro lote: um vínculo e órgão por conta, até cinco setores ou delegação integral. Cadastro e inscrição por representação, elegibilidade por órgão, comprovantes e integração LDAP/PostgreSQL continuam como próximas entregas. Sem migração automática de usuários, contatos ou históricos antigos.
-+
-+## v0.8.0 — Exclusão protegida, histórico e restauração da sessão — entrega de 21/10/2026
+
+**Resumo para a chefia:** prepara a PRGD para atender equipe GRGD, gestores de NSI, substitutos e auditoria com acessos aprovados por órgão e setor. Participantes permanecem pessoas sem conta obrigatória. Base: `main@61cdbf259b283071d8d6be8cb27abefc835eaa5e` (v0.8.0). Proposta para revisão; site e regras institucionais não foram publicados nesta entrega.
+
+| Antes | Depois |
+| --- | --- |
+| Interno/externo e administrador/consulta, com órgão em texto livre. | Vínculo adicional com papel, órgão por ID, setores e ações aprovadas; preservação dos cadastros antigos. |
+| NSI apenas como contato do órgão. | Acesso de NSI e substituto exige referências de aprovação GRGD e autoridade competente, início, validade e próxima revisão. |
+| Alterações de negócio dependiam de administração completa. | Equipe GRGD pode criar/editar somente módulos expressamente autorizados, sem excluir nem administrar usuários. |
+| Sem portal próprio para o órgão. | Meu órgão, Colaboradores e Inscrições do órgão com consultas filtradas e bloqueio por ID fora do escopo. |
+| Histórico apenas administrativo. | Auditoria autorizada em leitura de trilhas identificadas com órgão e setor; sem editar, apagar ou conceder acessos. |
+| Sem demonstração independente dos perfis. | Prévia autônoma, responsiva e com dados fictícios, sem conexões externas. |
+
+**Compatibilidade protegida:** inscrições legadas não recebem órgão, setor ou participante arbitrário por requisição; seu histórico exige um registro da própria conta. Inscrições institucionais por representação continuam bloqueadas até o próximo lote.
+
+**Governança:** administrador registra aprovações institucionais recebidas, seus responsáveis/referências e a autoria do registro. Não implementa assinatura eletrônica ou validação automática de protocolos. Alterar escopo no formulário exige nova revisão das aprovações. Não deduz privilégios do LDAP, de e-mail ou do cadastro de contatos.
+
+**Validação:** regressão da aplicação, regras e Auth em emuladores de demonstração; navegador com Firebase simulado para NSI, auditoria, edição GRGD, aprovação, F5/logout e prévia em computador/celular. Testes não alteram dados institucionais. Detalhes em `docs/perfis-vinculos.md`.
+
+**Implantação e limites:** mudanças de regras e índices exigem homologação separada e publicação coordenada. Primeiro lote: um vínculo e órgão por conta, até cinco setores ou delegação integral. Cadastro e inscrição por representação, elegibilidade por órgão, comprovantes e integração LDAP/PostgreSQL continuam como próximas entregas. Sem migração automática de usuários, contatos ou históricos antigos.
+
+## v0.8.0 — Exclusão protegida, histórico e restauração da sessão — entrega de 21/10/2026
 
 **Resumo para a chefia:** reduz exclusões acidentais com confirmação da senha do administrador, identifica quem alterou os cadastros e mantém a aba escolhida ao atualizar a página. Parte de `main@5f444af75e9b35a8f5e67e9efdca573f5c83ae3f` (v0.7.0). Publicação autorizada pelo usuário em 21/10/2026, após informar que publicou as novas regras no Firebase. Integração e GitHub Pages acompanhados no PR #13.
 

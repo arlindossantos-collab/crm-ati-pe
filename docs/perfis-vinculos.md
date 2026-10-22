@@ -51,6 +51,7 @@ O primeiro lote mantém um vínculo institucional por conta e um órgão por ví
 - Usuários exibe o novo papel, órgão, setores e situação do vínculo e permite filtrar por órgão/setor.
 - Meu órgão apresenta o contexto autorizado e os prazos.
 - Colaboradores, Inscrições do órgão e Auditoria do órgão usam consultas filtradas por `orgaoId` e, quando aplicável, `setorId in setoresIds`.
+- Inscrições legadas aceitam somente os campos da própria conta e do evento; não aceitam órgão, setor, participante ou operador informados arbitrariamente. O histórico legado exige o registro da própria conta, e a escrita institucional por representação continua bloqueada neste lote.
 - Regras recusam consultas gerais, acesso por ID fora do escopo e uso do UID para contornar o órgão de uma inscrição institucional.
 - Falha de uma consulta limpa seus dados e apresenta uma mensagem. Troca de acesso, expiração, revisão e logout limpam os dados locais; F5 restaura somente uma aba permitida.
 - O substituto é revalidado no servidor contra o titular; revogar o titular não exige trocar a senha do substituto. A interface apresenta erro e limpa a consulta quando o servidor deixa de confirmá-la.
@@ -75,6 +76,6 @@ O retorno ao HTML anterior restringe a interface antiga aos módulos legados, ma
 
 ## Validação e próximos lotes
 
-Validação local: 95 testes da aplicação, 46 testes de regras e 3 de Auth (144 ao todo), além das três suítes de navegador. Testes de regressão da aplicação, regras no emulador `demo-prgd-usuarios`, alteração de senha no emulador Auth e testes de navegador com Firebase interceptado. Os casos novos verificam aprovação, escopo por órgão/setor, consulta por ID, delegação, revisão, expiração, edição GRGD, auditoria, limpeza de dados e gravação com cinco setores/identidade/auditoria no mesmo lote. A prévia também é testada sem solicitações externas e em largura de celular. Para inspeção visual offline da aplicação atual, `PRGD_TEST_CSS` pode fornecer CSS Tailwind compilado localmente, sem modificar o CSS publicado.
+Validação local: 95 testes da aplicação, 48 testes de regras e 3 de Auth (146 ao todo), além das três suítes de navegador. Testes de regressão da aplicação, regras no emulador `demo-prgd-usuarios`, alteração de senha no emulador Auth e testes de navegador com Firebase interceptado. Os casos novos verificam aprovação, escopo por órgão/setor, consulta por ID, delegação, revisão, expiração, edição GRGD, auditoria, limpeza de dados e gravação com cinco setores/identidade/auditoria no mesmo lote. A prévia também é testada sem solicitações externas e em largura de celular. Para inspeção visual offline da aplicação atual, `PRGD_TEST_CSS` pode fornecer CSS Tailwind compilado localmente, sem modificar o CSS publicado.
 
 Próximo lote: cadastrar participantes sem conta, inscrever/cancelar por representação, público elegível por órgão, comprovantes, prevenção de duplicidade e vagas em transação. A integração LDAP/OIDC e a persistência PostgreSQL continuam pertencendo à migração; os nomes dos perfis não simulam essa integração.
