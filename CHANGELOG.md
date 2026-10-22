@@ -16,6 +16,8 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 
 **Validação:** 105 testes da aplicação, 69 de regras e 3 de Auth, além das quatro suítes de navegador com Firebase simulado. Casos incluem escopo, revisão operacional, substituição, concorrência, auditoria, duplicidade entre órgãos, cancelamento após retirada da elegibilidade, comprovantes, F5/logout e celular. Dados fictícios e projeto de demonstração; nenhuma conta institucional alterada.
 
+**Restauração da sessão:** a verificação final identificou uma disputa na ordem de chegada do CSS: o login podia estar com a classe de ocultação e ainda receber `display:flex`. Uma regra local prioritária protege login, modais e área de restauração. O teste simula utilitários CSS chegando após o HTML, sem dispensar a verificação de F5 sem exibir login.
+
 **Implantação e limites:** publicar novas regras de forma coordenada com o HTML, após homologação e autorização própria para este lote. Índices compostos da v0.9.0 preservados. Não converte eventos legados, não transfere órgão/setor/e-mail de colaborador, não emite certificado de presença nem assinatura digital e não integra LDAP/PostgreSQL. Detalhes e retorno em [inscrições institucionais](docs/inscricoes-institucionais.md).
 
 ## v0.9.0 — Governança dos vínculos e telas por perfil — entrega de 22/10/2026

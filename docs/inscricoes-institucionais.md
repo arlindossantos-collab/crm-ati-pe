@@ -68,6 +68,8 @@ Retorno: o HTML anterior não opera inscrições institucionais. Fechar novas in
 
 105 testes da aplicação, 69 de regras no emulador `demo-prgd-usuarios` e 3 de Auth, além de quatro suítes de navegador. Casos novos incluem cadastro/edição sem conta, aprovação expressa, escopo, substituição, duplicidade entre órgãos, prazo, lote atômico com histórico, disputa da última vaga, cancelamento repetido, retomada, comprovante, impressão, F5/logout e celular. Nenhum teste altera contas ou dados institucionais.
 
+A regressão de sessão também simula uma regra de display CSS chegando após o HTML, durante a restauração. A ocultação local prioritária mantém login, modais e conteúdo protegido ocultos quando marcados como tal. O mesmo cenário sem essa proteção reproduz a falha de exibição breve; o cenário corrigido passa.
+
 Referências primárias de implementação: [transações e limites das regras](https://firebase.google.com/docs/firestore/manage-data/transactions), [hashing nas regras](https://firebase.google.com/docs/reference/rules/rules.hashing), [representação de bytes](https://firebase.google.com/docs/reference/rules/rules.Bytes).
 
 Próximas entregas possíveis: revisão/transferência de vínculos de participantes, migração assistida dos eventos legados, frequência e certificados, lista de espera e envio de comunicações com autorização própria.

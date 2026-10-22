@@ -18,6 +18,8 @@
     <style>
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
         .hidden { display: none; }
+        /* A restauração e os modais não dependem da ordem de chegada dos utilitários CSS. */
+        [id^="modal-"].hidden, #main-content.hidden, #sessao-carregando.hidden { display: none !important; }
         body:not([data-admin="true"]) .btn-admin-only:not([data-acao]) { display: none !important; }
         [hidden] { display: none !important; }
         .tab-active { background-color: #ffffff; color: #1e3a8a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -34,7 +36,7 @@
         #locais-indicadores [data-tone="verde"] .local-card-icone { color:#427660; }
 
     </style>
-<style>@media print { body > * { display:none !important; } body > #modal-comprovante { display:block !important; position:static !important; background:white !important; padding:0 !important; } #modal-comprovante > div { max-height:none !important; overflow:visible !important; max-width:none !important; } .nao-imprimir { display:none !important; } }</style>
+<style>@media print { body > * { display:none !important; } body > #modal-comprovante:not(.hidden) { display:block !important; position:static !important; background:white !important; padding:0 !important; } #modal-comprovante > div { max-height:none !important; overflow:visible !important; max-width:none !important; } .nao-imprimir { display:none !important; } }</style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
