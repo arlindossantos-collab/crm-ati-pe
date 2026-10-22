@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.8.0 — exclusão com senha, histórico de alterações e restauração da sessão.** Publicação autorizada em 21/10/2026 após o usuário informar que publicou as regras do Firebase. Integração e implantação do site acompanhadas no PR #13. Parte da v0.7.0 e preserva a organização e os tons suaves de Locais.
+**Versão deste código: v0.9.0 — governança dos vínculos e telas por perfil.** Base: v0.8.0, commit `61cdbf2`. Publicação autorizada pelo usuário em 22/10/2026, após confirmar que publicou as regras e os índices Firebase. Essa confirmação é baseada no relato do usuário; a validação institucional permanece pendente. Integração e GitHub Pages são acompanhados no [PR #14](https://github.com/arlindossantos-collab/crm-ati-pe/pull/14). A migração LDAP/PostgreSQL permanece planejada, sem integração nesta entrega.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -26,6 +26,14 @@ A versão do site depende da integração e da publicação deste código. Uma b
 Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo interno não concede administração automaticamente. Registros antigos sem vínculo continuam preservados, sem associação automática por nome.
 
 ## O que mudou nesta entrega
+
+A v0.9.0 acrescenta vínculos institucionais por órgão e setores, ações por função, referências das aprovações GRGD/autoridade e prazos de validade/revisão. Contatos e autenticação não concedem o papel de NSI automaticamente. O administrador registra as aprovações recebidas e a aplicação protege o escopo também nas regras.
+
+O lote entrega consultas de Meu órgão, Colaboradores, Inscrições do órgão e Auditoria autorizada, além da edição GRGD nos módulos explicitamente permitidos. A inscrição por representação, o cadastro de participantes pelo gestor e os comprovantes são o próximo lote; suas ações estão identificadas como em preparação. Usuários antigos são preservados para revisão individual.
+
+Abrir a [prévia com dados fictícios](previa-perfis.html) para explorar a matriz de perfis sem conexão a serviços. Consultar [modelo, limites, validação e implantação](docs/perfis-vinculos.md). A disponibilidade no site depende da conclusão da implantação do GitHub Pages, acompanhada no PR #14.
+
+### Entregas anteriores
 
 A v0.8.0 mantém os controles de exclusão visíveis somente para administradores e pede a **senha da própria conta** antes de confirmar. Usuários são retirados do cadastro ativo, com bloqueio da autoexclusão; outros registros seguem a exclusão já existente. As regras passam a exigir autenticação recente para excluir e, na exclusão de usuários, o histórico no mesmo envio. Não altera automaticamente os perfis de acesso cadastrados.
 
@@ -62,6 +70,7 @@ O mapa registra o que manter, organizar e avaliar para exclusão. A versão anti
 
 ## Documentação para manutenção
 
+- [Governança dos vínculos e telas por perfil](docs/perfis-vinculos.md).
 - [Cadastro de usuários e responsáveis GRGD](docs/cadastro-usuarios.md).
 - [Perfil pessoal, foto e privacidade dos dados](docs/perfil-pessoal.md).
 - [Exclusão com senha, histórico e restauração da sessão](docs/seguranca-auditoria-sessao.md).
@@ -99,7 +108,7 @@ A hospedagem futura prevista é uma **VM no DataCenter da ATI**. Essa mudança a
 
 ## Pendências conhecidas
 
-- Definir acessos externos além da consulta opcional a eventos públicos.
+- Homologar os vínculos institucionais e completar cadastro de participantes, inscrições por representação, elegibilidade e comprovantes.
 - Evoluir regras de eventos, duplicidade de inscrições e controle concorrente de vagas.
 - Homologar integralmente os perfis, fotos e senha no ambiente institucional.
 - Revisar relatórios, importação e recursos exclusivos da versão histórica antes de decidir sua incorporação ou retirada.

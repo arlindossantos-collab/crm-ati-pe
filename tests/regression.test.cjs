@@ -4,6 +4,15 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
+function vinculoTeste(extra={}) {
+    const agora=Date.now();
+    return {papel:'gestor_nsi',situacao:'aprovado',orgaoId:'orgao-a',setoresIds:['a1'],
+        inicio:agora-60000,fim:agora+3600000,revisao:agora+1800000,titularUid:'',
+        acoes:['orgao.consultar','participantes.consultar','eventos.consultar','inscricoes.consultar'],
+        aprovacaoGrgd:{responsavel:'GRGD de teste',referencia:'Protocolo fictício G1'},
+        aprovacaoAutoridade:{responsavel:'Autoridade de teste',referencia:'Protocolo fictício A1'},...extra};
+}
+
 // Exercita o módulo real com DOM/Firebase simulados, sem acessar serviços ou dados reais.
 function app() {
     const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
@@ -24,7 +33,7 @@ function app() {
         return nodes.get(id);
     };
     const context = vm.createContext({
-        console: { info() {}, warn() {} }, window: {},
+        console: { info() {}, warn() {} }, window: {}, setTimeout(){return 1;},clearTimeout(){},
         document: { body:{setAttribute(){}},getElementById: element, createElement() { return {}; }, querySelectorAll() { return []; }, querySelector() { return null; }, addEventListener() {} },
         sessionStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},
         alert() {}, confirm() { return true; },
@@ -677,4 +686,61 @@ test('retorno atrasado do histórico após logout não expõe dados',async()=>{
     const pendente=a.run('carregarHistoricoAlteracoes(true)');await a.context.authCallback(null);
     resolver({docs:[{id:'h',data:()=>({autorNome:'Restrito'})}]});await pendente;
     assert.equal(a.run('historicoRegistros.length'),0);assert.equal(a.element('historico-registros').innerHTML,'');
+});
+
+test('vínculo pendente, vencido ou sem duas aprovações não herda módulos antigos',()=>{
+    const a=app();a.context.vinculo=vinculoTeste();
+    a.run("currentUser={uid:'nsi',ativo:true,tipoUsuario:'externo',perfil:'comum',modulosPermitidos:['eventos'],acessoInstitucional:vinculo}");
+    assert.deepEqual(Array.from(a.run('modulosDoUsuario()')),['meu_orgao','colaboradores','eventos','inscricoes_orgao']);
+    for(const code of ["currentUser.acessoInstitucional.situacao='pendente'","currentUser.acessoInstitucional.fim=Date.now()-1","currentUser.acessoInstitucional.revisao=Date.now()-1","currentUser.acessoInstitucional.aprovacaoAutoridade.referencia=''","currentUser.acessoInstitucional.aprovacaoGrgd.referencia=''"]){
+        a.context.vinculo=vinculoTeste();a.run('currentUser.acessoInstitucional=vinculo');a.run(code);
+        assert.equal(a.run('modulosDoUsuario().length'),0);
+    }
+});
+test('papel NSI não concede administração, edição institucional nem inscrição da própria conta',()=>{
+    const a=app();a.context.vinculo=vinculoTeste();a.run("currentUser={uid:'nsi',ativo:true,tipoUsuario:'externo',perfil:'comum',acessoInstitucional:vinculo}");
+    assert.equal(a.run('ehAdministrador()'),false);
+    assert.equal(a.run("podeAlterarColecao('usuarios')"),false);
+    assert.equal(a.run("podeAlterarColecao('eventos')"),false);
+    assert.equal(a.run("podeAcao('inscricoes','propria')"),false);
+});
+test('GRGD edita apenas módulos com consulta e edição delegadas, sem excluir ou administrar usuários',()=>{
+    const a=app();a.context.vinculo=vinculoTeste({papel:'grgd',orgaoId:'',setoresIds:[],acoes:['eventos.consultar','eventos.editar']});
+    a.run("currentUser={uid:'grgd',ativo:true,tipoUsuario:'interno',perfil:'comum',acessoInstitucional:vinculo}");
+    assert.equal(a.run("podeAlterarColecao('eventos')"),true);
+    for(const code of ["podeAlterarColecao('eventos','criar')","podeAlterarColecao('eventos','excluir')","podeAlterarColecao('usuarios')","podeAlterarColecao('demandas')"])assert.equal(a.run(code),false);
+});
+test('auditoria só recebe consultas do escopo e não acessa participantes, usuários nem edição',()=>{
+    const a=app();a.context.vinculo=vinculoTeste({papel:'auditoria',acoes:['auditoria.consultar','relatorios.consultar']});
+    a.run("currentUser={uid:'auditor',ativo:true,tipoUsuario:'interno',perfil:'comum',acessoInstitucional:vinculo}");
+    assert.deepEqual(Array.from(a.run('modulosDoUsuario()')),['inscricoes_orgao','auditoria_orgao']);
+    assert.equal(a.run("podeAcao('participantes')"),false);
+    assert.equal(a.run("podeAlterarColecao('usuarios')"),false);
+});
+test('consultas do portal são filtradas por órgão e setores e não assinam coleções internas',()=>{
+    const a=app();a.context.vinculo=vinculoTeste();a.context.setTimeout=()=>1;
+    a.run("currentUser={uid:'nsi',ativo:true,tipoUsuario:'externo',perfil:'comum',acessoInstitucional:vinculo};iniciarSnapshotFirestore()");
+    const cols=a.snapshots.map(s=>s.ref);
+    assert.ok(cols.some(r=>JSON.stringify(r).includes('["orgaoId","==","orgao-a"]')&&JSON.stringify(r).includes('["setorId","in",["a1"]]')));
+    assert.ok(!cols.some(r=>r==='usuarios'||r==='demandas'||r==='fornecedores'));
+    assert.equal(a.run("registroNoEscopo({orgaoId:'orgao-b',setorId:'a1'})"),false);
+    assert.equal(a.run("registroNoEscopo({orgaoId:'orgao-a',setorId:'a2'})"),false);
+    assert.equal(a.run("registroNoEscopo({orgaoId:'orgao-a',setorId:'a1'})"),true);
+});
+test('aprovação não pode ser apagada pelo formulário para reativar acesso legado',()=>{
+    const a=app();a.element('vinculo-papel').value='';a.context.anterior={acessoInstitucional:vinculoTeste()};
+    assert.throws(()=>a.run('lerVinculoInstitucional(anterior)'),/suspenda/);
+});
+
+test('filtro administrativo usa órgão por ID e setor delegado, sem deduzir vínculo pelo texto antigo',()=>{
+    const a=app();a.context.vinculo=vinculoTeste();a.run("dbData.setores=[{id:'a1',orgaoId:'orgao-a',nome:'NSI A'}];dbData.usuarios=[{uid:'nsi',tipoUsuario:'externo',perfil:'comum',nome:'NSI',acessoInstitucional:vinculo},{uid:'legado',nome:'Legado',orgao:'orgao-a'}];filtroOrgaoUsuarioAtual='orgao-a';filtroSetorUsuarioAtual='a1';renderUsuarios()");
+    assert.equal(a.element('count-usuarios').textContent,1);
+    assert.match(a.element('tabela-usuarios').innerHTML,/Gestor de NSI/);
+    assert.ok(!a.element('tabela-usuarios').innerHTML.includes('Legado'));
+});
+test('prazo do vínculo remove os dados e a navegação mesmo sem recarregar a página',()=>{
+    const a=app();let deadline;a.context.setTimeout=fn=>{deadline=fn;return 1;};a.context.vinculo=vinculoTeste();
+    a.run("currentUser={uid:'nsi',ativo:true,tipoUsuario:'externo',perfil:'comum',acessoInstitucional:vinculo};programarRevisaoAcesso();dbData.colaboradores=[{nome:'Registro privado'}]");
+    a.element('portal-colaboradores').innerHTML='Registro privado';a.run('currentUser.acessoInstitucional.fim=Date.now()-1');deadline();
+    assert.equal(a.run('modulosDoUsuario().length'),0);assert.equal(a.run('dbData.colaboradores.length'),0);assert.equal(a.element('portal-colaboradores').innerHTML,'');
 });

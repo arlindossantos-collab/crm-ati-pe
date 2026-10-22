@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.8.0 - EXCLUSÃO PROTEGIDA, HISTÓRICO E SESSÃO   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.9.0 - GOVERNANÇA E TELAS POR PERFIL   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -18,7 +18,7 @@
     <style>
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
         .hidden { display: none; }
-        body:not([data-admin="true"]) .btn-admin-only { display: none !important; }
+        body:not([data-admin="true"]) .btn-admin-only:not([data-acao]) { display: none !important; }
         [hidden] { display: none !important; }
         .tab-active { background-color: #ffffff; color: #1e3a8a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .tab-inactive { color: #64748b; font-weight: 500; }
@@ -66,7 +66,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.8.0</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.9.0</span></p>
             </div>
         </div>
     </div>
@@ -79,7 +79,7 @@
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.8.0</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.9.0</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -110,6 +110,10 @@
         <!-- Navegação por Abas -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit max-w-full overflow-x-auto text-xs sm:text-sm">
+                <button type="button" data-tab="meu_orgao" class="nav-tab hidden px-3.5 py-2 rounded-lg">Meu órgão</button>
+                <button type="button" data-tab="colaboradores" class="nav-tab hidden px-3.5 py-2 rounded-lg">Colaboradores</button>
+                <button type="button" data-tab="inscricoes_orgao" class="nav-tab hidden px-3.5 py-2 rounded-lg">Inscrições do órgão</button>
+                <button type="button" data-tab="auditoria_orgao" class="nav-tab hidden px-3.5 py-2 rounded-lg">Auditoria do órgão</button>
                 <button type="button" data-tab="dashboard" class="nav-tab px-3.5 py-2 rounded-lg transition tab-active"><i class="fa-solid fa-chart-pie mr-1"></i> Dashboard</button>
                 <button type="button" data-tab="demandas" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-list-check mr-1"></i> Demandas <span id="cnt-tab-demandas" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
                 <button type="button" data-tab="clientes" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-sitemap mr-1"></i> Clientes <span id="cnt-tab-clientes" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
@@ -121,13 +125,18 @@
             </div>
             <div class="flex items-center gap-2">
                 <button type="button" id="btn-historico-alteracoes" class="btn-admin-only hidden bg-blue-50 border border-blue-200 text-blue-900 text-xs px-3 py-2 rounded-lg font-medium"><i class="fa-solid fa-clock-rotate-left mr-1" aria-hidden="true"></i> Histórico de alterações</button>
-                <button type="button" id="btn-export-csv" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                <button type="button" id="btn-export-csv" class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-file-csv"></i> Exportar Dados
                 </button>
             </div>
         </div>
 
         <!-- ABA DASHBOARD -->
+        <p id="portal-erros" role="alert" class="text-sm text-red-700 mb-3"></p>
+        <section id="aba-meu_orgao" class="hidden space-y-4"><div id="portal-resumo" class="bg-white border border-blue-100 rounded-xl p-5"></div><p class="text-sm text-slate-600">Consulte os módulos liberados para acompanhar os registros do seu órgão.</p></section>
+        <section id="aba-colaboradores" class="hidden space-y-4"><h3 class="text-xl font-bold">Colaboradores do órgão</h3><p class="text-sm text-slate-600">Participantes de eventos podem ser cadastrados sem conta de acesso. O cadastro e a inscrição por representação serão disponibilizados no próximo lote.</p><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Nome</th><th class="p-3 text-left">E-mail institucional</th><th class="p-3 text-left">Setor</th><th class="p-3 text-left">Situação</th></tr></thead><tbody id="portal-colaboradores"></tbody></table></div></section>
+        <section id="aba-inscricoes_orgao" class="hidden space-y-4"><h3 class="text-xl font-bold">Inscrições do órgão</h3><p class="text-sm text-slate-600">Consulta dos registros vinculados ao órgão e aos setores autorizados.</p><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Participante</th><th class="p-3 text-left">Evento</th><th class="p-3 text-left">Situação</th><th class="p-3 text-left">Protocolo</th></tr></thead><tbody id="portal-inscricoes"></tbody></table></div></section>
+        <section id="aba-auditoria_orgao" class="hidden space-y-4"><h3 class="text-xl font-bold">Auditoria autorizada</h3><p class="text-sm text-slate-600">Somente leitura das trilhas identificadas com o órgão e os setores aprovados.</p><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Autor</th><th class="p-3 text-left">Ação</th><th class="p-3 text-left">Registro</th><th class="p-3 text-left">Data e hora</th></tr></thead><tbody id="portal-auditoria"></tbody></table></div></section>
         <div id="aba-dashboard" class="block space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs font-semibold text-slate-500 uppercase">Demandas Ativas</p><h3 id="dash-tot-demandas" class="text-3xl font-bold text-blue-900 mt-1">0</h3></div>
@@ -193,7 +202,7 @@
                         <button type="button" id="btn-visao-tabela" class="px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition"><i class="fa-solid fa-table mr-1"></i> Tabela</button>
                         <button type="button" id="btn-visao-calendario" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition"><i class="fa-solid fa-calendar-week mr-1"></i> Calendário & Backlog</button>
                     </div>
-                    <button type="button" data-modal-target="demanda" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Demanda</button>
+                    <button type="button" data-modal-target="demanda" data-acao="demandas.criar" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Demanda</button>
                 </div>
             </div>
 
@@ -292,7 +301,7 @@
                     <label class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <i class="fa-solid fa-file-arrow-up"></i> Importar CSV <input type="file" id="input-import-orgaos-csv" accept=".csv" class="hidden">
                     </label>
-                    <button type="button" data-modal-target="cliente" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Cliente</button>
+                    <button type="button" data-modal-target="cliente" data-acao="clientes.criar" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Cliente</button>
                 </div>
             </div>
             
@@ -332,7 +341,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" id="btn-relatorio-geral-eventos" class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-file-excel"></i> Relatório Geral de Inscrições</button>
-                    <button type="button" data-modal-target="evento" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Novo Evento</button>
+                    <button type="button" data-modal-target="evento" data-acao="eventos.criar" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Novo Evento</button>
                 </div>
             </div>
             <div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
@@ -343,7 +352,7 @@
             <section class="rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-900 p-5 sm:p-6 text-white shadow-lg">
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div><p class="text-[10px] font-bold uppercase tracking-widest text-blue-200">Planejamento de espaços</p><h3 class="mt-1 text-2xl font-bold">Locais e auditórios</h3><p class="mt-2 text-sm text-blue-100">Compare espaços, consulte a agenda e acompanhe as locações.</p></div>
-                    <button type="button" data-modal-target="local" class="btn-abrir-form btn-admin-only rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-blue-900 shadow hover:bg-blue-50"><i class="fa-solid fa-plus mr-1"></i> Novo Local / Auditório</button>
+                    <button type="button" data-modal-target="local" data-acao="locais.criar" class="btn-abrir-form btn-admin-only rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-blue-900 shadow hover:bg-blue-50"><i class="fa-solid fa-plus mr-1"></i> Novo Local / Auditório</button>
                 </div>
                 <p class="mt-4 text-xs text-blue-200">Indicadores de todos os locais carregados. Os filtros abaixo afetam apenas a tabela.</p>
             </section>
@@ -390,7 +399,7 @@
                     <h3 class="text-base font-bold text-slate-800">Fornecedores (<span id="count-fornecedores">0</span>)</h3>
                     <input type="text" id="busca-fornecedores" placeholder="Buscar fornecedor, CNPJ, serviço..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
                 </div>
-                <button type="button" data-modal-target="fornecedor" class="btn-abrir-form btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Fornecedor</button>
+                <button type="button" data-modal-target="fornecedor" data-acao="fornecedores.criar" class="btn-abrir-form btn-admin-only bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Fornecedor</button>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Razão Social / Nome</th><th class="p-4">CNPJ / Categoria</th><th class="p-4">Serviço Principal</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-fornecedores" class="divide-y text-sm"></tbody></table></div>
         </div>
@@ -405,6 +414,7 @@
                     <select id="filtro-orgao-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
                         <option value="">Filtrar por Cliente / Secretaria</option>
                     </select>
+                    <select id="filtro-setor-usuario" aria-label="Filtrar setor do vínculo" class="p-2 border rounded-lg text-xs bg-white"><option value="">Todos os setores</option></select>
                     <select id="filtro-tag-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
                         <option value="">Filtrar por Tag / Categoria</option>
                     </select>
@@ -417,6 +427,7 @@
                 </div>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail de acesso</th><th class="p-4">Tipo / Situação</th><th class="p-4">Cliente</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-3"><h4 class="font-bold">Setores por órgão</h4><form id="form-setor" class="flex flex-wrap gap-2"><select id="setor-orgao" aria-label="Órgão do setor" required class="border rounded-lg p-2 text-xs"></select><input id="setor-nome" aria-label="Nome do setor" required maxlength="150" placeholder="Nome do setor" class="border rounded-lg p-2 text-xs"><button class="bg-blue-900 text-white rounded-lg px-3 py-2 text-xs">Cadastrar setor</button></form><p id="setor-msg" role="status" class="text-xs"></p><div id="gestao-setores-lista" class="text-xs max-h-40 overflow-auto"></div><a href="previa-perfis.html" target="_blank" rel="noopener" class="inline-block text-sm text-blue-800 underline">Abrir prévia de perfis com dados fictícios</a></div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
                 <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários (Acesso Restrito a Eventos)</h4><p class="text-xs text-slate-500">Crie grupos para controlar quais usuários enxergam os eventos restritos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
                 <div id="lista-grupos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -430,7 +441,7 @@
                     <h3 class="text-base font-bold text-slate-800">Repositório de Bases Dinâmicas (<span id="count-bases">0</span>)</h3>
                     <p class="text-xs text-slate-500">Cadastre parâmetros, categorias e opções compartilhadas que alimentam automaticamente os dropdowns de todo o sistema.</p>
                 </div>
-                <button type="button" data-modal-target="base" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Base / Categoria</button>
+                <button type="button" data-modal-target="base" data-acao="bases.criar" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Base / Categoria</button>
             </div>
             <div class="flex gap-2 items-center">
                 <input type="text" id="busca-bases" placeholder="Buscar categoria, sigla, nome..." class="p-2 border rounded-lg text-xs bg-white w-64 focus:ring-2 focus:ring-blue-600 focus:outline-none">
@@ -467,13 +478,13 @@
     <!-- Modais -->
     <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-5xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento e Edição Completa</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-detalhes"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento e Edição Completa</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-detalhes" aria-label="Fechar detalhes"><span class="text-xs">Fechar</span></button></div>
             
             <div id="dashboard-detalhe-evento-container" class="hidden mb-6 space-y-4"></div>
 
             <div id="detalhe-conteudo" class="space-y-4 text-sm mb-4"></div>
             <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl">
-                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Gerenciamento Cloud</p><button type="button" id="btn-excluir-registro" class="btn-admin-only hidden bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer">Excluir Registro</button></div>
+                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Editar cadastro</p><button type="button" id="btn-excluir-registro" class="btn-admin-only hidden bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer">Excluir Registro</button></div>
                 <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-72 overflow-y-auto space-y-2"></div><div class="flex justify-end gap-2 pt-3 border-t"><button id="btn-salvar-edicao" type="submit" class="px-4 py-2 bg-blue-900 text-white font-bold rounded cursor-pointer">Salvar na Nuvem (Firestore)</button></div></form>
             </div>
         </div>
@@ -513,7 +524,7 @@
                 <input type="hidden" id="obs-demanda-id">
                 <label class="block text-xs font-bold text-slate-700">Registrar novo status ou andamento:</label>
                 <textarea id="obs-novo-texto" rows="3" placeholder="Digite o registro do status ou andamento..." class="w-full p-2.5 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-600 focus:outline-none"></textarea>
-                <button type="button" id="btn-salvar-nova-observacao" class="btn-admin-only w-full py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition cursor-pointer">Salvar no Histórico Ilimitado</button>
+                <button type="button" id="btn-salvar-nova-observacao" data-acao="demandas.editar" class="btn-admin-only w-full py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition cursor-pointer">Salvar no Histórico Ilimitado</button>
             </div>
         </div>
     </div>
@@ -525,14 +536,14 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.8.0 -->
+    <!-- Script Principal v0.9.0 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, doc, onSnapshot, getDoc, query, where, getDocs, runTransaction, serverTimestamp, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.8.0: Exclusão com senha, histórico de alterações e restauração de sessão');
+        console.info('PRGD v0.9.0: Governança dos vínculos e telas por perfil');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -557,12 +568,13 @@
         let exclusaoPendente = null, exclusaoEmCurso = false;
         let historicoRegistros = [], historicoUltimo = null, historicoCarregando = false, historicoVersao = 0;
         let versaoSessao = 0;
-        let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
+        let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [], setores:[], colaboradores:[], auditoriaOrgao:[] };
         let abaAtual = 'dashboard';
         let filtroEventoAtual = 'futuros';
         let filtroTagAtual = '';
         let filtroTipoUsuarioAtual = '';
         let filtroOrgaoUsuarioAtual = '';
+        let filtroSetorUsuarioAtual = '';
         let filtroGestorModalidadeAtual = '';
         let filtroSituacaoClienteAtual = '';
         let filtroDemandaStatusAtual = '';
@@ -581,6 +593,10 @@
         let buscaUsuariosVal = '';
 
         const MÓDULOS_SISTEMA = [
+            { id: 'meu_orgao', nome: 'Meu órgão' },
+            { id: 'colaboradores', nome: 'Colaboradores' },
+            { id: 'inscricoes_orgao', nome: 'Inscrições do órgão' },
+            { id: 'auditoria_orgao', nome: 'Auditoria do órgão' },
             { id: 'dashboard', nome: 'Dashboard' },
             { id: 'demandas', nome: 'Demandas' },
             { id: 'clientes', nome: 'Clientes' },
@@ -594,6 +610,196 @@
         // Tipo de usuário e perfil são independentes. Cadastros antigos são classificados pelo administrador.
         function ehAdministrador(usuario = currentUser) {
             return !!usuario && usuario.ativo !== false && usuario.excluido !== true && usuario.tipoUsuario !== 'externo' && usuario.perfil === 'admin';
+        }
+
+        // Governança institucional: autenticação, contato e vínculo são conceitos distintos.
+        const PAPEIS_INSTITUCIONAIS = {
+            grgd: {nome:'Equipe GRGD', acoes:['demandas.consultar','demandas.criar','demandas.editar','clientes.consultar','clientes.criar','clientes.editar','eventos.consultar','eventos.criar','eventos.editar','locais.consultar','locais.criar','locais.editar','fornecedores.consultar','fornecedores.criar','fornecedores.editar','bases.consultar','bases.criar','bases.editar','relatorios.consultar']},
+            gestor_nsi: {nome:'Gestor de NSI', acoes:['orgao.consultar','participantes.consultar','participantes.cadastrar','participantes.editar','eventos.consultar','inscricoes.consultar','inscricoes.criar','inscricoes.cancelar','comprovantes.consultar']},
+            substituto: {nome:'Substituto do gestor', acoes:['orgao.consultar','participantes.consultar','participantes.cadastrar','participantes.editar','eventos.consultar','inscricoes.consultar','inscricoes.criar','inscricoes.cancelar','comprovantes.consultar']},
+            auditoria: {nome:'Auditoria autorizada', acoes:['auditoria.consultar','relatorios.consultar']}
+        };
+        const MODULOS_PORTAL = ['meu_orgao','colaboradores','inscricoes_orgao','auditoria_orgao'];
+        function nomeAcaoInstitucional(acao) {
+            const [modulo,verbo]=acao.split('.');
+            const modulos={orgao:'dados do órgão',clientes:'órgãos e contatos',participantes:'participantes',eventos:'eventos',inscricoes:'inscrições',comprovantes:'comprovantes',auditoria:'trilhas de auditoria',relatorios:'relatórios',demandas:'demandas',locais:'locais',fornecedores:'fornecedores',bases:'bases'};
+            return ({consultar:'Consultar',criar:'Criar',editar:'Editar',cadastrar:'Cadastrar',cancelar:'Cancelar'}[verbo]||verbo)+' '+(modulos[modulo]||modulo);
+        }
+        const ACAO_COLECAO = {orgaos:'clientes',demandas:'demandas',eventos:'eventos',locais:'locais',fornecedores:'fornecedores',bases:'bases',usuarios:'usuarios',grupos:'usuarios',setores:'usuarios'};
+        let acessoTimer = null, portalErros = {};
+        function possuiVinculo(usuario=currentUser) { return usuario?.acessoInstitucional != null; }
+        function acessoInstitucionalAtivo(usuario=currentUser, agora=Date.now()) {
+            const v=usuario?.acessoInstitucional;
+            return !!usuario && usuario.ativo !== false && usuario.excluido !== true && !!v
+                && !!PAPEIS_INSTITUCIONAIS[v.papel] && v.situacao==='aprovado'
+                && Number.isFinite(v.inicio) && Number.isFinite(v.fim) && Number.isFinite(v.revisao)
+                && v.inicio<=agora && v.fim>agora && v.revisao>agora
+                && !!v.aprovacaoGrgd?.responsavel && !!v.aprovacaoGrgd?.referencia
+                && !!v.aprovacaoAutoridade?.responsavel && !!v.aprovacaoAutoridade?.referencia
+                && (v.papel==='grgd' ? usuario.tipoUsuario==='interno' : !!v.orgaoId)
+                && (v.papel!=='substituto' || (!!v.titularUid && v.titularUid!==usuario.uid))
+                && Array.isArray(v.setoresIds) && Array.isArray(v.acoes)
+                && v.acoes.every(a=>PAPEIS_INSTITUCIONAIS[v.papel].acoes.includes(a));
+        }
+        function podeAcao(modulo,acao='consultar',usuario=currentUser) {
+            if (!usuario || usuario.ativo===false || usuario.excluido===true) return false;
+            if (ehAdministrador(usuario)) return true;
+            if (possuiVinculo(usuario)) return acessoInstitucionalAtivo(usuario) && usuario.acessoInstitucional.acoes.includes(modulo+'.'+acao);
+            if (acao==='consultar') return modulosDoUsuario(usuario).includes(modulo);
+            return modulo==='inscricoes' && acao==='propria' && modulosDoUsuario(usuario).includes('eventos');
+        }
+        function podeAlterarColecao(colecao,acao='editar') {
+            return ehAdministrador() || (currentUser?.acessoInstitucional?.papel==='grgd'
+                && ['criar','editar'].includes(acao) && podeAcao(ACAO_COLECAO[colecao]) && podeAcao(ACAO_COLECAO[colecao],acao));
+        }
+        function portalInstitucional(usuario=currentUser) {
+            return possuiVinculo(usuario) && ['gestor_nsi','substituto','auditoria'].includes(usuario.acessoInstitucional.papel);
+        }
+        function nomePerfilAcesso(usuario=currentUser) {
+            if (ehAdministrador(usuario)) return 'Administrador da PRGD';
+            return PAPEIS_INSTITUCIONAIS[usuario?.acessoInstitucional?.papel]?.nome || 'Consulta';
+        }
+        function chaveOrgaoUsuario(usuario) {return usuario.acessoInstitucional?.orgaoId || usuario.orgao || '';}
+        function nomeOrgaoUsuario(usuario) {
+            const chave=chaveOrgaoUsuario(usuario);
+            return dbData.orgaos.find(o=>String(o.firestoreId||o.id)===chave)?.sigla||chave||(usuario.tipoUsuario==='externo'?'Não vinculado':'ATI');
+        }
+        function situacaoVinculo(usuario) {
+            const v=usuario.acessoInstitucional;if(!v)return '';
+            if(v.situacao!=='aprovado')return v.situacao==='suspenso'?'Suspenso':'Pendente de aprovação';
+            if(v.fim<=Date.now())return 'Vencido';if(v.revisao<=Date.now())return 'Revisão pendente';
+            if(v.inicio>Date.now())return 'Aguardando início';
+            return acessoInstitucionalAtivo(usuario)?'Aprovado':'Pendente de validação';
+        }
+        function registroNoEscopo(item,usuario=currentUser) {
+            const v=usuario?.acessoInstitucional;
+            return acessoInstitucionalAtivo(usuario) && item.orgaoId===v.orgaoId
+                && (!v.setoresIds.length || v.setoresIds.includes(item.setorId));
+        }
+        function programarRevisaoAcesso() {
+            if(acessoTimer)clearTimeout(acessoTimer);acessoTimer=null;
+            const v=currentUser?.acessoInstitucional;
+            if(!v)return;
+            const futuro=[v.inicio,v.fim,v.revisao].filter(t=>t>Date.now()).sort((a,b)=>a-b)[0];
+            if(futuro)acessoTimer=setTimeout(()=>{
+                ++versaoSessao;pararSnapshots();const usuario=currentUser;limparDadosSessao();currentUser=usuario;
+                iniciarSnapshotFirestore();renderizarTudo();restaurarNavegacao();
+            },Math.min(2147483647,Math.max(1,futuro-Date.now()+25)));
+        }
+        function consultasDoEscopo(colecao) {
+            const v=currentUser.acessoInstitucional;
+            const filtros=[where('orgaoId','==',v.orgaoId)];
+            if(v.setoresIds.length)filtros.push(where('setorId','in',v.setoresIds));
+            return query(collection(db,colecao),...filtros);
+        }
+        function observarPortal(colecao,ref) {
+            snapshotUnsubs.push(observarFirestore(ref,snap=>{
+                dbData[colecao]=snap.docs ? snap.docs.map(d=>({...d.data(),id:d.id,firestoreId:d.id})) : snap.exists()?[{...snap.data(),id:snap.id,firestoreId:snap.id}]:[];
+                delete portalErros[colecao];renderPortalInstitucional();
+            },()=>{dbData[colecao]=[];portalErros[colecao]=true;renderPortalInstitucional();}));
+        }
+        function iniciarPortalInstitucional() {
+            if(!acessoInstitucionalAtivo())return;
+            const v=currentUser.acessoInstitucional;
+            if(podeAcao('orgao'))observarPortal('orgaos',doc(db,'orgaos',v.orgaoId));
+            if(podeAcao('participantes'))observarPortal('colaboradores',consultasDoEscopo('colaboradores'));
+            if(podeAcao('inscricoes')||podeAcao('relatorios'))observarPortal('inscricoes',consultasDoEscopo('inscricoes'));
+            if(podeAcao('auditoria'))observarPortal('auditoriaOrgao',consultasDoEscopo('historicoAlteracoes'));
+            if(podeAcao('eventos'))snapshotUnsubs.push(observarFirestore(query(collection(db,'eventos'),where('eventoPublico','==',true)),snap=>atualizarEventosVisiveis(snap.docs.map(d=>({...d.data(),id:d.id,firestoreId:d.id}))),()=>{dbData.eventos=[];portalErros.eventos=true;renderPortalInstitucional();}));
+        }
+        function renderPortalInstitucional() {
+            const v=currentUser?.acessoInstitucional;
+            const box=document.getElementById('portal-resumo');
+            if(!box)return;
+            if(!portalInstitucional()||!acessoInstitucionalAtivo()){
+                box.innerHTML='';
+                ['portal-colaboradores','portal-inscricoes','portal-auditoria'].forEach(id=>document.getElementById(id).innerHTML='');
+                document.getElementById('portal-erros').textContent='';return;
+            }
+            const orgao=dbData.orgaos.find(o=>String(o.firestoreId||o.id)===v.orgaoId);
+            box.innerHTML=`<p class="text-xs text-blue-800 font-bold">${esc(nomePerfilAcesso())}</p><h3 class="font-bold text-xl mt-1">${esc(orgao?.nome||'Meu órgão')}</h3><p class="text-sm text-slate-600 mt-2">${esc(v.orgaoId)} · ${v.setoresIds.length ? esc(v.setoresIds.map(id=>dbData.setores.find(s=>s.id===id)?.nome||id).join(', ')) : 'Todos os setores do órgão (delegação integral)'}</p><p class="text-xs text-slate-500 mt-2">Válido até ${esc(new Date(v.fim).toLocaleDateString('pt-BR'))}. Revisão até ${esc(new Date(v.revisao).toLocaleDateString('pt-BR'))}.</p>`;
+            const linhas=(colecao,campos)=>{
+                if(portalErros[colecao])return '<tr><td colspan="4" class="p-4 text-red-700">Não foi possível confirmar o acesso. Os dados desta consulta foram removidos. Procure a GRGD.</td></tr>';
+                const lista=(dbData[colecao]||[]).filter(i=>registroNoEscopo(i));
+                return lista.map(i=>'<tr>'+campos.map(c=>'<td class="p-3 border-t">'+esc(c(i))+'</td>').join('')+'</tr>').join('')||'<tr><td colspan="4" class="p-4 text-slate-500">Nenhum registro disponível no seu escopo.</td></tr>';
+            };
+            document.getElementById('portal-colaboradores').innerHTML=linhas('colaboradores',[i=>i.nome||'-',i=>i.emailInstitucional||'-',i=>dbData.setores.find(s=>s.id===i.setorId)?.nome||i.setorId||'-',i=>i.ativo===false?'Inativo':'Ativo']);
+            document.getElementById('portal-inscricoes').innerHTML=linhas('inscricoes',[i=>i.participanteNome||i.nome||'-',i=>dbData.eventos.find(e=>String(e.firestoreId||e.id)===i.eventId)?.titulo||i.eventoTitulo||i.eventId||'-',i=>i.situacao||'-',i=>i.protocolo||'-']);
+            document.getElementById('portal-auditoria').innerHTML=linhas('auditoriaOrgao',[i=>i.autorNome||i.autorUid||'-',i=>i.acao||'-',i=>i.registroNome||i.registroId||'-',i=>i.criadoEm?.toDate?i.criadoEm.toDate().toLocaleString('pt-BR'):'-']);
+            const msg=document.getElementById('portal-erros');msg.textContent=Object.keys(portalErros).length?'Algumas consultas não puderam ser confirmadas. Nenhum dado dessas consultas é exibido.':'';
+        }
+        function camposVinculo(usuario) {
+            const v=usuario.acessoInstitucional||{}, cls='w-full border rounded-lg p-2 bg-white text-xs';
+            const input=(id,label,value='',type='text')=>`<label class="block">${label}<input id="vinculo-${id}" type="${type}" value="${esc(value)}" class="${cls}"></label>`;
+            const data=t=>t?new Date(t-new Date(t).getTimezoneOffset()*60000).toISOString().slice(0,16):'';
+            return `<fieldset class="md:col-span-2 border rounded-xl p-3"><legend class="font-bold px-1">Vínculo institucional</legend><p class="text-slate-500 mb-3">Registre as aprovações recebidas da GRGD e da autoridade competente. Nome, e-mail ou contato cadastrado não concedem acesso.</p><div class="grid md:grid-cols-2 gap-3">
+                <label>Papel institucional<select id="vinculo-papel" class="${cls}"><option value="">Manter acesso anterior (sem novo vínculo)</option>${Object.entries(PAPEIS_INSTITUCIONAIS).map(([k,p])=>`<option value="${k}" ${v.papel===k?'selected':''}>${p.nome}</option>`).join('')}</select></label>
+                <label>Situação<select id="vinculo-situacao" class="${cls}">${['pendente','aprovado','suspenso'].map(s=>`<option ${v.situacao===s?'selected':''}>${s}</option>`).join('')}</select></label>
+                <label>Órgão<select id="vinculo-orgao" class="${cls}"><option value="">Selecione o órgão</option>${dbData.orgaos.map(o=>`<option value="${esc(o.firestoreId||o.id)}" ${String(o.firestoreId||o.id)===v.orgaoId?'selected':''}>${esc(o.sigla||o.nome)} - ${esc(o.nome)}</option>`).join('')}</select></label>
+                <label>Setores delegados (até 5)<select id="vinculo-setores" multiple class="${cls}"></select><span class="text-slate-500">Sem seleção: todo o órgão. Use Ctrl/Command para vários.</span></label>
+                ${input('inicio','Início',data(v.inicio),'datetime-local')}${input('fim','Validade até',data(v.fim),'datetime-local')}${input('revisao','Próxima revisão até',data(v.revisao),'datetime-local')}
+                <label>Titular (somente substituto)<select id="vinculo-titular" class="${cls}"><option value="">Selecione</option>${dbData.usuarios.filter(u=>u.acessoInstitucional?.papel==='gestor_nsi'&&uidCadastro(u)!==uidCadastro(usuario)).map(u=>`<option value="${esc(uidCadastro(u))}" ${v.titularUid===uidCadastro(u)?'selected':''}>${esc(u.nome||u.email)}</option>`).join('')}</select></label>
+                ${input('grgd-nome','Responsável pela aprovação GRGD',v.aprovacaoGrgd?.responsavel)}${input('grgd-ref','Referência da aprovação GRGD',v.aprovacaoGrgd?.referencia)}${input('autoridade-nome','Autoridade do órgão / ATI',v.aprovacaoAutoridade?.responsavel)}${input('autoridade-ref','Referência da aprovação da autoridade',v.aprovacaoAutoridade?.referencia)}
+                <fieldset class="md:col-span-2 border rounded-lg p-2"><legend class="font-bold">Ações expressamente autorizadas</legend><div id="vinculo-acoes" class="grid md:grid-cols-2 gap-2"></div></fieldset>
+                </div><p class="text-slate-500 mt-2">Participante sem login é cadastrado como pessoa, sem receber perfil ou conta. LDAP será integrado na migração institucional.</p></fieldset>`;
+        }
+        function atualizarCamposVinculo(selecionados=null) {
+            const papel=document.getElementById('vinculo-papel');if(!papel)return;
+            const anterior=dbData.usuarios.find(u=>uidCadastro(u)===document.getElementById('edit-doc-id').value)?.acessoInstitucional||{};
+            const acoes=selecionados||Array.from(document.querySelectorAll('[name="vinculo-acao"]:checked')).map(el=>el.value);
+            const box=document.getElementById('vinculo-acoes');
+            box.innerHTML=(PAPEIS_INSTITUCIONAIS[papel.value]?.acoes||[]).map(a=>`<label><input type="checkbox" name="vinculo-acao" value="${a}" ${acoes.includes(a)?'checked':''}> ${esc(nomeAcaoInstitucional(a))}${papel.value!=='grgd'&&(!a.endsWith('.consultar')||a.startsWith('comprovantes.'))?' <span class="text-slate-500">(próximo lote)</span>':''}</label>`).join('')||'<p>Selecione um papel para definir suas ações.</p>';
+            const orgaoCampo=document.getElementById('vinculo-orgao');
+            const grgd=papel.value==='grgd';orgaoCampo.disabled=grgd;if(grgd)orgaoCampo.value='';
+            const orgao=orgaoCampo.value;
+            const setores=document.getElementById('vinculo-setores');
+            const ids=Array.from(setores.selectedOptions||[]).map(o=>o.value);
+            const marcados=selecionados!==null?(anterior.setoresIds||[]):ids;
+            const disponiveis=(dbData.setores||[]).filter(s=>s.orgaoId===orgao&&s.ativo!==false);
+            const anteriores=orgao===anterior.orgaoId?marcados.filter(id=>!disponiveis.some(s=>s.id===id)):[];
+            setores.innerHTML=disponiveis.map(s=>`<option value="${esc(s.id)}" ${marcados.includes(s.id)?'selected':''}>${esc(s.nome)}</option>`).join('')
+                +anteriores.map(id=>`<option value="${esc(id)}" selected>Vínculo anterior: ${esc(id)} (revisar)</option>`).join('');
+            setores.disabled=grgd;
+            document.getElementById('vinculo-titular').disabled=papel.value!=='substituto';
+        }
+        function lerVinculoInstitucional(anterior={}) {
+            const el=document.getElementById('vinculo-papel');
+            if(!el)return anterior.acessoInstitucional;
+            if(!el.value){if(anterior.acessoInstitucional)throw new Error('Para retirar o novo acesso, suspenda o vínculo. Não é permitido restaurar permissões legadas por este formulário.');return undefined;}
+            const val=id=>(document.getElementById('vinculo-'+id)?.value||'').trim();
+            const papel=el.value,orgaoId=papel==='grgd'?'':val('orgao');
+            if(!PAPEIS_INSTITUCIONAIS[papel])throw new Error('Papel institucional inválido.');
+            const v={papel,orgaoId,setoresIds:papel==='grgd'?[]:Array.from(document.getElementById('vinculo-setores').selectedOptions||[]).map(o=>o.value),
+                situacao:val('situacao'),inicio:new Date(val('inicio')).getTime(),fim:new Date(val('fim')).getTime(),revisao:new Date(val('revisao')).getTime(),titularUid:papel==='substituto'?val('titular'):'',
+                acoes:Array.from(document.querySelectorAll('[name="vinculo-acao"]:checked')).map(el=>el.value),
+                aprovacaoGrgd:{responsavel:val('grgd-nome'),referencia:val('grgd-ref')},aprovacaoAutoridade:{responsavel:val('autoridade-nome'),referencia:val('autoridade-ref')}};
+            if(!['pendente','aprovado','suspenso'].includes(v.situacao)||v.setoresIds.length>5||!v.acoes.every(a=>PAPEIS_INSTITUCIONAIS[papel].acoes.includes(a)))throw new Error('Revise a situação, os setores e as ações autorizadas.');
+            if(!Number.isFinite(v.inicio)||!Number.isFinite(v.fim)||!Number.isFinite(v.revisao)||v.fim<=v.inicio||v.revisao>v.fim||v.revisao<=v.inicio)throw new Error('Informe início, validade e revisão coerentes. A revisão deve ocorrer dentro da validade.');
+            if(v.situacao==='aprovado'&&papel!=='grgd'&&!dbData.orgaos.some(o=>String(o.firestoreId||o.id)===orgaoId))throw new Error('Selecione um órgão cadastrado.');
+            if(v.situacao==='aprovado'&&v.setoresIds.some(id=>!dbData.setores.some(s=>s.id===id&&s.orgaoId===orgaoId&&s.ativo!==false)))throw new Error('Há setor inválido para o órgão.');
+            if(v.situacao==='aprovado'&&(!v.aprovacaoGrgd.responsavel||!v.aprovacaoGrgd.referencia||!v.aprovacaoAutoridade.responsavel||!v.aprovacaoAutoridade.referencia))throw new Error('A liberação exige os responsáveis e as referências das duas aprovações.');
+            if(papel==='substituto'&&v.situacao==='aprovado'){
+                const titular=dbData.usuarios.find(u=>uidCadastro(u)===v.titularUid);
+                const t=titular?.acessoInstitucional;
+                if(!acessoInstitucionalAtivo(titular)||t.papel!=='gestor_nsi'||t.orgaoId!==v.orgaoId||v.inicio<t.inicio||v.fim>t.fim||v.revisao>t.revisao||!v.acoes.every(a=>t.acoes.includes(a))||(t.setoresIds.length&&(!v.setoresIds.length||!v.setoresIds.every(id=>t.setoresIds.includes(id)))))throw new Error('A delegação não pode exceder as ações, setores ou validade do titular aprovado.');
+            }
+            const canon=value=>Array.isArray(value)?value.slice().sort():value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(k=>[k,canon(value[k])])):value;
+            const base=anterior.acessoInstitucional;
+            if(base){const {registradoPorUid,registradoEm,...dados}=base;if(JSON.stringify(canon(dados))===JSON.stringify(canon(v)))return base;}
+            return {...v,registradoPorUid:currentUser.uid,registradoEm:serverTimestamp()};
+        }
+        function renderGestaoSetores() {
+            const el=document.getElementById('gestao-setores-lista');if(!el)return;
+            if(!ehAdministrador()){el.innerHTML='';document.getElementById('setor-orgao').innerHTML='';return;}
+            el.innerHTML=(dbData.setores||[]).map(s=>`<p class="py-1">${esc(s.nome)} · ${esc(dbData.orgaos.find(o=>String(o.firestoreId||o.id)===s.orgaoId)?.sigla||s.orgaoId)}</p>`).join('')||'<p>Nenhum setor cadastrado.</p>';
+            const select=document.getElementById('setor-orgao'),atual=select.value;
+            select.innerHTML='<option value="">Selecione o órgão</option>'+dbData.orgaos.map(o=>`<option value="${esc(o.firestoreId||o.id)}">${esc(o.sigla||o.nome)}</option>`).join('');select.value=atual;
+        }
+        async function salvarSetor(e) {
+            e.preventDefault();if(!ehAdministrador())return;
+            const nome=document.getElementById('setor-nome').value.trim(),orgaoId=document.getElementById('setor-orgao').value;
+            if(!nome||nome.length>150||!dbData.orgaos.some(o=>String(o.firestoreId||o.id)===orgaoId))return;
+            try{await adicionarComHistorico(collection(db,'setores'),{nome,orgaoId,ativo:true});document.getElementById('setor-nome').value='';document.getElementById('setor-msg').textContent='Setor cadastrado.';}catch(err){document.getElementById('setor-msg').textContent=traduzirErroSistema(err);}
         }
 
         // Apenas navegação: nenhum perfil, senha ou dado de negócio vai para este armazenamento.
@@ -616,7 +822,7 @@
             verificarAutenticacaoObrigatoria();
         }
 
-        const COLECOES_AUDITADAS = ['usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes'];
+        const COLECOES_AUDITADAS = ['setores','usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes'];
         const METADADOS_AUDITORIA = ['ultimaAuditoriaId','criadoEm','criadoPor','criadoPorUid','atualizadoEm','editadoPor','editadoPorUid','perfilAtualizadoEm'];
         function dadosRegistroAuditoria(ref, antes, depois, remover = false) {
             const partes = ref.path.split('/');
@@ -626,7 +832,7 @@
             const campos = [...new Set([...Object.keys(antes || {}), ...Object.keys(depois || {})])]
                 .filter(k => !METADADOS_AUDITORIA.includes(k) && (remover || JSON.stringify(antes?.[k]) !== JSON.stringify(depois?.[k]))).sort();
             const item = depois || antes || {};
-            return {colecao,registroId,acao,campos,registroNome:String(privado ? 'Perfil pessoal' : item.nome || item.titulo || item.id || registroId).slice(0,180)};
+            return {...(item.orgaoId ? {orgaoId:item.orgaoId,...(item.setorId?{setorId:item.setorId}:{})} : {}),colecao,registroId,acao,campos,registroNome:String(privado ? 'Perfil pessoal' : item.nome || item.titulo || item.id || registroId).slice(0,180)};
         }
         async function gravarComHistorico(operacoes) {
             const uid = currentUser?.uid, sessao = versaoSessao;
@@ -715,10 +921,24 @@
 
         function modulosDoUsuario(usuario = currentUser) {
             if (!usuario || usuario.ativo === false || usuario.excluido === true) return [];
-            if (ehAdministrador(usuario)) return MÓDULOS_SISTEMA.map(m => m.id);
+            if (ehAdministrador(usuario)) return MÓDULOS_SISTEMA.map(m => m.id).filter(id=>!MODULOS_PORTAL.includes(id));
+            if(possuiVinculo(usuario)) {
+                if(!acessoInstitucionalAtivo(usuario))return [];
+                const v=usuario.acessoInstitucional,mods=[];
+                if(v.papel==='grgd'){
+                    for(const m of MÓDULOS_SISTEMA)if(v.acoes.includes(m.id+'.consultar'))mods.push(m.id);
+                    return mods.length?['dashboard',...mods]:[];
+                }
+                if(v.acoes.includes('orgao.consultar'))mods.push('meu_orgao');
+                if(v.acoes.includes('participantes.consultar'))mods.push('colaboradores');
+                if(v.acoes.includes('eventos.consultar'))mods.push('eventos');
+                if(v.acoes.includes('inscricoes.consultar')||v.acoes.includes('relatorios.consultar'))mods.push('inscricoes_orgao');
+                if(v.acoes.includes('auditoria.consultar'))mods.push('auditoria_orgao');
+                return mods;
+            }
             const legados = usuario.tipoUsuario ? [] : ['dashboard', 'demandas', 'eventos'];
             const modulos = Array.isArray(usuario.modulosPermitidos) ? usuario.modulosPermitidos : legados;
-            return modulos.filter(id => id !== 'usuarios' && MÓDULOS_SISTEMA.some(m => m.id === id)
+            return modulos.filter(id => id !== 'usuarios' && !MODULOS_PORTAL.includes(id) && MÓDULOS_SISTEMA.some(m => m.id === id)
                 && (usuario.tipoUsuario !== 'externo' || id === 'eventos'));
         }
 
@@ -779,7 +999,7 @@
             const cls = 'w-full p-2 border rounded-lg text-xs bg-white';
             const modulos = novo ? [] : modulosDoUsuario(usuario);
             const lista = chave => Array.isArray(usuario[chave]) ? usuario[chave].join(', ') : (usuario[chave] || '');
-            return `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs max-h-[65vh] overflow-y-auto p-1">
+            return `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs p-1">
                 <div><label for="usuario-nome" class="block font-bold mb-1">Nome completo</label><input id="usuario-nome" value="${esc(usuario.nome || '')}" required maxlength="150" class="${cls}"></div>
                 <div><label for="usuario-email" class="block font-bold mb-1">E-mail de acesso</label><input id="usuario-email" type="email" value="${esc(usuario.email || '')}" required ${!novo && usuario.email ? 'readonly' : ''} class="${cls}">${!novo ? '<p class="mt-1 text-slate-500">Alterações no e-mail de acesso exigem ajuste no Firebase Authentication.</p>' : ''}</div>
                 <div><label for="usuario-tipo" class="block font-bold mb-1">Tipo de usuário</label><select id="usuario-tipo" required class="${cls}"><option value="">Selecione</option><option value="interno" ${usuario.tipoUsuario === 'interno' ? 'selected' : ''}>Interno - GRGD</option><option value="externo" ${usuario.tipoUsuario === 'externo' ? 'selected' : ''}>Externo</option></select></div>
@@ -788,11 +1008,18 @@
                 <div><label for="usuario-orgao" class="block font-bold mb-1">Cliente / Secretaria</label><input id="usuario-orgao" value="${esc(usuario.orgao || '')}" class="${cls}"></div>
                 <div><label for="usuario-tags" class="block font-bold mb-1">Tags / Categorias (separe por vírgula)</label><input id="usuario-tags" value="${esc(lista('tags'))}" class="${cls}"></div>
                 <div><label for="usuario-grupos" class="block font-bold mb-1">Grupos de eventos</label><select id="usuario-grupos" multiple class="${cls}" aria-describedby="usuario-grupos-ajuda">${[...new Map([...dbData.grupos.map(g => [String(g.firestoreId || g.id), g.nome || g.id]), ...(Array.isArray(usuario.grupos) ? usuario.grupos : []).map(id => [id, dbData.grupos.find(g => String(g.firestoreId || g.id) === id)?.nome || id])]).entries()].map(([id,nome]) => `<option value="${esc(id)}" ${(usuario.grupos || []).includes(id) ? 'selected' : ''}>${esc(nome)}</option>`).join('')}</select><p id="usuario-grupos-ajuda" class="text-slate-500 mt-1">Use Ctrl ou Command para selecionar vários.</p></div>
-                <fieldset class="md:col-span-2 border rounded-lg p-3"><legend class="font-bold px-1">Módulos permitidos</legend><p id="usuario-permissoes-ajuda" class="text-slate-500 mb-2"></p><div class="grid grid-cols-2 gap-2">${MÓDULOS_SISTEMA.filter(m => m.id !== 'usuarios').map(m => `<label class="flex items-center gap-2"><input type="checkbox" name="usuario-modulo" value="${m.id}" ${modulos.includes(m.id) ? 'checked' : ''}>${m.nome}</label>`).join('')}</div></fieldset>
+                <fieldset class="md:col-span-2 border rounded-lg p-3"><legend class="font-bold px-1">Módulos do acesso anterior</legend><p id="usuario-permissoes-ajuda" class="text-slate-500 mb-2"></p><div class="grid grid-cols-2 gap-2">${MÓDULOS_SISTEMA.filter(m => m.id !== 'usuarios' && !MODULOS_PORTAL.includes(m.id)).map(m => `<label class="flex items-center gap-2"><input type="checkbox" name="usuario-modulo" value="${m.id}" ${modulos.includes(m.id) ? 'checked' : ''}>${m.nome}</label>`).join('')}</div></fieldset>
+                ${camposVinculo(usuario)}
                 ${novo ? `<div class="md:col-span-2"><label for="usuario-senha" class="block font-bold mb-1">Senha inicial de acesso (mínimo 8 caracteres)</label><input id="usuario-senha" type="password" autocomplete="new-password" minlength="8" required class="${cls}"><p class="text-slate-500 mt-1">A senha é enviada apenas ao Firebase Authentication. Não é gravada no cadastro.</p></div>` : `<p class="md:col-span-2 text-slate-500">Identificador do cadastro: ${esc(uidCadastro(usuario))}. A inativação bloqueia o acesso e preserva os vínculos anteriores.</p>`}
             </div>`;
         }
         function atualizarControlesUsuario() {
+            const papel=document.getElementById('vinculo-papel');
+            if(papel && !document.getElementById('vinculo-acoes').dataset.inicializado){
+                const anterior=dbData.usuarios.find(u=>uidCadastro(u)===document.getElementById('edit-doc-id').value)?.acessoInstitucional;
+                atualizarCamposVinculo(anterior?.acoes||[]);
+                document.getElementById('vinculo-acoes').dataset.inicializado='true';
+            }
             const tipo = document.getElementById('usuario-tipo');
             const perfil = document.getElementById('usuario-perfil');
             if (!tipo || !perfil) return;
@@ -802,9 +1029,9 @@
             const admin = !externo && perfil.value === 'admin';
             document.querySelectorAll('input[name="usuario-modulo"]').forEach(cb => {
                 if (externo && cb.value !== 'eventos') cb.checked = false;
-                cb.disabled = admin || (externo && cb.value !== 'eventos');
+                cb.disabled = admin || !!papel?.value || (externo && cb.value !== 'eventos');
             });
-            document.getElementById('usuario-permissoes-ajuda').textContent = admin
+            document.getElementById('usuario-permissoes-ajuda').textContent = papel?.value ? 'O vínculo institucional define o acesso pelas ações aprovadas abaixo. Os módulos antigos não concedem privilégios adicionais.' : admin
                 ? 'Administrador: acesso e edição em todos os módulos, incluindo Usuários.'
                 : externo ? 'Externo: sem acesso interno. A consulta a eventos pode ser liberada; as demais permissões externas serão definidas depois.'
                 : 'Consulta nos módulos selecionados. Alterações nos dados são exclusivas do perfil Administrador. Internos ativos aparecem como responsáveis GRGD.';
@@ -824,11 +1051,15 @@
             if (anterior.email && email !== anterior.email.toLowerCase()) throw new Error('Altere o e-mail pelo fluxo do Firebase Authentication.');
             const selecionados = Array.from(document.querySelectorAll('input[name="usuario-modulo"]:checked')).map(cb => cb.value);
             if (selecionados.some(id => !MÓDULOS_SISTEMA.some(m => m.id === id) || id === 'usuarios' || (tipoUsuario === 'externo' && id !== 'eventos'))) throw new Error('Módulo não permitido para este usuário.');
-            const modulosPermitidos = perfil === 'admin' ? MÓDULOS_SISTEMA.map(m => m.id) : [...new Set(selecionados)];
+            const modulosPermitidos = perfil === 'admin' ? MÓDULOS_SISTEMA.map(m => m.id).filter(id=>!MODULOS_PORTAL.includes(id)) : [...new Set(selecionados)];
             const tagsTexto = val('usuario-tags');
             const tags = Array.isArray(anterior.tags) && tagsTexto === anterior.tags.join(', ') ? anterior.tags : tagsTexto.split(',').map(t => t.trim()).filter(Boolean);
             const grupos = Array.from(document.getElementById('usuario-grupos')?.selectedOptions || []).map(o => o.value);
-            return {nome, email, tipoUsuario, ativo, perfil, modulosPermitidos, orgao: val('usuario-orgao'), tags, grupos};
+            const acessoInstitucional=lerVinculoInstitucional(anterior);
+            if(acessoInstitucional&&perfil==='admin')throw new Error('O administrador não deve acumular um papel institucional neste formulário.');
+            if(acessoInstitucional?.papel==='grgd'&&tipoUsuario!=='interno')throw new Error('Equipe GRGD exige tipo Interno - GRGD.');
+            return {nome, email, tipoUsuario, ativo, perfil, modulosPermitidos, orgao: val('usuario-orgao'), tags, grupos,
+                ...(acessoInstitucional?{acessoInstitucional}:{})};
         }
 
         let cadastroUsuarioEmAndamento = false;
@@ -917,7 +1148,7 @@
             if (avatar) avatar.innerHTML = currentUser ? avatarUsuario(currentUser,'md') : '';
             if (!currentUser) return;
             document.getElementById('user-name-display').textContent = currentUser.nome || currentUser.email;
-            document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
+            document.getElementById('user-role-display').textContent = nomePerfilAcesso() + ' • ' + nomeOrgaoUsuario(currentUser);
         }
         function mensagemPerfil(texto, erro = false, senha = false) {
             const el = document.getElementById(senha ? 'perfil-senha-msg' : 'perfil-msg');
@@ -1256,7 +1487,7 @@
         function atualizarVisibilidadeAbas() {
             verificarAutenticacaoObrigatoria();
             document.body?.setAttribute('data-admin', String(ehAdministrador()));
-            document.getElementById('detalhe-area-admin')?.classList.toggle('hidden', !ehAdministrador());
+            document.getElementById('detalhe-area-admin')?.classList.toggle('hidden', !podeAlterarColecao(document.getElementById('edit-colecao').value));
             document.getElementById('btn-excluir-registro').disabled = !ehAdministrador();
             if (!ehAdministrador()) {
                 document.getElementById('modal-historico-alteracoes')?.classList.add('hidden');
@@ -1269,15 +1500,15 @@
             
             MÓDULOS_SISTEMA.forEach(mod => {
                 const btnTab = document.querySelector(`[data-tab="${mod.id}"]`);
-                if (btnTab) btnTab.style.display = permitidos.includes(mod.id) ? 'inline-flex' : 'none';
+                if (btnTab) {btnTab.classList.remove('hidden');btnTab.style.display = permitidos.includes(mod.id) ? 'inline-flex' : 'none';}
             });
             document.querySelectorAll('.btn-admin-only').forEach(btn => {
-                if (isAdmin) btn.classList.remove('hidden'); else btn.classList.add('hidden');
+                const pode=btn.dataset.acao ? podeAcao(...btn.dataset.acao.split('.')) : isAdmin;btn.classList.toggle('hidden',!pode);
             });
-            document.querySelectorAll('.input-data-demanda, .select-diaselect-demanda, .select-modalidade-gestor, #obs-novo-texto').forEach(el => { el.disabled = !isAdmin; });
+            document.querySelectorAll('.input-data-demanda, .select-diaselect-demanda, .select-modalidade-gestor, #obs-novo-texto').forEach(el => { el.disabled = !podeAlterarColecao(el.matches?.('.select-modalidade-gestor')?'orgaos':'demandas'); });
 
             const badgePerfil = document.getElementById('badge-perfil-acesso');
-            if (badgePerfil) badgePerfil.textContent = 'PERFIL: ' + (currentUser.perfil || 'comum').toUpperCase() + ' | CLIENTE: ' + (currentUser.orgao || 'GERAL');
+            if (badgePerfil) badgePerfil.textContent = nomePerfilAcesso() + ' | ' + nomeOrgaoUsuario(currentUser);
 
             if (!permitidos.includes(abaAtual)) mudarAba(permitidos[0] || '');
             document.getElementById('aviso-sem-modulos')?.classList.toggle('hidden', permitidos.length > 0);
@@ -1295,6 +1526,7 @@
             if (aba === 'dashboard') renderCharts();
             if (aba === 'demandas') renderDemandas();
             if (aba === 'clientes') renderClientes();
+            if (MODULOS_PORTAL.includes(aba))renderPortalInstitucional();
             if (aba === 'eventos') renderEventos();
             if (aba === 'locais') renderLocais();
             if (aba === 'fornecedores') renderFornecedores();
@@ -1327,7 +1559,7 @@
         }
 
         function assinaturaAcesso(usuario) {
-            return JSON.stringify([usuario?.ativo !== false, ehAdministrador(usuario), usuario?.tipoUsuario || '', modulosDoUsuario(usuario), usuario?.grupos || []]);
+            return JSON.stringify([usuario?.ativo !== false, ehAdministrador(usuario), usuario?.tipoUsuario || '', modulosDoUsuario(usuario), usuario?.grupos || [],usuario?.acessoInstitucional || null]);
         }
 
         function iniciarSnapshotFirestore() {
@@ -1335,6 +1567,10 @@
             eventosCacheMap = {};
             if (!currentUser) return;
             const modulos = modulosDoUsuario();
+            programarRevisaoAcesso();
+            if(ehAdministrador())snapshotUnsubs.push(observarFirestore(collection(db,'setores'),snap=>{dbData.setores=snap.docs.map(d=>({...d.data(),id:d.id}));renderGestaoSetores();preencherFiltrosUsuarios();}));
+            else if(portalInstitucional()&&acessoInstitucionalAtivo())observarPortal('setores',query(collection(db,'setores'),where('orgaoId','==',currentUser.acessoInstitucional.orgaoId)));
+            if(portalInstitucional())iniciarPortalInstitucional();
             const colecoes = {demandas:'demandas', locais:'locais', orgaos:'clientes', fornecedores:'fornecedores', bases:'bases'};
             Object.entries(colecoes).filter(([,modulo]) => modulos.includes(modulo)).forEach(([col]) => {
                 snapshotUnsubs.push(observarFirestore(collection(db, col), snap => {
@@ -1351,23 +1587,25 @@
                 }));
             }
             agendaLocaisEstado=modulos.includes('eventos')?'carregando':'sem-acesso';
-            if (modulos.includes('eventos')) {
-                const ref = admin ? collection(db,'eventos') : query(collection(db,'eventos'), where('eventoPublico','==',true));
+            if (modulos.includes('eventos') && !portalInstitucional()) {
+                const ref = (admin || (currentUser.acessoInstitucional?.papel==='grgd' && podeAcao('eventos'))) ? collection(db,'eventos') : query(collection(db,'eventos'), where('eventoPublico','==',true));
                 snapshotUnsubs.push(observarFirestore(ref, snap => {
                     agendaLocaisEstado=admin?'completa':'parcial';
                     atualizarEventosVisiveis(snap.docs.map(d => ({...d.data(), firestoreId: d.id, id: d.data().id || d.id})));
                 }, err=>{agendaLocaisEstado='erro';dbData.eventos=[];eventosCacheMap={};renderLocais();renderEventos();renderDashboardKPIs();atualizarContadoresAbas();console.warn('Agenda de locais:',err.message);}));
-                const inscricoes = admin ? collection(db,'inscricoes') : query(collection(db,'inscricoes'), where('uid','==',currentUser.uid));
+                if(admin || !possuiVinculo() || (currentUser.acessoInstitucional?.papel==='grgd' && podeAcao('relatorios'))) {
+                const inscricoes = (admin || podeAcao('relatorios')) ? collection(db,'inscricoes') : query(collection(db,'inscricoes'), where('uid','==',currentUser.uid));
                 snapshotUnsubs.push(observarFirestore(inscricoes, snap => {
                     dbData.inscricoes = snap.docs.map(d => ({...d.data(), firestoreId:d.id, id:d.data().id || d.id}));
                     renderEventos();
                 }));
+                }
             }
             if (admin) snapshotUnsubs.push(observarFirestore(collection(db,'grupos'), snap => {
                 dbData.grupos = snap.docs.map(d => ({...d.data(), firestoreId:d.id, id:d.data().id || d.id}));
                 renderGrupos(); renderUsuarios();
             }));
-            if (modulos.length && !admin) {
+            if (modulos.length && !admin && !portalInstitucional()) {
                 const identidades = query(collection(db,'identidadesUsuarios'),where('tipoUsuario','==','interno'),where('ativo','==',true));
                 snapshotUnsubs.push(observarFirestore(identidades,snap => {
                     identidadesUsuarios = snap.docs.map(d => ({...d.data(),uid:d.id})); renderizarTudo();
@@ -1382,7 +1620,7 @@
                     iniciarSnapshotFirestore();
                 } else currentUser = atualizado;
                 document.getElementById('user-name-display').textContent = currentUser.nome || currentUser.email;
-                document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
+                document.getElementById('user-role-display').textContent = nomePerfilAcesso() + ' • ' + nomeOrgaoUsuario(currentUser);
                 renderizarTudo();
             }, () => { bloquearSessao('Não foi possível confirmar suas permissões. Entre novamente.'); }));
             if (currentUser.uid) snapshotUnsubs.push(observarFirestore(doc(db,'usuarios',currentUser.uid,'privado','perfil'),snap => {
@@ -1396,7 +1634,7 @@
 
         function renderizarTudo() {
             atualizarIdentidadeSessao();
-            renderUsuarios(); renderClientes(); renderBases(); renderDemandas(); renderEventos(); renderLocais(); renderFornecedores(); renderDashboardKPIs(); preencherSelectClientes(); atualizarVisibilidadeAbas(); preencherFiltrosUsuarios(); renderGrupos(); atualizarContadoresAbas();
+            renderPortalInstitucional();renderGestaoSetores();renderUsuarios(); renderClientes(); renderBases(); renderDemandas(); renderEventos(); renderLocais(); renderFornecedores(); renderDashboardKPIs(); preencherSelectClientes(); atualizarVisibilidadeAbas(); preencherFiltrosUsuarios(); renderGrupos(); atualizarContadoresAbas();
             if (abaAtual === 'dashboard') renderCharts();
         }
 
@@ -1428,14 +1666,15 @@
             const selectOrgao = document.getElementById('filtro-orgao-usuario');
             if (selectOrgao) {
                 const valorAtual = selectOrgao.value;
-                const orgaos = [...new Set(dbData.usuarios.filter(u => u.excluido !== true).map(u => u.orgao).filter(Boolean))].sort();
+                const orgaos = [...new Set(dbData.usuarios.filter(u => u.excluido !== true).map(chaveOrgaoUsuario).filter(Boolean))].sort();
                 selectOrgao.innerHTML = '<option value="">Filtrar por Cliente / Secretaria</option>';
                 orgaos.forEach(orgao => {
                     const opt = document.createElement('option');
-                    opt.value = orgao; opt.textContent = orgao; selectOrgao.appendChild(opt);
+                    opt.value = orgao; opt.textContent = dbData.orgaos.find(o=>String(o.firestoreId||o.id)===orgao)?.sigla||orgao; selectOrgao.appendChild(opt);
                 });
                 selectOrgao.value = valorAtual;
             }
+            const setorSelect=document.getElementById('filtro-setor-usuario');if(setorSelect){const antigo=setorSelect.value;setorSelect.innerHTML='<option value="">Todos os setores</option>'+(dbData.setores||[]).map(s=>`<option value="${esc(s.id)}">${esc(s.nome)} - ${esc(s.orgaoId)}</option>`).join('');setorSelect.value=antigo;}
             const selectTag = document.getElementById('filtro-tag-usuario');
             if (selectTag) {
                 const valAtual = selectTag.value;
@@ -1454,15 +1693,17 @@
             const us = dbData.usuarios.filter(u => {
                 if (u.excluido === true) return false;
                 const matchTag = !filtroTagAtual || (u.tags || []).includes(filtroTagAtual);
-                const matchOrgao = !filtroOrgaoUsuarioAtual || u.orgao === filtroOrgaoUsuarioAtual;
+                const matchOrgao = !filtroOrgaoUsuarioAtual || chaveOrgaoUsuario(u) === filtroOrgaoUsuarioAtual;
                 const matchBusca = !buscaUsuariosVal || (u.nome || '').toLowerCase().includes(buscaUsuariosVal) || (u.email || '').toLowerCase().includes(buscaUsuariosVal);
                 const matchTipo = !filtroTipoUsuarioAtual || (filtroTipoUsuarioAtual === 'legado' ? !['interno','externo'].includes(u.tipoUsuario) : u.tipoUsuario === filtroTipoUsuarioAtual);
-                return matchTag && matchOrgao && matchBusca && matchTipo;
+                const setor=(dbData.setores||[]).find(s=>s.id===filtroSetorUsuarioAtual),v=u.acessoInstitucional;
+                const matchSetor=!filtroSetorUsuarioAtual||(!!setor&&v?.orgaoId===setor.orgaoId&&(!v.setoresIds.length||v.setoresIds.includes(setor.id)));
+                return matchTag && matchOrgao && matchBusca && matchTipo && matchSetor;
             });
             document.getElementById('count-usuarios').textContent = us.length;
             tbody.innerHTML = us.map(u => {
                 const audit = renderAuditInfo(u);
-                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${identificacaoUsuario({...u,uid:uidCadastro(u)})}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4 text-xs"><b>${nomeTipoUsuario(u)}</b><br>${u.ativo === false ? 'Inativo' : 'Ativo'}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(u.orgao || 'ATI')}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(', ') : u.tags || '-')}</td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.perfil || 'comum')}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button>${ehAdministrador() ? `<button type="button" class="ml-1 text-xs bg-blue-100 px-2.5 py-1 rounded font-semibold text-blue-900" data-usuario-editar="${esc(u.firestoreId)}">Editar</button><button type="button" class="ml-1 text-xs bg-red-50 px-2.5 py-1 rounded font-semibold text-red-700" data-usuario-excluir="${esc(u.firestoreId)}" ${uidCadastro(u) === currentUser?.uid ? 'disabled title="Você não pode excluir a própria conta"' : ''}>Excluir</button>` : ''}</td></tr>`;
+                return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${identificacaoUsuario({...u,uid:uidCadastro(u)})}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4 text-xs"><b>${nomeTipoUsuario(u)}</b><br>${u.ativo === false ? 'Inativo' : 'Ativo'}</td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(nomeOrgaoUsuario(u))}${u.acessoInstitucional?'<small class="block mt-1 font-normal">'+esc(u.acessoInstitucional.setoresIds.map(id=>dbData.setores.find(s=>s.id===id)?.nome||id).join(', ')||'Órgão integral')+'</small>':''}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(', ') : u.tags || '-')}</td><td class="p-4"><span class="bg-${u.perfil === 'admin' ? 'emerald' : 'amber'}-100 font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.acessoInstitucional?nomePerfilAcesso(u):u.perfil||'comum')}${u.acessoInstitucional?'<small class="block normal-case font-normal mt-1">'+esc(situacaoVinculo(u))+'</small>':''}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button>${ehAdministrador() ? `<button type="button" class="ml-1 text-xs bg-blue-100 px-2.5 py-1 rounded font-semibold text-blue-900" data-usuario-editar="${esc(u.firestoreId)}">Editar</button><button type="button" class="ml-1 text-xs bg-red-50 px-2.5 py-1 rounded font-semibold text-red-700" data-usuario-excluir="${esc(u.firestoreId)}" ${uidCadastro(u) === currentUser?.uid ? 'disabled title="Você não pode excluir a própria conta"' : ''}>Excluir</button>` : ''}</td></tr>`;
             }).join('') || '<tr><td colspan="9" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';
         }
 
@@ -1528,7 +1769,7 @@
                         <div class="text-[10px] text-slate-500 font-normal">Gestor do Órgão</div>
                     </td>
                     <td class="p-3">
-                        <select ${ehAdministrador() ? '' : 'disabled'} class="select-modalidade-gestor p-1.5 border rounded text-xs bg-white font-semibold text-blue-900 cursor-pointer" data-firestore-id="${esc(o.firestoreId)}" title="Escolha o gestor desejado">
+                        <select ${podeAlterarColecao('orgaos') ? '' : 'disabled'} class="select-modalidade-gestor p-1.5 border rounded text-xs bg-white font-semibold text-blue-900 cursor-pointer" data-firestore-id="${esc(o.firestoreId)}" title="Escolha o gestor desejado">
                             <option value="Órgão" ${modalidadeAtual==='Órgão'?'selected':''}>Gestor do Órgão</option>
                             <option value="NSI" ${modalidadeAtual==='NSI'?'selected':''}>Gestor do NSI</option>
                             <option value="Telemática" ${modalidadeAtual==='Telemática'?'selected':''}>Gestor de Telemática</option>
@@ -1613,13 +1854,13 @@
                     
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-1 flex-wrap">
-                            <input type="date" ${ehAdministrador() ? '' : 'disabled'} class="input-data-demanda p-1 border rounded text-xs bg-white font-medium text-blue-900 cursor-pointer shadow-sm" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Escolha uma data específica">
+                            <input type="date" ${podeAlterarColecao('demandas') ? '' : 'disabled'} class="input-data-demanda p-1 border rounded text-xs bg-white font-medium text-blue-900 cursor-pointer shadow-sm" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Escolha uma data específica">
                             ${badgeOutraSemanaHtml}
                         </div>
                     </td>
 
                     <td class="p-4 text-center">
-                        <select ${ehAdministrador() ? '' : 'disabled'} class="select-diaselect-demanda p-1 border rounded text-xs bg-white font-medium text-blue-900 cursor-pointer shadow-sm" data-firestore-id="${esc(d.firestoreId)}" title="Escolha o dia da semana">
+                        <select ${podeAlterarColecao('demandas') ? '' : 'disabled'} class="select-diaselect-demanda p-1 border rounded text-xs bg-white font-medium text-blue-900 cursor-pointer shadow-sm" data-firestore-id="${esc(d.firestoreId)}" title="Escolha o dia da semana">
                             <option value="" ${!diaSemanaVal ? 'selected' : ''}>-- Selecionar --</option>
                             <option value="segunda" ${diaSemanaVal==='segunda'?'selected':''}>Segunda</option>
                             <option value="terca" ${diaSemanaVal==='terca'?'selected':''}>Terça</option>
@@ -1774,8 +2015,8 @@
                     <div class="flex justify-between items-center"><span class="text-[10px] font-semibold opacity-75">${esc(d.solicitante || 'ATI')}</span><div class="scale-90 origin-right">${badgesResp}</div></div>
                     <div class="flex items-center justify-between gap-1 pt-1 bg-white/60 p-1 rounded border border-black/5 flex-wrap">
                         <span class="text-[10px] font-bold text-slate-700">Data/Dia:</span>
-                        <input type="date" ${ehAdministrador() ? '' : 'disabled'} class="input-data-demanda text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Data Específica">
-                        <select ${ehAdministrador() ? '' : 'disabled'} class="select-diaselect-demanda text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}" title="Dia da Semana">
+                        <input type="date" ${podeAlterarColecao('demandas') ? '' : 'disabled'} class="input-data-demanda text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}" value="${esc(dataVal)}" title="Data Específica">
+                        <select ${podeAlterarColecao('demandas') ? '' : 'disabled'} class="select-diaselect-demanda text-[10px] p-1 border rounded bg-white font-medium text-blue-900 cursor-pointer" data-firestore-id="${esc(d.firestoreId)}" title="Dia da Semana">
                             <option value="" ${!diaSemanaVal ? 'selected' : ''}>Dia</option>
                             <option value="segunda" ${diaSemanaVal==='segunda'?'selected':''}>Seg</option>
                             <option value="terca" ${diaSemanaVal==='terca'?'selected':''}>Ter</option>
@@ -1795,7 +2036,7 @@
             if (!grid) return;
             const agora = new Date();
             const gruposUser = currentUser?.grupos || [];
-            const visiveis = dbData.eventos.filter(e => e.eventoPublico || !(e.gruposPermitidos?.length) || e.gruposPermitidos.some(g => gruposUser.includes(g)));
+            const visiveis = dbData.eventos.filter(e => ehAdministrador() || (currentUser?.acessoInstitucional?.papel==='grgd'&&podeAcao('eventos')) || e.eventoPublico || !(e.gruposPermitidos?.length) || e.gruposPermitidos.some(g => gruposUser.includes(g)));
             const filtrados = visiveis.filter(e => {
                 const fim = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
                 const real = fim < agora;
@@ -1823,7 +2064,7 @@
                 const real = fim < agora;
                 const vagas = Number(e.limiteVagas || 0);
                 const idsEvento = [String(e.id), String(e.firestoreId || e.id)];
-                const inscritosReal = ehAdministrador() ? (dbData.inscricoes || []).filter(i => idsEvento.includes(String(i.eventId))).length : (Number.isFinite(e.inscritosCount) ? e.inscritosCount : null);
+                const inscritosReal = (ehAdministrador() || (currentUser?.acessoInstitucional?.papel==='grgd'&&podeAcao('relatorios'))) ? (dbData.inscricoes || []).filter(i => idsEvento.includes(String(i.eventId))).length : (Number.isFinite(e.inscritosCount) ? e.inscritosCount : null);
                 const lotado = vagas > 0 && inscritosReal !== null && inscritosReal >= vagas;
                 const minha = !!(dbData.inscricoes || []).some(i => idsEvento.includes(String(i.eventId)) && i.uid === currentUser?.uid);
                 const bannerImg = normalizarUrl(e.imagemCard);
@@ -1846,7 +2087,7 @@
                         </div>
                         <div class="pt-3 border-t mt-3 flex justify-between text-[11px] text-slate-500"><span>${audit.dataHtml}</span><span>Por: ${audit.autorHtml}</span></div>
                         <div class="mt-auto pt-4 flex flex-wrap gap-2 items-center">
-                            ${!minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.firestoreId || e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrever-se</button>` : ''}
+                            ${podeAcao('inscricoes','propria') && !minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.firestoreId || e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrever-se</button>` : ''}
                             <div class="flex items-center gap-1 ml-auto">
                                 ${isAdmin ? `<button type="button" data-relatorio-evento="${esc(e.id)}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-2.5 py-2 rounded-xl font-bold cursor-pointer" title="Relatório"><i class="fa-solid fa-file-excel"></i></button>` : ''}
                                 <button type="button" class="tr-detalhe border bg-white hover:bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-xl font-bold cursor-pointer" data-colecao="eventos" data-id="${esc(e.firestoreId || e.id)}">Detalhes</button>
@@ -1989,7 +2230,7 @@
             const historico=lista.filter(e=>{const p=intervaloEventoLocal(e);return !eventoCanceladoLocal(e) && (['realizado','realizada','concluido'].includes(normalizarLocal(e.status)) || (p && p.fim<hojeLocais()));});
             const info=(titulo,valor)=>'<div class="rounded-xl bg-slate-50 border p-3"><dt class="text-[10px] uppercase tracking-wide text-slate-500 font-bold">'+titulo+'</dt><dd class="text-sm mt-1 whitespace-pre-wrap">'+esc(valor ?? 'Não informado')+'</dd></div>';
             const extra=Object.entries(l).filter(([k])=>!['firestoreId','nome','endereco','capacidade','area','areaM2','valorAluguel','tipoLocacao','periodicidadeLocacao','contato','contatoResponsavel','telefone','emailContato','recursos','descricao'].includes(k));
-            box.innerHTML='<div class="flex flex-wrap justify-between items-start gap-3"><div><p class="text-[10px] text-blue-700 font-bold uppercase tracking-widest">Detalhes do espaço</p><h4 class="font-bold text-xl mt-1">'+esc(l.nome || 'Local sem nome')+'</h4></div><div class="flex gap-2">'+(ehAdministrador()?'<button type="button" data-local-editar="'+esc(idLocal(l))+'" class="border border-blue-200 bg-blue-50 text-blue-900 rounded-lg px-3 py-2 text-xs font-bold">Editar cadastro</button>':'')+'<button type="button" id="local-fechar-painel" class="border rounded-lg px-3 py-2 text-xs">Fechar</button></div></div>'+
+            box.innerHTML='<div class="flex flex-wrap justify-between items-start gap-3"><div><p class="text-[10px] text-blue-700 font-bold uppercase tracking-widest">Detalhes do espaço</p><h4 class="font-bold text-xl mt-1">'+esc(l.nome || 'Local sem nome')+'</h4></div><div class="flex gap-2">'+(podeAlterarColecao('locais')?'<button type="button" data-local-editar="'+esc(idLocal(l))+'" class="border border-blue-200 bg-blue-50 text-blue-900 rounded-lg px-3 py-2 text-xs font-bold">Editar cadastro</button>':'')+'<button type="button" id="local-fechar-painel" class="border rounded-lg px-3 py-2 text-xs">Fechar</button></div></div>'+
                 '<dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">'+info('Endereço',l.endereco || null)+info('Capacidade',numeroLocal(l.capacidade)===null?null:l.capacidade+' pessoas')+info('Área',l.area || (l.areaM2?l.areaM2+' m²':null))+info('Responsável / Contato',[l.contatoResponsavel,l.contato,l.telefone,l.emailContato].filter(Boolean).join('\n') || null)+info('Locação',(tipoLocacaoLocal(l)==='nao-informado'?'Tipo não informado':tipoLocacaoLocal(l)==='gratuito'?'Gratuito':'Pago')+' • '+valorLocacaoTexto(l)+(l.periodicidadeLocacao?' / '+l.periodicidadeLocacao:''))+info('Recursos disponíveis',recursosLocal(l).join(', ') || null)+'</dl>'+
                 '<p class="text-sm text-slate-600 whitespace-pre-wrap mt-4">'+esc(l.descricao || 'Descrição não informada.')+'</p>'+
                 '<div class="mt-5 pt-4 border-t"><h5 class="font-bold text-sm">Histórico de eventos</h5><p class="text-xs text-slate-500 mt-1">'+esc(textoAgendaLocais())+' Datas passadas sem status de realização exigem confirmação.</p><ul class="mt-3 space-y-2">'+historico.sort((a,b)=>(String(b.dataInicio || '')).localeCompare(String(a.dataInicio || ''))).map(ev=>'<li class="p-3 border rounded-xl bg-slate-50 text-xs"><b>'+esc(ev.titulo || ev.nome || 'Evento')+'</b><br>'+esc(dataEventoTextoLocal(ev))+'<br><span class="text-slate-500">'+(['realizado','realizada','concluido'].includes(normalizarLocal(ev.status))?'Realização registrada':'Data encerrada; realização a confirmar')+'</span></li>').join('')+'</ul>'+(historico.length?'':'<p class="text-xs text-slate-500 mt-3">Nenhum evento passado identificado entre os registros carregados.</p>')+'</div>'+
@@ -2141,6 +2382,7 @@
 
         function montarEdicaoEstruturada(colecao, item){
             const c = document.getElementById('edit-campos-dinamicos');
+            c.style.maxHeight=colecao==='usuarios'?'55vh':'';
             const common = (label,key,type='text',cls='',extraClass='') => `<div class="${cls}"><label class="block font-bold text-[11px] uppercase mb-1">${label}</label><input type="${type}" name="${key}" value="${esc(item[key] || '')}" class="w-full p-2 border rounded-lg text-xs bg-white ${extraClass}"></div>`;
             
             if (colecao === 'usuarios') { document.getElementById('form-univ-campos').innerHTML = ''; c.innerHTML = camposUsuario(item); atualizarControlesUsuario(); return; }
@@ -2393,22 +2635,26 @@
                         <div class="col-span-2"><b>Detalhes:</b> ${esc(item.descricao || '-')}</div>
                     </div>
                 `;
+            } else if(colecao === 'usuarios') {
+                const v=item.acessoInstitucional;
+                document.getElementById('detalhe-conteudo').innerHTML=`<div class="flex items-center gap-3">${avatarUsuario({...item,uid:uidCadastro(item)},'lg')}<div><h4 class="font-bold">${esc(item.nome||item.email)}</h4><p class="text-xs text-slate-500">${esc(item.email||'')}</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs"><p><b>Perfil:</b> ${esc(nomePerfilAcesso(item))}</p><p><b>Órgão:</b> ${esc(nomeOrgaoUsuario(item))}</p><p><b>Situação:</b> ${item.ativo===false?'Inativo':'Ativo'}${v?' · '+esc(situacaoVinculo(item)):''}</p><p><b>Identificador:</b> ${esc(uidCadastro(item))}</p>${v?`<p><b>Validade:</b> ${esc(new Date(v.fim).toLocaleDateString('pt-BR'))}</p><p><b>Revisão:</b> ${esc(new Date(v.revisao).toLocaleDateString('pt-BR'))}</p>`:''}</div>`;
             } else {
-                document.getElementById('detalhe-conteudo').innerHTML = (colecao === 'usuarios' ? `<div class="flex items-center gap-3">${avatarUsuario({...item,uid:uidCadastro(item)},'lg')}<b>${esc(item.nome || item.email)}</b></div>` : '') + Object.entries(item).filter(([k])=>!['firestoreId','fotoPerfil','ultimaAuditoriaId'].includes(k)).map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${['criadoPor','editadoPor'].includes(k) ? identificacaoUsuario({nome:v,uid:item[k+'Uid']}) : Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
+                document.getElementById('detalhe-conteudo').innerHTML = Object.entries(item).filter(([k])=>!['firestoreId','fotoPerfil','ultimaAuditoriaId'].includes(k)).map(([k,v])=>`<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${['criadoPor','editadoPor'].includes(k) ? identificacaoUsuario({nome:v,uid:item[k+'Uid']}) : Array.isArray(v)?esc(v.join(', ')):esc(v)}</span></div>`).join('');
             }
 
             if (colecao === 'demandas') document.getElementById('detalhe-conteudo').innerHTML += historicoDemandaHtml(item);
             if (colecao === 'eventos') document.getElementById('detalhe-conteudo').innerHTML += inscricoesEventoHtml(item);
             document.getElementById('btn-excluir-registro').textContent = colecao === 'usuarios' ? 'Excluir usuário' : 'Excluir registro';
             document.getElementById('btn-salvar-edicao').textContent = colecao === 'usuarios' ? 'Salvar usuário' : 'Salvar na Nuvem (Firestore)';
-            document.getElementById('detalhe-area-admin').classList.toggle('hidden', !ehAdministrador());
+            document.getElementById('detalhe-area-admin').classList.toggle('hidden', !podeAlterarColecao(colecao));
             document.getElementById('modal-detalhes').classList.remove('hidden');
         }
 
         async function salvarEdicaoAdmin(e){
-            e.preventDefault(); if(!ehAdministrador()){ alert('Somente administradores.'); return; }
+            e.preventDefault();
             const colecao = document.getElementById('edit-colecao').value;
             const firestoreId = document.getElementById('edit-doc-id').value;
+            if(!podeAlterarColecao(colecao)){alert('Ação não autorizada para este perfil.');return;}
             const form = e.target;
             const itemAntigo = dbData[colecao]?.find(i => String(i.firestoreId) === String(firestoreId) || String(i.id) === String(firestoreId)) || {};
             const agora = new Date().toISOString();
@@ -2478,7 +2724,7 @@
         }
 
         async function salvarNovaObservacao() {
-            if (!ehAdministrador()) { alert('Somente administradores podem registrar andamentos.'); return; }
+            if (!podeAlterarColecao('demandas')) { alert('Ação não autorizada para este perfil.'); return; }
             const demandaId = document.getElementById('obs-demanda-id').value;
             const texto = document.getElementById('obs-novo-texto').value.trim();
             if(!texto || !demandaId) return;
@@ -2577,6 +2823,8 @@
         async function salvarCadastroUniversal(e) {
             e.preventDefault();
             const tipo = document.getElementById('form-univ-tipo').value;
+            const col={usuario:'usuarios',cliente:'orgaos',demanda:'demandas',local:'locais',evento:'eventos',fornecedor:'fornecedores',base:'bases'}[tipo];
+            if(!col||!podeAlterarColecao(col,'criar'))return;
             const val = id => document.getElementById(id)?.value || '';
             const agora = new Date().toISOString();
             const autor = currentUser?.nome || currentUser?.email || 'Sistema';
@@ -2585,7 +2833,7 @@
                 if (tipo === 'usuario') {
                     await criarCadastroUsuario();
                 } else if (tipo === 'local' || tipo === 'evento') {
-                    if (!ehAdministrador()) throw new Error('Somente administradores podem cadastrar locais e eventos.');
+                    if (!podeAlterarColecao(tipo==='local'?'locais':'eventos','criar')) throw new Error('Ação não autorizada para este perfil.');
                     const dados=tipo==='local' ? lerCadastroLocal(true) : {titulo:val('uc-1').trim(),nome:val('uc-1').trim(),descricao:val('uc-2'),...lerAgendaEvento({},true)};
                     if(tipo==='evento' && !dados.titulo)throw new Error('Informe o título do evento.');
                     await adicionarComHistorico(collection(db,tipo==='local'?'locais':'eventos'),{...dados,criadoEm:agora,atualizadoEm:agora,criadoPor:autor,criadoPorUid:currentUser.uid,editadoPor:autor,editadoPorUid:currentUser.uid});
@@ -2773,6 +3021,7 @@
 
         function configurarInterface() {
             const byId = id => document.getElementById(id);
+            byId('form-setor')?.addEventListener('submit',salvarSetor);
             byId('form-confirmar-exclusao')?.addEventListener('submit',confirmarExclusao);
             byId('exclusao-cancelar')?.addEventListener('click',()=>cancelarExclusao());
             byId('btn-historico-alteracoes')?.addEventListener('click',abrirHistoricoAlteracoes);
@@ -2815,6 +3064,7 @@
             byId('busca-bases')?.addEventListener('input', e => { buscaBasesVal = e.target.value.toLowerCase().trim(); renderBases(); });
             byId('filtro-tipo-usuario')?.addEventListener('change', e => { filtroTipoUsuarioAtual = e.target.value; renderUsuarios(); });
             byId('filtro-tag-usuario')?.addEventListener('change', e => { filtroTagAtual = e.target.value; renderUsuarios(); });
+            byId('filtro-setor-usuario')?.addEventListener('change',e=>{filtroSetorUsuarioAtual=e.target.value;renderUsuarios();});
             byId('filtro-orgao-usuario')?.addEventListener('change', e => { filtroOrgaoUsuarioAtual = e.target.value; renderUsuarios(); });
             byId('busca-eventos')?.addEventListener('input', e => { buscaEventosVal = e.target.value.toLowerCase().trim(); renderEventos(); });
             byId('filtro-evento-futuros')?.addEventListener('click', () => { filtroEventoAtual = 'futuros'; renderEventos(); });
@@ -2853,9 +3103,14 @@
 
         document.addEventListener('change', async ev => {
             if (['usuario-tipo','usuario-perfil'].includes(ev.target.id)) atualizarControlesUsuario();
+            if(['vinculo-papel','vinculo-orgao','vinculo-setores','vinculo-inicio','vinculo-fim','vinculo-revisao','vinculo-titular'].includes(ev.target.id)||ev.target.name==='vinculo-acao'){
+                document.getElementById('vinculo-situacao').value='pendente';
+                document.getElementById('vinculo-grgd-ref').value='';document.getElementById('vinculo-autoridade-ref').value='';
+            }
+            if(['vinculo-papel','vinculo-orgao'].includes(ev.target.id)){atualizarCamposVinculo();if(ev.target.id==='vinculo-papel')atualizarControlesUsuario();}
             const inputData = ev.target.closest?.('.input-data-demanda');
             if (inputData) {
-                if (!ehAdministrador()) return;
+                if (!podeAlterarColecao('demandas')) return;
                 const firestoreId = inputData.getAttribute('data-firestore-id');
                 const novaData = inputData.value;
                 const demandaObj = dbData.demandas.find(x => String(x.firestoreId) === String(firestoreId) || String(x.id) === String(firestoreId));
@@ -2884,7 +3139,7 @@
 
             const selectDia = ev.target.closest?.('.select-diaselect-demanda');
             if (selectDia) {
-                if (!ehAdministrador()) return;
+                if (!podeAlterarColecao('demandas')) return;
                 const firestoreId = selectDia.getAttribute('data-firestore-id');
                 const novoDia = selectDia.value;
                 const demandaObj = dbData.demandas.find(x => String(x.firestoreId) === String(firestoreId) || String(x.id) === String(firestoreId));
@@ -2910,7 +3165,7 @@
 
             const selectMod = ev.target.closest?.('.select-modalidade-gestor');
             if (selectMod) {
-                if (!ehAdministrador()) return;
+                if (!podeAlterarColecao('orgaos')) return;
                 const firestoreId = selectMod.getAttribute('data-firestore-id');
                 const novaModalidade = selectMod.value;
                 const orgaoObj = dbData.orgaos.find(x => String(x.firestoreId) === String(firestoreId) || String(x.id) === String(firestoreId));
@@ -2980,7 +3235,7 @@
             const detalheLocal=ev.target.closest?.('[data-local-detalhes]');
             if(detalheLocal){selecionarLocal(detalheLocal.getAttribute('data-local-detalhes'));return;}
             const editarLocal=ev.target.closest?.('[data-local-editar]');
-            if(editarLocal){if(ehAdministrador())detalharRegistro('locais',editarLocal.getAttribute('data-local-editar'));return;}
+            if(editarLocal){if(podeAlterarColecao('locais'))detalharRegistro('locais',editarLocal.getAttribute('data-local-editar'));return;}
             if(ev.target.closest?.('#local-fechar-painel')){localSelecionadoId='';renderPainelLocal();return;}
             const btnDetalhes = ev.target.closest?.('.tr-detalhe');
             if (btnDetalhes) {
@@ -2992,7 +3247,7 @@
             const btnInscricao = ev.target.closest?.('[data-acao-inscricao]');
             if (btnInscricao) {
                 const eventId = btnInscricao.getAttribute('data-acao-inscricao');
-                if (!currentUser) return;
+                if (!podeAcao('inscricoes','propria')) return;
                 try {
                     await adicionarComHistorico(collection(db, 'inscricoes'), {
                         eventId: String(eventId),
@@ -3008,6 +3263,7 @@
         });
 
         function limparDadosSessao() {
+            if(acessoTimer)clearTimeout(acessoTimer);acessoTimer=null;portalErros={};
             currentUser = null;
             document.body?.setAttribute('data-admin','false');
             cancelarExclusao(true);
@@ -3022,11 +3278,11 @@
             dadosPessoaisPerfil = null; identidadesUsuarios = []; perfilEmEdicao = null; limparSenhasPerfil();
             ['perfil-nome','perfil-email','perfil-telefone','perfil-endereco','perfil-foto'].forEach(id => { document.getElementById(id).value = ''; });
             document.getElementById('perfil-foto-preview').innerHTML = '';
-            dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [] };
+            dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [], setores:[], colaboradores:[], auditoriaOrgao:[] };
             eventosCacheMap = {};
             buscaDemandasVal = buscaEventosVal = buscaLocaisVal = buscaClientesVal = buscaFornecedoresVal = buscaBasesVal = buscaUsuariosVal = '';
-            filtroTipoUsuarioAtual = filtroTagAtual = filtroOrgaoUsuarioAtual = filtroGestorModalidadeAtual = filtroSituacaoClienteAtual = filtroDemandaStatusAtual = filtroDemandaPrioAtual = '';
-            ['busca-demandas', 'busca-eventos', 'busca-locais', 'busca-clientes', 'busca-fornecedores', 'busca-bases', 'busca-usuarios', 'filtro-tipo-usuario', 'filtro-tag-usuario', 'filtro-orgao-usuario', 'filtro-gestor-modalidade', 'filtro-situacao-cliente', 'filtro-demanda-status', 'filtro-demanda-prio'].forEach(id => {
+            filtroTipoUsuarioAtual = filtroTagAtual = filtroOrgaoUsuarioAtual = filtroSetorUsuarioAtual = filtroGestorModalidadeAtual = filtroSituacaoClienteAtual = filtroDemandaStatusAtual = filtroDemandaPrioAtual = '';
+            ['busca-demandas', 'busca-eventos', 'busca-locais', 'busca-clientes', 'busca-fornecedores', 'busca-bases', 'busca-usuarios', 'filtro-tipo-usuario', 'filtro-tag-usuario', 'filtro-setor-usuario', 'filtro-orgao-usuario', 'filtro-gestor-modalidade', 'filtro-situacao-cliente', 'filtro-demanda-status', 'filtro-demanda-prio'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
@@ -3074,7 +3330,7 @@
                 }
                 currentUser = perfilCarregado;
                 document.getElementById('user-name-display').textContent = currentUser.nome || user.email;
-                document.getElementById('user-role-display').textContent = (currentUser.perfil || 'comum') + ' • ' + (currentUser.orgao || 'GERAL');
+                document.getElementById('user-role-display').textContent = nomePerfilAcesso() + ' • ' + nomeOrgaoUsuario(currentUser);
                 restaurarNavegacao();
                 atualizarVisibilidadeAbas(); iniciarSnapshotFirestore(); renderizarTudo();
                 finalizarRestauracao(); guardarNavegacao();

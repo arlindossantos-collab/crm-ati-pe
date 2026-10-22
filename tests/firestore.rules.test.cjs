@@ -5,6 +5,33 @@ const path = require('node:path');
 const {initializeTestEnvironment, assertSucceeds, assertFails} = require('@firebase/rules-unit-testing');
 const {doc, setDoc, getDoc, deleteDoc, updateDoc, collection, getDocs, query, where, writeBatch, serverTimestamp} = require('firebase/firestore');
 
+function institutionalAccess(extra={}) {
+    const agora=Date.now();
+    return {papel:'gestor_nsi',orgaoId:'orgao-a',setoresIds:['a1'],situacao:'aprovado',inicio:agora-60000,fim:agora+3600000,revisao:agora+1800000,
+        titularUid:'',acoes:['orgao.consultar','participantes.consultar','eventos.consultar','inscricoes.consultar'],
+        aprovacaoGrgd:{responsavel:'GRGD de teste',referencia:'G1'},aprovacaoAutoridade:{responsavel:'Autoridade de teste',referencia:'A1'},
+        registradoPorUid:'admin',registradoEm:new Date(),...extra};
+}
+async function seedInstitutional() {
+    const titular=profile('titular',{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:institutionalAccess()});
+    await env.withSecurityRulesDisabled(async ctx=>{
+        const f=ctx.firestore();
+        const rows={
+            'orgaos/orgao-a':{nome:'Órgão A fictício'},'orgaos/orgao-b':{nome:'Órgão B fictício'},
+            'setores/a1':{nome:'Setor A1',orgaoId:'orgao-a',ativo:true},'setores/a2':{nome:'Setor A2',orgaoId:'orgao-a',ativo:true},'setores/b1':{nome:'Setor B1',orgaoId:'orgao-b',ativo:true},
+            'usuarios/titular':titular,
+            'usuarios/sub':profile('sub',{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:institutionalAccess({papel:'substituto',titularUid:'titular',fim:titular.acessoInstitucional.fim-1000,revisao:titular.acessoInstitucional.revisao-1000})}),
+            'usuarios/auditor':profile('auditor',{modulosPermitidos:[],acessoInstitucional:institutionalAccess({papel:'auditoria',acoes:['auditoria.consultar','relatorios.consultar']})}),
+            'usuarios/operador':profile('operador',{modulosPermitidos:[],acessoInstitucional:institutionalAccess({papel:'grgd',orgaoId:'',setoresIds:[],acoes:['eventos.consultar','eventos.editar']})}),
+            'colaboradores/a1':{nome:'Participante A1',orgaoId:'orgao-a',setorId:'a1'},'colaboradores/a2':{nome:'Participante A2',orgaoId:'orgao-a',setorId:'a2'},'colaboradores/b1':{nome:'Participante B1',orgaoId:'orgao-b',setorId:'b1'},
+            'inscricoes/a1':{uid:'participante-sem-login',eventId:'e1',orgaoId:'orgao-a',setorId:'a1'},'inscricoes/b1':{uid:'titular',eventId:'e1',orgaoId:'orgao-b',setorId:'b1'},
+            'historicoAlteracoes/a1':{orgaoId:'orgao-a',setorId:'a1',autorUid:'admin',acao:'editar'},'historicoAlteracoes/b1':{orgaoId:'orgao-b',setorId:'b1',autorUid:'admin',acao:'editar'}
+        };
+        await Promise.all(Object.entries(rows).map(([p,data])=>setDoc(doc(f,p),data)));
+    });
+    return titular;
+}
+
 // Somente projeto demo e emulador local. Nunca inicializar com o projeto da produção.
 const projectId = 'demo-prgd-usuarios';
 let env;
@@ -281,4 +308,134 @@ test('registro de troca de senha exige a própria conta com autenticação recen
     await assertFails(setDoc(doc(collection(db('interno',0),'historicoAlteracoes')),data));
     await assertFails(setDoc(doc(collection(db('interno'),'historicoAlteracoes')),{...data,registroId:'outro'}));
     await assertFails(setDoc(doc(collection(db('interno'),'historicoAlteracoes')),{...data,senha:'valor-secreto'}));
+});
+
+test('NSI lê somente o órgão e os setores aprovados, inclusive por ID e consulta',async()=>{
+    await seedInstitutional();const f=db('titular');
+    await assertSucceeds(getDoc(doc(f,'orgaos','orgao-a')));
+    await assertFails(getDoc(doc(f,'orgaos','orgao-b')));
+    await assertSucceeds(getDoc(doc(f,'colaboradores','a1')));
+    await assertFails(getDoc(doc(f,'colaboradores','a2')));
+    await assertFails(getDoc(doc(f,'colaboradores','b1')));
+    await assertFails(getDocs(collection(f,'colaboradores')));
+    const q=query(collection(f,'colaboradores'),where('orgaoId','==','orgao-a'),where('setorId','in',['a1']));
+    const result=await assertSucceeds(getDocs(q));assert.equal(result.size,1);
+    await assertFails(getDocs(query(collection(f,'colaboradores'),where('orgaoId','==','orgao-a'))));
+    await assertFails(getDocs(collection(f,'usuarios')));
+});
+test('inscrição institucional distingue participante e operador e não usa UID para escapar do escopo',async()=>{
+    await seedInstitutional();const f=db('titular');
+    await assertSucceeds(getDoc(doc(f,'inscricoes','a1')));
+    await assertFails(getDoc(doc(f,'inscricoes','b1')));
+    await assertFails(setDoc(doc(f,'inscricoes','nova'),{uid:'titular',eventId:'e1'}));
+    await assertFails(setDoc(doc(f,'colaboradores','novo'),{nome:'Novo',orgaoId:'orgao-a',setorId:'a1'}));
+});
+test('autenticação não supera aprovação pendente, falta de referência, expiração ou revisão vencida',async()=>{
+    await seedInstitutional();
+    for(const extra of [{situacao:'pendente'},{situacao:'suspenso'},{fim:Date.now()-1},{revisao:Date.now()-1},{aprovacaoAutoridade:{responsavel:'Nome',referencia:''}},{aprovacaoGrgd:{responsavel:'Nome',referencia:''}}]){
+        await env.withSecurityRulesDisabled(ctx=>updateDoc(doc(ctx.firestore(),'usuarios','titular'),{acessoInstitucional:institutionalAccess(extra)}));
+        await assertFails(getDoc(doc(db('titular'),'colaboradores','a1')));
+        await assertFails(getDoc(doc(db('titular'),'eventos','e1')));
+    }
+});
+test('substituto fica limitado ao titular e perde acesso quando o titular é suspenso',async()=>{
+    await seedInstitutional();const f=db('sub');
+    await assertSucceeds(getDoc(doc(f,'colaboradores','a1')));
+    await assertFails(getDoc(doc(f,'colaboradores','a2')));
+    await env.withSecurityRulesDisabled(ctx=>updateDoc(doc(ctx.firestore(),'usuarios','titular'),{'acessoInstitucional.situacao':'suspenso'}));
+    await assertFails(getDoc(doc(f,'colaboradores','a1')));
+    await assertFails(getDoc(doc(f,'eventos','e1')));
+});
+test('auditoria é leitura no escopo, sem escrita de logs, acesso a participantes ou concessão de privilégios',async()=>{
+    await seedInstitutional();const f=db('auditor');
+    await assertSucceeds(getDoc(doc(f,'historicoAlteracoes','a1')));
+    await assertFails(getDoc(doc(f,'historicoAlteracoes','b1')));
+    await assertFails(getDocs(collection(f,'historicoAlteracoes')));
+    await assertSucceeds(getDocs(query(collection(f,'historicoAlteracoes'),where('orgaoId','==','orgao-a'),where('setorId','in',['a1']))));
+    await assertSucceeds(getDoc(doc(f,'inscricoes','a1')));
+    await assertFails(getDoc(doc(f,'colaboradores','a1')));
+    await assertFails(setDoc(doc(f,'historicoAlteracoes','forjado'),{orgaoId:'orgao-a',setorId:'a1',autorUid:'auditor',acao:'editar'}));
+    await assertFails(updateDoc(doc(f,'usuarios','auditor'),{perfil:'admin'}));
+});
+test('GRGD pode editar evento autorizado sem receber criação, exclusão, usuários ou outros módulos',async()=>{
+    await seedInstitutional();const f=db('operador');
+    await assertSucceeds(getDoc(doc(f,'eventos','restrito')));
+    await assertSucceeds(updateDoc(doc(f,'eventos','e1'),{titulo:'Atualizado pela GRGD'}));
+    await assertFails(setDoc(doc(f,'eventos','novo'),{titulo:'Não permitido'}));
+    await assertFails(deleteDoc(doc(f,'eventos','e1')));
+    await assertFails(updateDoc(doc(f,'demandas','d1'),{titulo:'Não permitido'}));
+    await assertFails(updateDoc(doc(f,'usuarios','outro'),{perfil:'admin'}));
+});
+test('administrador registra vínculo com duas aprovações, órgão real e metadados do autor',async()=>{
+    await seedInstitutional();const f=db('admin');
+    const v=institutionalAccess({registradoEm:serverTimestamp()});
+    await assertSucceeds(setDoc(doc(f,'usuarios','novo-nsi'),profile('novo-nsi',{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:v})));
+    for(const extra of [{aprovacaoAutoridade:{responsavel:'Nome',referencia:''}},{aprovacaoGrgd:{responsavel:'Nome',referencia:''}},{orgaoId:'inexistente'},{setoresIds:['b1']},{acoes:['usuarios.editar']},{registradoPorUid:'outro'}]){
+        await assertFails(setDoc(doc(f,'usuarios','novo-negado'),profile('novo-negado',{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:{...v,...extra}})));
+    }
+    await assertFails(updateDoc(doc(f,'usuarios','novo-nsi'),{acessoInstitucional:null,modulosPermitidos:['eventos']}));
+    await assertFails(updateDoc(doc(db('novo-nsi'),'usuarios','novo-nsi'),{'acessoInstitucional.acoes':['usuarios.editar']}));
+});
+test('aprovação de substituto não pode ampliar setores, ações, órgão ou validade do titular',async()=>{
+    const titular=await seedInstitutional();const f=db('admin');
+    const v=institutionalAccess({papel:'substituto',titularUid:'titular',fim:titular.acessoInstitucional.fim-1000,revisao:titular.acessoInstitucional.revisao-1000,registradoEm:serverTimestamp()});
+    await assertSucceeds(setDoc(doc(f,'usuarios','sub-novo'),profile('sub-novo',{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:v})));
+    for(const extra of [{setoresIds:[]},{setoresIds:['a2']},{orgaoId:'orgao-b',setoresIds:[]},{fim:titular.acessoInstitucional.fim+1000},{inicio:titular.acessoInstitucional.inicio-1000},{revisao:titular.acessoInstitucional.revisao+1000},{acoes:['participantes.editar']}]){
+        await assertFails(setDoc(doc(f,'usuarios','sub-negado'),profile('sub-negado',{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:{...v,...extra}})));
+    }
+});
+
+test('cadastro com cinco setores e identidade pública é confirmado junto da auditoria',async()=>{
+    await seedInstitutional();
+    await env.withSecurityRulesDisabled(async ctx=>{const f=ctx.firestore();for(const id of ['a3','a4','a5'])await setDoc(doc(f,'setores',id),{nome:id,orgaoId:'orgao-a',ativo:true});});
+    const f=db('admin'),batch=writeBatch(f),uid='nsi-cinco';
+    const pessoa=profile(uid,{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:institutionalAccess({setoresIds:['a1','a2','a3','a4','a5'],registradoEm:serverTimestamp()})});
+    batch.set(doc(f,'usuarios',uid),pessoa);
+    batch.set(doc(f,'identidadesUsuarios',uid),{uid,nome:uid,fotoPerfil:'',tipoUsuario:'externo',ativo:true});
+    batch.set(doc(f,'historicoAlteracoes','aprovacao-cinco'),{autorUid:'admin',autorNome:'admin',criadoEm:serverTimestamp(),colecao:'usuarios',registroId:uid,registroNome:uid,acao:'criar',campos:['acessoInstitucional']});
+    await assertSucceeds(batch.commit());
+});
+
+test('NSI e auditoria não recebem o diretório interno de identidades da GRGD',async()=>{
+    await seedInstitutional();
+    for(const uid of ['titular','auditor']){
+        await assertFails(getDoc(doc(db(uid),'identidadesUsuarios','outro')));
+        await assertFails(getDocs(query(collection(db(uid),'identidadesUsuarios'),where('tipoUsuario','==','interno'),where('ativo','==',true))));
+    }
+    await assertSucceeds(getDoc(doc(db('operador'),'identidadesUsuarios','outro')));
+});
+
+test('escopo da auditoria corresponde ao registro alterado e não aceita atribuição a outro órgão',async()=>{
+    await seedInstitutional();const f=db('admin');
+    const log={autorUid:'admin',autorNome:'admin',criadoEm:serverTimestamp(),colecao:'colaboradores',registroId:'a1',registroNome:'Pessoa fictícia',acao:'editar',campos:['nome'],orgaoId:'orgao-a',setorId:'a1'};
+    // Usa um evento de negócio com escopo explícito e coleção já auditada.
+    await env.withSecurityRulesDisabled(ctx=>setDoc(doc(ctx.firestore(),'eventos','com-escopo'),{titulo:'Evento fictício',orgaoId:'orgao-a',setorId:'a1'}));
+    log.colecao='eventos';log.registroId='com-escopo';
+    await assertSucceeds(setDoc(doc(f,'historicoAlteracoes','correto'),log));
+    await assertFails(setDoc(doc(f,'historicoAlteracoes','outro-orgao'),{...log,orgaoId:'orgao-b'}));
+    await assertFails(setDoc(doc(f,'historicoAlteracoes','outro-setor'),{...log,setorId:'a2'}));
+});
+
+test('edição GRGD e auditoria com escopo são confirmadas na mesma transação de negócio',async()=>{
+    await seedInstitutional();
+    await env.withSecurityRulesDisabled(ctx=>updateDoc(doc(ctx.firestore(),'eventos','e1'),{orgaoId:'orgao-a',setorId:'a1'}));
+    const f=db('operador'),batch=writeBatch(f);
+    batch.update(doc(f,'eventos','e1'),{titulo:'Edição com autoria individual'});
+    batch.set(doc(f,'historicoAlteracoes','edicao-grgd'),{autorUid:'operador',autorNome:'operador',criadoEm:serverTimestamp(),colecao:'eventos',registroId:'e1',registroNome:'Evento fictício',acao:'editar',campos:['titulo'],orgaoId:'orgao-a',setorId:'a1'});
+    await assertSucceeds(batch.commit());
+});
+
+test('inscrição legada não aceita órgão, setor ou participante arbitrário e mantém criação com histórico próprio',async()=>{
+    await seedInstitutional();const f=db('eventos'),base={uid:'eventos',eventId:'e1',nome:'eventos',email:'eventos@example.invalid',criadoEm:'2026-10-22'};
+    for(const extra of [{orgaoId:'orgao-a'},{setorId:'a1'},{participanteId:'outro'},{operadorUid:'titular'}])await assertFails(setDoc(doc(f,'inscricoes','forjada'),{...base,...extra}));
+    const batch=writeBatch(f);batch.set(doc(f,'inscricoes','propria-nova'),base);
+    batch.set(doc(f,'historicoAlteracoes','inscricao-propria'),{autorUid:'eventos',autorNome:'eventos',criadoEm:serverTimestamp(),colecao:'inscricoes',registroId:'propria-nova',registroNome:'Minha inscrição',acao:'criar',campos:['eventId','uid','nome','email','criadoEm']});
+    await assertSucceeds(batch.commit());
+});
+test('histórico de inscrição recusa outro titular e os papéis institucionais ainda sem escrita por representação',async()=>{
+    await seedInstitutional();
+    const log=uid=>({autorUid:uid,autorNome:uid,criadoEm:serverTimestamp(),colecao:'inscricoes',registroId:'a1',registroNome:'Registro fictício',acao:'criar',campos:['eventId']});
+    await assertFails(setDoc(doc(db('eventos'),'historicoAlteracoes','outro-titular'),log('eventos')));
+    await assertFails(setDoc(doc(db('titular'),'historicoAlteracoes','sem-fluxo'),log('titular')));
+    await assertSucceeds(setDoc(doc(db('admin'),'historicoAlteracoes','administrativo'),log('admin')));
 });
