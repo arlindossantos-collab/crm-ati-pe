@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.13.0 — painel gerencial e Colaboradores unificados.** Base: `main@ecb2b0db473bdeb25b22844d27bfa63024316436` (v0.12.0 publicada). Reúne pessoas, contas de acesso, permissões, setores e grupos no módulo Colaboradores. Acrescenta matrícula, resumo por órgão e criação de acesso vinculado pelo administrador. **Todos os dados existentes serão preservados. Publicação autorizada em 23/10/2026, após o usuário confirmar as novas regras do Firestore; sem novos índices. Integração e GitHub Pages acompanhados no [PR #19](https://github.com/arlindossantos-collab/crm-ati-pe/pull/19).** Veja [funcionamento e implantação](docs/painel-gerencial-colaboradores.md).
+**Versão deste código: v0.14.0 — relatórios de inscrições por evento no painel gerencial.** Base: `main@9e4e7df89cba247e2db07557ef41ab02b01e001e` (v0.13.0 integrada). Os botões de relatório de Eventos passam a exportar CSV com inscrições carregadas, distinguindo registros institucionais dos antigos e inscrições confirmadas de canceladas. A exportação é exclusiva do administrador, não comprova presença e não altera dados, regras ou índices do Firebase. **Entrega em revisão, ainda não publicada no site.** Consulte [funcionamento e limites](docs/relatorios-inscricoes.md).
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -14,7 +14,7 @@ A versão do site depende da integração e da publicação deste código. Uma b
 | --- | --- |
 | Demandas | Cadastro, buscas, filtros, prioridades, responsáveis GRGD, calendário e registros de andamento. |
 | Clientes e órgãos | Cadastros institucionais, contatos, filtros e importação de CSV. |
-| Eventos | Consulta e cadastro de eventos; inscrições associadas ao evento e à pessoa. |
+| Eventos | Consulta e cadastro de eventos; inscrições associadas ao evento e à pessoa; relatórios CSV geral e por evento, exclusivos do administrador (v0.14.0 em revisão). |
 | Locais | Indicadores, filtros, capacidade, contatos, recursos, painel de detalhes, histórico e consulta de agenda. |
 | Fornecedores | Cadastros e consultas de apoio às atividades. |
 | Colaboradores — painel gerencial | Cadastros e órgãos; matrícula, pesquisa e filtros; contas de acesso e permissões; setores e grupos. |

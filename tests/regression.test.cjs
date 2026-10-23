@@ -909,3 +909,67 @@ test('criação de acesso recusa sessão trocada, colaborador inativo e conta j�
  const a=app();a.run("currentUser={uid:'admin',perfil:'admin',ativo:true}");
  await assert.rejects(a.run("criarContaDoColaborador('novo',{},{id:'p',uid:'outra',sessao:versaoSessao})"),/sessão mudou/);assert.equal(a.writes.length,0);
 });
+
+test('CSV por evento distingue inscrições atuais, canceladas e legadas, sem inventar frequência',()=>{
+    const a=app();a.run("currentUser={uid:'master',ativo:true,tipoUsuario:'interno',perfil:'admin'};agendaLocaisEstado='completa';inscricoesRelatorioEstado='pronto'");
+    a.context.dadosEventos=[{id:'e1',firestoreId:'doc-e1',titulo:'Oficina fictícia'},{id:'e2',titulo:'Outro evento'}];
+    a.context.dadosInscricoes=[
+        {id:'i1',eventId:'doc-e1',modeloInscricao:'institucional-v1',participanteNome:'Pessoa A',emailInstitucional:'a@example.invalid',orgaoId:'o1',setorId:'s1',situacao:'confirmada',protocolo:'PROTO-A'},
+        {id:'i2',eventId:'e1',nome:'Pessoa antiga',email:'legado@example.invalid'},
+        {id:'i3',eventId:'e2',participanteNome:'Pessoa B',situacao:'cancelada'}
+    ];
+    a.run("dbData.eventos=dadosEventos;dbData.inscricoes=dadosInscricoes;dbData.orgaos=[{id:'o1',nome:'Órgão A'}];dbData.setores=[{id:'s1',nome:'Setor A'}]");
+    const porEvento=a.run("prepararRelatorioInscricoes('e1')");
+    assert.equal(porEvento.total,2);assert.match(porEvento.csv,/Órgão A/);assert.match(porEvento.csv,/Setor A/);
+    assert.match(porEvento.csv,/Não informada \(fluxo anterior\)/);assert.doesNotMatch(porEvento.csv,/Pessoa B/);
+    assert.equal(a.run("prepararRelatorioInscricoes('doc-e1').total"),2);
+    const geral=a.run('prepararRelatorioInscricoes()');assert.equal(geral.total,3);assert.match(geral.csv,/cancelada/);
+    assert.doesNotMatch(geral.csv,/Presença confirmada|Certificado emitido/);
+});
+test('exportação geral de participantes é só do administrador ativo, não GRGD, gestor ou auditoria',()=>{
+    const a=app();a.run("agendaLocaisEstado='completa';inscricoesRelatorioEstado='pronto'");
+    for(const usuario of [
+        {uid:'nsi',ativo:true,tipoUsuario:'externo',perfil:'comum',acessoInstitucional:vinculoTeste()},
+        {uid:'grgd',ativo:true,tipoUsuario:'interno',perfil:'comum',acessoInstitucional:vinculoTeste({papel:'grgd',orgaoId:'',acoes:['relatorios.consultar']})},
+        {uid:'aud',ativo:true,tipoUsuario:'externo',perfil:'comum',acessoInstitucional:vinculoTeste({papel:'auditoria',acoes:['relatorios.consultar']})},
+        {uid:'admin',ativo:false,tipoUsuario:'interno',perfil:'admin'}
+    ]){
+        a.context.usuario=usuario;a.run('currentUser=usuario');
+        assert.throws(()=>a.run('prepararRelatorioInscricoes()'),/Somente o administrador/);
+    }
+});
+test('erro e carregamento incompleto bloqueiam relatório e desabilitam controles',()=>{
+    const a=app();a.run("currentUser={uid:'master',ativo:true,tipoUsuario:'interno',perfil:'admin'};dbData.eventos=[{id:'e1',titulo:'Evento'}]");
+    for(const estado of ['aguardando','carregando','erro']){
+        a.run("agendaLocaisEstado='completa';inscricoesRelatorioEstado='"+estado+"';dbData.inscricoes=[{nome:'Não exportar'}]");
+        assert.throws(()=>a.run('prepararRelatorioInscricoes()'),/carregamento completo/);
+        a.run('renderEventos()');assert.equal(a.element('btn-relatorio-geral-eventos').disabled,true);
+    }
+    a.run("inscricoesRelatorioEstado='pronto';agendaLocaisEstado='erro'");
+    assert.throws(()=>a.run('prepararRelatorioInscricoes()'),/carregamento completo/);
+    a.run("agendaLocaisEstado='completa'");
+    assert.throws(()=>a.run("prepararRelatorioInscricoes('inexistente')"),/Evento não encontrado/);
+    a.run('renderEventos()');assert.equal(a.element('btn-relatorio-geral-eventos').disabled,false);
+});
+test('CSV é UTF-8, separador ponto e vírgula, com neutralização de fórmulas e aspas',()=>{
+    const a=app();a.run("currentUser={uid:'master',ativo:true,tipoUsuario:'interno',perfil:'admin'};agendaLocaisEstado='completa';inscricoesRelatorioEstado='pronto'");
+    a.context.inscricoesFicticias=[{eventId:'e',participanteNome:' =2+2 ',email:'"@cmd"',orgaoId:'-2',situacao:'confirmada'}];
+    a.run("dbData.eventos=[{id:'e',titulo:'Oficina / TI'}];dbData.inscricoes=inscricoesFicticias");
+    const rel=a.run('prepararRelatorioInscricoes()');
+    assert.equal(rel.csv.charCodeAt(0),0xFEFF);
+    assert.match(rel.csv,/"'=2\+2"/);assert.match(rel.csv,/'-2/);
+    assert.match(rel.csv,/"\u0022\u0022@cmd\u0022\u0022"/);
+    assert.match(rel.csv,/";"/);assert.match(rel.nomeArquivo,/prgd-inscricoes-geral-/);
+    assert.equal(a.run("campoCsvRelatorio(' =SOMA(1;2)\\nlinha')"),'"\'=SOMA(1;2) linha"');
+});
+test('clique geral produz download sem escrita, e logout impede exportação posterior',()=>{
+    const a=app();a.run("currentUser={uid:'master',ativo:true,tipoUsuario:'interno',perfil:'admin'};agendaLocaisEstado='completa';inscricoesRelatorioEstado='pronto';dbData.eventos=[{id:'e',titulo:'Teste'}];dbData.inscricoes=[{eventId:'e',nome:'Pessoa'}]");
+    const arquivos=[];a.context.Blob=Blob;
+    a.context.URL={createObjectURL:blob=>{arquivos.push(blob);return 'blob:relatorio';},revokeObjectURL(){}};
+    a.context.document.createElement=()=>({click(){},remove(){},set href(v){this.link=v},set download(v){a.context.arquivoNome=v}});
+    a.context.document.body.appendChild=()=>{};
+    a.listeners.get('btn-relatorio-geral-eventos:click')();
+    assert.equal(arquivos.length,1);assert.match(a.context.arquivoNome,/\.csv$/);assert.equal(a.writes.length,0);
+    a.run('limparDadosSessao()');
+    assert.throws(()=>a.run('prepararRelatorioInscricoes()'),/Somente o administrador/);
+});
