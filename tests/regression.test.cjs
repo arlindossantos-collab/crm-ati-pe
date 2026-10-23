@@ -863,6 +863,7 @@ test('contato com revisão vencida é sinalizado e função NSI não cria autori
 test('projeção de contato não compartilha UID de login, senha nem perfil',()=>{
     const a=app();const p=a.run("projecaoContato({nome:'Pessoa',orgaoId:'o',setorId:'s',usuarioUid:'login',perfil:'admin',senha:'nunca',emailInstitucional:'p@example.invalid',telefone:'',cargo:'',ativo:true,atualizadoEm:'agora'})");
     assert.equal(p.usuarioUid,undefined);assert.equal(p.perfil,undefined);assert.equal(p.senha,undefined);
+    a.element('colab-validade').value='2027-10-23';a.element('colab-funcoes').innerHTML='dados anteriores';a.element('colab-orgao').innerHTML='órgão anterior';a.run('limparDadosSessao()');assert.equal(a.element('colab-validade').value,'');assert.equal(a.element('colab-funcoes').innerHTML,'');assert.equal(a.element('colab-orgao').innerHTML,'');
 });
 test('admin vê colaboradores e gestor permanece limitado ao seu escopo',()=>{
     const a=app();a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno',ativo:true}");assert.ok(a.run('modulosDoUsuario()').includes('colaboradores'));
@@ -871,6 +872,6 @@ test('admin vê colaboradores e gestor permanece limitado ao seu escopo',()=>{
 test('cancelar revisão de usuário não grava cadastro e mudança de sessão invalida confirmação',async()=>{
     const a=app({revisaoAutomatica:false});a.run("currentUser={uid:'admin',perfil:'admin',ativo:true,tipoUsuario:'interno'}");
     const dados="{nome:'Pessoa',email:'p@example.invalid',ativo:true,tipoUsuario:'externo',perfil:'comum',modulosPermitidos:[]}";
-    let promessa=a.run('revisarUsuario('+dados+')');assert.equal(a.element('modal-revisar-usuario').classList.contains('hidden'),false);a.run('cancelarRevisaoUsuario()');assert.equal(await promessa,false);assert.equal(a.writes.length,0);
+    let promessa=a.run('revisarUsuario('+dados+')');assert.equal(a.element('modal-revisar-usuario').classList.contains('hidden'),false);a.run('cancelarRevisaoUsuario()');assert.equal(await promessa,false);assert.equal(a.writes.length,0);assert.equal(a.element('revisar-usuario-resumo').innerHTML,'');
     promessa=a.run('revisarUsuario('+dados+')');a.run('versaoSessao++');a.listeners.get('revisar-usuario-confirmar:click')();assert.equal(await promessa,false);
 });

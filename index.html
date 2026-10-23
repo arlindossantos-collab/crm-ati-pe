@@ -939,8 +939,8 @@
             colaboradorEmEdicao=null;eventoInscricaoId='';comprovanteAtualId='';
             ['modal-colaborador','modal-inscricao-institucional','modal-comprovante'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
             document.getElementById('comprovante-conteudo').innerHTML='';
-            for(const id of ['colab-nome','colab-emailInstitucional','colab-telefone','colab-cargo','colaborador-busca'])document.getElementById(id).value='';
-            for(const id of ['colab-setorId','insc-participante','colaborador-setor-filtro'])document.getElementById(id).innerHTML='';
+            for(const id of ['colab-nome','colab-emailInstitucional','colab-telefone','colab-cargo','colab-validade','colaborador-busca'])document.getElementById(id).value='';
+            for(const id of ['colab-setorId','colab-orgao','colab-funcoes','insc-participante','colaborador-setor-filtro'])document.getElementById(id).innerHTML='';
             for(const id of ['colab-erro','colab-setores-msg','insc-erro','insc-contexto','colab-contexto'])document.getElementById(id).textContent='';
         }
         function mensagemPortal(texto,erro=false) {
@@ -1283,7 +1283,7 @@
             return `<section data-colaborador-usuario="${esc(uidCadastro(u))}" class="md:col-span-2 bg-blue-50/70 border border-blue-100 rounded-xl p-4 text-xs"><h4 class="font-bold mb-2">Colaborador vinculado</h4>${p?`<p>${esc(p.nome)} · ${esc(p.emailInstitucional)}</p><p>${esc(dbData.orgaos.find(o=>String(o.firestoreId||o.id)===p.orgaoId)?.sigla||dbData.orgaos.find(o=>String(o.firestoreId||o.id)===p.orgaoId)?.nome||p.orgaoId)} · ${esc(dbData.setores.find(s=>s.id===p.setorId)?.nome||p.setorId)}</p><p>${esc(situacaoCadastroColaborador(p).nome)}</p>`:`<p>${u.colaboradorId?'O vínculo não pôde ser confirmado nesta consulta.':'Nenhum colaborador vinculado. Faça a associação em Colaboradores → Vincular usuário.'}</p>`}<p class="text-slate-600 mt-2">Os dados do colaborador acompanham o cadastro de origem. Login, e-mail de acesso e permissões são administrados separadamente.</p></section>`;
         }
         function atualizarResumosUsuariosAbertos(){document.querySelectorAll('[data-colaborador-usuario]').forEach(el=>{const u=dbData.usuarios.find(u=>uidCadastro(u)===el.dataset.colaboradorUsuario);if(u)el.outerHTML=resumoColaboradorUsuario(u);});}
-        function cancelarRevisaoUsuario(){const resolver=revisaoUsuarioResolver;revisaoUsuarioResolver=null;document.getElementById('modal-revisar-usuario')?.classList.add('hidden');resolver?.(false);}
+        function cancelarRevisaoUsuario(){const resolver=revisaoUsuarioResolver;revisaoUsuarioResolver=null;document.getElementById('revisar-usuario-resumo').innerHTML='';document.getElementById('modal-revisar-usuario')?.classList.add('hidden');resolver?.(false);}
         async function revisarUsuario(dados){
             if(revisaoUsuarioResolver)return false;
             const uid=currentUser?.uid,sessao=versaoSessao;
@@ -3871,9 +3871,9 @@
         function limparDadosSessao() {
             if(acessoTimer)clearTimeout(acessoTimer);acessoTimer=null;portalErros={};portalCarregando={};
             limparOperacoesInstitucionais();eventosPortalFontes={};mensagemPortal('');cancelarRevisaoUsuario();
-            document.getElementById('admin-colab-lista').innerHTML='';document.getElementById('usuarios-indicadores').innerHTML='';document.getElementById('colaboradores-indicadores').innerHTML='';
+            document.getElementById('admin-colab-lista').innerHTML='';document.getElementById('admin-colab-orgao').innerHTML='';document.getElementById('admin-colab-setor').innerHTML='';document.getElementById('admin-colab-status').textContent='';document.getElementById('usuarios-indicadores').innerHTML='';document.getElementById('colaboradores-indicadores').innerHTML='';
             ['filtro-perfil-usuario','filtro-acesso-usuario','admin-colab-busca','admin-colab-orgao','admin-colab-setor','admin-colab-situacao','admin-colab-conta'].forEach(id=>document.getElementById(id).value='');
-            document.getElementById('modal-vincular-colaborador').classList.add('hidden');document.getElementById('vincular-lista').innerHTML='';vinculoColaboradorAtual=null;
+            document.getElementById('modal-vincular-colaborador').classList.add('hidden');document.getElementById('vincular-lista').innerHTML='';document.getElementById('vincular-contexto').textContent='';document.getElementById('vincular-busca').value='';document.getElementById('vincular-erro').textContent='';document.getElementById('vincular-confirmacao').checked=false;vinculoColaboradorAtual=null;
             currentUser = null;
             document.body?.setAttribute('data-admin','false');
             cancelarExclusao(true);
