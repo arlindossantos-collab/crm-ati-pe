@@ -1,6 +1,6 @@
 # Áreas externa e interna por perfil — v0.11.0
 
-Proposta de 23/10/2026, baseada em `main@ffd3ce8a463e51b8f43536e91bf75e25caf2f489` (v0.10.1). A referência visual é `previa-perfis.html`. Esta entrega permanece em um único `index.html` e não publica automaticamente a aplicação.
+Entrega de 23/10/2026, baseada em `main@ffd3ce8a463e51b8f43536e91bf75e25caf2f489` (v0.10.1). A referência visual é `previa-perfis.html`. Esta entrega permanece em um único `index.html`. Publicação autorizada pelo usuário em 23/10/2026, com integração e implantação acompanhadas no [PR #17](https://github.com/arlindossantos-collab/crm-ati-pe/pull/17).
 
 ## Apresentação por perfil
 
@@ -30,12 +30,14 @@ A escolha é automática a partir do usuário autenticado. Não há seletor de p
 
 ## Validação
 
+[GitHub Actions aprovado](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39970697273) na revisão funcional `de00d790780a7dbe70e4270d10af67be9305c908`: 183 testes e seis suítes de navegador. O fechamento documental não altera HTML, regras, índices ou testes. Homologação institucional permanece como conferência dos responsáveis.
+
 109 testes da aplicação e seis suítes de navegador executados localmente. A suíte nova testa os perfis da matriz, indicadores sem registros de outro setor/órgão, cadastro pelo atalho, menu lateral e celular, F5, perfil pessoal, mudança de papel em tempo real, falha de consulta e limpeza no logout. As cinco suítes anteriores continuam exercitando Locais, segurança/sessão, perfis, inscrições e estabilidade do portal.
 
 O CI também executa os 71 testes existentes das regras Firestore e os 3 de Auth: 183 testes, além das seis suítes de navegador. Os navegadores interceptam os SDKs; não acessam dados institucionais. As capturas em `test-results/` usam dados fictícios e são artefatos de validação.
 
 ## Implantação
 
-**Sem alterações em `firestore.rules` ou `firestore.indexes.json`. Não é necessário republicar regras ou índices.** A implantação deste lote é somente do site após revisão e autorização. Nenhum usuário é promovido ou reclassificado pela publicação.
+**Sem alterações em `firestore.rules` ou `firestore.indexes.json`. Não é necessário republicar regras ou índices.** Publicação do site autorizada pelo usuário em 23/10/2026, após revisão e validação automatizada. Nenhum usuário é promovido ou reclassificado pela publicação.
 
 A prévia autônoma continua sendo uma demonstração com dados fictícios. O portal funcional é a aplicação autenticada, com os dados e permissões efetivamente cadastrados. LDAP/PostgreSQL permanecem na migração separada.

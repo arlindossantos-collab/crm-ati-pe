@@ -2,9 +2,9 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.11.0 — Áreas externa e interna por perfil — proposta de 23/10/2026
+## v0.11.0 — Áreas externa e interna por perfil — entrega de 23/10/2026
 
-**Resumo para a chefia:** apresenta um portal próprio para gestores de NSI, substitutos, auditoria e usuários externos, inspirado na prévia de perfis. O menu lateral, os indicadores e os atalhos ajudam a distinguir a área do órgão da área de trabalho GRGD/administração. Base: `main@ffd3ce8a463e51b8f43536e91bf75e25caf2f489`. Proposta em revisão, sem publicação.
+**Resumo para a chefia:** apresenta um portal próprio para gestores de NSI, substitutos, auditoria e usuários externos, inspirado na prévia de perfis. O menu lateral, os indicadores e os atalhos ajudam a distinguir a área do órgão da área de trabalho GRGD/administração. Base: `main@ffd3ce8a463e51b8f43536e91bf75e25caf2f489`. Publicação autorizada pelo usuário em 23/10/2026; integração e GitHub Pages acompanhados no [PR #17](https://github.com/arlindossantos-collab/crm-ati-pe/pull/17).
 
 | Antes | Depois |
 | --- | --- |
@@ -13,7 +13,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 | Portal sem hierarquia própria para telas e ações. | Cabeçalho de contexto, uma única navegação com aba atual identificada, formulários e ações existentes integrados ao portal. |
 | Uma mesma apresentação também no celular. | Menu horizontal com rolagem no portal móvel, cards empilhados e tabelas com rolagem interna. |
 
-**Validação local:** 109 testes de regressão da aplicação e seis suítes de navegador. Nova suíte verifica perfis externo/NSI/substituto/auditoria e interno/GRGD/administração, indicadores com escopo, cadastro por atalho, F5, perfil pessoal, troca de papel, limpeza no logout, falha de consulta e celular. CI também executa os 71 testes de regras e 3 de Auth existentes, totalizando 183 testes além das seis suítes. Dados fictícios, sem acesso a contas institucionais.
+**Validação:** [GitHub Actions aprovado na revisão funcional `de00d79`](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39970697273): 183 testes e seis suítes de navegador. Localmente, 109 testes de regressão da aplicação e seis suítes de navegador. Nova suíte verifica perfis externo/NSI/substituto/auditoria e interno/GRGD/administração, indicadores com escopo, cadastro por atalho, F5, perfil pessoal, troca de papel, limpeza no logout, falha de consulta e celular. CI também executa os 71 testes de regras e 3 de Auth existentes, totalizando 183 testes além das seis suítes. Dados fictícios, sem acesso a contas institucionais.
 
 **Implantação e limites:** não altera regras ou índices do Firebase; não é necessário republicá-los. Não modifica perfis, vínculos ou direitos cadastrados. Eventos disponíveis significam eventos futuros públicos ou destinados ao órgão; a possibilidade de inscrição depende de elegibilidade, período, vagas e ação autorizada. Indicadores refletem as consultas do próprio usuário. A página de prévia continua demonstrativa e sem conexão aos dados reais. Ver [layout por perfil](docs/layout-por-perfil.md).
 

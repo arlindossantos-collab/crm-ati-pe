@@ -4,7 +4,7 @@ Modelo do primeiro lote, baseado em `main@61cdbf259b283071d8d6be8cb27abefc835eaa
 
 **Ajuste na v0.10.1:** por solicitação do usuário em 23/10/2026, responsáveis e referências das aprovações são opcionais. A decisão de ativar permanece administrativa, com autoria e horário; papel, órgão/setores, ações, validade, revisão e limites do substituto continuam obrigatórios. O texto histórico abaixo sobre registrar duas referências descreve a implantação anterior. Ver [correções do portal](correcoes-portal-nsi.md).
 
-**Apresentação na v0.11.0 (em revisão):** gestores de NSI, substitutos, auditoria e contas externas recebem uma área visual própria; administradores e equipe GRGD mantêm a área interna. O layout não altera papéis, ações ou escopos. Ver [mapeamento do layout](layout-por-perfil.md).
+**Apresentação na v0.11.0:** gestores de NSI, substitutos, auditoria e contas externas recebem uma área visual própria; administradores e equipe GRGD mantêm a área interna. O layout não altera papéis, ações ou escopos. Ver [mapeamento do layout](layout-por-perfil.md).
 
 ## Modelo adotado
 
