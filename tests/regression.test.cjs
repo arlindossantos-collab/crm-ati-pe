@@ -875,3 +875,37 @@ test('cancelar revisão de usuário não grava cadastro e mudança de sessão in
     let promessa=a.run('revisarUsuario('+dados+')');assert.equal(a.element('modal-revisar-usuario').classList.contains('hidden'),false);a.run('cancelarRevisaoUsuario()');assert.equal(await promessa,false);assert.equal(a.writes.length,0);assert.equal(a.element('revisar-usuario-resumo').innerHTML,'');
     promessa=a.run('revisarUsuario('+dados+')');a.run('versaoSessao++');a.listeners.get('revisar-usuario-confirmar:click')();assert.equal(await promessa,false);
 });
+
+test('painel gerencial unifica contas e estrutura em Colaboradores, preservando rota antiga',()=>{
+ const a=app();a.run("currentUser={uid:'admin',ativo:true,tipoUsuario:'interno',perfil:'admin'};mudarAba('usuarios')");
+ assert.equal(a.run('abaAtual'),'colaboradores');assert.equal(a.run('secaoColaboradores'),'acessos');assert.equal(a.element('aba-usuarios').classList.contains('hidden'),false);
+ a.run("mostrarSecaoColaboradores('estrutura')");assert.equal(a.element('aba-usuarios').classList.contains('hidden'),true);assert.equal(a.element('colaboradores-estrutura').classList.contains('hidden'),false);
+ assert.equal(a.element('painel-identificacao').textContent,'Painel gerencial');
+});
+test('matrícula é pesquisável pelo admin e não integra a projeção institucional',()=>{
+ const a=app();a.run("currentUser={uid:'admin',perfil:'admin',ativo:true};dbData.colaboradores=[{id:'p',nome:'Pessoa',matricula:'ATI-001',orgaoId:'o',setorId:'s',emailInstitucional:'p@example.invalid'}]");
+ a.element('admin-colab-busca').value='ati-001';a.run('renderColaboradoresAdmin()');assert.match(a.element('admin-colab-lista').innerHTML,/ATI-001/);
+ a.element('admin-colab-busca').value='outra';a.run('renderColaboradoresAdmin()');assert.doesNotMatch(a.element('admin-colab-lista').innerHTML,/ATI-001/);
+ assert.equal(a.run("Object.hasOwn(projecaoContato({matricula:'ATI-001'}),'matricula')"),false);
+});
+test('acesso do colaborador exige vínculo recíproco e considera bloqueio da conta',()=>{
+ const a=app();a.run("dbData.usuarios=[{uid:'u',colaboradorId:'p',nome:'Pessoa',ativo:true,tipoUsuario:'externo',modulosPermitidos:['eventos']}]");
+ assert.equal(a.run("acessoDoColaborador({id:'p',usuarioUid:'u'}).liberado"),true);
+ a.run('dbData.usuarios[0].ativo=false');assert.equal(a.run("acessoDoColaborador({id:'p',usuarioUid:'u'}).liberado"),false);
+ assert.equal(a.run("acessoDoColaborador({id:'outra',usuarioUid:'u'}).usuario"),null);
+});
+test('cadastro e login vinculados são gravados juntos com projeção e duas auditorias',async()=>{
+ const a=app();a.run("currentUser={uid:'admin',nome:'Admin',perfil:'admin',ativo:true};");
+ a.context.getDoc=async ref=>ref.collection==='colaboradores'?{exists:()=>true,data:()=>({nome:'Pessoa',ativo:true,orgaoId:'o',setorId:'s',emailInstitucional:'p@example.invalid',telefone:'',cargo:''})}:{exists:()=>false};
+ await a.run("criarContaDoColaborador('novo',{nome:'Pessoa',perfil:'comum',ativo:true},{id:'p',uid:'admin',sessao:versaoSessao})");
+ assert.equal(a.writes.find(w=>w.collection==='colaboradores').data.usuarioUid,'novo');assert.equal(a.writes.find(w=>w.collection==='usuarios').data.colaboradorId,'p');assert.equal(a.audits.length,2);
+ assert.ok(a.writes.some(w=>w.collection==='contatosColaboradores'));assert.ok(a.writes.some(w=>w.collection==='identidadesUsuarios'));
+});
+test('criação de acesso recusa sessão trocada, colaborador inativo e conta já vinculada',async()=>{
+ for(const pessoa of [{ativo:false},{ativo:true,usuarioUid:'outro'}]){
+  const a=app();a.run("currentUser={uid:'admin',perfil:'admin',ativo:true}");a.context.getDoc=async ref=>({exists:()=>ref.collection==='colaboradores',data:()=>pessoa});
+  await assert.rejects(a.run("criarContaDoColaborador('novo',{},{id:'p',uid:'admin',sessao:versaoSessao})"),/cadastro mudou/);assert.equal(a.writes.length,0);
+ }
+ const a=app();a.run("currentUser={uid:'admin',perfil:'admin',ativo:true}");
+ await assert.rejects(a.run("criarContaDoColaborador('novo',{},{id:'p',uid:'outra',sessao:versaoSessao})"),/sessão mudou/);assert.equal(a.writes.length,0);
+});

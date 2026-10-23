@@ -238,7 +238,8 @@ service cloud.firestore {
       let funcoes=data.get('funcoesContato',[]);
       let usuarioUid=data.get('usuarioUid','');
       let validade=data.get('validadeCadastro',null);
-      return data.keys().hasOnly(['nome','emailInstitucional','orgaoId','setorId','telefone','cargo','ativo','validadeCadastro','funcoesContato','usuarioUid','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+      return data.keys().hasOnly(['nome','emailInstitucional','orgaoId','setorId','telefone','cargo','matricula','ativo','validadeCadastro','funcoesContato','usuarioUid','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+        && data.get('matricula','') is string && data.get('matricula','').size() <= 50
         && data.nome is string && data.nome.size() > 1 && data.nome.size() <= 150
         && data.emailInstitucional is string && data.emailInstitucional.size() <= 254
         && data.emailInstitucional == data.emailInstitucional.lower().trim()
@@ -418,7 +419,7 @@ service cloud.firestore {
         let antes=resource.data;
         let depois=request.resource.data;
         return (admin || managerAction('participantes.editar',antes)) && validParticipant(depois,id)
-          && depois.diff(antes).affectedKeys().hasOnly(['nome','telefone','cargo','ativo','setorId','validadeCadastro','funcoesContato','usuarioUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+          && depois.diff(antes).affectedKeys().hasOnly(['nome','telefone','cargo','matricula','ativo','setorId','validadeCadastro','funcoesContato','usuarioUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
           && (depois.setorId == antes.setorId || (validSectorId(depois.setorId,depois.orgaoId) && (admin || participantSectorInScope(depois))))
           && (admin || depois.get('usuarioUid','') == antes.get('usuarioUid',''))
           && newAuditMatches(depois,'colaboradores',id,'editar');

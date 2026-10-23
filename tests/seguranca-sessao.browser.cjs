@@ -73,7 +73,7 @@ export async function runTransaction(db,fn){
    assert.equal(await page.evaluate(()=>globalThis.__loginApareceu),false,'Login não pode aparecer enquanto a sessão é recuperada: '+JSON.stringify(await page.evaluate(()=>globalThis.__loginFrames)));
    assert.equal(await page.locator('#user-name-display').isVisible(),true,'Identificação permanece visível no computador.');
    assert.equal(await page.getByRole('heading',{name:'Plataforma de Relacionamento do Governo Digital',exact:true}).isVisible(),true);
-   await page.locator('[data-tab="usuarios"]').click();
+   await page.locator('[data-tab="colaboradores"]').click();await page.locator('[data-colab-secao="acessos"]').click();
    assert.equal(await page.locator('[data-usuario-excluir="admin"]').isDisabled(),true);
    await page.locator('[data-usuario-editar="outro"]').click();
    await page.locator('#usuario-nome').fill('Nome atualizado');await page.locator('#btn-salvar-edicao').click();await page.locator('#revisar-usuario-confirmar').click();

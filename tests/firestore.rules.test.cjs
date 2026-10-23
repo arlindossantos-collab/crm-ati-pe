@@ -711,3 +711,21 @@ test('desvínculo completo preserva conta, colaborador e permissões com histór
     b.update(doc(f,'usuarios','titular'),{colaboradorId:'',ultimaAuditoriaId:lu.id});b.set(lu,{autorUid:'admin',autorNome:'admin',criadoEm:serverTimestamp(),colecao:'usuarios',registroId:'titular',registroNome:'titular',acao:'editar',campos:['colaboradorId']});await assertSucceeds(b.commit());
     assert.equal((await getDoc(doc(f,'usuarios','titular'))).data().acessoInstitucional.papel,'gestor_nsi');assert.equal((await getDoc(doc(f,'colaboradores',id))).data().ativo,true);
 });
+
+test('matrícula opcional aceita texto, limita tamanho e não amplia a projeção de contatos',async()=>{
+ const {p}=await seedLote2();await assertSucceeds(atualizarPessoaV012('admin',p,{matricula:'ATI-001'}));
+ const atual=(await getDoc(doc(db('admin'),'colaboradores',idPessoaLote2(p)))).data();assert.equal(atual.matricula,'ATI-001');
+ const contato=(await getDoc(doc(db('admin'),'contatosColaboradores',idPessoaLote2(p)))).data();assert.equal(Object.hasOwn(contato,'matricula'),false);
+ await assertFails(atualizarPessoaV012('admin',atual,{matricula:123}));await assertFails(atualizarPessoaV012('admin',atual,{matricula:'A'.repeat(51)}));
+ await assertSucceeds(atualizarPessoaV012('titular',atual,{matricula:'ORGAO-002'}));
+});
+test('admin cria conta com colaborador e auditorias na mesma operação; gestor não concede acesso',async()=>{
+ const {p}=await seedLote2(),id=idPessoaLote2(p);
+ async function criar(uid,conta){const f=db(uid),b=writeBatch(f),lp=doc(collection(f,'historicoAlteracoes')),lu=doc(collection(f,'historicoAlteracoes'));
+ const novo={...p,usuarioUid:conta,atualizadoEm:serverTimestamp(),atualizadoPorUid:uid,ultimaAuditoriaId:lp.id};
+ const user=profile(conta,{tipoUsuario:'externo',modulosPermitidos:[],colaboradorId:id,ultimaAuditoriaId:lu.id});
+ b.set(doc(f,'colaboradores',id),novo);b.set(doc(f,'contatosColaboradores',id),contatoProjetado(novo));b.set(lp,{...auditoriaLote2(uid,'colaboradores',id,novo,'editar'),campos:['usuarioUid']});
+ b.set(doc(f,'usuarios',conta),user);b.set(lu,{autorUid:uid,autorNome:uid,criadoEm:serverTimestamp(),colecao:'usuarios',registroId:conta,registroNome:conta,acao:'criar',campos:['colaboradorId']});return b.commit();}
+ await assertFails(criar('titular','nao-autorizado'));await assertSucceeds(criar('admin','nova-conta'));
+ const u=(await getDoc(doc(db('admin'),'usuarios','nova-conta'))).data();assert.equal(u.colaboradorId,id);assert.equal(u.perfil,'comum');assert.deepEqual(u.modulosPermitidos,[]);
+});
