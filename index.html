@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.13.0 - GOVERNANÇA E TELAS POR PERFIL   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.14.0 - RELATÓRIOS DE INSCRIÇÕES -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -132,7 +132,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.13.0</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.14.0</span></p>
             </div>
         </div>
     </div>
@@ -145,7 +145,7 @@
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.13.0</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.14.0</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -459,11 +459,11 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button type="button" id="btn-relatorio-geral-eventos" class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-file-excel"></i> Relatório Geral de Inscrições</button>
+                    <button type="button" id="btn-relatorio-geral-eventos" class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-file-csv"></i> Relatório Geral de Inscrições (CSV)</button>
                     <button type="button" data-modal-target="evento" data-acao="eventos.criar" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Novo Evento</button>
                 </div>
             </div>
-            <p id="eventos-portal-status" role="status" class="hidden text-sm bg-blue-50/60 border border-blue-100 rounded-xl p-3"></p><div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+            <p id="eventos-relatorio-status" role="status" class="btn-admin-only text-xs text-slate-500"></p><p id="eventos-portal-status" role="status" class="hidden text-sm bg-blue-50/60 border border-blue-100 rounded-xl p-3"></p><div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
         <!-- ABA LOCAIS -->
@@ -660,14 +660,14 @@
       <div class="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"><div class="flex justify-end gap-2 nao-imprimir"><button id="comprovante-imprimir" type="button" class="border rounded-lg px-3 py-2 text-blue-900">Imprimir / salvar PDF</button><button type="button" class="btn-fechar-modal border rounded-lg px-3 py-2" data-target="modal-comprovante">Fechar</button></div><div id="comprovante-conteudo" class="mt-4"></div></div>
     </div>
 
-    <!-- Script Principal v0.13.0 -->
+    <!-- Script Principal v0.14.0 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, doc, onSnapshot, getDoc, query, where, getDocs, runTransaction, increment, serverTimestamp, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.13.0: Painel gerencial e Colaboradores unificados');
+        console.info('PRGD v0.14.0: relatórios de inscrições por evento no painel gerencial');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -696,6 +696,7 @@
         let abaAtual = 'dashboard';
         let secaoColaboradores='cadastros', novoAcessoColaborador=null;
         let filtroEventoAtual = 'futuros';
+        let inscricoesRelatorioEstado = 'aguardando';
         let filtroTagAtual = '';
         let filtroTipoUsuarioAtual = '';
         let filtroOrgaoUsuarioAtual = '';
@@ -1227,7 +1228,7 @@
             verificarAutenticacaoObrigatoria();
         }
 
-        // v0.13.0: cadastros, contatos institucionais e identidade de acesso são vínculos distintos.
+        // v0.14.0: cadastros, contatos institucionais e identidade de acesso são vínculos distintos.
         const FUNCOES_CONTATO={orgao:{nome:'Gestor do órgão',nomeCampo:'gestorOrgao',email:'emailGestorOrgao',telefone:'telGestorOrgao',cargo:'cargoGestorOrgao'},nsi:{nome:'NSI',nomeCampo:'gestorNsi',email:'emailGestorNsi',telefone:'telGestorNsi'},telematica:{nome:'Telemática',nomeCampo:'gestorTelematica',email:'emailGestorTelematica',telefone:'telGestorTelematica'},si:{nome:'SI',nomeCampo:'gestorSi',email:'emailGestorSi',telefone:'telGestorSi'},sei:{nome:'SEI',nomeCampo:'gestorSei',email:'emailGestorSei',telefone:'telGestorSei'},focal:{nome:'Ponto focal / substituto',nomeCampo:'pontoFocalNome',email:'pontoFocalEmail',telefone:'pontoFocalTel',cargo:'pontoFocalCargo'}};
         const ESTADOS_ACESSO={liberado:'Acesso liberado',inativo:'Cadastro inativo',excluido:'Excluído do cadastro',pendente:'Aguardando aprovação',suspenso:'Vínculo suspenso',vencido:'Vínculo vencido',revisao:'Revisão do vínculo pendente',futuro:'Vínculo ainda não iniciou',sem_modulos:'Sem ações ou módulos liberados',invalido:'Vínculo precisa de validação',titular:'Sujeito à validação do titular'};
         let revisaoUsuarioResolver=null,vinculoColaboradorAtual=null,vinculoColaboradorOcupado=false;
@@ -2203,6 +2204,7 @@
         function iniciarSnapshotFirestore() {
             pararSnapshots();
             eventosCacheMap = {};
+            inscricoesRelatorioEstado = 'aguardando';
             if (!currentUser) return;
             const modulos = modulosDoUsuario();
             programarRevisaoAcesso();
@@ -2241,8 +2243,14 @@
                 }, err=>{agendaLocaisEstado='erro';dbData.eventos=[];eventosCacheMap={};renderLocais();renderEventos();renderDashboardKPIs();atualizarContadoresAbas();console.warn('Agenda de locais:',err.message);}));
                 if(admin || !possuiVinculo() || (currentUser.acessoInstitucional?.papel==='grgd' && podeAcao('relatorios'))) {
                 const inscricoes = (admin || podeAcao('relatorios')) ? collection(db,'inscricoes') : query(collection(db,'inscricoes'), where('uid','==',currentUser.uid));
+                if (admin) inscricoesRelatorioEstado = 'carregando';
                 snapshotUnsubs.push(observarFirestore(inscricoes, snap => {
                     dbData.inscricoes = snap.docs.map(d => ({...d.data(), firestoreId:d.id, id:d.data().id || d.id}));
+                    if (admin) inscricoesRelatorioEstado = 'pronto';
+                    renderEventos();
+                }, () => {
+                    dbData.inscricoes = [];
+                    if (admin) inscricoesRelatorioEstado = 'erro';
                     renderEventos();
                 }));
                 }
@@ -2679,6 +2687,82 @@
             </div>`;
         }
 
+
+        // v0.14.0: exportação de leitura sobre snapshots autorizados, sem operações Firestore.
+        function relatorioInscricoesPronto() {
+            return ehAdministrador() && agendaLocaisEstado === 'completa' && inscricoesRelatorioEstado === 'pronto';
+        }
+        function dataInscricaoRelatorio(valor) {
+            if (valor && typeof valor.toDate === 'function') {
+                const data = valor.toDate();
+                return data instanceof Date && Number.isFinite(data.getTime()) ? data.toISOString() : '';
+            }
+            if (valor && typeof valor.seconds === 'number') {
+                const data = new Date(valor.seconds * 1000);
+                return Number.isFinite(data.getTime()) ? data.toISOString() : '';
+            }
+            return typeof valor === 'string' ? valor : '';
+        }
+        function campoCsvRelatorio(valor) {
+            const texto = String(valor ?? '').replace(/[\u0000-\u001f\u007f]/g,' ').trim();
+            const seguro = /^[=+\-@]/.test(texto) ? "'" + texto : texto;
+            return '"' + seguro.replace(/"/g,'""') + '"';
+        }
+        function prepararRelatorioInscricoes(eventoId = '') {
+            if (!ehAdministrador()) throw new Error('Somente o administrador pode exportar relatórios gerais com dados pessoais.');
+            if (!relatorioInscricoesPronto()) throw new Error('Aguarde o carregamento completo de eventos e inscrições. Se houver falha de consulta, revise o acesso e tente novamente.');
+            const id = String(eventoId || '');
+            const eventos = dbData.eventos || [];
+            const encontrarEvento = chave => eventos.find(e => [e.firestoreId,e.id].some(v => v != null && String(v) === String(chave)));
+            const eventoSelecionado = id ? encontrarEvento(id) : null;
+            if (id && !eventoSelecionado) throw new Error('Evento não encontrado entre os dados autorizados.');
+            const pertence = (inscricao, evento) => [evento.firestoreId,evento.id].some(v => v != null && String(v) === String(inscricao.eventId));
+            const inscricoes = (dbData.inscricoes || []).filter(i => !id || pertence(i,eventoSelecionado));
+            const cabecalho = ['Evento','ID do evento','Participante','E-mail institucional','Órgão','Setor','Situação','Protocolo','Criada em','Atualizada em','Modelo de inscrição'];
+            const linhas = inscricoes.map(i => {
+                const evento = encontrarEvento(i.eventId);
+                const orgao = (dbData.orgaos || []).find(o => [o.firestoreId,o.id].some(v => v != null && String(v) === String(i.orgaoId)));
+                const setor = (dbData.setores || []).find(s => [s.firestoreId,s.id].some(v => v != null && String(v) === String(i.setorId)));
+                return [
+                    evento?.titulo || i.eventoTitulo || 'Evento não identificado',
+                    i.eventId || '',
+                    i.participanteNome || i.nome || '',
+                    i.emailInstitucional || i.email || '',
+                    orgao?.nome || i.orgaoId || '',
+                    setor?.nome || i.setorId || '',
+                    i.situacao || 'Não informada (fluxo anterior)',
+                    i.protocolo || i.firestoreId || i.id || '',
+                    dataInscricaoRelatorio(i.criadoEm),
+                    dataInscricaoRelatorio(i.atualizadoEm),
+                    i.modeloInscricao === MODELO_INSCRICAO ? 'Institucional' : 'Anterior'
+                ];
+            }).sort((a,b) => String(a[0]).localeCompare(String(b[0]),'pt-BR') || String(a[2]).localeCompare(String(b[2]),'pt-BR'));
+            const csv = '\uFEFF' + [cabecalho,...linhas].map(linha => linha.map(campoCsvRelatorio).join(';')).join('\r\n') + '\r\n';
+            const nomeCurto = String(eventoSelecionado?.titulo || 'geral').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+                .toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48) || 'evento';
+            const nomeArquivo = 'prgd-inscricoes-' + nomeCurto + '-' + new Date().toISOString().slice(0,10) + '.csv';
+            return {csv,total:linhas.length,nomeArquivo};
+        }
+        function baixarRelatorioInscricoes(eventoId = '') {
+            const relatorio = prepararRelatorioInscricoes(eventoId);
+            if (!relatorio.total) { alert('Nenhuma inscrição localizada. Nenhum arquivo foi gerado.'); return false; }
+            let url;
+            try {
+                url = URL.createObjectURL(new Blob([relatorio.csv],{type:'text/csv;charset=utf-8'}));
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = relatorio.nomeArquivo;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url),1000);
+                return true;
+            } catch(erro) {
+                if (url) URL.revokeObjectURL(url);
+                throw erro;
+            }
+        }
+
         function eventoEncerrado(evento,agora=new Date()) {
             if(evento.status==='Realizado')return true;
             const data=evento.dataFim||evento.dataInicio;
@@ -2714,6 +2798,15 @@
                 }
             }
 
+            const podeExportar=relatorioInscricoesPronto();
+            const btnRelatorio=document.getElementById('btn-relatorio-geral-eventos');
+            if (btnRelatorio) btnRelatorio.disabled=!podeExportar;
+            const avisoRelatorio=document.getElementById('eventos-relatorio-status');
+            if (avisoRelatorio) avisoRelatorio.textContent=!ehAdministrador()?'':agendaLocaisEstado==='erro'
+                ?'Falha ao carregar eventos: exportação indisponível.'
+                :inscricoesRelatorioEstado==='erro'?'Falha ao carregar inscrições: exportação indisponível.'
+                :podeExportar?'Relatórios disponíveis: inscrições não comprovam presença.'
+                :'Carregando dados para os relatórios. Aguarde a confirmação das consultas.';
             const statusPortal=document.getElementById('eventos-portal-status');
             if(statusPortal){const portal=portalInstitucional(),carregando=portal&&(portalCarregando.eventos_publicos||portalCarregando.eventos_elegiveis),erro=portal&&(portalErros.eventos_publicos||portalErros.eventos_elegiveis);
                 statusPortal.classList.toggle('hidden',!portal);
@@ -2749,7 +2842,7 @@
                             ${e.modeloInscricao!==MODELO_INSCRICAO && podeAcao('inscricoes','propria') && !minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.firestoreId || e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrever-se</button>` : ''}
                             ${gestorPode('inscricoes.criar')&&eventoElegivelInstitucional(e)&&!real?`<button type="button" data-inscrever-colaborador="${esc(e.firestoreId||e.id)}" class="bg-blue-900 text-white text-xs px-3 py-2 rounded-xl font-bold">Inscrever colaborador</button>`:''}
                             <div class="flex items-center gap-1 ml-auto">
-                                ${isAdmin ? `<button type="button" data-relatorio-evento="${esc(e.id)}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-2.5 py-2 rounded-xl font-bold cursor-pointer" title="Relatório"><i class="fa-solid fa-file-excel"></i></button>` : ''}
+                                ${isAdmin ? `<button type="button" data-relatorio-evento="${esc(e.firestoreId || e.id)}" ${podeExportar?'':'disabled'} class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs px-2.5 py-2 rounded-xl font-bold cursor-pointer" title="Exportar inscrições do evento (CSV)" aria-label="Exportar inscrições do evento ${esc(e.titulo)}"><i class="fa-solid fa-file-excel"></i></button>` : ''}
                                 <button type="button" class="tr-detalhe border bg-white hover:bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-xl font-bold cursor-pointer" data-colecao="eventos" data-id="${esc(e.firestoreId || e.id)}">Detalhes</button>
                             </div>
                         </div>
@@ -3736,6 +3829,9 @@
             byId('busca-eventos')?.addEventListener('input', e => { buscaEventosVal = e.target.value.toLowerCase().trim(); renderEventos(); });
             byId('filtro-evento-futuros')?.addEventListener('click', () => { filtroEventoAtual = 'futuros'; renderEventos(); });
             byId('filtro-evento-realizados')?.addEventListener('click', () => { filtroEventoAtual = 'realizados'; renderEventos(); });
+            byId('btn-relatorio-geral-eventos')?.addEventListener('click', () => {
+                try { baixarRelatorioInscricoes(); } catch(err) { alert(err.message || 'Não foi possível preparar o relatório.'); }
+            });
 
             byId('btn-visao-tabela')?.addEventListener('click', () => {
                 visaoDemandasAtual = 'tabela';
@@ -3914,6 +4010,13 @@
                 return;
             }
 
+            const relatorioEvento=ev.target.closest?.('[data-relatorio-evento]');
+            if(relatorioEvento) {
+                try { baixarRelatorioInscricoes(relatorioEvento.getAttribute('data-relatorio-evento')); }
+                catch(err) { alert(err.message || 'Não foi possível preparar o relatório.'); }
+                return;
+            }
+
             const btnInscricao = ev.target.closest?.('[data-acao-inscricao]');
             if (btnInscricao) {
                 const eventId = btnInscricao.getAttribute('data-acao-inscricao');
@@ -3933,7 +4036,7 @@
         });
 
         function limparDadosSessao() {
-            if(acessoTimer)clearTimeout(acessoTimer);acessoTimer=null;portalErros={};portalCarregando={};
+            if(acessoTimer)clearTimeout(acessoTimer);acessoTimer=null;portalErros={};portalCarregando={};inscricoesRelatorioEstado='aguardando';
             limparOperacoesInstitucionais();novoAcessoColaborador=null;secaoColaboradores='cadastros';eventosPortalFontes={};mensagemPortal('');cancelarRevisaoUsuario();
             document.getElementById('admin-colab-lista').innerHTML='';document.getElementById('admin-colab-orgao').innerHTML='';document.getElementById('admin-colab-setor').innerHTML='';document.getElementById('admin-colab-status').textContent='';document.getElementById('usuarios-indicadores').innerHTML='';document.getElementById('colaboradores-indicadores').innerHTML='';document.getElementById('colaboradores-por-orgao').innerHTML='';document.getElementById('painel-identificacao').textContent='';
             ['filtro-perfil-usuario','filtro-acesso-usuario','admin-colab-busca','admin-colab-orgao','admin-colab-setor','admin-colab-situacao','admin-colab-conta'].forEach(id=>document.getElementById(id).value='');

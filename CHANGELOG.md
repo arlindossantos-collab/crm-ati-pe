@@ -2,6 +2,20 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.14.0 — Relatórios CSV de inscrições — proposta de 23/10/2026
+
+**Resumo para a chefia:** os dois controles de relatório já visíveis em Eventos passam a exportar inscrições em CSV com evento, participante, órgão, setor, situação, protocolo e datas disponíveis. O administrador pode gerar o relatório geral ou por evento. A exportação de inscrições **não comprova presença**.
+
+| Antes | Depois |
+| --- | --- |
+| Botões de relatório sem ação conectada. | Exportação CSV geral e por evento, somente para administração. |
+| Ausência de controle sobre relatórios com leitura parcial. | Exportação bloqueada até a conclusão das consultas de Eventos e Inscrições; falhas impedem gerar arquivos potencialmente incompletos. |
+| Campos sem neutralização específica para planilhas. | CSV UTF-8 com separador ponto e vírgula e tratamento de textos que poderiam executar fórmulas. |
+
+**Segurança e preservação:** sem novas permissões, coleções, índices ou alterações nas regras do Firestore. Nada é gravado, excluído, migrado ou enviado a terceiros. CSV baixado contém dados pessoais e exige guarda autorizada. Eventos antigos permanecem sem situação presumida.
+
+**Validação:** testes de isolamento administrativo, filtros, compatibilidade legado, erro de consulta, estado dos botões e neutralização de fórmulas. CI do PR pendente de execução. Necessita homologação com dados fictícios e autorização antes de integrar/publicar. [Detalhes](docs/relatorios-inscricoes.md).
+
 ## v0.13.0 — Painel gerencial e Colaboradores unificados — entrega de 23/10/2026
 
 **Resumo para a chefia:** adota os nomes Painel gerencial (equipe interna) e Painel externo (órgãos e demais usuários externos). No painel gerencial, Colaboradores reúne os cadastros de pessoas, contas de acesso, permissões, setores e grupos. Base: `main@ecb2b0db473bdeb25b22844d27bfa63024316436`. Publicação autorizada pelo usuário em 23/10/2026, após confirmar a publicação das novas regras (relato do usuário, sem inspeção direta do console). Integração e GitHub Pages acompanhados no [PR #19](https://github.com/arlindossantos-collab/crm-ati-pe/pull/19).
