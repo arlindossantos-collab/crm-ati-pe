@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.10.1 - GOVERNANÇA E TELAS POR PERFIL   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.11.0 - GOVERNANÇA E TELAS POR PERFIL   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -35,6 +35,69 @@
         #locais-indicadores .local-card-icone { flex:none; font-size:15px; line-height:1.2; color:#4b6d8b; }
         #locais-indicadores [data-tone="verde"] .local-card-icone { color:#427660; }
 
+
+        /* Portal externo: a organização visual é derivada do perfil, sem alterar as permissões. */
+        .somente-portal { display:none; }
+        body[data-layout="portal"] { background:#f5f8fb; color:#20374a; }
+        body[data-layout="portal"] #app-header { background:#173c65; box-shadow:none; }
+        body[data-layout="portal"] #app-header > div { max-width:1440px; padding-top:17px; padding-bottom:17px; }
+        body[data-layout="portal"] #main-content { display:grid; grid-template-columns:230px minmax(0,1fr); max-width:1440px; padding:0; min-height:calc(100vh - 90px); align-items:start; }
+        body[data-layout="portal"] #status-sessao { display:none; }
+        body[data-layout="portal"] .somente-portal { display:block; }
+        body[data-layout="portal"] #app-navegacao { position:sticky; top:88px; display:block; min-width:0; padding:28px 18px; margin:0; border-right:1px solid #dce5ed; min-height:calc(100vh - 90px); }
+        body[data-layout="portal"] #container-abas-navegacao { display:flex; flex-direction:column; width:100%; gap:5px; padding:0; background:transparent; overflow:visible; }
+        body[data-layout="portal"] .nav-tab { width:100%; text-align:left; align-items:center; justify-content:flex-start; gap:7px; padding:12px; border-radius:8px; font-size:13px; white-space:nowrap; }
+        body[data-layout="portal"] .nav-tab.tab-active { background:#e7f0f8; color:#204b75; box-shadow:none; }
+        body[data-layout="portal"] .nav-tab.tab-inactive { color:#566c81; }
+        body[data-layout="portal"] #app-conteudo { padding:28px 32px 40px; min-width:0; }
+        .portal-sobre { font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#6a8298; font-weight:700; margin:0 0 9px; }
+        #portal-orgao-nome { font-size:15px; font-weight:700; color:#234b6a; overflow-wrap:anywhere; }
+        #portal-papel-nome { font-size:12px; color:#617286; margin:5px 0 24px; }
+        .portal-nota { margin-top:24px; padding:12px; border-left:3px solid #9cc1db; background:#eff5fa; color:#4b6780; font-size:12px; line-height:1.65; }
+        #portal-topo { margin-bottom:24px; }
+        #portal-pagina-titulo { color:#183b5b; font-size:27px; font-weight:750; line-height:1.25; margin:7px 0 9px; }
+        #portal-pagina-descricao { color:#617286; font-size:14px; line-height:1.7; max-width:760px; }
+        #portal-saudacao { color:#64819a; font-size:12px; }
+        .portal-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+        .portal-card { border:1px solid #d9e5ef; background:#eff5fa; border-radius:13px; padding:20px; min-width:0; }
+        .portal-card[data-tone="verde"] { background:#eef6f2; border-color:#d8e8de; }
+        .portal-card-label { color:#355d79; font-size:12px; font-weight:650; display:flex; gap:8px; align-items:center; }
+        .portal-card strong { display:block; color:#2c5577; font-size:29px; font-weight:750; margin:10px 0 5px; }
+        .portal-card small { display:block; color:#5f7b90; font-size:12px; line-height:1.6; }
+        .portal-painel { background:white; border:1px solid #dce5ed; border-radius:13px; padding:22px; }
+        .portal-painel-topo { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px; }
+        .portal-painel h3 { color:#284e6c; font-size:15px; font-weight:700; }
+        .portal-atalhos { display:flex; flex-wrap:wrap; gap:10px; }
+        .portal-atalho { border:1px solid #cbdde9; background:white; color:#245782; border-radius:8px; padding:10px 14px; font-size:12px; font-weight:650; }
+        .portal-atalho.primario { background:#245782; border-color:#245782; color:white; }
+        body[data-layout="portal"] #portal-resumo { border-color:#dce5ed; border-radius:13px; padding:22px; }
+        body[data-layout="portal"] #portal-operacao-msg { margin-bottom:18px; }
+        body[data-layout="portal"] :is(#aba-colaboradores,#aba-inscricoes_orgao,#aba-auditoria_orgao) > h3,
+        body[data-layout="portal"] :is(#aba-colaboradores,#aba-inscricoes_orgao,#aba-auditoria_orgao) > p:first-of-type,
+        body[data-layout="portal"] #eventos-titulo-interno { display:none; }
+        body[data-layout="portal"] #grid-eventos > article { border-color:#dce5ed; border-radius:13px; box-shadow:none; }
+        body[data-layout="portal"] #grid-eventos > article > .h-32 { background:#edf4fa; color:#284e6c; height:auto; min-height:88px; padding:20px; justify-content:flex-start; text-align:left; border-bottom:1px solid #dce5ed; }
+        body[data-layout="portal"] #grid-eventos article h4 { display:none; }
+        body[data-layout="portal"] #app-conteudo table { font-size:13px; }
+        body[data-layout="portal"] #app-conteudo th { font-size:11px; letter-spacing:.4px; color:#61768b; background:#f8fafc; }
+        body[data-layout="portal"] #app-conteudo td { border-color:#e9eef3; }
+        body[data-layout="portal"] #app-conteudo :is(button,input,select,a):focus-visible { outline:3px solid #6ca4d5; outline-offset:3px; }
+        @media(max-width:900px) {
+            body[data-layout="portal"] #main-content { grid-template-columns:200px minmax(0,1fr); }
+            body[data-layout="portal"] #app-conteudo { padding:24px 20px; }
+            .portal-cards { grid-template-columns:1fr; }
+        }
+        @media(max-width:760px) {
+            body[data-layout="portal"] #main-content { grid-template-columns:1fr; }
+            body[data-layout="portal"] #app-navegacao { position:static; min-height:0; border-right:0; border-bottom:1px solid #dce5ed; padding:16px; }
+            body[data-layout="portal"] #portal-papel-nome { margin-bottom:14px; }
+            body[data-layout="portal"] #container-abas-navegacao { flex-direction:row; overflow-x:auto; }
+            body[data-layout="portal"] .nav-tab { width:auto; flex-shrink:0; }
+            body[data-layout="portal"] .portal-nota { display:none; }
+            body[data-layout="portal"] #app-conteudo { padding:22px 16px; }
+            #portal-pagina-titulo { font-size:23px; }
+            .portal-painel { padding:16px; }
+        }
     </style>
 <style>@media print { body > * { display:none !important; } body > #modal-comprovante:not(.hidden) { display:block !important; position:static !important; background:white !important; padding:0 !important; } #modal-comprovante > div { max-height:none !important; overflow:visible !important; max-width:none !important; } .nao-imprimir { display:none !important; } }</style>
 </head>
@@ -69,20 +132,20 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.10.1</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.11.0</span></p>
             </div>
         </div>
     </div>
 
     <!-- Header Navbar -->
-    <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-40">
+    <header id="app-header" class="bg-blue-900 text-white shadow-lg sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <div class="bg-white text-blue-900 px-3 py-1.5 rounded-lg font-bold text-xl tracking-wider">PRGD</div>
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.10.1</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.11.0</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -104,15 +167,15 @@
 
     <!-- Main Container -->
     <main id="main-content" class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full hidden">
-        <p id="aviso-sem-modulos" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm">Seu cadastro está ativo, mas ainda não há módulos liberados. Aguarde a definição de acesso pelo administrador.</p>
-        <div class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
+        <div id="status-sessao" class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
             <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Sincronizado em Tempo Real com Firestore Cloud</span></span>
             <span id="badge-perfil-acesso" class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold uppercase"></span>
         </div>
 
-        <!-- Navegação por Abas -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div id="container-abas-navegacao" class="flex bg-slate-200 p-1 rounded-xl w-fit max-w-full overflow-x-auto text-xs sm:text-sm">
+        <!-- Uma única navegação; a disposição muda conforme o perfil. -->
+        <aside id="app-navegacao" class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div class="somente-portal"><p class="portal-sobre">Área de trabalho</p><p id="portal-orgao-nome"></p><p id="portal-papel-nome"></p></div>
+            <div id="container-abas-navegacao" role="navigation" aria-label="Navegação principal" class="flex bg-slate-200 p-1 rounded-xl w-fit max-w-full overflow-x-auto text-xs sm:text-sm">
                 <button type="button" data-tab="meu_orgao" class="nav-tab hidden px-3.5 py-2 rounded-lg">Meu órgão</button>
                 <button type="button" data-tab="colaboradores" class="nav-tab hidden px-3.5 py-2 rounded-lg">Colaboradores</button>
                 <button type="button" data-tab="inscricoes_orgao" class="nav-tab hidden px-3.5 py-2 rounded-lg">Inscrições do órgão</button>
@@ -132,11 +195,15 @@
                     <i class="fa-solid fa-file-csv"></i> Exportar Dados
                 </button>
             </div>
-        </div>
+            <div class="somente-portal portal-nota">Seu acesso considera o órgão, os setores e as ações autorizadas. Para solicitar alterações, fale com a GRGD.</div>
+        </aside>
+        <div id="app-conteudo" class="min-w-0">
+        <p id="aviso-sem-modulos" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm">Seu cadastro está ativo, mas ainda não há módulos liberados. Aguarde a definição de acesso pelo administrador.</p>
+            <div id="portal-topo" class="somente-portal"><p id="portal-saudacao"></p><p class="portal-sobre mt-3">Portal institucional</p><h2 id="portal-pagina-titulo"></h2><p id="portal-pagina-descricao"></p></div>
 
         <!-- ABA DASHBOARD -->
         <p id="portal-erros" role="alert" class="text-sm text-red-700 mb-3"></p>
-        <section id="aba-meu_orgao" class="hidden space-y-4"><div id="portal-resumo" class="bg-white border border-blue-100 rounded-xl p-5"></div><p class="text-sm text-slate-600">Consulte os módulos liberados para acompanhar os registros do seu órgão.</p></section>
+        <section id="aba-meu_orgao" class="hidden space-y-4"><div id="portal-resumo" class="bg-white border border-blue-100 rounded-xl p-5"></div><div id="portal-indicadores" class="portal-cards"></div><div id="portal-atalhos" class="portal-atalhos"></div><section id="portal-agenda" class="portal-painel" hidden><div class="portal-painel-topo"><h3>Próximos eventos</h3><button type="button" class="portal-atalho" data-portal-aba="eventos">Ver eventos</button></div><div id="portal-eventos-resumo"></div></section></section>
         <div id="portal-operacao-msg" role="status" class="hidden"></div>
         <section id="aba-colaboradores" class="hidden space-y-4"><h3 class="text-xl font-bold">Colaboradores do órgão</h3><p class="text-sm text-slate-600">Cadastre os colaboradores do órgão e inscreva-os nos eventos elegíveis. O cadastro não cria conta de acesso.</p><div class="flex flex-wrap gap-3 items-center"><label class="text-sm flex-1">Buscar colaborador<input id="colaborador-busca" type="search" placeholder="Nome, e-mail ou cargo" class="block w-full border rounded-lg p-2"></label><label class="text-sm">Filtrar por setor<select id="colaborador-setor-filtro" class="block w-full border rounded-lg p-2"><option value="">Todos os setores autorizados</option></select></label><button type="button" id="btn-novo-colaborador" class="hidden px-4 py-2 rounded-lg bg-blue-900 text-white">Cadastrar colaborador</button></div><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Nome</th><th class="p-3 text-left">E-mail institucional</th><th class="p-3 text-left">Setor</th><th class="p-3 text-left">Situação</th><th class="p-3 text-left">Ações</th></tr></thead><tbody id="portal-colaboradores"></tbody></table></div><p id="portal-cadastro-status" role="status" class="text-sm text-slate-600"></p></section>
         <section id="aba-inscricoes_orgao" class="hidden space-y-4"><h3 class="text-xl font-bold">Inscrições do órgão</h3><p class="text-sm text-slate-600">Consulta dos registros vinculados ao órgão e aos setores autorizados.</p><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Participante</th><th class="p-3 text-left">Evento</th><th class="p-3 text-left">Situação</th><th class="p-3 text-left">Protocolo</th><th class="p-3 text-left">Ações</th></tr></thead><tbody id="portal-inscricoes"></tbody></table></div></section>
@@ -333,7 +400,7 @@
         <div id="aba-eventos" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 flex-wrap">
-                    <div>
+                    <div id="eventos-titulo-interno">
                         <h3 class="text-base font-bold text-slate-800">Módulo de Eventos (<span id="count-eventos">0</span>)</h3>
                         <p class="text-xs text-slate-500">Gestão de capacitações, encontros e trilhas digitais da ATI-PE</p>
                     </div>
@@ -452,6 +519,7 @@
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[800px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Categoria / Domínio</th><th class="p-4">Identificador / Sigla</th><th class="p-4">Valor / Opção</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-bases" class="divide-y text-sm"></tbody></table></div>
         </div>
+        </div>
     </main>
 
     <div id="modal-perfil" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
@@ -565,14 +633,14 @@
       <div class="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"><div class="flex justify-end gap-2 nao-imprimir"><button id="comprovante-imprimir" type="button" class="border rounded-lg px-3 py-2 text-blue-900">Imprimir / salvar PDF</button><button type="button" class="btn-fechar-modal border rounded-lg px-3 py-2" data-target="modal-comprovante">Fechar</button></div><div id="comprovante-conteudo" class="mt-4"></div></div>
     </div>
 
-    <!-- Script Principal v0.10.1 -->
+    <!-- Script Principal v0.11.0 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, doc, onSnapshot, getDoc, query, where, getDocs, runTransaction, increment, serverTimestamp, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.10.1: Colaboradores e inscrições institucionais');
+        console.info('PRGD v0.11.0: Colaboradores e inscrições institucionais');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -682,6 +750,51 @@
         function portalInstitucional(usuario=currentUser) {
             return possuiVinculo(usuario) && ['gestor_nsi','substituto','auditoria'].includes(usuario.acessoInstitucional.papel);
         }
+        function usaPortalExterno(usuario=currentUser) {
+            return !!usuario && !ehAdministrador(usuario) && (portalInstitucional(usuario)||usuario.tipoUsuario==='externo');
+        }
+        function textoPortal(id,texto) {
+            const el=document.getElementById(id);if(el&&el.textContent!==texto)el.textContent=texto;
+        }
+        function htmlPortal(id,html) {
+            const el=document.getElementById(id);if(el&&el.innerHTML!==html)el.innerHTML=html;
+        }
+        function atualizarAreaPorPerfil() {
+            const externo=usaPortalExterno();document.body?.setAttribute('data-layout',externo?'portal':'interna');
+            if(!externo){for(const id of ['portal-orgao-nome','portal-papel-nome','portal-saudacao','portal-pagina-titulo','portal-pagina-descricao'])textoPortal(id,'');return;}
+            const v=currentUser.acessoInstitucional,orgao=v?dbData.orgaos.find(o=>String(o.firestoreId||o.id)===v.orgaoId):null;
+            textoPortal('portal-orgao-nome',orgao?.nome||orgao?.sigla||(v?'Órgão vinculado':'Área de eventos'));
+            textoPortal('portal-papel-nome',v?nomePerfilAcesso():'Usuário externo');
+            textoPortal('portal-saudacao','Olá, '+(currentUser.nome||'bem-vindo')+'.');
+            const paginas={meu_orgao:[v?.papel==='substituto'?'Minha delegação':'Meu órgão','Acompanhe os colaboradores, as inscrições e os eventos disponíveis no seu escopo.'],
+                colaboradores:['Colaboradores','Organize os colaboradores por setor e mantenha os dados atualizados. O cadastro não cria conta de acesso.'],
+                eventos:['Eventos','Consulte a agenda e as oportunidades disponíveis para o seu perfil.'],
+                inscricoes_orgao:['Inscrições do órgão','Acompanhe as inscrições autorizadas e consulte os comprovantes disponíveis.'],
+                auditoria_orgao:['Auditoria autorizada','Consulte as trilhas permitidas no órgão e nos setores da sua autorização.']};
+            const pagina=modulosDoUsuario().includes(abaAtual)?paginas[abaAtual]:null;
+            textoPortal('portal-pagina-titulo',pagina?.[0]||'Acesso em análise');
+            textoPortal('portal-pagina-descricao',pagina?.[1]||'Seu cadastro está ativo. Aguarde a liberação dos módulos pelo administrador.');
+        }
+        function renderInicioPortal() {
+            const ativo=usaPortalExterno()&&portalInstitucional()&&acessoInstitucionalAtivo()&&podeAcao('orgao');
+            if(!ativo){for(const id of ['portal-indicadores','portal-atalhos','portal-eventos-resumo'])htmlPortal(id,'');document.getElementById('portal-agenda').hidden=true;return;}
+            const cards=[],estado=col=>portalCarregando[col]?'Carregando…':portalErros[col]?'Consulta indisponível':'';
+            const card=(label,n,extra,icone,verde=false)=>`<div class="portal-card" data-tone="${verde?'verde':'azul'}"><p class="portal-card-label"><i class="fa-solid ${icone}" aria-hidden="true"></i>${esc(label)}</p><strong>${esc(n)}</strong><small>${esc(extra)}</small></div>`;
+            const eventos=podeAcao('eventos')?dbData.eventos.filter(e=>(e.eventoPublico===true||e.orgaosElegiveis?.includes(currentUser.acessoInstitucional.orgaoId))&&!eventoEncerrado(e)).sort((a,b)=>String(a.dataInicio||'').localeCompare(String(b.dataInicio||''))):[];
+            const estadoEventos=estado('eventos_publicos')||estado('eventos_elegiveis');
+            if(podeAcao('eventos'))cards.push(card('Eventos disponíveis',estadoEventos?'—':eventos.length,estadoEventos||'Na agenda pública ou destinados ao seu órgão','fa-calendar-days'));
+            if(podeAcao('participantes')){const erro=estado('colaboradores');cards.push(card('Colaboradores ativos',erro?'—':dbData.colaboradores.filter(p=>registroNoEscopo(p)&&p.ativo!==false).length,erro||'Nos seus setores autorizados','fa-users',true));}
+            if(podeAcao('inscricoes')||podeAcao('comprovantes')||podeAcao('relatorios')){const erro=estado('inscricoes');cards.push(card('Inscrições confirmadas',erro?'—':dbData.inscricoes.filter(i=>registroNoEscopo(i)&&String(i.situacao||'').toLowerCase()==='confirmada').length,erro||'Registros confirmados no seu escopo','fa-ticket'));}
+            htmlPortal('portal-indicadores',cards.join(''));
+            const acoes=[];
+            if(gestorPode('participantes.cadastrar'))acoes.push('<button type="button" class="portal-atalho primario" data-portal-cadastrar>Cadastrar colaborador</button>');
+            else if(podeAcao('participantes'))acoes.push('<button type="button" class="portal-atalho" data-portal-aba="colaboradores">Ver colaboradores</button>');
+            if(podeAcao('inscricoes')||podeAcao('comprovantes')||podeAcao('relatorios'))acoes.push('<button type="button" class="portal-atalho" data-portal-aba="inscricoes_orgao">Consultar inscrições</button>');
+            htmlPortal('portal-atalhos',acoes.join(''));
+            document.getElementById('portal-agenda').hidden=!podeAcao('eventos');
+            const lista=eventos.slice(0,3).map(e=>`<tr><td class="p-3">${esc(e.titulo||'Evento')}</td><td class="p-3">${esc(formatarData(e.dataInicio))}</td><td class="p-3">${eventoElegivelInstitucional(e)?'Inscrições abertas':'Consulte os detalhes'}</td></tr>`).join('');
+            htmlPortal('portal-eventos-resumo',(estadoEventos?`<p class="text-sm text-slate-600 mb-3">${esc(estadoEventos)}</p>`:'')+(lista?`<div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th class="p-3">Evento</th><th class="p-3">Data</th><th class="p-3">Inscrições</th></tr></thead><tbody>${lista}</tbody></table></div>`:!estadoEventos?'<p class="text-sm text-slate-500">Nenhum evento futuro disponível no momento.</p>':''));
+        }
         function nomePerfilAcesso(usuario=currentUser) {
             if (ehAdministrador(usuario)) return 'Administrador da PRGD';
             return PAPEIS_INSTITUCIONAIS[usuario?.acessoInstitucional?.papel]?.nome || 'Consulta';
@@ -738,6 +851,7 @@
             if(podeAcao('eventos'))observarEventosPortal();
         }
         function renderPortalInstitucional() {
+            atualizarAreaPorPerfil();renderInicioPortal();
             const v=currentUser?.acessoInstitucional;
             const box=document.getElementById('portal-resumo');
             if(!box)return;
@@ -968,6 +1082,8 @@
         document.getElementById('colaborador-setor-filtro')?.addEventListener('change',renderPortalInstitucional);
         document.getElementById('comprovante-imprimir')?.addEventListener('click',()=>consultarComprovante(comprovanteAtualId,true));
         document.addEventListener('click',ev=>{
+            const atalho=ev.target.closest?.('[data-portal-aba],[data-portal-cadastrar]');
+            if(atalho){if(atalho.hasAttribute('data-portal-cadastrar')){if(gestorPode('participantes.cadastrar')){mudarAba('colaboradores');abrirColaborador();}}else mudarAba(atalho.getAttribute('data-portal-aba'));return;}
             const el=ev.target.closest?.('[data-colaborador-editar],[data-inscrever-colaborador],[data-inscricao-cancelar],[data-comprovante]');if(!el)return;
             if(el.hasAttribute('data-colaborador-editar'))abrirColaborador(el.getAttribute('data-colaborador-editar'));
             else if(el.hasAttribute('data-inscrever-colaborador'))abrirInscricaoInstitucional(el.getAttribute('data-inscrever-colaborador'));
@@ -1734,6 +1850,7 @@
         }
 
         function atualizarVisibilidadeAbas() {
+            atualizarAreaPorPerfil();
             verificarAutenticacaoObrigatoria();
             document.body?.setAttribute('data-admin', String(ehAdministrador()));
             document.getElementById('detalhe-area-admin')?.classList.toggle('hidden', !podeAlterarColecao(document.getElementById('edit-colecao').value));
@@ -1770,7 +1887,7 @@
                 const el = document.getElementById('aba-' + mod.id);
                 const btn = document.querySelector(`[data-tab="${mod.id}"]`);
                 if (el) el.classList.toggle('hidden', mod.id !== abaAtual);
-                if (btn) btn.className = 'nav-tab px-3.5 py-2 rounded-lg transition ' + (mod.id === abaAtual ? 'tab-active' : 'tab-inactive');
+                if (btn) {btn.className = 'nav-tab px-3.5 py-2 rounded-lg transition ' + (mod.id === abaAtual ? 'tab-active' : 'tab-inactive');if(mod.id===abaAtual)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');}
             });
             if (aba === 'dashboard') renderCharts();
             if (aba === 'demandas') renderDemandas();
@@ -1781,6 +1898,7 @@
             if (aba === 'fornecedores') renderFornecedores();
             if (aba === 'usuarios') { renderGrupos(); renderUsuarios(); }
             if (aba === 'bases') renderBases();
+            atualizarAreaPorPerfil();
             guardarNavegacao();
         }
 
