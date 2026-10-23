@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.10.1 — correções do portal do gestor de NSI.** Base: `main@53f51a3` (v0.10.0). Publicação autorizada pelo usuário em 23/10/2026, após informar a publicação das novas regras da v0.10.1 no Firebase. Confirmação baseada no relato do usuário, sem acesso direto ao console nesta sessão. Integração e implantação do site acompanhadas no [PR #16](https://github.com/arlindossantos-collab/crm-ati-pe/pull/16). Corrige a estabilidade das consultas, setores e eventos de hoje; responsáveis e referências de aprovação são opcionais. Índices existentes mantidos. LDAP/PostgreSQL seguem na migração planejada.
+**Versão deste código: v0.11.0 — áreas externa e interna por perfil, em revisão.** Base: `main@ffd3ce8` (v0.10.1 publicada). A área externa adota a organização da prévia de perfis: menu lateral, identificação do órgão, indicadores e atalhos autorizados. Equipe GRGD e administradores usam a interface interna. Esta proposta ainda não foi integrada ou publicada. **Não altera regras nem índices do Firebase e não exige republicá-los.**
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -28,6 +28,13 @@ A versão do site depende da integração e da publicação deste código. Uma b
 Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo interno não concede administração automaticamente. Registros antigos sem vínculo continuam preservados, sem associação automática por nome.
 
 ## O que mudou nesta entrega
+
+A v0.11.0 separa a apresentação do portal do órgão da área de trabalho interna. Gestores de NSI, substitutos, auditoria autorizada e contas externas recebem menu lateral no computador e navegação horizontal no celular. A página Meu órgão mostra somente os indicadores, dados e atalhos permitidos no escopo do vínculo; consulta pendente ou recusada não é apresentada como zero. Cadastros, inscrições, comprovantes e perfil pessoal usam os fluxos existentes.
+
+A interface é escolhida automaticamente pelo perfil cadastrado. Não há seletor de papel na aplicação real nem novas permissões. Administradores e equipe GRGD, inclusive usuários internos legados, continuam na área interna. Ver [mapeamento e validação](docs/layout-por-perfil.md).
+
+### Base v0.10.1
+
 
 A v0.10.1 corrige reinícios desnecessários dos snapshots quando a ordem dos campos ou metadados muda, mantém o nome do órgão estável, atualiza os setores sem apagar dados digitados, inclui filtro de colaboradores por setor e mantém eventos de hoje em Futuros até o horário final ou fim do dia local. Falha na consulta não é apresentada como ausência de eventos. Veja [causas, validação e implantação](docs/correcoes-portal-nsi.md).
 
