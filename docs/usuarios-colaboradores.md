@@ -1,6 +1,6 @@
 # Usuários, colaboradores e contatos institucionais — v0.12.0
 
-Primeiro lote do controle de acesso no **crm-ati-pe**, sobre `main@373368974e4175eb585db2a9b0d511c3eb2072a5` (v0.11.0). Proposta para revisão, sem publicação em produção. Mantém HTML único, Firebase Authentication e Firestore. Não usa o repositório prgd-institucional nem implementa sua arquitetura PostgreSQL/OIDC.
+Primeiro lote do controle de acesso no **crm-ati-pe**, sobre `main@373368974e4175eb585db2a9b0d511c3eb2072a5` (v0.11.0). Publicação autorizada em 23/10/2026, após o usuário informar que publicou as regras do Firestore. Essa informação é uma confirmação do usuário, sem inspeção direta do console. Integração e publicação do site acompanhadas no [PR #18](https://github.com/arlindossantos-collab/crm-ati-pe/pull/18). Mantém HTML único, Firebase Authentication e Firestore. Não usa o repositório prgd-institucional nem implementa sua arquitetura PostgreSQL/OIDC.
 
 ## O que muda
 
