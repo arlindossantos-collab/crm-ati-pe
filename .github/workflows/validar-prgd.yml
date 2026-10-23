@@ -54,6 +54,10 @@ jobs:
         env:
           PRGD_TEST_CSS: /tmp/prgd-test.css
         run: node tests/layout-perfis.browser.cjs
+      - name: Testar administração de usuários, colaboradores e contatos vinculados
+        env:
+          PRGD_TEST_CSS: /tmp/prgd-test.css
+        run: node tests/usuarios-colaboradores.browser.cjs
       - name: Guardar capturas da interface de teste
         if: always()
         uses: actions/upload-artifact@v4

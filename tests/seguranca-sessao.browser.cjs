@@ -76,7 +76,7 @@ export async function runTransaction(db,fn){
    await page.locator('[data-tab="usuarios"]').click();
    assert.equal(await page.locator('[data-usuario-excluir="admin"]').isDisabled(),true);
    await page.locator('[data-usuario-editar="outro"]').click();
-   await page.locator('#usuario-nome').fill('Nome atualizado');await page.locator('#btn-salvar-edicao').click();
+   await page.locator('#usuario-nome').fill('Nome atualizado');await page.locator('#btn-salvar-edicao').click();await page.locator('#revisar-usuario-confirmar').click();
    await page.locator('#modal-detalhes').waitFor({state:'hidden'});
    await page.locator('#btn-historico-alteracoes').click();
    await page.locator('#historico-registros tr').filter({hasText:'Nome atualizado'}).waitFor();

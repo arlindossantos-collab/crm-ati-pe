@@ -182,14 +182,63 @@ service cloud.firestore {
         && item.get('ultimaAuditoriaId','') == id && item.get('atualizadoPorUid','') == request.auth.uid && item.get('atualizadoEm',null) == request.time
         && data.orgaoId == item.orgaoId && data.setorId == item.setorId;
     }
+    // A projeção compartilha somente contato institucional; nunca perfil, UID de login ou dados privados.
+    function contactProjectionMatches(data, id) {
+      let path = /databases/$(database)/documents/contatosColaboradores/$(id);
+      let c = getAfter(path).data;
+      return c != null && c.keys().hasOnly(['nome','emailInstitucional','telefone','cargo','orgaoId','setorId','ativo','validadeCadastro','funcoesContato','atualizadoEm'])
+        && c.nome == data.nome && c.emailInstitucional == data.emailInstitucional
+        && c.telefone == data.telefone && c.cargo == data.cargo && c.orgaoId == data.orgaoId && c.setorId == data.setorId
+        && c.ativo == data.ativo && c.validadeCadastro == data.get('validadeCadastro',null)
+        && c.funcoesContato == data.get('funcoesContato',[]) && c.atualizadoEm == data.atualizadoEm;
+    }
+    function maintainContactProjection(data,id) {
+      let path = /databases/$(database)/documents/contatosColaboradores/$(id);
+      return (!exists(path) && !existsAfter(path)) || contactProjectionMatches(data,id);
+    }
+    function participantUserLinkMatches(data,id) {
+      let previous = resource == null ? '' : resource.data.get('usuarioUid','');
+      let next = data.get('usuarioUid','');
+      return previous == next || (isAdmin()
+        && (next == '' || getAfter(/databases/$(database)/documents/usuarios/$(next)).data.get('colaboradorId','') == id)
+        && (previous == '' || getAfter(/databases/$(database)/documents/usuarios/$(previous)).data.get('colaboradorId','') != id));
+    }
+    function userParticipantLinkMatches(data,uid) {
+      let previous = resource == null ? '' : resource.data.get('colaboradorId','');
+      let next = data.get('colaboradorId','');
+      let path = /databases/$(database)/documents/historicoAlteracoes/$(data.get('ultimaAuditoriaId','ausente'));
+      let log = getAfter(path).data;
+      return previous == next || (isAdmin() && next is string && next.size() <= 150
+        && (next == '' || getAfter(/databases/$(database)/documents/colaboradores/$(next)).data.get('usuarioUid','') == uid)
+        && (previous == '' || getAfter(/databases/$(database)/documents/colaboradores/$(previous)).data.get('usuarioUid','') != uid)
+        && !exists(path) && log.autorUid == request.auth.uid && log.criadoEm == request.time
+        && log.colecao == 'usuarios' && log.registroId == uid && log.campos.hasAny(['colaboradorId']));
+    }
+    function validContactRef(data,key,id) {
+      let value=data.get('contatosVinculados',{}).get(key,'auto');
+      let previous=resource == null ? 'auto' : resource.data.get('contatosVinculados',{}).get(key,'auto');
+      return value is string && (value in ['auto','manual'] || value == previous
+        || get(/databases/$(database)/documents/contatosColaboradores/$(value)).data.orgaoId == id);
+    }
+    function validOrgContacts(data,id) {
+      return data.get('contatosVinculados',{}) is map
+        && data.get('contatosVinculados',{}).keys().hasOnly(['orgao','nsi','telematica','si','sei','focal'])
+        && validContactRef(data,'orgao',id) && validContactRef(data,'nsi',id) && validContactRef(data,'telematica',id)
+        && validContactRef(data,'si',id) && validContactRef(data,'sei',id) && validContactRef(data,'focal',id);
+    }
     function validParticipant(data, id) {
-      return data.keys().hasOnly(['nome','emailInstitucional','orgaoId','setorId','telefone','cargo','ativo','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+      return data.keys().hasOnly(['nome','emailInstitucional','orgaoId','setorId','telefone','cargo','ativo','validadeCadastro','funcoesContato','usuarioUid','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
         && data.nome is string && data.nome.size() > 1 && data.nome.size() <= 150
         && data.emailInstitucional is string && data.emailInstitucional.size() <= 254
         && data.emailInstitucional == data.emailInstitucional.lower().trim()
         && data.emailInstitucional.matches('^[^ /@]+@[^ /@]+[.][^ /@]+$')
         && data.orgaoId is string && data.setorId is string && id == participantKey(data)
         && data.telefone is string && data.telefone.size() <= 40 && data.cargo is string && data.cargo.size() <= 150
+        && (data.get('validadeCadastro',null) == null || (data.validadeCadastro is int && data.validadeCadastro > 0))
+        && data.get('funcoesContato',[]) is list && data.get('funcoesContato',[]).size() <= 6
+        && data.get('funcoesContato',[]).hasOnly(['orgao','nsi','telematica','si','sei','focal'])
+        && data.get('usuarioUid','') is string && data.get('usuarioUid','').size() <= 150
+        && participantUserLinkMatches(data,id) && maintainContactProjection(data,id)
         && data.ativo is bool && data.criadoEm is timestamp && data.criadoPorUid is string
         && data.atualizadoEm == request.time && data.atualizadoPorUid == request.auth.uid
         && data.ultimaAuditoriaId is string;
@@ -265,7 +314,7 @@ service cloud.firestore {
 
     match /usuarios/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
-      allow create: if isAdmin() && validUser(request.resource.data, uid) && validAccessRegistration(request.resource.data, null);
+      allow create: if isAdmin() && validUser(request.resource.data, uid) && validAccessRegistration(request.resource.data, null) && userParticipantLinkMatches(request.resource.data,uid);
       allow update: if ((isAdmin()
           && ((validUser(request.resource.data, uid) && validAccessRegistration(request.resource.data, resource.data.get('acessoInstitucional', null)))
             || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ativo','excluido','atualizadoEm','editadoPor','editadoPorUid','ultimaAuditoriaId']) && request.resource.data.ativo is bool
@@ -277,6 +326,7 @@ service cloud.firestore {
           && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 150
           && validPhoto(request.resource.data.get('fotoPerfil', ''))
           && request.resource.data.get('perfilAtualizadoEm', '') is string && request.resource.data.get('perfilAtualizadoEm', '').size() <= 40))
+        && userParticipantLinkMatches(request.resource.data,uid)
         && (request.resource.data.get('excluido', false) != true || resource.data.get('excluido', false) == true
           || (recentAuthentication() && auditedUserDeletion(uid)));
       // Inativar o perfil mantém os vínculos e o histórico.
@@ -339,7 +389,7 @@ service cloud.firestore {
         && (isAdmin() || (!hasInstitutionalAccess() && canReadModule('eventos') && resource.data.uid == request.auth.uid));
     }
     match /setores/{id} {
-      allow read: if isAdmin() || (accessActive() && resource.data.orgaoId == profile().acessoInstitucional.orgaoId);
+      allow read: if isAdmin() || canReadModule('clientes') || (accessActive() && resource.data.orgaoId == profile().acessoInstitucional.orgaoId);
       allow create, update: if isAdmin() && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 150
         && request.resource.data.ativo is bool && request.resource.data.orgaoId is string
         && exists(/databases/$(database)/documents/orgaos/$(request.resource.data.orgaoId));
@@ -347,14 +397,23 @@ service cloud.firestore {
     }
     match /colaboradores/{id} {
       allow read: if resource != null && (isAdmin() || (institutionalAction('participantes.consultar') && scopedRecord(resource.data)));
-      allow get: if resource == null && institutionalAction('participantes.cadastrar') && profile().acessoInstitucional.get('operacoesVersao','') == 'v1';
-      allow create: if managerAction('participantes.cadastrar',request.resource.data) && validParticipant(request.resource.data,id)
+      allow get: if resource == null && (isAdmin() || (institutionalAction('participantes.cadastrar') && profile().acessoInstitucional.get('operacoesVersao','') == 'v1'));
+      allow create: if (isAdmin() || managerAction('participantes.cadastrar',request.resource.data)) && validParticipant(request.resource.data,id)
         && validSectorId(request.resource.data.setorId,request.resource.data.orgaoId)
         && request.resource.data.criadoEm == request.time && request.resource.data.criadoPorUid == request.auth.uid
         && newAuditMatches(request.resource.data,'colaboradores',id,'criar');
-      allow update: if managerAction('participantes.editar',resource.data) && validParticipant(request.resource.data,id)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','telefone','cargo','ativo','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+      allow update: if (isAdmin() || managerAction('participantes.editar',resource.data)) && validParticipant(request.resource.data,id)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','telefone','cargo','ativo','setorId','validadeCadastro','funcoesContato','usuarioUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+        && (request.resource.data.setorId == resource.data.setorId || (validSectorId(request.resource.data.setorId,request.resource.data.orgaoId) && (isAdmin() || managerAction('participantes.editar',request.resource.data))))
+        && (isAdmin() || request.resource.data.get('usuarioUid','') == resource.data.get('usuarioUid',''))
         && newAuditMatches(request.resource.data,'colaboradores',id,'editar');
+      allow delete: if false;
+    }
+    match /contatosColaboradores/{id} {
+      allow read: if isAdmin() || canReadModule('clientes');
+      allow create, update: if (isAdmin() || managerAction('participantes.cadastrar',request.resource.data)
+          || managerAction('participantes.editar',request.resource.data))
+        && contactProjectionMatches(getAfter(/databases/$(database)/documents/colaboradores/$(id)).data,id);
       allow delete: if false;
     }
     match /{col}/{id} {
@@ -370,8 +429,8 @@ service cloud.firestore {
       }
       allow read: if businessCollection() && canReadModule(moduleName()) && visibleRecord(resource.data)
         || (col == 'orgaos' && institutionalAction('orgao.consultar') && id == profile().acessoInstitucional.orgaoId);
-      allow create: if businessCollection() && canWriteBusiness(moduleName(),'criar');
-      allow update: if businessCollection() && canWriteBusiness(moduleName(),'editar');
+      allow create: if businessCollection() && canWriteBusiness(moduleName(),'criar') && (col != 'orgaos' || validOrgContacts(request.resource.data,id));
+      allow update: if businessCollection() && canWriteBusiness(moduleName(),'editar') && (col != 'orgaos' || validOrgContacts(request.resource.data,id));
       allow delete: if businessCollection() && isAdmin() && recentAuthentication();
     }
   }

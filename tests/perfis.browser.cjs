@@ -78,13 +78,13 @@ const fixture=me=>({me,usuarios:[admin,nsi,auditor,grgd,user('novo')],
             await page.locator('#vinculo-situacao').selectOption('aprovado');
             for(const id of ['grgd-nome','grgd-ref','autoridade-nome','autoridade-ref'])await page.locator('#vinculo-'+id).fill('Referência fictícia '+id);
             await page.locator('#edit-campos-dinamicos').evaluate(el=>el.scrollTop=0);await page.screenshot({path:'test-results/formulario-vinculo.png'});
-            await page.locator('#btn-salvar-edicao').click();await page.locator('#modal-detalhes').waitFor({state:'hidden'});
+            await page.locator('#btn-salvar-edicao').click();await page.locator('#revisar-usuario-confirmar').click();await page.locator('#modal-detalhes').waitFor({state:'hidden'});
             const v=await page.evaluate(()=>__fixture.usuarios.find(u=>u.uid==='novo').acessoInstitucional);
             assert.equal(v.situacao,'aprovado');assert.equal(v.orgaoId,'orgao-a');assert.deepEqual(v.setoresIds,['a1']);assert.equal(v.registradoPorUid,'admin');
             assert.ok((await page.evaluate(()=>__transactions.at(-1))).some(op=>op.ref.collection==='historicoAlteracoes'&&op.data.campos.includes('acessoInstitucional')));
             await page.locator('[data-usuario-editar="novo"]').click();await page.locator('#vinculo-setores').selectOption(['a2']);
             assert.equal(await page.locator('#vinculo-situacao').inputValue(),'pendente');assert.equal(await page.locator('#vinculo-grgd-ref').inputValue(),'');assert.equal(await page.locator('#vinculo-autoridade-ref').inputValue(),'');
-            await page.locator('#btn-salvar-edicao').click();await page.locator('#modal-detalhes').waitFor({state:'hidden'});
+            await page.locator('#btn-salvar-edicao').click();await page.locator('#revisar-usuario-confirmar').click();await page.locator('#modal-detalhes').waitFor({state:'hidden'});
             assert.equal(await page.evaluate(()=>__fixture.usuarios.find(u=>u.uid==='novo').acessoInstitucional.situacao),'pendente');
             await context.close();
         }
