@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.12.0 - GOVERNANÇA E TELAS POR PERFIL   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.13.0 - GOVERNANÇA E TELAS POR PERFIL   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -132,7 +132,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.12.0</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.13.0</span></p>
             </div>
         </div>
     </div>
@@ -145,7 +145,7 @@
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.12.0</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.13.0</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -186,7 +186,7 @@
                 <button type="button" data-tab="eventos" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-calendar-day mr-1"></i> Eventos <span id="cnt-tab-eventos" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
                 <button type="button" data-tab="locais" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-building-circle-check mr-1"></i> Locais <span id="cnt-tab-locais" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
                 <button type="button" data-tab="fornecedores" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-handshake mr-1"></i> Fornecedores <span id="cnt-tab-fornecedores" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
-                <button type="button" data-tab="usuarios" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-users-gear mr-1"></i> Usuários <span id="cnt-tab-usuarios" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+
                 <button type="button" data-tab="bases" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-database mr-1"></i> Bases <span id="cnt-tab-bases" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
             </div>
             <div class="flex items-center gap-2">
@@ -199,23 +199,61 @@
         </aside>
         <div id="app-conteudo" class="min-w-0">
         <p id="aviso-sem-modulos" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm">Seu cadastro está ativo, mas ainda não há módulos liberados. Aguarde a definição de acesso pelo administrador.</p>
-            <div id="portal-topo" class="somente-portal"><p id="portal-saudacao"></p><p class="portal-sobre mt-3">Portal institucional</p><h2 id="portal-pagina-titulo"></h2><p id="portal-pagina-descricao"></p></div>
+            <p id="painel-identificacao" class="text-xs font-bold uppercase tracking-widest text-blue-900 mb-4"></p><div id="portal-topo" class="somente-portal"><p id="portal-saudacao"></p><p class="portal-sobre mt-3">Painel externo</p><h2 id="portal-pagina-titulo"></h2><p id="portal-pagina-descricao"></p></div>
 
         <!-- ABA DASHBOARD -->
         <p id="portal-erros" role="alert" class="text-sm text-red-700 mb-3"></p>
         <section id="aba-meu_orgao" class="hidden space-y-4"><div id="portal-resumo" class="bg-white border border-blue-100 rounded-xl p-5"></div><div id="portal-indicadores" class="portal-cards"></div><div id="portal-atalhos" class="portal-atalhos"></div><section id="portal-agenda" class="portal-painel" hidden><div class="portal-painel-topo"><h3>Próximos eventos</h3><button type="button" class="portal-atalho" data-portal-aba="eventos">Ver eventos</button></div><div id="portal-eventos-resumo"></div></section></section>
         <div id="portal-operacao-msg" role="status" class="hidden"></div>
-        <section id="aba-colaboradores" class="hidden space-y-4"><div id="admin-colaboradores" class="hidden space-y-4">
-<h3 class="text-xl font-bold text-blue-900">Colaboradores dos órgãos</h3><p class="text-sm text-slate-600">Cadastro compartilhado com os gestores. Contatos institucionais e contas de acesso são vínculos distintos.</p>
-<div id="colaboradores-indicadores" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
+        <section id="aba-colaboradores" class="hidden space-y-4">
+<div id="colaboradores-gerencial-topo" class="hidden space-y-3"><div><h2 class="text-xl font-bold text-blue-900">Colaboradores</h2><p class="text-sm text-slate-600">Pessoas, órgãos e acesso ao sistema em um só módulo. Somente o Administrador PRGD (master) concede permissões.</p></div><div class="flex flex-wrap gap-2" role="group" aria-label="Áreas de Colaboradores"><button type="button" data-colab-secao="cadastros" class="border rounded-lg px-4 py-2 text-sm">Cadastros e órgãos</button><button type="button" data-colab-secao="acessos" class="border rounded-lg px-4 py-2 text-sm">Acessos e permissões <span id="cnt-tab-usuarios">0</span></button><button type="button" data-colab-secao="estrutura" class="border rounded-lg px-4 py-2 text-sm">Setores e grupos</button></div></div>
+<div id="admin-colaboradores" class="hidden space-y-4">
+<h3 class="text-xl font-bold text-blue-900">Cadastros e órgãos</h3><p class="text-sm text-slate-600">Cadastro compartilhado com os gestores. Contatos institucionais e contas de acesso são vínculos distintos.</p>
+<div id="colaboradores-por-orgao" class="bg-white border rounded-xl p-4 space-y-3" aria-label="Colaboradores por órgão"></div><div id="colaboradores-indicadores" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
 <div class="bg-white border rounded-xl p-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-<label>Pesquisar<input id="admin-colab-busca" type="search" placeholder="Nome, e-mail, cargo, órgão ou setor" class="block w-full border rounded-lg p-2"></label>
+<label>Pesquisar<input id="admin-colab-busca" type="search" placeholder="Nome, matrícula, e-mail, cargo, órgão ou setor" class="block w-full border rounded-lg p-2"></label>
 <label>Órgão<select id="admin-colab-orgao" class="block w-full border rounded-lg p-2"></select></label>
 <label>Setor<select id="admin-colab-setor" class="block w-full border rounded-lg p-2"></select></label>
 <label>Situação<select id="admin-colab-situacao" class="block w-full border rounded-lg p-2"><option value="">Todas as situações</option><option value="ativo">Atualizado</option><option value="vencido">Revisão vencida</option><option value="inativo">Inativo</option><option value="sem_prazo">Sem prazo informado</option></select></label>
-<label>Conta de acesso<select id="admin-colab-conta" class="block w-full border rounded-lg p-2"><option value="">Com e sem conta vinculada</option><option value="com">Com conta vinculada</option><option value="sem">Sem conta vinculada</option></select></label>
+<label>Conta de acesso<select id="admin-colab-conta" class="block w-full border rounded-lg p-2"><option value="">Com e sem conta vinculada</option><option value="com">Com conta vinculada</option><option value="sem">Sem conta vinculada</option><option value="liberado">Acesso liberado</option><option value="bloqueado">Acesso bloqueado ou pendente</option></select></label>
 <div class="flex gap-2 items-end sm:col-span-2 lg:col-span-3 flex-wrap"><button type="button" id="admin-colab-novo" class="bg-blue-900 text-white rounded-lg px-4 py-2">Cadastrar colaborador</button><button type="button" id="admin-colab-limpar" class="border rounded-lg px-3 py-2">Limpar filtros</button><span id="admin-colab-status" role="status" class="text-xs text-slate-600"></span></div></div>
-<div class="bg-white border rounded-xl overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-slate-50"><tr><th class="p-3">Colaborador / contato</th><th class="p-3">Órgão / setor</th><th class="p-3">Funções de contato</th><th class="p-3">Revisão cadastral</th><th class="p-3">Usuário vinculado</th><th class="p-3">Ações</th></tr></thead><tbody id="admin-colab-lista"></tbody></table></div></div><div id="colaboradores-portal-area" class="space-y-4"><h3 class="text-xl font-bold">Colaboradores do órgão</h3><p class="text-sm text-slate-600">Cadastre os colaboradores do órgão e inscreva-os nos eventos elegíveis. O cadastro não cria conta de acesso.</p><div class="flex flex-wrap gap-3 items-center"><label class="text-sm flex-1">Buscar colaborador<input id="colaborador-busca" type="search" placeholder="Nome, e-mail ou cargo" class="block w-full border rounded-lg p-2"></label><label class="text-sm">Filtrar por setor<select id="colaborador-setor-filtro" class="block w-full border rounded-lg p-2"><option value="">Todos os setores autorizados</option></select></label><button type="button" id="btn-novo-colaborador" class="hidden px-4 py-2 rounded-lg bg-blue-900 text-white">Cadastrar colaborador</button></div><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Nome</th><th class="p-3 text-left">E-mail institucional</th><th class="p-3 text-left">Setor</th><th class="p-3 text-left">Situação</th><th class="p-3 text-left">Ações</th></tr></thead><tbody id="portal-colaboradores"></tbody></table></div><p id="portal-cadastro-status" role="status" class="text-sm text-slate-600"></p></div></section>
+<div class="bg-white border rounded-xl overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-slate-50"><tr><th class="p-3">Colaborador / contato</th><th class="p-3">Órgão / setor</th><th class="p-3">Funções de contato</th><th class="p-3">Revisão cadastral</th><th class="p-3">Acesso ao sistema</th><th class="p-3">Ações</th></tr></thead><tbody id="admin-colab-lista"></tbody></table></div></div><div id="colaboradores-portal-area" class="space-y-4"><h3 class="text-xl font-bold">Colaboradores do órgão</h3><p class="text-sm text-slate-600">Cadastre os colaboradores do órgão e inscreva-os nos eventos elegíveis. O cadastro não cria conta de acesso.</p><div class="flex flex-wrap gap-3 items-center"><label class="text-sm flex-1">Buscar colaborador<input id="colaborador-busca" type="search" placeholder="Nome, e-mail ou cargo" class="block w-full border rounded-lg p-2"></label><label class="text-sm">Filtrar por setor<select id="colaborador-setor-filtro" class="block w-full border rounded-lg p-2"><option value="">Todos os setores autorizados</option></select></label><button type="button" id="btn-novo-colaborador" class="hidden px-4 py-2 rounded-lg bg-blue-900 text-white">Cadastrar colaborador</button></div><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Nome</th><th class="p-3 text-left">E-mail institucional</th><th class="p-3 text-left">Setor</th><th class="p-3 text-left">Situação</th><th class="p-3 text-left">Ações</th></tr></thead><tbody id="portal-colaboradores"></tbody></table></div><p id="portal-cadastro-status" role="status" class="text-sm text-slate-600"></p></div>        <!-- Acessos e estrutura dentro de Colaboradores -->
+        <div id="aba-usuarios" data-colab-conteudo="acessos" class="hidden space-y-4">
+            <div id="usuarios-indicadores" class="grid grid-cols-2 lg:grid-cols-4 gap-3" aria-label="Indicadores dos usuários"></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h3 class="text-base font-bold text-slate-800">Contas de acesso (<span id="count-usuarios">0</span>)</h3>
+                    <input type="text" id="busca-usuarios" placeholder="Buscar nome ou e-mail..." class="p-2 border rounded-lg text-xs bg-white w-48 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    <select id="filtro-tipo-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium" aria-label="Filtrar tipo de usuário"><option value="">Todos os tipos</option><option value="interno">Interno - GRGD</option><option value="externo">Externos</option><option value="legado">A definir</option></select>
+                    <select id="filtro-orgao-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="">Filtrar por Cliente / Secretaria</option>
+                    </select>
+                    <select id="filtro-setor-usuario" aria-label="Filtrar setor do vínculo" class="p-2 border rounded-lg text-xs bg-white"><option value="">Todos os setores</option></select>
+                    <select id="filtro-perfil-usuario" aria-label="Filtrar perfil" class="p-2 border rounded-lg text-xs bg-white"><option value="">Todos os perfis</option><option value="admin">Administrador PRGD</option><option value="grgd">Equipe GRGD</option><option value="gestor_nsi">Gestor NSI</option><option value="substituto">Substituto</option><option value="auditoria">Auditoria</option><option value="legado">Acesso anterior</option></select>
+                    <select id="filtro-acesso-usuario" aria-label="Filtrar situação de acesso" class="p-2 border rounded-lg text-xs bg-white"><option value="">Todas as situações de acesso</option></select>
+                    <button type="button" id="usuarios-limpar-filtros" class="border rounded-lg p-2 text-xs">Limpar filtros</button>
+                    <select id="filtro-tag-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="">Filtrar por Tag / Categoria</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                        <i class="fa-solid fa-file-arrow-up"></i> Importar CSV <input type="file" id="input-import-csv" accept=".csv" class="hidden">
+                    </label>
+                    <button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Nova conta de acesso</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail de acesso</th><th class="p-4">Tipo / Situação</th><th class="p-4">Cliente</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
+        </div>
+        <div id="colaboradores-estrutura" class="hidden space-y-4">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-3"><h4 class="font-bold">Setores por órgão</h4><form id="form-setor" class="flex flex-wrap gap-2"><select id="setor-orgao" aria-label="Órgão do setor" required class="border rounded-lg p-2 text-xs"></select><input id="setor-nome" aria-label="Nome do setor" required maxlength="150" placeholder="Nome do setor" class="border rounded-lg p-2 text-xs"><button class="bg-blue-900 text-white rounded-lg px-3 py-2 text-xs">Cadastrar setor</button></form><p id="setor-msg" role="status" class="text-xs"></p><div id="gestao-setores-lista" class="text-xs max-h-40 overflow-auto"></div><a href="previa-perfis.html" target="_blank" rel="noopener" class="inline-block text-sm text-blue-800 underline">Abrir prévia de perfis com dados fictícios</a></div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários (Acesso Restrito a Eventos)</h4><p class="text-xs text-slate-500">Crie grupos para controlar quais usuários enxergam os eventos restritos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
+                <div id="lista-grupos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            </div>
+        </div>
+
+</section>
         <section id="aba-inscricoes_orgao" class="hidden space-y-4"><h3 class="text-xl font-bold">Inscrições do órgão</h3><p class="text-sm text-slate-600">Consulta dos registros vinculados ao órgão e aos setores autorizados.</p><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Participante</th><th class="p-3 text-left">Evento</th><th class="p-3 text-left">Situação</th><th class="p-3 text-left">Protocolo</th><th class="p-3 text-left">Ações</th></tr></thead><tbody id="portal-inscricoes"></tbody></table></div></section>
         <section id="aba-auditoria_orgao" class="hidden space-y-4"><h3 class="text-xl font-bold">Auditoria autorizada</h3><p class="text-sm text-slate-600">Somente leitura das trilhas identificadas com o órgão e os setores aprovados.</p><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Autor</th><th class="p-3 text-left">Ação</th><th class="p-3 text-left">Registro</th><th class="p-3 text-left">Data e hora</th></tr></thead><tbody id="portal-auditoria"></tbody></table></div></section>
         <div id="aba-dashboard" class="block space-y-6">
@@ -485,40 +523,6 @@
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Razão Social / Nome</th><th class="p-4">CNPJ / Categoria</th><th class="p-4">Serviço Principal</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-fornecedores" class="divide-y text-sm"></tbody></table></div>
         </div>
 
-        <!-- ABA USUÁRIOS -->
-        <div id="aba-usuarios" class="hidden space-y-4">
-            <div id="usuarios-indicadores" class="grid grid-cols-2 lg:grid-cols-4 gap-3" aria-label="Indicadores dos usuários"></div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-3 flex-wrap">
-                    <h3 class="text-base font-bold text-slate-800">Usuários (<span id="count-usuarios">0</span>)</h3>
-                    <input type="text" id="busca-usuarios" placeholder="Buscar nome ou e-mail..." class="p-2 border rounded-lg text-xs bg-white w-48 focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    <select id="filtro-tipo-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium" aria-label="Filtrar tipo de usuário"><option value="">Todos os tipos</option><option value="interno">Interno - GRGD</option><option value="externo">Externos</option><option value="legado">A definir</option></select>
-                    <select id="filtro-orgao-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
-                        <option value="">Filtrar por Cliente / Secretaria</option>
-                    </select>
-                    <select id="filtro-setor-usuario" aria-label="Filtrar setor do vínculo" class="p-2 border rounded-lg text-xs bg-white"><option value="">Todos os setores</option></select>
-                    <select id="filtro-perfil-usuario" aria-label="Filtrar perfil" class="p-2 border rounded-lg text-xs bg-white"><option value="">Todos os perfis</option><option value="admin">Administrador PRGD</option><option value="grgd">Equipe GRGD</option><option value="gestor_nsi">Gestor NSI</option><option value="substituto">Substituto</option><option value="auditoria">Auditoria</option><option value="legado">Acesso anterior</option></select>
-                    <select id="filtro-acesso-usuario" aria-label="Filtrar situação de acesso" class="p-2 border rounded-lg text-xs bg-white"><option value="">Todas as situações de acesso</option></select>
-                    <button type="button" id="usuarios-limpar-filtros" class="border rounded-lg p-2 text-xs">Limpar filtros</button>
-                    <select id="filtro-tag-usuario" class="p-2 border rounded-lg text-xs bg-white font-medium">
-                        <option value="">Filtrar por Tag / Categoria</option>
-                    </select>
-                </div>
-                <div class="flex items-center gap-2">
-                    <label class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-                        <i class="fa-solid fa-file-arrow-up"></i> Importar CSV <input type="file" id="input-import-csv" accept=".csv" class="hidden">
-                    </label>
-                    <button type="button" data-modal-target="usuario" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-user-plus"></i> Novo Usuário</button>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto"><table class="w-full text-left border-collapse min-w-[900px]"><thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome</th><th class="p-4">E-mail de acesso</th><th class="p-4">Tipo / Situação</th><th class="p-4">Cliente</th><th class="p-4">Tags</th><th class="p-4">Perfil</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-usuarios" class="divide-y text-sm"></tbody></table></div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-3"><h4 class="font-bold">Setores por órgão</h4><form id="form-setor" class="flex flex-wrap gap-2"><select id="setor-orgao" aria-label="Órgão do setor" required class="border rounded-lg p-2 text-xs"></select><input id="setor-nome" aria-label="Nome do setor" required maxlength="150" placeholder="Nome do setor" class="border rounded-lg p-2 text-xs"><button class="bg-blue-900 text-white rounded-lg px-3 py-2 text-xs">Cadastrar setor</button></form><p id="setor-msg" role="status" class="text-xs"></p><div id="gestao-setores-lista" class="text-xs max-h-40 overflow-auto"></div><a href="previa-perfis.html" target="_blank" rel="noopener" class="inline-block text-sm text-blue-800 underline">Abrir prévia de perfis com dados fictícios</a></div>
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                <div class="flex items-center justify-between mb-4"><div><h4 class="font-bold text-slate-800">Grupos de Usuários (Acesso Restrito a Eventos)</h4><p class="text-xs text-slate-500">Crie grupos para controlar quais usuários enxergam os eventos restritos.</p></div><button type="button" id="btn-novo-grupo" class="btn-admin-only bg-violet-700 hover:bg-violet-600 text-white text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer"><i class="fa-solid fa-layer-group"></i> Novo Grupo</button></div>
-                <div id="lista-grupos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-            </div>
-        </div>
-
         <!-- ABA BASES -->
         <div id="aba-bases" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
@@ -636,7 +640,7 @@
           <label>E-mail institucional<input id="colab-emailInstitucional" type="email" required maxlength="254" class="block border rounded-lg p-2 w-full"></label>
           <label>Setor<select id="colab-setorId" required class="block border rounded-lg p-2 w-full"></select><span id="colab-setores-msg" role="status" class="block text-xs text-slate-600 mt-1"></span></label>
           <label>Telefone<input id="colab-telefone" type="tel" maxlength="40" class="block border rounded-lg p-2 w-full"></label>
-          <label>Cargo / função<input id="colab-cargo" maxlength="150" class="block border rounded-lg p-2 w-full"></label>
+          <label>Matrícula<input id="colab-matricula" maxlength="50" autocomplete="off" class="block border rounded-lg p-2 w-full"></label><label>Cargo / função<input id="colab-cargo" maxlength="150" class="block border rounded-lg p-2 w-full"></label>
           <label id="colab-orgao-label" class="hidden sm:col-span-2">Órgão<select id="colab-orgao" class="block border rounded-lg p-2 w-full"></select></label>
           <label>Revisar cadastro até<input id="colab-validade" type="date" class="block border rounded-lg p-2 w-full"><span class="text-xs text-slate-500">Prazo de atualização cadastral. Não altera a validade do acesso.</span></label>
           <fieldset class="sm:col-span-2 border rounded-lg p-3"><legend class="font-semibold">Contatos institucionais do órgão</legend><div id="colab-funcoes" class="flex flex-wrap gap-3"></div><p class="text-xs text-slate-500 mt-2">As funções atualizam os contatos em Clientes. Não concedem permissão de acesso à PRGD.</p></fieldset>
@@ -656,14 +660,14 @@
       <div class="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"><div class="flex justify-end gap-2 nao-imprimir"><button id="comprovante-imprimir" type="button" class="border rounded-lg px-3 py-2 text-blue-900">Imprimir / salvar PDF</button><button type="button" class="btn-fechar-modal border rounded-lg px-3 py-2" data-target="modal-comprovante">Fechar</button></div><div id="comprovante-conteudo" class="mt-4"></div></div>
     </div>
 
-    <!-- Script Principal v0.12.0 -->
+    <!-- Script Principal v0.13.0 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, doc, onSnapshot, getDoc, query, where, getDocs, runTransaction, increment, serverTimestamp, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.12.0: Usuários, colaboradores e contatos vinculados');
+        console.info('PRGD v0.13.0: Painel gerencial e Colaboradores unificados');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -690,6 +694,7 @@
         let versaoSessao = 0;
         let dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [], setores:[], colaboradores:[], auditoriaOrgao:[], contatosColaboradores:[] };
         let abaAtual = 'dashboard';
+        let secaoColaboradores='cadastros', novoAcessoColaborador=null;
         let filtroEventoAtual = 'futuros';
         let filtroTagAtual = '';
         let filtroTipoUsuarioAtual = '';
@@ -784,6 +789,7 @@
         }
         function atualizarAreaPorPerfil() {
             const externo=usaPortalExterno();document.body?.setAttribute('data-layout',externo?'portal':'interna');
+            textoPortal('painel-identificacao',currentUser?(externo?'Painel externo':'Painel gerencial'):'');
             if(!externo){for(const id of ['portal-orgao-nome','portal-papel-nome','portal-saudacao','portal-pagina-titulo','portal-pagina-descricao'])textoPortal(id,'');return;}
             const v=currentUser.acessoInstitucional,orgao=v?dbData.orgaos.find(o=>String(o.firestoreId||o.id)===v.orgaoId):null;
             textoPortal('portal-orgao-nome',orgao?.nome||orgao?.sigla||(v?'Órgão vinculado':'Área de eventos'));
@@ -925,6 +931,7 @@
             if(!p.nome||p.nome.length<2||p.nome.length>150)throw new Error('Informe o nome do colaborador (2 a 150 caracteres).');
             if(p.emailInstitucional.length>254||!/^[^ /@]+@[^ /@]+\.[^ /@]+$/.test(p.emailInstitucional))throw new Error('Informe um e-mail institucional válido.');
             if(!p.setorId||!setoresDoGestor().some(s=>s.id===p.setorId&&s.orgaoId===p.orgaoId)||!registroNoEscopo(p))throw new Error('Selecione um setor ativo dentro da sua delegação.');
+            if(typeof (p.matricula??'')!=='string'||(p.matricula||'').length>50)throw new Error('A matrícula deve ter até 50 caracteres.');
             if(p.telefone.length>40||p.cargo.length>150)throw new Error('Revise o telefone e o cargo.');
             return p;
         }
@@ -939,7 +946,7 @@
             colaboradorEmEdicao=null;eventoInscricaoId='';comprovanteAtualId='';
             ['modal-colaborador','modal-inscricao-institucional','modal-comprovante'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
             document.getElementById('comprovante-conteudo').innerHTML='';
-            for(const id of ['colab-nome','colab-emailInstitucional','colab-telefone','colab-cargo','colab-validade','colaborador-busca'])document.getElementById(id).value='';
+            for(const id of ['colab-nome','colab-emailInstitucional','colab-telefone','colab-matricula','colab-cargo','colab-validade','colaborador-busca'])document.getElementById(id).value='';
             for(const id of ['colab-setorId','colab-orgao','colab-funcoes','insc-participante','colaborador-setor-filtro'])document.getElementById(id).innerHTML='';
             for(const id of ['colab-erro','colab-setores-msg','insc-erro','insc-contexto','colab-contexto'])document.getElementById(id).textContent='';
         }
@@ -967,7 +974,7 @@
             if(campo.innerHTML!==html){campo.innerHTML=html;campo.value=valor;}
             campo.disabled=!!portalCarregando.setores||!!portalErros.setores||!setores.length;
             const msg=document.getElementById('colab-setores-msg');
-            if(msg)msg.textContent=portalErros.setores?'Não foi possível confirmar os setores. Solicite à GRGD a revisão do acesso.':portalCarregando.setores?'Aguarde o carregamento dos setores.':!setores.length?'Peça ao administrador para cadastrar um setor ativo em Usuários → Setores por órgão e conferir sua delegação.':'';
+            if(msg)msg.textContent=portalErros.setores?'Não foi possível confirmar os setores. Solicite à GRGD a revisão do acesso.':portalCarregando.setores?'Aguarde o carregamento dos setores.':!setores.length?'Peça ao administrador para cadastrar um setor ativo em Colaboradores → Setores e grupos e conferir sua delegação.':'';
             document.getElementById('colab-salvar').disabled=portalOperacao||!!portalCarregando.setores||!!portalErros.setores||!setores.length;
             if(filtro){const atual=filtro.value,htmlFiltro='<option value="">Todos os setores autorizados</option>'+opcoes;if(filtro.innerHTML!==htmlFiltro){filtro.innerHTML=htmlFiltro;filtro.value=atual;}}
         }
@@ -976,7 +983,7 @@
             if((!ehAdministrador()&&!gestorPode(id?'participantes.editar':'participantes.cadastrar'))||(id&&(!p||!registroNoEscopo(p))))return;
             colaboradorEmEdicao=p?{id:p.id,uid:currentUser.uid,sessao:versaoSessao}:null;
             document.getElementById('colab-titulo').textContent=id?'Editar colaborador':'Cadastrar colaborador';
-            for(const k of ['nome','emailInstitucional','telefone','cargo'])document.getElementById('colab-'+k).value=p?.[k]||'';
+            for(const k of ['nome','emailInstitucional','telefone','cargo','matricula'])document.getElementById('colab-'+k).value=p?.[k]||'';
             document.getElementById('colab-emailInstitucional').readOnly=!!p;
             document.getElementById('colab-setorId').value=p?.setorId||'';
             document.getElementById('colab-ativo').checked=p?.ativo!==false;
@@ -999,7 +1006,7 @@
             try {
                 if(edicao&&(edicao.uid!==uid||edicao.sessao!==sessao))throw new Error('Sua sessão mudou. Abra o cadastro novamente.');
                 const val=k=>document.getElementById('colab-'+k).value.trim(),v=currentUser.acessoInstitucional;
-                const dados=validarDadosColaborador({nome:val('nome'),emailInstitucional:emailParticipante(val('emailInstitucional')),orgaoId:ehAdministrador()?document.getElementById('colab-orgao').value:v.orgaoId,setorId:val('setorId'),telefone:val('telefone'),cargo:val('cargo'),ativo:document.getElementById('colab-ativo').checked,validadeCadastro:lerValidadeCadastro(),funcoesContato:Array.from(document.querySelectorAll('[name="colab-funcao"]:checked')).map(c=>c.value)});
+                const dados=validarDadosColaborador({nome:val('nome'),emailInstitucional:emailParticipante(val('emailInstitucional')),orgaoId:ehAdministrador()?document.getElementById('colab-orgao').value:v.orgaoId,setorId:val('setorId'),telefone:val('telefone'),cargo:val('cargo'),matricula:val('matricula'),ativo:document.getElementById('colab-ativo').checked,validadeCadastro:lerValidadeCadastro(),funcoesContato:Array.from(document.querySelectorAll('[name="colab-funcao"]:checked')).map(c=>c.value)});
                 const id=await chaveColaborador(dados.orgaoId,dados.emailInstitucional),ref=doc(db,'colaboradores',id),log=doc(collection(db,'historicoAlteracoes'));
                 if(edicao&&edicao.id!==id)throw new Error('Órgão e e-mail identificam este cadastro e não podem ser alterados.');
                 await runTransaction(db,async t=>{
@@ -1202,13 +1209,14 @@
         // Apenas navegação: nenhum perfil, senha ou dado de negócio vai para este armazenamento.
         function guardarNavegacao() {
             if (!currentUser || restaurandoSessao) return;
-            try { sessionStorage.setItem('prgd:navegacao:' + currentUser.uid, JSON.stringify({aba:abaAtual, visao:visaoDemandasAtual})); } catch (_) {}
+            try { sessionStorage.setItem('prgd:navegacao:' + currentUser.uid, JSON.stringify({aba:abaAtual, visao:visaoDemandasAtual,secaoColaboradores})); } catch (_) {}
         }
         function restaurarNavegacao() {
             let salvo = {};
             try { salvo = JSON.parse(sessionStorage.getItem('prgd:navegacao:' + currentUser.uid) || '{}'); } catch (_) {}
             const permitidos = modulosDoUsuario();
             const aba = permitidos.includes(salvo?.aba) ? salvo.aba : permitidos[0] || '';
+            secaoColaboradores=salvo?.aba==='usuarios'?'acessos':['cadastros','acessos','estrutura'].includes(salvo?.secaoColaboradores)?salvo.secaoColaboradores:'cadastros';
             const calendario = salvo?.visao === 'calendario';
             document.getElementById(calendario ? 'btn-visao-calendario' : 'btn-visao-tabela')?.click?.();
             mudarAba(aba);
@@ -1219,7 +1227,7 @@
             verificarAutenticacaoObrigatoria();
         }
 
-        // v0.12.0: cadastros, contatos institucionais e identidade de acesso são vínculos distintos.
+        // v0.13.0: cadastros, contatos institucionais e identidade de acesso são vínculos distintos.
         const FUNCOES_CONTATO={orgao:{nome:'Gestor do órgão',nomeCampo:'gestorOrgao',email:'emailGestorOrgao',telefone:'telGestorOrgao',cargo:'cargoGestorOrgao'},nsi:{nome:'NSI',nomeCampo:'gestorNsi',email:'emailGestorNsi',telefone:'telGestorNsi'},telematica:{nome:'Telemática',nomeCampo:'gestorTelematica',email:'emailGestorTelematica',telefone:'telGestorTelematica'},si:{nome:'SI',nomeCampo:'gestorSi',email:'emailGestorSi',telefone:'telGestorSi'},sei:{nome:'SEI',nomeCampo:'gestorSei',email:'emailGestorSei',telefone:'telGestorSei'},focal:{nome:'Ponto focal / substituto',nomeCampo:'pontoFocalNome',email:'pontoFocalEmail',telefone:'pontoFocalTel',cargo:'pontoFocalCargo'}};
         const ESTADOS_ACESSO={liberado:'Acesso liberado',inativo:'Cadastro inativo',excluido:'Excluído do cadastro',pendente:'Aguardando aprovação',suspenso:'Vínculo suspenso',vencido:'Vínculo vencido',revisao:'Revisão do vínculo pendente',futuro:'Vínculo ainda não iniciou',sem_modulos:'Sem ações ou módulos liberados',invalido:'Vínculo precisa de validação',titular:'Sujeito à validação do titular'};
         let revisaoUsuarioResolver=null,vinculoColaboradorAtual=null,vinculoColaboradorOcupado=false;
@@ -1260,23 +1268,71 @@
             if(campo.innerHTML!==html){campo.innerHTML=html;campo.value=valor;}
         }
         function renderColaboradoresAdmin(){
-            const admin=ehAdministrador();document.getElementById('admin-colaboradores').classList.toggle('hidden',!admin);document.getElementById('colaboradores-portal-area').classList.toggle('hidden',admin);
-            if(!admin){document.getElementById('admin-colab-lista').innerHTML='';return;}
+            const admin=ehAdministrador();mostrarSecaoColaboradores(secaoColaboradores,false);document.getElementById('colaboradores-portal-area').classList.toggle('hidden',admin);
+            if(!admin){document.getElementById('admin-colab-lista').innerHTML='';document.getElementById('colaboradores-por-orgao').innerHTML='';return;}
             preencherOpcoesPreservando('admin-colab-orgao',dbData.orgaos,o=>(o.sigla?o.sigla+' · ':'')+(o.nome||''),'Todos os órgãos');
             const org=document.getElementById('admin-colab-orgao').value;
             preencherOpcoesPreservando('admin-colab-setor',dbData.setores.filter(s=>!org||s.orgaoId===org),s=>s.nome,'Todos os setores');
             const valor=id=>document.getElementById(id).value,q=emailParticipante(valor('admin-colab-busca')),setor=valor('admin-colab-setor'),situacao=valor('admin-colab-situacao'),conta=valor('admin-colab-conta');
             const nomeOrgao=p=>dbData.orgaos.find(o=>String(o.firestoreId||o.id)===p.orgaoId)?.sigla||dbData.orgaos.find(o=>String(o.firestoreId||o.id)===p.orgaoId)?.nome||p.orgaoId;
             const nomeSetor=p=>dbData.setores.find(s=>s.id===p.setorId)?.nome||p.setorId;
-            const lista=dbData.colaboradores.filter(p=>(!org||p.orgaoId===org)&&(!setor||p.setorId===setor)&&(!situacao||situacaoCadastroColaborador(p).id===situacao)&&(!conta||(conta==='com')===!!p.usuarioUid)&&(!q||[p.nome,p.emailInstitucional,p.cargo,nomeOrgao(p),dbData.orgaos.find(o=>String(o.firestoreId||o.id)===p.orgaoId)?.nome,nomeSetor(p)].some(v=>String(v||'').toLowerCase().includes(q))));
+            const lista=dbData.colaboradores.filter(p=>(!org||p.orgaoId===org)&&(!setor||p.setorId===setor)&&(!situacao||situacaoCadastroColaborador(p).id===situacao)&&(!conta||(conta==='com'?!!p.usuarioUid:conta==='sem'?!p.usuarioUid:conta==='liberado'?acessoDoColaborador(p).liberado:!!p.usuarioUid&&!acessoDoColaborador(p).liberado))&&(!q||[p.nome,p.matricula,p.emailInstitucional,p.cargo,nomeOrgao(p),dbData.orgaos.find(o=>String(o.firestoreId||o.id)===p.orgaoId)?.nome,nomeSetor(p)].some(v=>String(v||'').toLowerCase().includes(q))));
             const erro=portalErros.colaboradores,carregando=portalCarregando.colaboradores;
+            renderColaboradoresPorOrgao(lista,erro||carregando);
             document.getElementById('admin-colab-status').textContent=erro?'Não foi possível carregar os colaboradores. Verifique as regras do Firebase e tente novamente.':carregando?'Carregando colaboradores…':`${lista.length} de ${dbData.colaboradores.length} colaborador(es). Revisão cadastral não altera permissões de acesso.`;
             const total=(id)=>dbData.colaboradores.filter(p=>situacaoCadastroColaborador(p).id===id).length;
             document.getElementById('colaboradores-indicadores').innerHTML=[['Total de colaboradores',dbData.colaboradores.length,'fa-users'],['Revisão vencida',total('vencido'),'fa-calendar-check'],['Sem prazo informado',total('sem_prazo'),'fa-clock'],['Usuários vinculados',dbData.colaboradores.filter(p=>p.usuarioUid).length,'fa-link']].map(([nome,n,icone])=>cardCadastro(nome,erro||carregando?'—':n,icone)).join('');
             document.getElementById('admin-colab-lista').innerHTML=erro||carregando?'':lista.map(p=>{
-                const usuario=dbData.usuarios.find(u=>uidCadastro(u)===p.usuarioUid),st=situacaoCadastroColaborador(p);
-                return `<tr class="border-t"><td class="p-3"><b>${esc(p.nome)}</b><small class="block">${esc(p.emailInstitucional)}</small><small class="block text-slate-500">${esc(p.telefone||'')} ${esc(p.cargo||'')}</small></td><td class="p-3">${esc(nomeOrgao(p))}<small class="block">${esc(nomeSetor(p))}</small></td><td class="p-3">${esc((p.funcoesContato||[]).map(f=>FUNCOES_CONTATO[f]?.nome||f).join(', ')||'Sem função indicada')}</td><td class="p-3"><span class="text-blue-900">${esc(st.nome)}</span><small class="block">${p.validadeCadastro?esc(new Date(p.validadeCadastro).toLocaleDateString('pt-BR',{timeZone:'America/Recife'})):'Revisão não informada'}</small></td><td class="p-3">${esc(p.usuarioUid?usuario?.nome||'Conta indisponível':'Sem conta vinculada')}<small class="block">${esc(usuario?.email||'')}</small></td><td class="p-3"><div class="flex flex-wrap gap-2"><button type="button" data-colaborador-editar="${esc(p.id)}" class="border rounded-lg px-3 py-2 text-blue-900">Editar</button><button type="button" data-colaborador-vincular="${esc(p.id)}" class="border rounded-lg px-3 py-2 text-blue-900">${p.usuarioUid?'Ver vínculo':'Vincular usuário'}</button></div></td></tr>`;
+                const acesso=acessoDoColaborador(p),usuario=acesso.usuario,st=situacaoCadastroColaborador(p);
+                return `<tr class="border-t"><td class="p-3"><b>${esc(p.nome)}</b><small class="block">${esc(p.emailInstitucional)}</small><small class="block text-slate-500">Matrícula: ${esc(p.matricula||'Não informada')}</small><small class="block text-slate-500">${esc(p.telefone||'')} ${esc(p.cargo||'')}</small></td><td class="p-3">${esc(nomeOrgao(p))}<small class="block">${esc(nomeSetor(p))}</small></td><td class="p-3">${esc((p.funcoesContato||[]).map(f=>FUNCOES_CONTATO[f]?.nome||f).join(', ')||'Sem função indicada')}</td><td class="p-3"><span class="text-blue-900">${esc(st.nome)}</span><small class="block">${p.validadeCadastro?esc(new Date(p.validadeCadastro).toLocaleDateString('pt-BR',{timeZone:'America/Recife'})):'Revisão não informada'}</small></td><td class="p-3"><b>${esc(acesso.nome)}</b><small class="block">${esc(usuario?.email||'')}</small><small class="block">${esc(usuario?nomePerfilAcesso(usuario):'')}</small></td><td class="p-3"><div class="flex flex-wrap gap-2"><button type="button" data-colaborador-editar="${esc(p.id)}" class="border rounded-lg px-3 py-2 text-blue-900">Editar</button><button type="button" data-colaborador-vincular="${esc(p.id)}" class="border rounded-lg px-3 py-2 text-blue-900">${p.usuarioUid?'Ver vínculo':'Vincular conta existente'}</button><button type="button" data-colaborador-acesso="${esc(p.id)}" class="border border-blue-200 bg-blue-50/70 rounded-lg px-3 py-2 text-blue-900">${p.usuarioUid?'Gerenciar permissões':'Criar acesso'}</button></div></td></tr>`;
             }).join('')||'<tr><td colspan="6" class="p-4 text-slate-500">Nenhum colaborador encontrado.</td></tr>';
+        }
+        function mostrarSecaoColaboradores(secao='cadastros',guardar=true){
+            if(!['cadastros','acessos','estrutura'].includes(secao))return;
+            const admin=ehAdministrador();secaoColaboradores=admin?secao:'cadastros';
+            for(const [id,nome]of [['admin-colaboradores','cadastros'],['aba-usuarios','acessos'],['colaboradores-estrutura','estrutura']])document.getElementById(id).classList.toggle('hidden',!admin||secaoColaboradores!==nome);
+            document.getElementById('colaboradores-gerencial-topo').classList.toggle('hidden',!admin);
+            document.querySelectorAll('[data-colab-secao]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.colabSecao===secaoColaboradores));b.classList.toggle('bg-blue-100',b.dataset.colabSecao===secaoColaboradores);});
+            if(guardar&&admin)guardarNavegacao();
+        }
+        function acessoDoColaborador(p){
+            const usuario=p.usuarioUid?dbData.usuarios.find(u=>uidCadastro(u)===p.usuarioUid&&u.colaboradorId===p.id&&!u.excluido):null;
+            if(!p.usuarioUid)return {usuario:null,liberado:false,nome:'Sem acesso ao sistema'};
+            if(!usuario)return {usuario:null,liberado:false,nome:'Vínculo de conta indisponível'};
+            const estado=estadoAcessoUsuario(usuario),liberado=modulosDoUsuario(usuario).length>0;
+            return {usuario,liberado,nome:liberado?'Acesso liberado':estado.nome};
+        }
+        function renderColaboradoresPorOrgao(lista,indisponivel=false){
+            const box=document.getElementById('colaboradores-por-orgao');
+            if(!ehAdministrador()){box.innerHTML='';return;}
+            if(indisponivel){box.innerHTML='<p>Resumo por órgão indisponível enquanto a consulta não for concluída.</p>';return;}
+            const grupos=new Map();for(const p of lista){if(!grupos.has(p.orgaoId))grupos.set(p.orgaoId,[]);grupos.get(p.orgaoId).push(p);}
+            box.innerHTML='<h3 class="font-bold text-blue-900">Colaboradores por órgão</h3><p class="text-xs text-slate-500">Resumo conforme os filtros. Selecione um órgão para consultar seus colaboradores.</p><div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">'+[...grupos].sort(([a],[b])=>a.localeCompare(b,'pt-BR')).map(([id,pessoas])=>{const o=dbData.orgaos.find(o=>String(o.firestoreId||o.id)===id);return `<button type="button" data-colab-orgao="${esc(id)}" class="text-left border border-blue-100 bg-blue-50/50 rounded-xl p-3"><b class="text-sm text-blue-900">${esc(o?.sigla||o?.nome||id)}</b><small class="block">${pessoas.length} colaborador(es) · ${pessoas.filter(p=>acessoDoColaborador(p).liberado).length} com acesso liberado</small></button>`;}).join('')+'</div>'+(lista.length?'':'<p class="text-sm">Nenhum colaborador nos filtros selecionados.</p>');
+        }
+        function abrirAcessoColaborador(id){
+            if(!ehAdministrador())return;
+            const p=dbData.colaboradores.find(p=>p.id===id);if(!p)return;
+            const acesso=acessoDoColaborador(p);
+            if(p.usuarioUid){if(acesso.usuario)detalharRegistro('usuarios',uidCadastro(acesso.usuario));else mensagemPortal('O vínculo com a conta precisa ser revisado em Vincular conta existente.',true);return;}
+            if(p.ativo===false){mensagemPortal('Ative o cadastro do colaborador antes de criar um acesso.',true);return;}
+            abrirModalForm('usuario');novoAcessoColaborador={id,uid:currentUser.uid,sessao:versaoSessao};
+            document.getElementById('usuario-nome').value=p.nome;document.getElementById('usuario-email').value=p.emailInstitucional;
+            document.getElementById('usuario-tipo').value='externo';document.getElementById('usuario-orgao').value=dbData.orgaos.find(o=>String(o.firestoreId||o.id)===p.orgaoId)?.nome||p.orgaoId;
+            document.getElementById('form-univ-titulo').textContent='Criar acesso · '+p.nome;
+            atualizarControlesUsuario();
+        }
+        async function criarContaDoColaborador(uid,dados,alvo){
+            const ref=doc(db,'colaboradores',alvo.id),userRef=doc(db,'usuarios',uid),log=doc(collection(db,'historicoAlteracoes')),userLog=doc(collection(db,'historicoAlteracoes'));
+            await runTransaction(db,async t=>{
+                const snap=await t.get(ref),userSnap=await t.get(userRef);
+                if(!ehAdministrador()||alvo.uid!==currentUser?.uid||alvo.sessao!==versaoSessao)throw new Error('Sua sessão mudou. Reabra a criação de acesso.');
+                if(!snap.exists()||snap.data().ativo===false||snap.data().usuarioUid||userSnap.exists())throw new Error('O cadastro mudou ou já possui conta. Revise o vínculo antes de continuar.');
+                const p={...snap.data(),usuarioUid:uid,atualizadoEm:serverTimestamp(),atualizadoPorUid:currentUser.uid,ultimaAuditoriaId:log.id};
+                const user={...dados,colaboradorId:alvo.id,ultimaAuditoriaId:userLog.id};
+                t.set(ref,p);t.set(doc(db,'contatosColaboradores',alvo.id),projecaoContato(p));t.set(log,logPortal(ref,p,'editar',['usuarioUid'],log));
+                t.set(userRef,user);t.set(doc(db,'identidadesUsuarios',uid),identidadePublica(uid,user));
+                t.set(userLog,{...dadosRegistroAuditoria(userRef,null,user),autorUid:currentUser.uid,autorNome:currentUser.nome||currentUser.email,criadoEm:serverTimestamp()});
+            });
         }
         function resumoColaboradorUsuario(u){
             const p=dbData.colaboradores.find(p=>p.id===u.colaboradorId&&p.usuarioUid===uidCadastro(u));
@@ -1287,7 +1343,7 @@
         async function revisarUsuario(dados){
             if(revisaoUsuarioResolver)return false;
             const uid=currentUser?.uid,sessao=versaoSessao;
-            document.getElementById('revisar-usuario-resumo').innerHTML=`<p><b>Pessoa:</b> ${esc(dados.nome)} · ${esc(dados.email)}</p><p><b>Cadastro:</b> ${dados.ativo?'Ativo':'Inativo'}</p><p><b>Perfil:</b> ${esc(nomePerfilAcesso(dados))}</p><p><b>Abrangência:</b> ${dados.perfil==='admin'||dados.acessoInstitucional?.papel==='grgd'?'Todos os órgãos, conforme o perfil':esc(nomeOrgaoUsuario(dados))}</p><p><b>Situação do acesso:</b> ${esc(estadoAcessoUsuario(dados).nome)}</p><p><b>Setores:</b> ${esc(dados.acessoInstitucional?(dados.acessoInstitucional.setoresIds.map(id=>dbData.setores.find(s=>s.id===id)?.nome||id).join(', ')||'Todos os setores do órgão'):'Conforme módulos liberados')}</p><p><b>Ações / módulos:</b> ${esc(dados.acessoInstitucional?.acoes.join(', ')||modulosDoUsuario(dados).map(id=>MÓDULOS_SISTEMA.find(m=>m.id===id)?.nome||id).join(', ')||'Nenhum')}</p>${dados.acessoInstitucional?`<p><b>Validade:</b> ${esc(new Date(dados.acessoInstitucional.fim).toLocaleString('pt-BR'))}</p><p><b>Revisão:</b> ${esc(new Date(dados.acessoInstitucional.revisao).toLocaleString('pt-BR'))}</p>`:''}`;
+            document.getElementById('revisar-usuario-resumo').innerHTML=`<p><b>Pessoa:</b> ${esc(dados.nome)} · ${esc(dados.email)}</p>${novoAcessoColaborador?'<p><b>Vincular ao colaborador:</b> '+esc(dbData.colaboradores.find(p=>p.id===novoAcessoColaborador.id)?.nome||'Cadastro indisponível')+'</p>':''}<p><b>Cadastro:</b> ${dados.ativo?'Ativo':'Inativo'}</p><p><b>Perfil:</b> ${esc(nomePerfilAcesso(dados))}</p><p><b>Abrangência:</b> ${dados.perfil==='admin'||dados.acessoInstitucional?.papel==='grgd'?'Todos os órgãos, conforme o perfil':esc(nomeOrgaoUsuario(dados))}</p><p><b>Situação do acesso:</b> ${esc(estadoAcessoUsuario(dados).nome)}</p><p><b>Setores:</b> ${esc(dados.acessoInstitucional?(dados.acessoInstitucional.setoresIds.map(id=>dbData.setores.find(s=>s.id===id)?.nome||id).join(', ')||'Todos os setores do órgão'):'Conforme módulos liberados')}</p><p><b>Ações / módulos:</b> ${esc(dados.acessoInstitucional?.acoes.join(', ')||modulosDoUsuario(dados).map(id=>MÓDULOS_SISTEMA.find(m=>m.id===id)?.nome||id).join(', ')||'Nenhum')}</p>${dados.acessoInstitucional?`<p><b>Validade:</b> ${esc(new Date(dados.acessoInstitucional.fim).toLocaleString('pt-BR'))}</p><p><b>Revisão:</b> ${esc(new Date(dados.acessoInstitucional.revisao).toLocaleString('pt-BR'))}</p>`:''}`;
             document.getElementById('modal-revisar-usuario').classList.remove('hidden');
             const resultado=await new Promise(resolve=>{revisaoUsuarioResolver=resolve;});
             return resultado&&uid===currentUser?.uid&&sessao===versaoSessao&&ehAdministrador();
@@ -1545,7 +1601,7 @@
             return ativos.map(u => checkbox(uidCadastro(u), `${u.nome || u.email} (${u.email || uidCadastro(u)})`, ids.includes(uidCadastro(u)))).join('')
                 + anteriores.map(uid => checkbox(uid, `${dadosResponsavel(uid, demanda).nome || uid} — vínculo anterior`, true)).join('')
                 + nomesLegados(demanda).map(nome => checkbox(nome, `${nome} — nome antigo, sem vínculo`, true, true)).join('')
-                + (!ativos.length ? '<p class="col-span-full text-xs text-slate-500">Nenhum usuário interno ativo. Cadastre ou classifique os usuários na aba Usuários.</p>' : '');
+                + (!ativos.length ? '<p class="col-span-full text-xs text-slate-500">Nenhum usuário interno ativo. Cadastre ou classifique os usuários em Colaboradores → Acessos e permissões.</p>' : '');
         }
         function lerResponsaveis(controles, anterior = {}) {
             const ids = [], legados = [], snapshot = [];
@@ -1604,7 +1660,7 @@
                 cb.disabled = admin || !!papel?.value || (externo && cb.value !== 'eventos');
             });
             document.getElementById('usuario-permissoes-ajuda').textContent = papel?.value ? 'O vínculo institucional define o acesso pelas ações aprovadas abaixo. Os módulos antigos não concedem privilégios adicionais.' : admin
-                ? 'Administrador: acesso e edição em todos os módulos, incluindo Usuários.'
+                ? 'Administrador: acesso e edição em todos os módulos, incluindo Acessos e permissões de Colaboradores.'
                 : externo ? 'Externo: sem acesso interno. A consulta a eventos pode ser liberada; as demais permissões externas serão definidas depois.'
                 : 'Consulta nos módulos selecionados. Alterações nos dados são exclusivas do perfil Administrador. Internos ativos aparecem como responsáveis GRGD.';
         }
@@ -1638,7 +1694,7 @@
         async function criarCadastroUsuario() {
             if (!ehAdministrador()) throw new Error('Somente administradores podem cadastrar usuários.');
             if (cadastroUsuarioEmAndamento) throw new Error('Aguarde a conclusão do cadastro em andamento.');
-            const dados = lerDadosUsuario();
+            const dados = lerDadosUsuario(),alvoColaborador=novoAcessoColaborador;
             if(!await revisarUsuario(dados))throw new Error('Cadastro não confirmado. Revise os dados antes de continuar.');
             const senha = document.getElementById('usuario-senha').value;
             if (senha.length < 8) throw new Error('A senha inicial deve ter pelo menos 8 caracteres.');
@@ -1652,7 +1708,10 @@
                 conta = (await createUserWithEmailAndPassword(authCadastro, dados.email, senha)).user;
                 if (sessao !== versaoSessao || !ehAdministrador()) throw new Error('Sua sessão mudou. Entre novamente antes de cadastrar usuários.');
                 const agora = new Date().toISOString(), autor = currentUser.nome || currentUser.email;
-                await gravarUsuarioComIdentidade(conta.uid, {...dados, uid: conta.uid, criadoEm: agora, criadoPor: autor, criadoPorUid: currentUser?.uid || '', atualizadoEm: agora, editadoPorUid: currentUser?.uid || '', editadoPor: autor});
+                const cadastro={...dados,uid:conta.uid,criadoEm:agora,criadoPor:autor,criadoPorUid:currentUser.uid,atualizadoEm:agora,editadoPorUid:currentUser.uid,editadoPor:autor};
+                if(alvoColaborador)await criarContaDoColaborador(conta.uid,cadastro,alvoColaborador);
+                else await gravarUsuarioComIdentidade(conta.uid,cadastro);
+                novoAcessoColaborador=null;
             } catch (err) {
                 if (conta) {
                     try { await deleteUser(conta); }
@@ -2089,12 +2148,13 @@
         }
 
         function mudarAba(aba) {
+            if(aba==='usuarios'&&ehAdministrador()){aba='colaboradores';secaoColaboradores='acessos';}
             if (aba && !modulosDoUsuario().includes(aba)) return;
             abaAtual = aba;
             MÓDULOS_SISTEMA.forEach(mod => {
                 const el = document.getElementById('aba-' + mod.id);
                 const btn = document.querySelector(`[data-tab="${mod.id}"]`);
-                if (el) el.classList.toggle('hidden', mod.id !== abaAtual);
+                if (el && mod.id!=='usuarios') el.classList.toggle('hidden', mod.id !== abaAtual);
                 if (btn) {btn.className = 'nav-tab px-3.5 py-2 rounded-lg transition ' + (mod.id === abaAtual ? 'tab-active' : 'tab-inactive');if(mod.id===abaAtual)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');}
             });
             if (aba === 'dashboard') renderCharts();
@@ -2104,7 +2164,7 @@
             if (aba === 'eventos') renderEventos();
             if (aba === 'locais') renderLocais();
             if (aba === 'fornecedores') renderFornecedores();
-            if (aba === 'usuarios') { renderGrupos(); renderUsuarios(); }
+            if (aba === 'colaboradores'&&ehAdministrador()) { renderGrupos(); renderUsuarios(); mostrarSecaoColaboradores(secaoColaboradores,false); }
             if (aba === 'bases') renderBases();
             atualizarAreaPorPerfil();
             guardarNavegacao();
@@ -2189,7 +2249,7 @@
             }
             if (admin) snapshotUnsubs.push(observarFirestore(collection(db,'grupos'), snap => {
                 dbData.grupos = snap.docs.map(d => ({...d.data(), firestoreId:d.id, id:d.data().id || d.id}));
-                renderGrupos(); renderUsuarios();
+                renderGrupos(); renderUsuarios();renderColaboradoresAdmin();
             }));
             if (modulos.length && !admin && !portalInstitucional()) {
                 const identidades = query(collection(db,'identidadesUsuarios'),where('tipoUsuario','==','interno'),where('ativo','==',true));
@@ -3347,6 +3407,7 @@
         }
 
         function abrirModalForm(tipo) {
+            novoAcessoColaborador=null;
             document.getElementById('form-univ-tipo').value = tipo;
             const container = document.getElementById('form-univ-campos');
             document.getElementById('form-univ-titulo').textContent = tipo === 'usuario' ? 'Novo usuário' : 'Novo Cadastro: ' + tipo.toUpperCase();
@@ -3828,6 +3889,9 @@
         });
 
         document.addEventListener('click', async ev => {
+            const secao=ev.target.closest?.('[data-colab-secao]');if(secao){mostrarSecaoColaboradores(secao.dataset.colabSecao);return;}
+            const orgao=ev.target.closest?.('[data-colab-orgao]');if(orgao&&ehAdministrador()){document.getElementById('admin-colab-orgao').value=orgao.dataset.colabOrgao;document.getElementById('admin-colab-setor').value='';renderColaboradoresAdmin();return;}
+            const acesso=ev.target.closest?.('[data-colaborador-acesso]');if(acesso){abrirAcessoColaborador(acesso.dataset.colaboradorAcesso);return;}
             const acaoUsuario = ev.target.closest?.('[data-usuario-editar], [data-usuario-excluir]');
             if (acaoUsuario) {
                 if (!ehAdministrador()) return;
@@ -3870,8 +3934,8 @@
 
         function limparDadosSessao() {
             if(acessoTimer)clearTimeout(acessoTimer);acessoTimer=null;portalErros={};portalCarregando={};
-            limparOperacoesInstitucionais();eventosPortalFontes={};mensagemPortal('');cancelarRevisaoUsuario();
-            document.getElementById('admin-colab-lista').innerHTML='';document.getElementById('admin-colab-orgao').innerHTML='';document.getElementById('admin-colab-setor').innerHTML='';document.getElementById('admin-colab-status').textContent='';document.getElementById('usuarios-indicadores').innerHTML='';document.getElementById('colaboradores-indicadores').innerHTML='';
+            limparOperacoesInstitucionais();novoAcessoColaborador=null;secaoColaboradores='cadastros';eventosPortalFontes={};mensagemPortal('');cancelarRevisaoUsuario();
+            document.getElementById('admin-colab-lista').innerHTML='';document.getElementById('admin-colab-orgao').innerHTML='';document.getElementById('admin-colab-setor').innerHTML='';document.getElementById('admin-colab-status').textContent='';document.getElementById('usuarios-indicadores').innerHTML='';document.getElementById('colaboradores-indicadores').innerHTML='';document.getElementById('colaboradores-por-orgao').innerHTML='';document.getElementById('painel-identificacao').textContent='';
             ['filtro-perfil-usuario','filtro-acesso-usuario','admin-colab-busca','admin-colab-orgao','admin-colab-setor','admin-colab-situacao','admin-colab-conta'].forEach(id=>document.getElementById(id).value='');
             document.getElementById('modal-vincular-colaborador').classList.add('hidden');document.getElementById('vincular-lista').innerHTML='';document.getElementById('vincular-contexto').textContent='';document.getElementById('vincular-busca').value='';document.getElementById('vincular-erro').textContent='';document.getElementById('vincular-confirmacao').checked=false;vinculoColaboradorAtual=null;
             currentUser = null;

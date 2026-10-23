@@ -69,7 +69,7 @@ const fixture=me=>({me,usuarios:[admin,nsi,auditor,grgd,user('novo')],
         }
         {
             const {page,context}=await appPage(admin);
-            await page.locator('[data-tab="usuarios"]').click();await page.locator('[data-usuario-editar="novo"]').click();
+            await page.locator('[data-tab="colaboradores"]').click();await page.locator('[data-colab-secao="acessos"]').click();await page.locator('[data-usuario-editar="novo"]').click();
             await page.locator('#vinculo-papel').selectOption('gestor_nsi');await page.locator('#vinculo-orgao').selectOption('orgao-a');
             await page.locator('#vinculo-setores').selectOption(['a1']);
             for(const a of ['orgao.consultar','participantes.consultar','eventos.consultar','inscricoes.consultar'])await page.locator('[name="vinculo-acao"][value="'+a+'"]').check();

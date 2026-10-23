@@ -51,7 +51,7 @@ function fixture(me){return {me,usuarios:[me,...[admin,nsi,sub,auditor,grgd,inte
    await page.locator('#btn-executar-logout').click();await page.locator('#modal-login').waitFor({state:'visible'});assert.equal(await page.locator('#portal-orgao-nome').textContent(),'');assert.equal(await page.locator('#portal-indicadores').innerHTML(),'');assert.equal(await page.locator('#portal-eventos-resumo').innerHTML(),'');await context.close();
   }
   for(const me of [admin,grgd,interno]){
-   const {page,context}=await open(me);assert.equal(await page.locator('body').getAttribute('data-layout'),'interna');assert.equal(await page.locator('#portal-topo').isVisible(),false);assert.equal(await page.locator('#status-sessao').isVisible(),true);if(me.uid==='admin'){assert.equal(await page.locator('[data-tab="usuarios"]').isVisible(),true);await shot(page,'area-interna-admin');}await context.close();
+   const {page,context}=await open(me);assert.equal(await page.locator('body').getAttribute('data-layout'),'interna');assert.equal(await page.locator('#portal-topo').isVisible(),false);assert.equal(await page.locator('#status-sessao').isVisible(),true);if(me.uid==='admin'){assert.equal(await page.locator('[data-tab="usuarios"]').count(),0);assert.equal(await page.locator('[data-tab="colaboradores"]').isVisible(),true);await shot(page,'area-interna-admin');}await context.close();
   }
   for(const me of [sub,auditor,externo]){
    const {page,context}=await open(me);assert.equal(await page.locator('body').getAttribute('data-layout'),'portal');assert.equal(await page.locator('[data-tab="usuarios"]').isVisible(),false);

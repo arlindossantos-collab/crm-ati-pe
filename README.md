@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.12.0 — usuários, colaboradores e contatos vinculados.** Base: `main@373368974e4175eb585db2a9b0d511c3eb2072a5` (v0.11.0 publicada). Melhora filtros e revisão de permissões; abre Colaboradores à administração; liga os contatos em Clientes ao cadastro mantido pelos órgãos e permite associação explícita entre colaborador e conta. **Publicação autorizada em 23/10/2026, após o usuário confirmar a publicação das regras do Firestore; sem novos índices. Integração e GitHub Pages acompanhados no [PR #18](https://github.com/arlindossantos-collab/crm-ati-pe/pull/18).** Veja [funcionamento e implantação](docs/usuarios-colaboradores.md).
+**Versão deste código: v0.13.0 — painel gerencial e Colaboradores unificados (proposta).** Base: `main@ecb2b0db473bdeb25b22844d27bfa63024316436` (v0.12.0 publicada). Reúne pessoas, contas de acesso, permissões, setores e grupos no módulo Colaboradores. Acrescenta matrícula, resumo por órgão e criação de acesso vinculado pelo administrador. **Todos os dados existentes serão preservados. Exige atualização das regras do Firestore para matrícula, sem novos índices. Não publicada.** Veja [funcionamento e implantação](docs/painel-gerencial-colaboradores.md).
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -17,8 +17,8 @@ A versão do site depende da integração e da publicação deste código. Uma b
 | Eventos | Consulta e cadastro de eventos; inscrições associadas ao evento e à pessoa. |
 | Locais | Indicadores, filtros, capacidade, contatos, recursos, painel de detalhes, histórico e consulta de agenda. |
 | Fornecedores | Cadastros e consultas de apoio às atividades. |
-| Usuários | Tipos **Interno - GRGD** e **Externo**, situação, perfil e módulos permitidos. |
-| Colaboradores do órgão | Cadastro, edição e inativação no escopo delegado, sem conta de acesso para o beneficiário. |
+| Colaboradores — painel gerencial | Cadastros e órgãos; matrícula, pesquisa e filtros; contas de acesso e permissões; setores e grupos. |
+| Colaboradores — painel externo | Cadastro, edição e inativação no escopo delegado, sem conta de acesso para o beneficiário. |
 | Inscrições institucionais | Novos eventos com órgãos elegíveis, período, vagas em transação, cancelamento, retomada e comprovante imprimível. |
 | Perfil pessoal | Edição do próprio nome, telefone e endereço, foto enviada do computador e troca de senha com confirmação da senha atual. |
 | Identificação | Foto ou iniciais no cabeçalho e nos registros com vínculo ao identificador da pessoa. |
