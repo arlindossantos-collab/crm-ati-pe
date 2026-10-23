@@ -629,7 +629,7 @@ test('portal sem referências consulta fontes de eventos e setores, preservando 
     await assertFails(getDocs(query(collection(f,'setores'),where('orgaoId','==','orgao-b'))));
 });
 
-function contatoProjetado(p){return {nome:p.nome,emailInstitucional:p.emailInstitucional,telefone:p.telefone,cargo:p.cargo,orgaoId:p.orgaoId,setorId:p.setorId,ativo:p.ativo,validadeCadastro:p.validadeCadastro??null,funcoesContato:p.funcoesContato||[],divulgavel:(p.funcoesContato||[]).length>0,atualizadoEm:p.atualizadoEm};}
+function contatoProjetado(p){return {nome:p.nome,emailInstitucional:p.emailInstitucional,telefone:p.telefone,cargo:p.cargo,orgaoId:p.orgaoId,setorId:p.setorId,ativo:p.ativo,validadeCadastro:p.validadeCadastro??null,funcoesContato:p.funcoesContato||[],divulgavel:(p.funcoesContato||[]).length>0,origemAuditoriaId:p.ultimaAuditoriaId||'',atualizadoEm:p.atualizadoEm};}
 async function atualizarPessoaV012(uid,p,patch,{projetar=true,projecaoExtra={},somentePessoa=false}={}){
     const f=db(uid),id=idPessoaLote2(p),log=doc(collection(f,'historicoAlteracoes')),b=writeBatch(f);
     const novo={...p,...patch,atualizadoEm:serverTimestamp(),atualizadoPorUid:uid,ultimaAuditoriaId:log.id};
@@ -693,6 +693,8 @@ test('substituto com cinco setores atualiza contato projetado dentro dos limites
     const {p,titular}=await seedLote2();
     await env.withSecurityRulesDisabled(async c=>{const f=c.firestore();for(const id of ['a3','a4','a5'])await setDoc(doc(f,'setores',id),{nome:id,orgaoId:'orgao-a',ativo:true});for(const uid of ['titular','sub'])await updateDoc(doc(f,'usuarios',uid),{'acessoInstitucional.setoresIds':['a1','a2','a3','a4','a5']});});
     await assertSucceeds(atualizarPessoaV012('sub',p,{funcoesContato:['sei'],validadeCadastro:Date.now()+86400000}));
+    const atual=(await getDoc(doc(db('admin'),'colaboradores',idPessoaLote2(p)))).data();
+    await assertSucceeds(atualizarPessoaV012('sub',atual,{setorId:'a2'}));
 });
 
 test('transferência de setor exige escopo anterior e novo, preservando órgão e inscrições',async()=>{

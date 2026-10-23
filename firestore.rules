@@ -190,11 +190,13 @@ service cloud.firestore {
       return c == {'nome':data.nome,'emailInstitucional':data.emailInstitucional,'telefone':data.telefone,
         'cargo':data.cargo,'orgaoId':data.orgaoId,'setorId':data.setorId,'ativo':data.ativo,
         'validadeCadastro':data.get('validadeCadastro',null),'funcoesContato':funcoes,
-        'divulgavel':funcoes.size()>0,'atualizadoEm':data.atualizadoEm};
+        'divulgavel':funcoes.size()>0,'origemAuditoriaId':data.ultimaAuditoriaId,'atualizadoEm':data.atualizadoEm};
     }
     function maintainContactProjection(data,id) {
       let path = /databases/$(database)/documents/contatosColaboradores/$(id);
-      return (!exists(path) && !existsAfter(path)) || contactProjectionMatches(data,id);
+      // O log da origem é novo neste envio (newAuditMatches); a projeção precisa apontar para ele.
+      // A regra da projeção valida o mapa inteiro, evitando repetir essa comparação aqui.
+      return (!exists(path) && !existsAfter(path)) || getAfter(path).data.origemAuditoriaId == data.ultimaAuditoriaId;
     }
     function participantUserLinkMatches(data,id) {
       let previous = resource == null ? '' : resource.data.get('usuarioUid','');
@@ -226,6 +228,11 @@ service cloud.firestore {
         && data.get('contatosVinculados',{}).keys().hasOnly(['orgao','nsi','telematica','si','sei','focal'])
         && validContactRef(data,'orgao',id) && validContactRef(data,'nsi',id) && validContactRef(data,'telematica',id)
         && validContactRef(data,'si',id) && validContactRef(data,'sei',id) && validContactRef(data,'focal',id);
+    }
+    function participantSectorInScope(data) {
+      let v=profile().acessoInstitucional;
+      // managerAction já validou identidade, vínculo, titular e setor de origem nesta escrita.
+      return v.setoresIds.size() == 0 || data.setorId in v.setoresIds;
     }
     function validParticipant(data, id) {
       let funcoes=data.get('funcoesContato',[]);
@@ -406,11 +413,17 @@ service cloud.firestore {
         && validSectorId(request.resource.data.setorId,request.resource.data.orgaoId)
         && request.resource.data.criadoEm == request.time && request.resource.data.criadoPorUid == request.auth.uid
         && newAuditMatches(request.resource.data,'colaboradores',id,'criar');
-      allow update: if (isAdmin() || managerAction('participantes.editar',resource.data)) && validParticipant(request.resource.data,id)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','telefone','cargo','ativo','setorId','validadeCadastro','funcoesContato','usuarioUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
-        && (request.resource.data.setorId == resource.data.setorId || (validSectorId(request.resource.data.setorId,request.resource.data.orgaoId) && (isAdmin() || managerAction('participantes.editar',request.resource.data))))
-        && (isAdmin() || request.resource.data.get('usuarioUid','') == resource.data.get('usuarioUid',''))
-        && newAuditMatches(request.resource.data,'colaboradores',id,'editar');
+      function validUpdate() {
+        let admin=isAdmin();
+        let antes=resource.data;
+        let depois=request.resource.data;
+        return (admin || managerAction('participantes.editar',antes)) && validParticipant(depois,id)
+          && depois.diff(antes).affectedKeys().hasOnly(['nome','telefone','cargo','ativo','setorId','validadeCadastro','funcoesContato','usuarioUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+          && (depois.setorId == antes.setorId || (validSectorId(depois.setorId,depois.orgaoId) && (admin || participantSectorInScope(depois))))
+          && (admin || depois.get('usuarioUid','') == antes.get('usuarioUid',''))
+          && newAuditMatches(depois,'colaboradores',id,'editar');
+      }
+      allow update: if validUpdate();
       allow delete: if false;
     }
     match /contatosColaboradores/{id} {

@@ -845,6 +845,7 @@ test('situação de acesso separa cadastro, validade do vínculo, revisão e mó
         a.context.usuario={...base,...patch};assert.equal(a.run('estadoAcessoUsuario(usuario).id'),estado);
     }
     a.context.usuario={...base,acessoInstitucional:null};assert.equal(a.run('estadoAcessoUsuario(usuario).id'),'sem_modulos');
+    assert.equal(a.run("perfilFiltroUsuario({perfil:'admin',tipoUsuario:'interno',ativo:false})"),'admin');
 });
 test('contato do cliente acompanha colaborador por ID e preserva dados manuais sem vínculo',()=>{
     const a=app();a.run("dbData.contatosColaboradores=[{id:'p',orgaoId:'o',nome:'Atual',emailInstitucional:'p@example.invalid',telefone:'81999',cargo:'Analista',funcoesContato:['nsi'],divulgavel:true,ativo:true}]");

@@ -819,7 +819,7 @@
             htmlPortal('portal-eventos-resumo',(estadoEventos?`<p class="text-sm text-slate-600 mb-3">${esc(estadoEventos)}</p>`:'')+(lista?`<div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th class="p-3">Evento</th><th class="p-3">Data</th><th class="p-3">Inscrições</th></tr></thead><tbody>${lista}</tbody></table></div>`:!estadoEventos?'<p class="text-sm text-slate-500">Nenhum evento futuro disponível no momento.</p>':''));
         }
         function nomePerfilAcesso(usuario=currentUser) {
-            if (ehAdministrador(usuario)) return 'Administrador da PRGD';
+            if (usuario?.perfil==='admin' && usuario?.tipoUsuario!=='externo') return 'Administrador da PRGD';
             return PAPEIS_INSTITUCIONAIS[usuario?.acessoInstitucional?.papel]?.nome || 'Consulta';
         }
         function chaveOrgaoUsuario(usuario) {return usuario.acessoInstitucional?.orgaoId || usuario.orgao || '';}
@@ -1223,7 +1223,7 @@
         const FUNCOES_CONTATO={orgao:{nome:'Gestor do órgão',nomeCampo:'gestorOrgao',email:'emailGestorOrgao',telefone:'telGestorOrgao',cargo:'cargoGestorOrgao'},nsi:{nome:'NSI',nomeCampo:'gestorNsi',email:'emailGestorNsi',telefone:'telGestorNsi'},telematica:{nome:'Telemática',nomeCampo:'gestorTelematica',email:'emailGestorTelematica',telefone:'telGestorTelematica'},si:{nome:'SI',nomeCampo:'gestorSi',email:'emailGestorSi',telefone:'telGestorSi'},sei:{nome:'SEI',nomeCampo:'gestorSei',email:'emailGestorSei',telefone:'telGestorSei'},focal:{nome:'Ponto focal / substituto',nomeCampo:'pontoFocalNome',email:'pontoFocalEmail',telefone:'pontoFocalTel',cargo:'pontoFocalCargo'}};
         const ESTADOS_ACESSO={liberado:'Acesso liberado',inativo:'Cadastro inativo',excluido:'Excluído do cadastro',pendente:'Aguardando aprovação',suspenso:'Vínculo suspenso',vencido:'Vínculo vencido',revisao:'Revisão do vínculo pendente',futuro:'Vínculo ainda não iniciou',sem_modulos:'Sem ações ou módulos liberados',invalido:'Vínculo precisa de validação',titular:'Sujeito à validação do titular'};
         let revisaoUsuarioResolver=null,vinculoColaboradorAtual=null,vinculoColaboradorOcupado=false;
-        function perfilFiltroUsuario(u){return ehAdministrador(u)?'admin':u.acessoInstitucional?.papel||'legado';}
+        function perfilFiltroUsuario(u){return u.perfil==='admin'&&u.tipoUsuario!=='externo'?'admin':u.acessoInstitucional?.papel||'legado';}
         function estadoAcessoUsuario(u,agora=Date.now()){
             let id='liberado';const v=u.acessoInstitucional;
             if(u.excluido===true)id='excluido';else if(u.ativo===false)id='inativo';
@@ -1252,7 +1252,7 @@
             return data;
         }
         function projecaoContato(p){
-            return {nome:p.nome,emailInstitucional:p.emailInstitucional,telefone:p.telefone,cargo:p.cargo,orgaoId:p.orgaoId,setorId:p.setorId,ativo:p.ativo,validadeCadastro:p.validadeCadastro??null,funcoesContato:p.funcoesContato||[],divulgavel:(p.funcoesContato||[]).length>0,atualizadoEm:p.atualizadoEm};
+            return {nome:p.nome,emailInstitucional:p.emailInstitucional,telefone:p.telefone,cargo:p.cargo,orgaoId:p.orgaoId,setorId:p.setorId,ativo:p.ativo,validadeCadastro:p.validadeCadastro??null,funcoesContato:p.funcoesContato||[],divulgavel:(p.funcoesContato||[]).length>0,origemAuditoriaId:p.ultimaAuditoriaId||'',atualizadoEm:p.atualizadoEm};
         }
         function preencherOpcoesPreservando(id,lista,rotulo,titulo){
             const campo=document.getElementById(id),valor=campo.value;
