@@ -2,6 +2,8 @@
 
 Segundo lote, baseado em `main@d033b8f2b2f76a414a170f7904821357b2b60485` (v0.9.0). Publicação autorizada pelo usuário em 23/10/2026, após informar a publicação das novas regras no Firebase. Integração e implantação do site acompanhadas no [PR #15](https://github.com/arlindossantos-collab/crm-ati-pe/pull/15). A aplicação continua em um único HTML, como definido em CONTRIBUTING.md.
 
+**Ajuste na v0.10.1:** os campos de responsáveis e referências das aprovações deixam de bloquear a ativação, conforme solicitação do usuário em 23/10/2026. O administrador continua decidindo a ativação do vínculo e a liberação operacional, com autoria e horário registrados. Os demais limites permanecem. Ver [correções do portal](correcoes-portal-nsi.md).
+
 ## Fluxo de operação
 
 1. O administrador revisa as aprovações GRGD/autoridade, os setores, os prazos e as ações do gestor. Marca **Habilitar cadastro e inscrições institucionais após revisão das aprovações**. A alteração retorna o vínculo a pendente e limpa as referências anteriores; as evidências revisadas precisam ser registradas antes da liberação.

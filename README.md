@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.10.0 — colaboradores e inscrições institucionais.** Base: v0.9.0, commit `d033b8f`. Publicação autorizada pelo usuário em 23/10/2026, após informar a publicação das novas regras no Firebase. Essa etapa foi relatada pelo usuário, sem verificação direta do console nesta sessão. Integração e implantação do site acompanhadas no [PR #15](https://github.com/arlindossantos-collab/crm-ati-pe/pull/15). Conserva os índices compostos existentes; homologação institucional e revisão individual dos vínculos continuam necessárias. LDAP/PostgreSQL seguem na migração planejada.
+**Versão deste código: v0.10.1 — correções do portal do gestor de NSI.** Base: `main@53f51a3` (v0.10.0). Publicação autorizada pelo usuário em 23/10/2026, após informar a publicação das novas regras da v0.10.1 no Firebase. Confirmação baseada no relato do usuário, sem acesso direto ao console nesta sessão. Integração e implantação do site acompanhadas no [PR #16](https://github.com/arlindossantos-collab/crm-ati-pe/pull/16). Corrige a estabilidade das consultas, setores e eventos de hoje; responsáveis e referências de aprovação são opcionais. Índices existentes mantidos. LDAP/PostgreSQL seguem na migração planejada.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -29,9 +29,11 @@ Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo
 
 ## O que mudou nesta entrega
 
+A v0.10.1 corrige reinícios desnecessários dos snapshots quando a ordem dos campos ou metadados muda, mantém o nome do órgão estável, atualiza os setores sem apagar dados digitados, inclui filtro de colaboradores por setor e mantém eventos de hoje em Futuros até o horário final ou fim do dia local. Falha na consulta não é apresentada como ausência de eventos. Veja [causas, validação e implantação](docs/correcoes-portal-nsi.md).
+
 A v0.10.0 habilita o gestor e seu substituto para cadastrar colaboradores e inscrevê-los em novos eventos institucionais, com elegibilidade por órgão, controle atômico de vagas, prevenção de duplicidade por e-mail, cancelamento com liberação da vaga e comprovante consultado no servidor. Cada alteração preserva autoria e histórico.
 
-As operações exigem uma liberação administrativa expressa, além das duas referências de aprovação, das ações e dos prazos. Vínculos da v0.9.0 continuam em consulta até revisão individual. Eventos anteriores conservam o fluxo original e não são convertidos automaticamente. Consultar [modelo e roteiro do lote](docs/inscricoes-institucionais.md).
+As operações exigem liberação administrativa expressa, ações e prazos válidos. Na v0.10.1, responsáveis e referências das aprovações são opcionais; a decisão administrativa continua registrada com autoria e horário. Vínculos da v0.9.0 continuam em consulta até revisão individual. Eventos anteriores conservam o fluxo original e não são convertidos automaticamente. Consultar [modelo e roteiro do lote](docs/inscricoes-institucionais.md).
 
 ### Base v0.9.0
 

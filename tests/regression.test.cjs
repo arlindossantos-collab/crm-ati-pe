@@ -688,11 +688,11 @@ test('retorno atrasado do histórico após logout não expõe dados',async()=>{
     assert.equal(a.run('historicoRegistros.length'),0);assert.equal(a.element('historico-registros').innerHTML,'');
 });
 
-test('vínculo pendente, vencido ou sem duas aprovações não herda módulos antigos',()=>{
+test('vínculo pendente, vencido ou com revisão vencida não herda módulos antigos',()=>{
     const a=app();a.context.vinculo=vinculoTeste();
     a.run("currentUser={uid:'nsi',ativo:true,tipoUsuario:'externo',perfil:'comum',modulosPermitidos:['eventos'],acessoInstitucional:vinculo}");
     assert.deepEqual(Array.from(a.run('modulosDoUsuario()')),['meu_orgao','colaboradores','eventos','inscricoes_orgao']);
-    for(const code of ["currentUser.acessoInstitucional.situacao='pendente'","currentUser.acessoInstitucional.fim=Date.now()-1","currentUser.acessoInstitucional.revisao=Date.now()-1","currentUser.acessoInstitucional.aprovacaoAutoridade.referencia=''","currentUser.acessoInstitucional.aprovacaoGrgd.referencia=''"]){
+    for(const code of ["currentUser.acessoInstitucional.situacao='pendente'","currentUser.acessoInstitucional.fim=Date.now()-1","currentUser.acessoInstitucional.revisao=Date.now()-1"]){
         a.context.vinculo=vinculoTeste();a.run('currentUser.acessoInstitucional=vinculo');a.run(code);
         assert.equal(a.run('modulosDoUsuario().length'),0);
     }
@@ -804,4 +804,36 @@ test('falha de consulta protegida apaga comprovante e opções de participantes 
     a.snapshots.at(-1).error({message:'permission-denied'});
     assert.equal(a.element('comprovante-conteudo').innerHTML,'');assert.equal(a.element('insc-participante').innerHTML,'');
     assert.equal(a.element('modal-comprovante').classList.contains('hidden'),true);
+});
+
+test('permissões equivalentes não mudam com ordem dos campos, ações ou metadados de aprovação',()=>{
+    const a=app(),v=vinculoTeste();
+    a.context.u1={uid:'nsi',ativo:true,tipoUsuario:'externo',perfil:'comum',acessoInstitucional:v};
+    a.context.u2={...a.context.u1,acessoInstitucional:{...Object.fromEntries(Object.entries(v).reverse()),acoes:[...v.acoes].reverse(),registradoEm:'atualização documental',aprovacaoGrgd:{responsavel:'Responsável revisado',referencia:'Referência revisada'}}};
+    assert.equal(a.run('assinaturaAcesso(u1)'),a.run('assinaturaAcesso(u2)'));
+    a.context.u2.acessoInstitucional.orgaoId='orgao-b';assert.notEqual(a.run('assinaturaAcesso(u1)'),a.run('assinaturaAcesso(u2)'));
+});
+test('evento de hoje permanece futuro até o horário final e respeita situação realizada',()=>{
+    const a=app();
+    assert.equal(a.run("eventoEncerrado({dataInicio:'2026-10-23'},new Date(2026,9,23,15))"),false);
+    assert.equal(a.run("eventoEncerrado({dataInicio:'2026-10-23',horaFim:'16:00'},new Date(2026,9,23,15))"),false);
+    assert.equal(a.run("eventoEncerrado({dataInicio:'2026-10-23',horaFim:'14:00'},new Date(2026,9,23,15))"),true);
+    assert.equal(a.run("eventoEncerrado({dataInicio:'2026-10-22'},new Date(2026,9,23,15))"),true);
+    assert.equal(a.run("eventoEncerrado({dataInicio:'2026-10-23',status:'Realizado'},new Date(2026,9,23,15))"),true);
+    assert.equal(a.run("eventoEncerrado({dataInicio:'2020-01-01T15:00:00Z'},new Date('2026-10-23T15:00:00Z'))"),true);
+    assert.equal(a.run("eventoEncerrado({dataInicio:'2099-01-01T15:00:00Z'},new Date('2026-10-23T15:00:00Z'))"),false);
+});
+
+test('referências e responsáveis opcionais não bloqueiam vínculo aprovado pelo administrador',()=>{
+    const a=app();a.context.vinculo=vinculoTeste();delete a.context.vinculo.aprovacaoGrgd;delete a.context.vinculo.aprovacaoAutoridade;
+    a.run("currentUser={uid:'nsi',ativo:true,tipoUsuario:'externo',perfil:'comum',acessoInstitucional:vinculo}");
+    assert.equal(a.run('acessoInstitucionalAtivo()'),true);assert.ok(a.run('modulosDoUsuario().includes("colaboradores")'));
+    a.run("currentUser.acessoInstitucional.situacao='pendente'");assert.equal(a.run('modulosDoUsuario().length'),0);
+});
+
+test('lista real de eventos mantém o encontro de hoje em Futuros durante o dia',()=>{
+    const a=app();
+    a.context.Date=class extends Date {constructor(...args){super(...(args.length?args:[2026,9,23,15,0]));}static now(){return new Date(2026,9,23,15,0).getTime();}};
+    a.run("currentUser={uid:'admin',perfil:'admin',ativo:true};dbData.eventos=[{id:'hoje',titulo:'Encontro hoje',dataInicio:'2026-10-23',eventoPublico:true}];filtroEventoAtual='futuros';renderEventos()");
+    assert.equal(a.element('count-eventos').textContent,1);assert.match(a.element('grid-eventos').innerHTML,/Encontro hoje/);
 });
