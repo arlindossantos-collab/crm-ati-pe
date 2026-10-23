@@ -973,3 +973,44 @@ test('clique geral produz download sem escrita, e logout impede exportação pos
     a.run('limparDadosSessao()');
     assert.throws(()=>a.run('prepararRelatorioInscricoes()'),/Somente o administrador/);
 });
+
+test('novo órgão sem localização não grava endereço, coordenadas ou foto de exemplo', async()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno'}");
+    a.element('form-univ-tipo').value='cliente';a.element('uc-1').value='Órgão fictício';
+    await a.run('salvarCadastroUniversal({preventDefault(){}})');
+    const record=a.writes.find(w=>w.collection==='orgaos').data;
+    assert.equal(record.endereco,'');assert.equal(record.geolocalizacao,'');assert.equal(record.fotoFachada,'');
+    assert.equal(a.audits.length,1);assert.equal(a.audits[0].colecao,'orgaos');
+});
+test('cadastro de órgão preserva localização e foto informadas',async()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno'}");
+    for(const [id,value]of Object.entries({'form-univ-tipo':'cliente','uc-1':'Órgão fictício','uc-endereco':'Rua informada, 10','uc-geo':'-8.1, -34.9','uc-fachada':'https://example.invalid/fachada.jpg'}))a.element(id).value=value;
+    await a.run('salvarCadastroUniversal({preventDefault(){}})');const record=a.writes.find(w=>w.collection==='orgaos').data;
+    assert.equal(record.endereco,'Rua informada, 10');assert.equal(record.geolocalizacao,'-8.1, -34.9');assert.equal(record.fotoFachada,'https://example.invalid/fachada.jpg');
+});
+test('detalhes de órgão sem localização mostram ausência sem inventar fachada ou mapa',()=>{
+    const a=app();a.run("dbData.orgaos=[{id:'o',nome:'Órgão fictício',endereco:'  ',geolocalizacao:'  ',fotoFachada:'  '}];detalharRegistro('orgaos','o')");
+    const html=a.element('detalhe-conteudo').innerHTML;
+    assert.match(html,/Endereço não informado/);assert.match(html,/Coordenadas não informadas/);assert.match(html,/Fachada não informada/);
+    assert.doesNotMatch(html,/google.com\/maps|images.unsplash.com|Rio Capibaribe|<img /);
+    assert.equal(a.run("dbData.orgaos[0].endereco"),'  ');assert.equal(a.writes.length,0);
+});
+test('mapa de órgão usa coordenadas cadastradas ou endereço disponível, sem alterar o registro',()=>{
+    const a=app();a.context.orgaos=[{id:'coordenadas',nome:'A',endereco:'Rua A',geolocalizacao:'-8.1, -34.9',fotoFachada:'https://example.invalid/foto.jpg'},{id:'endereco',nome:'B',endereco:'Rua B, 20 & Centro'}];a.run('dbData.orgaos=orgaos');
+    a.run("detalharRegistro('orgaos','coordenadas')");let html=a.element('detalhe-conteudo').innerHTML;
+    assert.ok(html.includes(encodeURIComponent('-8.1, -34.9')));assert.match(html,/src="https:\/\/example.invalid\/foto.jpg"/);
+    a.run("detalharRegistro('orgaos','endereco')");html=a.element('detalhe-conteudo').innerHTML;
+    assert.ok(html.includes(encodeURIComponent('Rua B, 20 & Centro')));assert.match(html,/Coordenadas não informadas/);assert.match(html,/Rua B, 20 &amp; Centro/);assert.equal(a.writes.length,0);
+});
+test('órgão sem ponto focal ou fonte não exibe pessoa, contato ou fonte fictícios',()=>{
+    const a=app();a.run("dbData.orgaos=[{id:'o',nome:'Órgão fictício'}];detalharRegistro('orgaos','o')");
+    const html=a.element('detalhe-conteudo').innerHTML;
+    assert.doesNotMatch(html,/Fernanda Alves|Analista de Suporte|fernanda.alves|9655-7788|Diário Oficial|10\.123\.456/);
+    assert.match(html,/Não informado/);assert.equal(a.writes.length,0);
+});
+test('órgão preserva fonte, ponto focal e referências manuais informadas',()=>{
+    const a=app();a.context.registro={id:'o',nome:'Órgão fictício',cnpj:'CNPJ cadastrado',fonteInformacao:'Fonte registrada',pontoFocalNome:'Pessoa cadastrada',pontoFocalCargo:'Cargo cadastrado',pontoFocalEmail:'pessoa@example.invalid',pontoFocalTel:'Telefone cadastrado'};
+    a.run("dbData.orgaos=[registro];detalharRegistro('orgaos','o')");const html=a.element('detalhe-conteudo').innerHTML;
+    for(const value of ['CNPJ cadastrado','Fonte registrada','Pessoa cadastrada','Cargo cadastrado','pessoa@example.invalid','Telefone cadastrado'])assert.ok(html.includes(value));
+    assert.equal(a.writes.length,0);
+});

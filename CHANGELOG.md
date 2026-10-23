@@ -2,6 +2,15 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.14.1 — Dados ausentes de órgãos — publicação autorizada, implantação em acompanhamento
+
+**Resumo para a gestão:** o cadastro deixa de preencher endereço, coordenadas e foto com exemplos. Os detalhes indicam dados ausentes, sem apresentar um ponto focal fictício ou uma fonte não cadastrada. Informações existentes e vínculos são preservados; não há migração ou alteração das regras Firebase.
+
+- **Antes:** campos de localização vazios eram gravados com valores fixos; detalhes exibiam foto, mapa, CNPJ, fonte e contato de exemplo.
+- **Depois:** campos vazios continuam vazios; mapa aparece somente quando existe endereço ou coordenadas; fonte e contato ausentes aparecem como “Não informado”.
+- **Validação:** 131 testes de regressão aprovados; cadastro e consulta verificados no navegador com Auth/Firestore emulados, sem requisições externas. Ver [evidências e limites](docs/planejamento/orgaos-dados-ausentes.md).
+- **Pendências:** aceite funcional e revisão humana dos dados antigos. Publicação autorizada pelo usuário nesta sessão; confirmação da implantação pendente. Nenhum registro de negócio remoto foi alterado.
+
 ## v0.14.0 — Relatórios CSV de inscrições — publicada em 23/10/2026
 
 **Resumo para a chefia:** os dois controles de relatório já visíveis em Eventos passam a exportar inscrições em CSV com evento, participante, órgão, setor, situação, protocolo e datas disponíveis. O administrador pode gerar o relatório geral ou por evento. A exportação de inscrições **não comprova presença**.

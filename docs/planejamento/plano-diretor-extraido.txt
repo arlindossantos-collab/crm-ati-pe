@@ -1,0 +1,1000 @@
+ PLANO DIRETOR DE EVOLUÇÃO
+
+
+
+
+ PRGD
+ Plataforma de Relacionamento
+ do Governo Digital
+
+ Diagnóstico, organização do código, desenvolvimento incremental do Módulo
+ de Eventos, homologação e preparação para infraestrutura institucional.
+
+
+
+ Versão analisada: v0.14.0
+ Data: 23 de outubro de 2026
+ Natureza: proposta de plano de ação - não é aprovação institucional
+
+
+
+
+PRGD | Gerência de Relacionamento do Governo Digital
+PRGD / PLANO DE EVOLUÇÃO                                                                                        Documento de trabalho | 23 out 2026
+
+
+
+
+ Sumário executivo
+ A PRGD deve evoluir em ciclos pequenos e verificáveis, com prioridade para o funcionamento integral da gestão de
+ eventos da Gerência de Relacionamento do Governo Digital (GRGD) da ATI/PE. A expansão para visitas institucionais,
+ Sucesso do Cliente, Customer Experience (CX) e inteligência de relacionamento ficará para fases futuras.
+
+
+      DECISÃO RECOMENDADA: preservar a versão atual, criar homologação independente, reorganizar o código de
+      forma incremental e estabilizar Órgãos, Colaboradores, Acessos e Eventos - sempre com testes e aceite antes da
+      publicação.
+
+
+
+    Prioridade                                  Direção
+
+
+    Imediata                                    Inventário técnico, backups, ambiente de homologação e modularização segura.
+
+
+    Funcional                                   Cadastros institucionais, pessoas, perfis, eventos, inscrições e relatórios.
+
+
+    Operacional                                 Piloto da GRGD, critérios de aceite, correção de defeitos e suporte.
+
+
+    Posterior                                   VM da ATI, identidade institucional (LDAP/SSO), eventual mudança do banco e novas frentes de
+                                                relacionamento.
+
+
+ Marco de negócio: a GRGD consegue planejar, cadastrar, divulgar, organizar inscrições, executar e encerrar um evento
+ com histórico confiável e relatórios, em ambiente homologado.
+
+ Regra de trabalho: nenhuma PR funcional será integrada automaticamente. A implantação só ocorrerá após testes,
+ homologação e autorização expressa.
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                        02
+PRGD / PLANO DE EVOLUÇÃO                                                                             Documento de trabalho | 23 out 2026
+
+
+
+
+ Índice do documento
+
+
+ Sumário executivo . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+
+
+ 1. Contexto, escopo e premissas . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+
+
+ 2. Diagnóstico da versão existente . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+
+
+ 3. Organização de código e arquitetura modular . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+
+
+ 4. Sequência de lotes e dependências . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+
+
+ 5. Lotes 00 a 02 - preparar a base . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+
+
+ 6. Lotes 03 a 05 - cadastros e governança . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+
+
+ 7. Matriz de permissões - proposta inicial . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+
+
+ 8. Lote 06 - eventos e agenda (centro do projeto) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+
+
+ 9. Lotes 07 e 08 - inscrições, presença e relatórios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+
+
+ 10. Lote 09 - homologação e piloto GRGD . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+
+
+ 11. Qualidade, testes e controle de publicação . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+
+
+ 12. Infraestrutura futura - VM, autenticação e dados . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+
+
+ 13. Governança, responsáveis e lacunas . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+
+
+ 14. Planejamento de execução e marcos . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+
+
+ 15. Expansões futuras fora do Marco 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+
+
+ Anexo A. Checklist de aceite de cada PR . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+
+
+ Anexo B. Fontes de referência utilizadas . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+
+
+ Anexo C. Controle de conhecimento . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                               03
+PRGD / PLANO DE EVOLUÇÃO                                                                                      Documento de trabalho | 23 out 2026
+
+
+
+
+ 1. Contexto, escopo e premissas
+ O sistema foi concebido para apoiar a GRGD no relacionamento com órgãos da administração pública estadual e em
+ atividades internas da ATI. O escopo inicial deve ficar restrito à base cadastral e à Gestão de Eventos, com recursos de
+ suporte realmente necessários para sua operação.
+
+ 1.1. Prioridade por horizonte
+
+    Horizonte                                 Escopo e resultado
+
+
+    Agora                                     Diagnosticar, proteger a base, estruturar o código, homologar e concluir Eventos, Órgãos,
+                                              Colaboradores, Acessos e Inscrições.
+
+
+    Depois da estabilização                   Operação institucional controlada, publicação na VM e integração com identidade institucional.
+
+
+    Futuro                                    Visitas aos órgãos, histórico de relacionamentos, Sucesso do Cliente, CX, inteligência e dashboards
+                                              avançados.
+
+
+
+ 1.2. Princípios inegociáveis
+  • Não excluir, sobrescrever ou migrar registros existentes sem plano de preservação e restauração validado.
+
+  • Não confundir recurso implementado com recurso integralmente homologado: testes automatizados não substituem
+     a avaliação da GRGD.
+
+  • Separar identidade, cadastro de pessoa, vínculo institucional e autorização de acesso.
+
+  • Não atribuir poderes de administração a alguém apenas por autenticar-se no diretório institucional.
+
+  • Não vincular automaticamente pessoas a órgãos por coincidência de nome ou e-mail sem regra validada.
+
+  • Não transformar inscrição em comprovação automática de comparecimento.
+
+  • Não iniciar a migração de dados ou LDAP sem conhecer dependências, infraestrutura e política de segurança da ATI.
+
+
+ 2. Diagnóstico da versão existente
+ A inspeção do repositório em 23/10/2026 identificou uma aplicação web com v0.14.0, hospedagem em GitHub Pages
+ e uso de Firebase Authentication e Cloud Firestore. O arquivo index.html concentra aproximadamente 4.128 linhas de
+ interface, lógica e comunicação com dados. Há testes automatizados e documentação de entregas anteriores.
+
+
+    Componente                             Situação observada / limite
+
+
+    Eventos                                Cadastro, agenda, inscrições institucionais e relatórios presentes no código; requer homologação
+                                           integrada.
+
+
+    Órgãos                                 Cadastro e informações de contato existentes; consistência, vínculo com pessoas e tratamento de
+                                           legado a validar.
+
+
+    Colaboradores                          Cadastro associado a órgão e setor; conta de acesso separada; revisar duplicidades e fluxos reais.
+
+
+    Permissões                             Papéis, regras Firestore e histórico de alterações; testar a matriz completa de perfis.
+
+
+    Testes                                 Regressão, Firestore, autenticação e navegação simulada; não equivalem a aceite institucional.
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                        04
+PRGD / PLANO DE EVOLUÇÃO                                                                                  Documento de trabalho | 23 out 2026
+
+
+
+
+    Componente                             Situação observada / limite
+
+
+    Prévia isolada                         Não foi identificado ambiente de homologação navegável independente do Firebase de produção.
+
+
+    VM / LDAP                              Não implementados na base atual; exigem decisões de infraestrutura, identidade e dados.
+
+
+
+      RISCO CENTRAL: uma alteração dentro do HTML monolítico pode afetar outras áreas. Refatorar em módulos reduz
+      o acoplamento, desde que seja feito com testes de caracterização e pequenas entregas.
+
+
+
+ 2.1. Evidências e lacunas
+ Sabemos: estrutura do repositório, coleções e regras existentes, tecnologia de autenticação/persistência e a presença
+ de vários fluxos no código. Suspeitamos: que algumas inconsistências podem surgir nos fluxos integrados, sobretudo
+ com registros legados e mudanças de permissões. Precisamos descobrir: processo operacional de Eventos, aprovação
+ dos campos, responsáveis funcionais, integridade da base, disponibilidade de backups, identidade institucional e
+ infraestrutura de hospedagem.
+
+
+ 3. Organização de código e arquitetura modular
+ A recomendação é fazer refatoração incremental, sem reconstruir toda a aplicação nem introduzir simultaneamente
+ um novo framework. Sugestão inicial: Vite com JavaScript modular, avaliando TypeScript gradualmente. A adoção de
+ React ou outro framework só deve ocorrer se resolver uma necessidade comprovada.
+
+ 3.1. Estrutura-alvo proposta
+
+     prgd/
+       public/                      # ativos publicáveis
+       src/
+         app/                       # inicialização, rotas e navegação
+         modules/
+            eventos/
+              cadastro/ agenda/ inscricoes/ presenca/ relatorios/
+            orgaos/ colaboradores/ acessos/
+            locais/ demandas/
+         services/
+            firebase/ repositories/ # acesso aos dados abstraído
+         shared/
+            components/ validators/ utils/
+       tests/                       # cenários de regressão e integração
+       docs/                        # especificações e decisões
+       index.html
+       package.json
+
+
+ Estrutura ilustrativa. Essas pastas não representam diretórios já existentes no projeto.
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                  05
+PRGD / PLANO DE EVOLUÇÃO                                                                                        Documento de trabalho | 23 out 2026
+
+
+
+
+ 3.2. Separação de responsabilidades
+
+    Camada                               Responsabilidade                                            Exemplo
+
+
+    Interface                            Exibir dados e receber comandos.                            Formulário Novo Evento.
+
+
+    Regras de negócio                    Validar condições, estados e prazos.                        Inscrição somente no período permitido.
+
+
+    Acesso a dados                       Consultar e persistir dados, sem misturar                   Repositório que lê inscrições do Firestore.
+                                         apresentação.
+
+
+
+ 3.3. Estratégia de extração segura
+   1. Documentar comportamento atual e criar testes de caracterização antes de mover funções.
+
+   2. Separar configuração, inicialização, serviços de autenticação e acesso a dados.
+
+   3. Extrair utilitários, validadores e componentes compartilhados.
+
+   4. Migrar Órgãos, Colaboradores, Acessos e Eventos em PRs independentes.
+
+   5. Ajustar testes atualmente dependentes do script dentro de index.html.
+
+   6. Preparar a pasta dist/ e revisar a configuração de Hosting, que hoje aponta para a raiz do projeto.
+
+   7. Comparar comportamento antes/depois e repetir a regressão completa.
+
+
+      CRITÉRIO DE ACEITE: o projeto passa a ter módulos separados, sem alteração não intencional de funções,
+      permissões, IDs, dados ou fluxos já aprovados.
+
+
+
+
+ 4. Sequência de lotes e dependências
+ O roteiro abaixo é organizado por dependências. O levantamento para a VM e a identidade institucional pode ocorrer
+ em paralelo, mas sua implantação não deve bloquear a estabilização do Módulo de Eventos.
+
+
+    Lote            Foco                                                   Saída principal
+
+
+    00              Diagnóstico e preservação                              Inventário, riscos, backlog, backup e restauração demonstrada.
+
+
+    01              Homologação e Preview                                  Link navegável isolado por PR, com dados e perfis fictícios.
+
+
+    02              Organização do código                                  Módulos separados, build previsível e regressão preservada.
+
+
+    03              Cadastro de órgãos                                     Base institucional consistente com contatos e referências.
+
+
+    04              Colaboradores e setores                                Pessoa e vínculos corretos com órgãos e eventos.
+
+
+    05              Controle de acesso                                     Papéis, permissões e auditoria verificáveis.
+
+
+    06              Eventos e agenda                                       Fluxo do evento: cadastro, agenda, responsáveis e elegibilidade.
+
+
+    07              Inscrições e vagas                                     Inscrição e cancelamento íntegros em cenários concorrentes.
+
+
+    08              Presença e relatórios                                  Registros confiáveis de comparecimento e consolidação.
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                           06
+PRGD / PLANO DE EVOLUÇÃO                                                                                      Documento de trabalho | 23 out 2026
+
+
+
+
+    Lote            Foco                                                   Saída principal
+
+
+    09              Homologação e piloto                                   Aceite da GRGD para o processo ponta a ponta.
+
+
+    10              Implantação em VM                                      Operação segura em infraestrutura institucional.
+
+
+    11              Identidade e dados                                     SSO/LDAP e eventual banco institucional, conforme aprovação.
+
+
+
+      MARCO 1 - GESTÃO DE EVENTOS OPERACIONAL: lotes 00 a 09 concluídos e homologados. Lotes 10 e 11 são
+      evoluções de infraestrutura, tratadas em projeto de migração controlado.
+
+
+
+ 4.1. Critério para iniciar um novo lote
+ Um lote dependente não deve começar como “concluído” com base em telas aparentemente funcionais. Ele só avança
+ quando os dados, as regras e os cenários críticos da etapa anterior têm evidências de aprovação. Ajustes menores
+ podem ser paralelizados sem misturar escopos ou publicações.
+
+
+ 5. Lotes 00 a 02 - preparar a base
+ Lote 00 | Diagnóstico, preservação e linha de base
+ Objetivo: conhecer a situação real e preservar os recursos e registros existentes.
+
+ Atividades: inventário de telas, funções, coleções, dependências, regras e permissões; backlog de defeitos;
+ levantamento dos registros legados; referência imutável da versão atual; backup e ensaio de restauração com
+ responsáveis autorizados.
+
+ Entregáveis: diagnóstico técnico, matriz de dependências, riscos, mapa de dados, backlog priorizado e evidência de
+ recuperação.
+
+ Pronto quando: há uma base reproduzível e os principais fluxos críticos estão documentados e cobertos por testes
+ mínimos.
+
+ Lote 01 | Homologação e prévia de PR
+ Objetivo: permitir que a GRGD teste visualmente cada entrega antes do merge.
+
+ Atividades: criar ambiente Firebase independente, contas de teste, cadastros fictícios, publicação de prévia temporária
+ por PR, proteção de credenciais, testes automatizados e roteiro de homologação.
+
+ Cuidados: uma URL temporária não isola dados por si só. A prévia deve apontar exclusivamente ao ambiente de
+ homologação, nunca ao Firebase de produção.
+
+ Pronto quando: o responsável consegue navegar nas telas e testar alterações reais de cadastro/inscrição fictícios sem
+ afetar usuários ou dados reais.
+
+ Lote 02 | Modularização
+ Objetivo: reduzir acoplamento mantendo os comportamentos atuais.
+
+ Atividades: separar serviços Firebase, navegação, UI reutilizável, validadores e módulos; configurar build; atualizar
+ testes; proteger apenas ativos públicos na publicação.
+
+ Pronto quando: os módulos possuem fronteiras claras e o conjunto de testes anterior continua aprovado.
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                      07
+PRGD / PLANO DE EVOLUÇÃO                                                                                     Documento de trabalho | 23 out 2026
+
+
+
+
+ 6. Lotes 03 a 05 - cadastros e governança
+ Lote 03 | Órgãos e relacionamento cadastral
+ Objetivo: disponibilizar referência única para órgão, sigla, situação, unidade, contatos, setores e vínculos.
+
+ Atividades: validar origem oficial dos dados; normalizar referências por ID; revisar contatos históricos; impedir
+ duplicação indevida; tratar renomeação, inativação ou reorganização sem perda de histórico. O relacionamento com
+ eventos deverá utilizar os IDs do cadastro, conforme autorização.
+
+ Pronto quando: inclusão, alteração, consulta e inativação/retificação permitidas funcionam sem quebrar vínculos com
+ colaboradores e eventos.
+
+ Lote 04 | Colaboradores, setores e participantes
+ Objetivo: definir uma única pessoa cadastral, que possa ter vínculos e participar de diversos eventos.
+
+
+    Termo                                           Conceito operacional
+
+
+    Colaborador                                     Pessoa vinculada a instituição; não implica conta ou acesso.
+
+
+    Usuário do sistema                              Pessoa com identidade autenticada e autorização específica.
+
+
+    Participante                                    Pessoa vinculada a uma inscrição de determinado evento.
+
+
+    Interlocutor                                    Representante que dialoga institucionalmente com a GRGD.
+
+
+    Responsável GRGD                                Integrante incumbido de acompanhar uma atividade ou evento.
+
+ Atividades: revisar busca, matrícula, e-mail e setor; duplicidades; mudança de vínculo; inativação; associação com
+ contas; associação a eventos; atualização de dados sem reescrever inscrições antigas de modo indevido.
+
+ Pronto quando: a mesma pessoa pode participar de diversos eventos e alterações permitidas preservam a
+ rastreabilidade.
+
+ Lote 05 | Autenticação, permissões e auditoria
+ Objetivo: impedir operações não autorizadas e manter o histórico dos atos relevantes.
+
+ Atividades: validar perfis internos, órgão, gestor, substituto e auditoria; aprovações e vigências; escopo por setor;
+ proteção no frontend e Firestore; auditoria; expiração de sessão; prevenção de escalonamento de privilégios.
+
+ Pronto quando: as pessoas autorizadas executam suas operações e as demais são bloqueadas também pela proteção
+ de dados, não apenas ocultando botões.
+
+
+ 7. Matriz de permissões - proposta inicial
+ Esta matriz serve à discussão com a GRGD e a equipe de segurança; não representa concessão aprovada ou
+ configuração já existente.
+
+
+    Operação                                                  Admin PRGD             Equipe GRGD                   Gestor de órgão
+
+
+    Contas e permissões                                       Sim                    Não, por padrão               Não
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                     08
+PRGD / PLANO DE EVOLUÇÃO                                                                                 Documento de trabalho | 23 out 2026
+
+
+
+
+    Operação                                                  Admin PRGD           Equipe GRGD                  Gestor de órgão
+
+
+    Criar / editar eventos                                    Sim                  Se autorizado                Não
+
+
+    Consultar eventos elegíveis                               Sim                  Sim                          Sim
+
+
+    Cadastrar colaboradores                                   Sim                  Se autorizado                No escopo aprovado
+
+
+    Inscrever participantes                                   Sim                  A definir                    No escopo aprovado
+
+
+    Consultar inscrições                                      Sim                  Se autorizado                No próprio escopo
+
+
+    Exportar dados gerais                                     Sim                  A definir                    Não
+
+
+ Nota: a identidade institucional futura não deve atribuir administração da PRGD automaticamente. A autorização
+ precisa ser mantida pelo sistema e validada no servidor.
+
+
+ 8. Lote 06 - eventos e agenda (centro do projeto)
+ Objetivo: permitir à GRGD acompanhar um evento do planejamento ao encerramento, com controle de informação e
+ responsáveis.
+
+
+
+        Planejar                                           Cadastrar                               Divulgar
+        objetivo e público                                 dados, agenda e local                   comunicar elegíveis
+
+
+
+
+        Inscrever                                          Executar                                Encerrar
+        vagas e confirmação                                presença e realização                   relatórios e histórico
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                 09
+PRGD / PLANO DE EVOLUÇÃO                                                                                        Documento de trabalho | 23 out 2026
+
+
+
+
+ 8.1. Subetapas do Módulo de Eventos
+
+    Subetapa            Escopo                                        Verificação principal
+
+
+    06.1                Cadastro e edição                             Criar, editar e consultar sem campos incorretos ou perda de dados.
+
+
+    06.2                Agenda e locais                               Datas, horários e locais coerentes; conflito não tratado como reserva
+                                                                      confirmada.
+
+
+    06.3                Situação do evento                            Transições válidas de planejado, confirmado, realizado e cancelado.
+
+
+    06.4                Responsáveis GRGD                             Atribuição e identificação da equipe responsável.
+
+
+    06.5                Público e elegibilidade                       Órgãos e perfis corretamente selecionados e autorizados.
+
+
+    06.6                Consultas e filtros                           Localização por data, tipo, status e outros critérios acordados.
+
+ Pronto quando: pessoa autorizada da GRGD consegue criar, editar, localizar, acompanhar e encerrar um evento, sem
+ erros bloqueantes ou inconsistências em dados e permissões.
+
+
+ 9. Lotes 07 e 08 - inscrições, presença e relatórios
+ Lote 07 | Inscrições e vagas
+ Revisar prevenção de duplicidade, elegibilidade por órgão, período de abertura, capacidade, cancelamento, reinscrição,
+ protocolos, histórico e concorrência. O código atual já contém transações para o fluxo institucional; é necessário validar
+ cenários integrados e a compatibilidade dos registros anteriores.
+
+ Tratamento do legado: não converter eventos ou inscrições antigas automaticamente para o modelo institucional sem
+ regra de reconciliação e ensaio de migração.
+
+ Pronto quando: uma disputa pela última vaga, uma tentativa duplicada, um cancelamento e uma reinscrição não geram
+ contadores inconsistentes ou perda de rastreabilidade.
+
+ Lote 08 | Presença e relatórios
+ Separar o registro de inscrição do registro de comparecimento. Se validado pela GRGD, implementar presença por
+ organizador autorizado, correção justificada, histórico, ausências e relatórios por evento/órgão. Reaproveitar os
+ relatórios CSV existentes.
+
+ Fora do escopo inicial: QR Code, certificados, lista de espera e comunicações automáticas - sujeitos a requisitos e
+ autorização próprios.
+
+ Pronto quando: evento pode ser encerrado com consolidação confiável de inscrições e, caso a presença seja
+ implementada, participantes efetivamente presentes.
+
+
+ 10. Lote 09 - homologação e piloto GRGD
+ Executar um cenário completo com dados fictícios: evento para representantes de três órgãos, responsáveis
+ designados, período de inscrição e vagas, inscrições de pessoas elegíveis, cancelamentos, validação de presença
+ quando aplicável e emissão de relatórios.
+
+ A homologação deve ser realizada pelo responsável funcional de Eventos. Cada divergência recebe registro, correção,
+ repetição dos testes e nova verificação; não basta a equipe de desenvolvimento considerar a tela concluída.
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                        10
+PRGD / PLANO DE EVOLUÇÃO                                                                                    Documento de trabalho | 23 out 2026
+
+
+
+
+      PRONTO QUANDO: o processo ponta a ponta recebe aceite funcional e não apresenta defeitos críticos ou
+      bloqueantes conhecidos. A validação integrada é distinta do resultado dos testes automatizados.
+
+
+
+
+ 11. Qualidade, testes e controle de publicação
+ Não é possível assegurar software permanentemente livre de erros. A meta é reduzir o risco por meio de critérios de
+ aprovação mensuráveis, testes, homologação e procedimentos de retorno.
+
+ 11.1. Fluxo obrigatório por PR
+   1. Definir requisitos e critérios de aceite antes de desenvolver.
+
+   2. Implementar em branch isolada, com PR em rascunho e escopo controlado.
+
+   3. Executar testes de lógica, regras Firestore, autenticação e navegador.
+
+   4. Disponibilizar ambiente de homologação com dados fictícios e link de prévia.
+
+   5. Avaliar a interface e os fluxos com perfis e tamanhos de tela distintos.
+
+   6. Corrigir achados e repetir regressões relevantes.
+
+   7. Obter aprovação do responsável funcional antes do merge e da publicação.
+
+   8. Conferir a implantação, registrar versão, evidências e procedimento de retorno.
+
+ 11.2. Condições mínimas de aceite
+
+    Dimensão                               Critério
+
+
+    Funcional                              Requisitos acordados executados na prévia.
+
+
+    Segurança                              Nenhum acesso indevido identificado nos cenários cobertos.
+
+
+    Dados                                  Sem exclusão, alteração indevida ou quebra de vínculo.
+
+
+    Regressão                              Testes existentes continuam aprovados.
+
+
+    Interface                              Desktop e celular revisados, inclusive mensagens de erro e acessibilidade básica.
+
+
+    Defeitos                               Sem falhas críticas ou bloqueantes conhecidas.
+
+
+    Homologação                            Aceite expresso do responsável funcional.
+
+
+    Publicação                             Evidências, versão, backup e retorno documentados.
+
+
+ Para cada PR, registrar: antes/depois, módulos afetados, regras alteradas, scripts de dados, cenários de teste, capturas
+ relevantes, riscos, responsável pelo aceite e pendências.
+
+ 11.3. Fluxo de acompanhamento
+
+      Planejado → Em desenvolvimento → Em testes → Em homologação → Aprovado → Publicado → Acompanhado
+
+ Uma falha de teste ou reprovação funcional devolve o lote à etapa de desenvolvimento. Não há avanço automático por
+ prazo.
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                    11
+PRGD / PLANO DE EVOLUÇÃO                                                                                     Documento de trabalho | 23 out 2026
+
+
+
+
+ 12. Infraestrutura futura - VM, autenticação e dados
+ Hospedar o site em uma VM não migra automaticamente sua autenticação ou persistência. O planejamento deve tratar
+ separadamente a implantação web e a arquitetura institucional completa.
+
+
+                                                              Navegador e painéis PRGD
+                                                         equipes GRGD e representantes autorizados
+
+
+
+
+                                                                 VM / infraestrutura ATI
+
+
+                                                                 site HTTPS + aplicação / API
+
+
+
+
+                               Banco de dados                                                    Identidade institucional
+
+
+                            Firestore ou PostgreSQL*                                            SSO/OIDC ou integração LDAP*
+
+
+
+
+      * Alternativas a validar tecnicamente com a ATI; não implementadas nesta fase.
+
+
+ 12.1. Lote 10 | VM e operação institucional
+
+    Verificação                               Pergunta/resultado necessário
+
+
+    Infraestrutura                            Sistema operacional, capacidade, ambientes e responsável técnico.
+
+
+    Rede                                      DNS institucional, certificados HTTPS, segmentação, firewall e acesso.
+
+
+    Operação                                  Backup, restauração, observabilidade, logs, atualização e suporte.
+
+
+    Aplicação                                 Configuração por ambiente, API futura, build restrito e publicação reproduzível.
+
+
+    Dependências                              Decidir se Firebase permanecerá temporariamente ou se haverá migração conjunta.
+
+ Pronto quando: aplicação opera em VM aprovada pela ATI, com monitoramento, plano de retorno e responsabilidade
+ operacional definida.
+
+ 12.2. Lote 11 | LDAP / SSO e banco
+ LDAP é um protocolo de acesso a diretórios. Se a ATI disponibilizar um provedor corporativo de identidade com
+ OpenID Connect (OIDC) ou outro mecanismo de Single Sign-On (SSO), essa costuma ser uma interface mais
+ apropriada para uma aplicação web. Se a integração disponível for LDAP/Active Directory, o acesso deve ocorrer por
+ componente seguro no servidor - nunca por chamadas LDAP diretas no navegador.
+
+ Fluxo conceitual: usuário acessa a PRGD → é autenticado pela identidade institucional → a aplicação confirma a
+ identidade → consulta suas permissões específicas → libera somente operações autorizadas.
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                     12
+PRGD / PLANO DE EVOLUÇÃO                                                                                Documento de trabalho | 23 out 2026
+
+
+
+ Não assumir: que gestores externos dos órgãos estejam no mesmo diretório, que o LDAP possua grupos adequados,
+ nem que PostgreSQL seja a tecnologia homologada na ATI.
+
+ Na eventual migração Firestore → PostgreSQL, preparar modelo de dados, IDs e relacionamentos, provas de
+ integridade, importação ensaiada, reconciliação, backup, trilha de auditoria e possibilidade de retorno.
+
+ Pronto quando: identidade, permissões, dados e fluxos homologados se mantêm corretos após a transição, com aceite
+ das equipes de infraestrutura, segurança e negócio.
+
+
+ 13. Governança, responsáveis e lacunas
+ A GRGD deve ser a área responsável pelas regras funcionais e pelo aceite dos fluxos de Eventos. Desenvolvimento,
+ infraestrutura, identidade, segurança e dados participam segundo competências definidas institucionalmente.
+ Responsáveis nominais ainda precisam ser designados.
+
+
+    Lacuna                            Fonte/responsável a consultar        Pergunta-chave
+
+
+    Fluxo real de Eventos             Equipe operacional GRGD              Como um evento começa, é divulgado, executado e encerrado?
+
+
+    Perfis e acessos                  Gestão GRGD + Segurança              Quem pode criar, editar, inscrever, cancelar e exportar?
+
+
+    Fonte dos órgãos                  Cadastro institucional / área        Qual registro oficial valida instituição, setor e contatos?
+                                      competente
+
+
+    Firebase e backups                Administrador do ambiente atual      Quais ambientes, backups, permissões e rotinas existem?
+
+
+    VM                                Infraestrutura ATI                   Qual o padrão de hospedagem, monitoração e publicação?
+
+
+    LDAP/SSO                          Identidade e segurança ATI           Há provedor OIDC/SAML? Quais contas são abrangidas?
+
+
+    Banco                             Arquitetura e dados ATI              Qual persistência institucional é aprovada?
+
+
+    Privacidade                       Segurança e proteção de dados        Quais dados são necessários, quem pode acessá-los e por
+                                                                           quanto tempo?
+
+
+
+ 13.1. Regras institucionais para dados pessoais
+ Inscrições e cadastros podem conter dados pessoais. Autorizações, exportações, retenção, guarda de arquivos,
+ finalidades de tratamento e auditoria devem seguir as regras da ATI e a legislação aplicável, inclusive a Lei Geral de
+ Proteção de Dados Pessoais (LGPD). O compartilhamento de um CSV deve ser tratado como operação distinta da mera
+ consulta na interface.
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                 13
+PRGD / PLANO DE EVOLUÇÃO                                                                                       Documento de trabalho | 23 out 2026
+
+
+
+
+ 13.2. Responsabilidades de trabalho - proposta
+
+    Papel                                           Responsabilidade
+
+
+    GRGD - negócio                                  Priorizar requisitos, validar jornadas, homologar e aceitar entregas.
+
+
+    Equipe de desenvolvimento                       Implementar, testar, documentar e corrigir defeitos.
+
+
+    Segurança / identidade                          Definir autenticação, privilégios, registros e requisitos de proteção.
+
+
+    Infraestrutura / dados                          Provisionar ambientes, backups, deploy, operação e migração.
+
+
+    Gestão ATI                                      Aprovar diretrizes institucionais, riscos, recursos e decisão de produção.
+
+
+
+
+ 14. Planejamento de execução e marcos
+ Sem tamanho de equipe, disponibilidade de profissionais e definição dos requisitos finais, não há evidência para fixar
+ prazo de conclusão. Recomenda-se organizar o trabalho em ciclos curtos de uma a duas semanas, dimensionando lotes
+ maiores em incrementos que possam ser testados e aceitos.
+
+
+    Marco                                     Lotes envolvidos             Condição de passagem
+
+
+    M0 - Base segura                          00 e 01                      Backup/restauração e prévia isolada funcionando.
+
+
+    M1 - Código organizado                    02                           Módulos separados, regressão aprovada.
+
+
+    M2 - Cadastros estáveis                   03 e 04                      Órgãos, setores, pessoas e vínculos conferidos.
+
+
+    M3 - Acessos aprovados                    05                           Matriz e testes de segurança homologados.
+
+
+    M4 - Eventos operacionais                 06 a 08                      Cadastro, inscrições e relatórios funcionais.
+
+
+    M5 - Piloto aprovado                      09                           Aceite da GRGD e plano de suporte.
+
+
+    M6 - Operação institucional               10 e 11                      VM, identidade e dados aprovados pelas equipes.
+
+
+
+ 14.1. Primeiras dez ações
+   1. Registrar este plano e estruturar lotes/marcos no repositório GitHub.
+
+   2. Criar referência de versão estável e confirmar backup/restauração.
+
+   3. Inventariar módulos, dados, permissões, dependências e defeitos.
+
+   4. Documentar com a GRGD o fluxo real e os campos obrigatórios de Eventos.
+
+   5. Definir critérios de aceite do Lote 00 e do ambiente de homologação.
+
+   6. Configurar Firebase de homologação sem ligação com produção.
+
+   7. Configurar a prévia navegável e preparar dados/contas fictícios.
+
+   8. Ajustar testes que dependem do arquivo HTML único.
+
+   9. Extrair o primeiro módulo em PR pequena, com regressão completa.
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                       14
+PRGD / PLANO DE EVOLUÇÃO                                                                                     Documento de trabalho | 23 out 2026
+
+
+
+   10. Homologar a reorganização antes de expandir cadastros e Eventos.
+
+
+ 15. Expansões futuras fora do Marco 1
+    Frente                                            Possibilidades futuras
+
+
+    Visitas institucionais                            Agenda, atas, participantes, encaminhamentos e acompanhamento.
+
+
+    Relacionamento                                    Histórico de interações ATI → órgão e responsabilidades.
+
+
+    Sucesso do Cliente                                Riscos, necessidades, resultados e acompanhamento institucional.
+
+
+    Customer Experience                               Jornadas, manifestações, experiência percebida e melhoria contínua.
+
+
+    Inteligência                                      Padrões de relacionamento, cruzamento de dados e apoio às decisões.
+
+
+    Gestão gerencial                                  Indicadores consolidados, prioridades e resultados.
+
+ Essas frentes devem usar o mesmo cadastro institucional quando apropriado, mas não misturar automaticamente
+ dados operacionais de eventos com avaliação da experiência dos órgãos sobre serviços de TIC.
+
+
+
+      RECOMENDAÇÃO FINAL: começar agora pelo Lote 00 (inventário e preservação) e pelo Lote 01 (homologação),
+      antes de desenvolver novas funções. Só então modularizar e estabilizar as dependências do Módulo de Eventos.
+
+
+
+
+ Anexo A. Checklist de aceite de cada PR
+    Item                                    Verificação
+
+
+    Requisito                               Descrição do pedido, regra de negócio, antes/depois e critério de aceite.
+
+
+    Escopo                                  Módulos e arquivos afetados; confirmação de recursos preservados.
+
+
+    Dados                                   Migração? Novo campo? Impacto nos registros existentes? Backup testado?
+
+
+    Permissões                              Perfis com e sem acesso testados no frontend e na camada de dados.
+
+
+    Testes                                  Lógica, integração, autenticação, navegação e regressão registrados.
+
+
+    Homologação                             Prévia com dados fictícios testada pelo responsável funcional.
+
+
+    Publicação                              Autorização, controle de versão, implantação e procedimento de retorno.
+
+
+    Pendências                              Riscos, limites e tarefas fora do escopo explicitamente registrados.
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                     15
+PRGD / PLANO DE EVOLUÇÃO                                                                                     Documento de trabalho | 23 out 2026
+
+
+
+
+ Anexo B. Fontes de referência utilizadas
+ As informações do estado atual foram extraídas do repositório técnico e seus documentos, consultados em
+ 23/10/2026. As recomendações de arquitetura e processo estão identificadas como propostas - não como serviços já
+ disponíveis na ATI.
+
+ Repositório: github.com/arlindossantos-collab/crm-ati-pe
+
+ Documentação: README.md, CONTRIBUTING.md, docs/inscricoes-institucionais.md,
+ docs/usuarios-colaboradores.md, docs/perfis-vinculos.md, docs/relatorios-inscricoes.md, docs/mapa-organizacao.md.
+
+ Implementação e testes: index.html, package.json, firebase.json, firestore.rules, .github/workflows/validar-prgd.yml e
+ tests/.
+
+ Padrões e orientações para estudo na fase de implantação: documentação do Firebase Hosting e de seus emuladores;
+ OpenID Connect Core; guias de segurança da ATI (a obter internamente); orientações da ANPD para o poder público.
+
+
+ Anexo C. Controle de conhecimento
+    Classificação                                  Registro
+
+
+    Sabemos                                        Base v0.14.0, Firebase, GitHub Pages, HTML monolítico, testes e diversos recursos já
+                                                   implementados.
+
+
+    Suspeitamos                                    Há pontos de falha nos fluxos integrados, histórico legado e manutenção do código que
+                                                   requerem testes dirigidos.
+
+
+    Precisamos descobrir                           Fluxo real da GRGD, aceite por perfil, confiabilidade dos dados, backup, requisitos da VM,
+                                                   provedor de identidade e arquitetura institucional.
+
+
+    Propomos                                       Refatoração incremental, Preview isolado, lotes com critérios de aceite e projeto separado
+                                                   para migração da infraestrutura.
+
+
+
+ Fim do documento. Plano de trabalho sujeito à validação da GRGD, das equipes técnicas competentes e da gestão da ATI/PE.
+
+
+
+
+ATI/PE - proposta técnica e funcional, sujeita à validação institucional                                                                        16
+
