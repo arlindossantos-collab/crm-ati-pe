@@ -2,9 +2,9 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.10.0 — Colaboradores e inscrições institucionais — proposta de 22/10/2026
+## v0.10.0 — Colaboradores e inscrições institucionais — entrega de 23/10/2026
 
-**Resumo para a chefia:** permite que o gestor do órgão e seu substituto cadastrem colaboradores sem criar contas de acesso e façam inscrições em eventos elegíveis. Prepara controle de vagas, cancelamento e comprovante com autoria individual. Base: `main@d033b8f2b2f76a414a170f7904821357b2b60485` (v0.9.0). Entrega em revisão, sem publicação do site ou das regras institucionais.
+**Resumo para a chefia:** permite que o gestor do órgão e seu substituto cadastrem colaboradores sem criar contas de acesso e façam inscrições em eventos elegíveis. Entrega controle de vagas, cancelamento e comprovante com autoria individual. Base: `main@d033b8f2b2f76a414a170f7904821357b2b60485` (v0.9.0). Publicação autorizada pelo usuário em 23/10/2026, após informar que publicou as novas regras no Firebase. Confirmação baseada no relato do usuário, sem verificação direta do console. Integração e GitHub Pages acompanhados no [PR #15](https://github.com/arlindossantos-collab/crm-ati-pe/pull/15).
 
 | Antes | Depois |
 | --- | --- |
@@ -18,7 +18,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 
 **Restauração da sessão:** a verificação final identificou uma disputa na ordem de chegada do CSS: o login podia estar com a classe de ocultação e ainda receber `display:flex`. Uma regra local prioritária protege login, modais e área de restauração. O teste simula utilitários CSS chegando após o HTML, sem dispensar a verificação de F5 sem exibir login.
 
-**Implantação e limites:** publicar novas regras de forma coordenada com o HTML, após homologação e autorização própria para este lote. Índices compostos da v0.9.0 preservados. Não converte eventos legados, não transfere órgão/setor/e-mail de colaborador, não emite certificado de presença nem assinatura digital e não integra LDAP/PostgreSQL. Detalhes e retorno em [inscrições institucionais](docs/inscricoes-institucionais.md).
+**Implantação e limites:** novas regras informadas como publicadas pelo usuário em 23/10/2026; índices compostos da v0.9.0 preservados. Homologação institucional e habilitação individual dos vínculos após revisão das aprovações continuam pendentes; os testes automatizados não equivalem à homologação em produção. [Validação completa do código funcional no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39851782396), revisão `319a2ff`. Não converte eventos legados, não transfere órgão/setor/e-mail de colaborador, não emite certificado de presença nem assinatura digital e não integra LDAP/PostgreSQL. Detalhes e retorno em [inscrições institucionais](docs/inscricoes-institucionais.md).
 
 ## v0.9.0 — Governança dos vínculos e telas por perfil — entrega de 22/10/2026
 

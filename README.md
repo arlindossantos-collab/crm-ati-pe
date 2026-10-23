@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.10.0 — proposta de colaboradores e inscrições institucionais.** Base: v0.9.0, commit `d033b8f`. Este novo lote está em revisão, sem integração à main ou publicação. O site atual permanece na v0.9.0. Requer homologação e implantação coordenada de novas regras Firebase; conserva os índices compostos existentes. LDAP/PostgreSQL seguem na migração planejada.
+**Versão deste código: v0.10.0 — colaboradores e inscrições institucionais.** Base: v0.9.0, commit `d033b8f`. Publicação autorizada pelo usuário em 23/10/2026, após informar a publicação das novas regras no Firebase. Essa etapa foi relatada pelo usuário, sem verificação direta do console nesta sessão. Integração e implantação do site acompanhadas no [PR #15](https://github.com/arlindossantos-collab/crm-ati-pe/pull/15). Conserva os índices compostos existentes; homologação institucional e revisão individual dos vínculos continuam necessárias. LDAP/PostgreSQL seguem na migração planejada.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -29,7 +29,7 @@ Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo
 
 ## O que mudou nesta entrega
 
-A proposta v0.10.0 habilita o gestor e seu substituto para cadastrar colaboradores e inscrevê-los em novos eventos institucionais, com elegibilidade por órgão, controle atômico de vagas, prevenção de duplicidade por e-mail, cancelamento com liberação da vaga e comprovante consultado no servidor. Cada alteração preserva autoria e histórico.
+A v0.10.0 habilita o gestor e seu substituto para cadastrar colaboradores e inscrevê-los em novos eventos institucionais, com elegibilidade por órgão, controle atômico de vagas, prevenção de duplicidade por e-mail, cancelamento com liberação da vaga e comprovante consultado no servidor. Cada alteração preserva autoria e histórico.
 
 As operações exigem uma liberação administrativa expressa, além das duas referências de aprovação, das ações e dos prazos. Vínculos da v0.9.0 continuam em consulta até revisão individual. Eventos anteriores conservam o fluxo original e não são convertidos automaticamente. Consultar [modelo e roteiro do lote](docs/inscricoes-institucionais.md).
 
@@ -37,9 +37,9 @@ As operações exigem uma liberação administrativa expressa, além das duas re
 
 A v0.9.0 acrescenta vínculos institucionais por órgão e setores, ações por função, referências das aprovações GRGD/autoridade e prazos de validade/revisão. Contatos e autenticação não concedem o papel de NSI automaticamente. O administrador registra as aprovações recebidas e a aplicação protege o escopo também nas regras.
 
-O lote entrega consultas de Meu órgão, Colaboradores, Inscrições do órgão e Auditoria autorizada, além da edição GRGD nos módulos explicitamente permitidos. A inscrição por representação, o cadastro de participantes pelo gestor e os comprovantes são o próximo lote; suas ações estão identificadas como em preparação. Usuários antigos são preservados para revisão individual.
+O primeiro lote entregou consultas de Meu órgão, Colaboradores, Inscrições do órgão e Auditoria autorizada, além da edição GRGD nos módulos explicitamente permitidos. A v0.10.0 acrescenta inscrição por representação, cadastro de colaboradores pelo gestor e comprovantes, mediante liberação operacional expressa. Usuários antigos são preservados para revisão individual.
 
-Abrir a [prévia com dados fictícios](previa-perfis.html) para explorar a matriz de perfis sem conexão a serviços. Consultar [modelo, limites, validação e implantação](docs/perfis-vinculos.md). A prévia é ilustrativa; o fluxo completo do novo lote está em revisão e é validado com dados fictícios nas suítes de navegador.
+Abrir a [prévia com dados fictícios](previa-perfis.html) para explorar a matriz de perfis sem conexão a serviços. Consultar [modelo, limites, validação e implantação](docs/perfis-vinculos.md). A prévia é ilustrativa; o fluxo completo do novo lote é validado com dados fictícios nas suítes de navegador.
 
 ### Entregas anteriores
 

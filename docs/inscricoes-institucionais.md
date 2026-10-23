@@ -1,6 +1,6 @@
 # Colaboradores e inscrições institucionais — v0.10.0
 
-Proposta do segundo lote, baseada em `main@d033b8f2b2f76a414a170f7904821357b2b60485` (v0.9.0). Entrega em branch/PR para revisão, sem publicação do HTML ou das regras institucionais. A aplicação continua em um único HTML, como definido em CONTRIBUTING.md.
+Segundo lote, baseado em `main@d033b8f2b2f76a414a170f7904821357b2b60485` (v0.9.0). Publicação autorizada pelo usuário em 23/10/2026, após informar a publicação das novas regras no Firebase. Integração e implantação do site acompanhadas no [PR #15](https://github.com/arlindossantos-collab/crm-ati-pe/pull/15). A aplicação continua em um único HTML, como definido em CONTRIBUTING.md.
 
 ## Fluxo de operação
 
@@ -54,6 +54,8 @@ O comprovante registra a situação consultada e os dados do evento na inscriç�
 LDAP/OIDC e PostgreSQL seguem na migração planejada. Este lote usa a autenticação Firebase existente e não provisiona pessoas no LDAP. Não altera grupos de diretório, infraestrutura ou contatos para conceder privilégios.
 
 ## Implantação e conferência
+
+Em 23/10/2026, o usuário informou que publicou as novas regras da v0.10.0. Registro baseado no relato do usuário, sem verificação direta do console nesta sessão. Os índices da v0.9.0 são mantidos. A autorização permite integrar o HTML e acompanhar o GitHub Pages; homologação institucional e revisão individual de acessos permanecem necessárias. Nenhum vínculo foi habilitado automaticamente durante a publicação. O roteiro abaixo permanece como referência para conferência.
 
 1. Revisar o PR e homologar em projeto Firebase separado, com contas/dados fictícios. Abrir o HTML local com a configuração institucional não isola a produção.
 2. Publicar o novo `firestore.rules` de forma coordenada com o HTML. Este lote não acrescenta índices compostos; conserva os três índices por órgão/setor da v0.9.0. A consulta de elegibilidade usa o índice automático de array de `orgaosElegiveis`.
