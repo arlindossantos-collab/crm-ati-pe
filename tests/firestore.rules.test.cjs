@@ -628,3 +628,86 @@ test('portal sem referências consulta fontes de eventos e setores, preservando 
     await assertSucceeds(getDocs(query(collection(f,'setores'),where('orgaoId','==','orgao-a'))));
     await assertFails(getDocs(query(collection(f,'setores'),where('orgaoId','==','orgao-b'))));
 });
+
+function contatoProjetado(p){return {nome:p.nome,emailInstitucional:p.emailInstitucional,telefone:p.telefone,cargo:p.cargo,orgaoId:p.orgaoId,setorId:p.setorId,ativo:p.ativo,validadeCadastro:p.validadeCadastro??null,funcoesContato:p.funcoesContato||[],divulgavel:(p.funcoesContato||[]).length>0,origemAuditoriaId:p.ultimaAuditoriaId||'',atualizadoEm:p.atualizadoEm};}
+async function atualizarPessoaV012(uid,p,patch,{projetar=true,projecaoExtra={},somentePessoa=false}={}){
+    const f=db(uid),id=idPessoaLote2(p),log=doc(collection(f,'historicoAlteracoes')),b=writeBatch(f);
+    const novo={...p,...patch,atualizadoEm:serverTimestamp(),atualizadoPorUid:uid,ultimaAuditoriaId:log.id};
+    b.set(doc(f,'colaboradores',id),novo);if(projetar)b.set(doc(f,'contatosColaboradores',id),{...contatoProjetado(novo),...projecaoExtra});
+    if(!somentePessoa)b.set(log,{...auditoriaLote2(uid,'colaboradores',id,novo,'editar'),campos:Object.keys(patch)});
+    return b.commit();
+}
+async function vincularPessoaV012(p,usuarioId,{espelhar=true,logUsuario=true}={}){
+    const f=db('admin'),id=idPessoaLote2(p),log=doc(collection(f,'historicoAlteracoes')),b=writeBatch(f),novo={...p,usuarioUid:usuarioId,atualizadoEm:serverTimestamp(),atualizadoPorUid:'admin',ultimaAuditoriaId:log.id};
+    b.set(doc(f,'colaboradores',id),novo);b.set(doc(f,'contatosColaboradores',id),contatoProjetado(novo));b.set(log,{...auditoriaLote2('admin','colaboradores',id,novo,'editar'),campos:['usuarioUid']});
+    if(espelhar){const lu=doc(collection(f,'historicoAlteracoes'));b.update(doc(f,'usuarios',usuarioId),{colaboradorId:id,ultimaAuditoriaId:lu.id});if(logUsuario)b.set(lu,{autorUid:'admin',autorNome:'admin',criadoEm:serverTimestamp(),colecao:'usuarios',registroId:usuarioId,registroNome:usuarioId,acao:'editar',campos:['colaboradorId']});}
+    return b.commit();
+}
+test('gestor atualiza funções e revisão com projeção correspondente; admin consulta todos os colaboradores',async()=>{
+    const {p}=await seedLote2();await assertSucceeds(atualizarPessoaV012('titular',p,{funcoesContato:['nsi','sei'],validadeCadastro:Date.now()+86400000}));
+    await assertSucceeds(getDocs(collection(db('admin'),'colaboradores')));
+    await assertFails(getDocs(collection(db('titular'),'colaboradores')));
+    await assertFails(atualizarPessoaV012('gestorB',p,{funcoesContato:['nsi']}));
+});
+test('projeção não aceita contato falsificado, UID ou promoção de acesso',async()=>{
+    const {p}=await seedLote2();
+    for(const projecaoExtra of [{nome:'Forjado'},{orgaoId:'orgao-b'},{usuarioUid:'admin'},{divulgavel:false}])await assertFails(atualizarPessoaV012('titular',p,{funcoesContato:['nsi']},{projecaoExtra}));
+    await assertFails(atualizarPessoaV012('titular',p,{funcoesContato:[]},{projecaoExtra:{divulgavel:true}}));
+    await assertFails(atualizarPessoaV012('titular',p,{funcoesContato:['admin']}));
+    await assertFails(atualizarPessoaV012('titular',p,{usuarioUid:'admin'}));
+    await assertFails(atualizarPessoaV012('titular',p,{validadeCadastro:'texto'}));
+});
+test('contato já projetado não pode ficar desatualizado quando a origem muda',async()=>{
+    const {p}=await seedLote2();await assertSucceeds(atualizarPessoaV012('titular',p,{funcoesContato:['nsi']}));
+    const atual=(await getDoc(doc(db('admin'),'colaboradores',idPessoaLote2(p)))).data();
+    await assertFails(atualizarPessoaV012('titular',atual,{telefone:'81999999999'},{projetar:false}));
+    await assertSucceeds(atualizarPessoaV012('titular',atual,{telefone:'81999999999'}));
+    const contato=(await getDoc(doc(db('admin'),'contatosColaboradores',idPessoaLote2(p)))).data();
+    await assertFails(setDoc(doc(db('admin'),'contatosColaboradores',idPessoaLote2(p)),contato));
+});
+test('consulta de clientes recebe somente projeção institucional e vínculo não aceita outro órgão',async()=>{
+    const {p,outro}=await seedLote2();await assertSucceeds(atualizarPessoaV012('admin',p,{funcoesContato:['nsi']}));await assertSucceeds(atualizarPessoaV012('admin',outro,{funcoesContato:['sei']}));
+    await env.withSecurityRulesDisabled(c=>updateDoc(doc(c.firestore(),'usuarios','interno'),{modulosPermitidos:['clientes']}));
+    await assertSucceeds(getDocs(query(collection(db('interno'),'contatosColaboradores'),where('divulgavel','==',true))));
+    await assertFails(getDocs(collection(db('interno'),'contatosColaboradores')));
+    await assertSucceeds(getDocs(collection(db('interno'),'setores')));
+    await assertFails(getDocs(collection(db('titular'),'setores')));
+    await assertFails(getDocs(collection(db('interno'),'colaboradores')));
+    await assertFails(getDocs(collection(db('titular'),'contatosColaboradores')));
+    await assertFails(updateDoc(doc(db('admin'),'orgaos','orgao-a'),{contatosVinculados:{nsi:idPessoaLote2(outro)}}));
+    const privado=pessoaLote2('privado@example.invalid');await assertSucceeds(gravarPessoaLote2('admin',privado));await assertSucceeds(atualizarPessoaV012('admin',(await getDoc(doc(db('admin'),'colaboradores',idPessoaLote2(privado)))).data(),{telefone:'81999'}));
+    await assertFails(getDoc(doc(db('interno'),'contatosColaboradores',idPessoaLote2(privado))));
+    await assertSucceeds(updateDoc(doc(db('admin'),'orgaos','orgao-a'),{contatosVinculados:{nsi:idPessoaLote2(p)}}));
+});
+test('associação de usuário exige espelho e auditoria; não altera permissões',async()=>{
+    const {p}=await seedLote2();await assertFails(vincularPessoaV012(p,'titular',{espelhar:false}));await assertFails(vincularPessoaV012(p,'titular',{logUsuario:false}));
+    await assertSucceeds(vincularPessoaV012(p,'titular'));
+    const u=(await getDoc(doc(db('admin'),'usuarios','titular'))).data();assert.equal(u.perfil,'comum');assert.equal(u.acessoInstitucional.papel,'gestor_nsi');assert.equal(u.colaboradorId,idPessoaLote2(p));
+    await assertFails(updateDoc(doc(db('titular'),'usuarios','titular'),{colaboradorId:'outro'}));
+});
+test('duas pessoas não podem manter o mesmo usuário e associação incompleta é recusada',async()=>{
+    const {p,p2}=await seedLote2();await assertSucceeds(vincularPessoaV012(p,'titular'));await assertFails(vincularPessoaV012(p2,'titular'));
+    await assertFails(updateDoc(doc(db('admin'),'usuarios','titular'),{colaboradorId:''}));
+});
+test('substituto com cinco setores atualiza contato projetado dentro dos limites de regras',async()=>{
+    const {p,titular}=await seedLote2();
+    await env.withSecurityRulesDisabled(async c=>{const f=c.firestore();for(const id of ['a3','a4','a5'])await setDoc(doc(f,'setores',id),{nome:id,orgaoId:'orgao-a',ativo:true});for(const uid of ['titular','sub'])await updateDoc(doc(f,'usuarios',uid),{'acessoInstitucional.setoresIds':['a1','a2','a3','a4','a5']});});
+    await assertSucceeds(atualizarPessoaV012('sub',p,{funcoesContato:['sei'],validadeCadastro:Date.now()+86400000}));
+    const atual=(await getDoc(doc(db('admin'),'colaboradores',idPessoaLote2(p)))).data();
+    await assertSucceeds(atualizarPessoaV012('sub',atual,{setorId:'a2'}));
+});
+
+test('transferência de setor exige escopo anterior e novo, preservando órgão e inscrições',async()=>{
+    const {p}=await seedLote2();await assertFails(atualizarPessoaV012('titular',p,{setorId:'a2'}));await assertFails(atualizarPessoaV012('admin',p,{setorId:'b1'}));
+    await assertSucceeds(atualizarPessoaV012('admin',p,{setorId:'a2'}));
+    const atual=(await getDoc(doc(db('admin'),'colaboradores',idPessoaLote2(p)))).data();assert.equal(atual.orgaoId,'orgao-a');assert.equal(atual.setorId,'a2');
+    await assertFails(atualizarPessoaV012('titular',atual,{setorId:'a1'}));
+});
+test('desvínculo completo preserva conta, colaborador e permissões com histórico atômico',async()=>{
+    const {p}=await seedLote2();await assertSucceeds(vincularPessoaV012(p,'titular'));
+    const f=db('admin'),id=idPessoaLote2(p),log=doc(collection(f,'historicoAlteracoes')),lu=doc(collection(f,'historicoAlteracoes')),b=writeBatch(f);
+    const atual=(await getDoc(doc(f,'colaboradores',id))).data(),novo={...atual,usuarioUid:'',atualizadoEm:serverTimestamp(),atualizadoPorUid:'admin',ultimaAuditoriaId:log.id};
+    b.set(doc(f,'colaboradores',id),novo);b.set(doc(f,'contatosColaboradores',id),contatoProjetado(novo));b.set(log,{...auditoriaLote2('admin','colaboradores',id,novo,'editar'),campos:['usuarioUid']});
+    b.update(doc(f,'usuarios','titular'),{colaboradorId:'',ultimaAuditoriaId:lu.id});b.set(lu,{autorUid:'admin',autorNome:'admin',criadoEm:serverTimestamp(),colecao:'usuarios',registroId:'titular',registroNome:'titular',acao:'editar',campos:['colaboradorId']});await assertSucceeds(b.commit());
+    assert.equal((await getDoc(doc(f,'usuarios','titular'))).data().acessoInstitucional.papel,'gestor_nsi');assert.equal((await getDoc(doc(f,'colaboradores',id))).data().ativo,true);
+});

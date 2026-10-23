@@ -2,6 +2,22 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.12.0 — Usuários, colaboradores e contatos vinculados — entrega de 23/10/2026
+
+**Resumo para a chefia:** melhora a identificação de quem pode acessar a PRGD e conecta os contatos de Clientes aos colaboradores mantidos pelos órgãos, reduzindo redigitação. Administração ganha consulta de colaboradores por órgão, setor e revisão cadastral e pode associar a pessoa à sua conta existente. Base: `main@373368974e4175eb585db2a9b0d511c3eb2072a5`. Publicação autorizada pelo usuário em 23/10/2026, após informar que publicou as regras do Firestore (confirmação do usuário, sem inspeção direta do console). Integração e GitHub Pages acompanhados no [PR #18](https://github.com/arlindossantos-collab/crm-ati-pe/pull/18).
+
+| Antes | Depois |
+| --- | --- |
+| Situação da conta e do vínculo distribuídas na tabela; poucos filtros. | Indicadores e filtros de perfil/situação do acesso, com motivos de bloqueio e revisão antes de salvar. |
+| Colaboradores acessíveis somente no portal do órgão. | Administração consulta e cadastra no mesmo repositório, filtrando órgão, setor, revisão e conta vinculada. |
+| Contatos NSI, SEI e demais funções digitados separadamente em Clientes. | Funções do colaborador alimentam automaticamente os contatos; seleção explícita por ID também disponível. Dados manuais anteriores preservados. |
+| Colaborador e usuário não têm associação explícita. | Vínculo recíproco confirmado por administrador, sem promoção de perfil ou criação de login. |
+| Sem prazo de revisão cadastral do colaborador. | Data opcional, sinalização de vencimento e filtro; separada da validade de acesso. |
+
+**Validação:** 115 testes da aplicação, 80 de regras Firestore e 3 de Auth aprovados localmente (198 ao todo), além de sete suítes de navegador com dados fictícios. [Verificação remota aprovada](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40000001532) no código funcional final; resultados e publicação registrados no PR. Inclui origem/projeção/auditoria atômicas, tentativa de associação incompleta, duplicidade de conta, desvínculo, transferência de setor com escopo e atualização de contato sem perder o formulário aberto.
+
+**Implantação e limites:** exige novas regras, sem novos índices. Publicar regras e HTML de forma coordenada; nenhum cadastro ou perfil é migrado em massa. Cadastros anteriores geram projeção ao serem revisados/salvos na interface nova. Associação não altera permissões ou e-mail de login. Prazo cadastral não bloqueia login nem cancela inscrições. Esta entrega não implementa a arquitetura do outro repositório, MFA, revogação global de sessões ou as proteções administrativas reservadas ao lote 2. [Roteiro e limites](docs/usuarios-colaboradores.md).
+
 ## v0.11.0 — Áreas externa e interna por perfil — entrega de 23/10/2026
 
 **Resumo para a chefia:** apresenta um portal próprio para gestores de NSI, substitutos, auditoria e usuários externos, inspirado na prévia de perfis. O menu lateral, os indicadores e os atalhos ajudam a distinguir a área do órgão da área de trabalho GRGD/administração. Base: `main@ffd3ce8a463e51b8f43536e91bf75e25caf2f489`. Publicação autorizada pelo usuário em 23/10/2026; integração e GitHub Pages acompanhados no [PR #17](https://github.com/arlindossantos-collab/crm-ati-pe/pull/17).

@@ -65,7 +65,7 @@ function fixture(me,extra={}){return {me,usuarios:[admin,nsi],orgaos:[{id:'a',no
   {
    const {context,page}=await open(admin);await page.locator('[data-tab="usuarios"]').click();await page.locator('[data-usuario-editar="nsi"]').click();
    for(const id of ['grgd-nome','grgd-ref','autoridade-nome','autoridade-ref'])assert.equal(await page.locator('#vinculo-'+id).inputValue(),'');
-   await page.locator('#btn-salvar-edicao').click();await page.locator('#modal-detalhes').waitFor({state:'hidden'});
+   await page.locator('#btn-salvar-edicao').click();await page.locator('#revisar-usuario-confirmar').click();await page.locator('#modal-detalhes').waitFor({state:'hidden'});
    assert.equal(await page.evaluate(()=>__fixture.usuarios.find(u=>u.uid==='nsi').acessoInstitucional.situacao),'aprovado');await context.close();
   }
   assert.deepEqual(errors,[]);console.log('Portal NSI: nome estável, snapshots independentes, setores atrasados/filtro/cadastro, eventos de hoje/elegibilidade, falhas, alteração real de escopo, referências opcionais e celular aprovados.');

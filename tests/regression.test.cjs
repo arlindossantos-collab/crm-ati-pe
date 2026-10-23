@@ -14,7 +14,7 @@ function vinculoTeste(extra={}) {
 }
 
 // Exercita o módulo real com DOM/Firebase simulados, sem acessar serviços ou dados reais.
-function app() {
+function app({revisaoAutomatica=true}={}) {
     const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
     const source = html.match(/<script type="module">([\s\S]*?)<\/script>/)[1]
         .replace(/^\s*import .*?;\s*$/gm, '');
@@ -54,6 +54,7 @@ function app() {
         Chart: function(ctx, config) { charts.push(config); this.destroy = () => {}; }
     });
     vm.runInContext(source, context);
+    if(revisaoAutomatica)vm.runInContext("revisarUsuario=async()=>true",context);
     return { run: code => vm.runInContext(code, context), element, writes, audits, charts, listeners, snapshots, context,storage };
 }
 
@@ -766,10 +767,10 @@ test('permissão de escrita isolada não substitui consulta, aprovação ou vali
     usuarioGestorLote2(a,{fim:Date.now()-1});assert.equal(a.run("gestorPode('inscricoes.cancelar')"),false);
     usuarioGestorLote2(a,{operacoesVersao:''});assert.equal(a.run("gestorPode('inscricoes.criar')"),false);
 });
-test('cadastro pelo formulário gera somente colaborador e auditoria, com órgão do vínculo',async()=>{
+test('cadastro pelo formulário grava colaborador, projeção de contato e auditoria sem conta de login',async()=>{
     const a=app();usuarioGestorLote2(a);for(const [k,v] of Object.entries({nome:'Pessoa de teste',emailInstitucional:' PESSOA@EXAMPLE.INVALID ',setorId:'a1',telefone:'81999999999',cargo:'Analista'}))a.element('colab-'+k).value=v;
     a.element('colab-ativo').checked=true;await a.run('salvarColaborador({preventDefault(){}})');
-    assert.equal(a.element('colab-erro').textContent,'');assert.equal(a.writes.length,1);assert.equal(a.writes[0].collection,'colaboradores');assert.equal(a.writes[0].data.orgaoId,'orgao-a');assert.equal(a.writes[0].data.emailInstitucional,'pessoa@example.invalid');assert.equal(a.audits.length,1);assert.equal(a.audits[0].colecao,'colaboradores');
+    assert.equal(a.element('colab-erro').textContent,'');assert.equal(a.writes.length,2);const registro=a.writes.find(w=>w.collection==='colaboradores');assert.equal(registro.data.orgaoId,'orgao-a');assert.equal(registro.data.emailInstitucional,'pessoa@example.invalid');assert.ok(a.writes.some(w=>w.collection==='contatosColaboradores'));assert.ok(!a.writes.some(w=>w.collection==='usuarios'));assert.equal(a.audits.length,1);assert.equal(a.audits[0].colecao,'colaboradores');
 });
 test('setor fora da delegação é recusado antes de gravar colaborador',async()=>{
     const a=app();usuarioGestorLote2(a);a.element('colab-nome').value='Pessoa';a.element('colab-emailInstitucional').value='pessoa@example.invalid';a.element('colab-setorId').value='b1';a.element('colab-ativo').checked=true;
@@ -836,4 +837,41 @@ test('lista real de eventos mantém o encontro de hoje em Futuros durante o dia'
     a.context.Date=class extends Date {constructor(...args){super(...(args.length?args:[2026,9,23,15,0]));}static now(){return new Date(2026,9,23,15,0).getTime();}};
     a.run("currentUser={uid:'admin',perfil:'admin',ativo:true};dbData.eventos=[{id:'hoje',titulo:'Encontro hoje',dataInicio:'2026-10-23',eventoPublico:true}];filtroEventoAtual='futuros';renderEventos()");
     assert.equal(a.element('count-eventos').textContent,1);assert.match(a.element('grid-eventos').innerHTML,/Encontro hoje/);
+});
+
+test('situação de acesso separa cadastro, validade do vínculo, revisão e módulos',()=>{
+    const a=app(),base={uid:'u',ativo:true,tipoUsuario:'externo',perfil:'comum',modulosPermitidos:[],acessoInstitucional:vinculoTeste()};
+    for(const [patch,estado]of [[{ativo:false},'inativo'],[{acessoInstitucional:{...base.acessoInstitucional,fim:Date.now()-1}},'vencido'],[{acessoInstitucional:{...base.acessoInstitucional,revisao:Date.now()-1}},'revisao'],[{acessoInstitucional:{...base.acessoInstitucional,situacao:'pendente'}},'pendente'],[{acessoInstitucional:{...base.acessoInstitucional,situacao:'suspenso'}},'suspenso']]){
+        a.context.usuario={...base,...patch};assert.equal(a.run('estadoAcessoUsuario(usuario).id'),estado);
+    }
+    a.context.usuario={...base,acessoInstitucional:null};assert.equal(a.run('estadoAcessoUsuario(usuario).id'),'sem_modulos');
+    assert.equal(a.run("perfilFiltroUsuario({perfil:'admin',tipoUsuario:'interno',ativo:false})"),'admin');
+});
+test('contato do cliente acompanha colaborador por ID e preserva dados manuais sem vínculo',()=>{
+    const a=app();a.run("dbData.contatosColaboradores=[{id:'p',orgaoId:'o',nome:'Atual',emailInstitucional:'p@example.invalid',telefone:'81999',cargo:'Analista',funcoesContato:['nsi'],divulgavel:true,ativo:true}]");
+    let o=a.run("orgaoComContatos({id:'o',gestorNsi:'Antigo',gestorSei:'Manual'})");assert.equal(o.gestorNsi,'Atual');assert.equal(o.gestorSei,'Manual');
+    a.run("dbData.contatosColaboradores[0].nome='Atualizado'");o=a.run("orgaoComContatos({id:'o',contatosVinculados:{nsi:'p'}})");assert.equal(o.gestorNsi,'Atualizado');
+    assert.equal(a.run("orgaoComContatos({id:'outro',contatosVinculados:{nsi:'p'},gestorNsi:'Antigo'}).gestorNsi"),'Contato vinculado indisponível');
+    assert.equal(a.run("orgaoComContatos({id:'o',gestorNsi:'Manual',contatosVinculados:{nsi:'manual'}}).gestorNsi"),'Manual');
+});
+test('contato com revisão vencida é sinalizado e função NSI não cria autorização',()=>{
+    const a=app();a.run("dbData.contatosColaboradores=[{id:'p',orgaoId:'o',nome:'Pessoa',funcoesContato:['nsi'],divulgavel:true,ativo:true,validadeCadastro:1}]");
+    assert.match(a.run("orgaoComContatos({id:'o'}).gestorNsi"),/revisão vencida/);
+    assert.equal(a.run("situacaoCadastroColaborador({ativo:true}).id"),'sem_prazo');
+    assert.equal(a.run("modulosDoUsuario({ativo:true,tipoUsuario:'externo',perfil:'comum',funcoesContato:['nsi'],modulosPermitidos:[]}).length"),0);
+});
+test('projeção de contato não compartilha UID de login, senha nem perfil',()=>{
+    const a=app();const p=a.run("projecaoContato({nome:'Pessoa',orgaoId:'o',setorId:'s',usuarioUid:'login',perfil:'admin',senha:'nunca',emailInstitucional:'p@example.invalid',telefone:'',cargo:'',ativo:true,atualizadoEm:'agora'})");
+    assert.equal(p.usuarioUid,undefined);assert.equal(p.perfil,undefined);assert.equal(p.senha,undefined);
+    a.element('colab-validade').value='2027-10-23';a.element('colab-funcoes').innerHTML='dados anteriores';a.element('colab-orgao').innerHTML='órgão anterior';a.run('limparDadosSessao()');assert.equal(a.element('colab-validade').value,'');assert.equal(a.element('colab-funcoes').innerHTML,'');assert.equal(a.element('colab-orgao').innerHTML,'');
+});
+test('admin vê colaboradores e gestor permanece limitado ao seu escopo',()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno',ativo:true}");assert.ok(a.run('modulosDoUsuario()').includes('colaboradores'));
+    usuarioGestorLote2(a);assert.equal(a.run("registroNoEscopo({orgaoId:'orgao-b',setorId:'b1'})"),false);
+});
+test('cancelar revisão de usuário não grava cadastro e mudança de sessão invalida confirmação',async()=>{
+    const a=app({revisaoAutomatica:false});a.run("currentUser={uid:'admin',perfil:'admin',ativo:true,tipoUsuario:'interno'}");
+    const dados="{nome:'Pessoa',email:'p@example.invalid',ativo:true,tipoUsuario:'externo',perfil:'comum',modulosPermitidos:[]}";
+    let promessa=a.run('revisarUsuario('+dados+')');assert.equal(a.element('modal-revisar-usuario').classList.contains('hidden'),false);a.run('cancelarRevisaoUsuario()');assert.equal(await promessa,false);assert.equal(a.writes.length,0);assert.equal(a.element('revisar-usuario-resumo').innerHTML,'');
+    promessa=a.run('revisarUsuario('+dados+')');a.run('versaoSessao++');a.listeners.get('revisar-usuario-confirmar:click')();assert.equal(await promessa,false);
 });
