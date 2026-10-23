@@ -2,7 +2,7 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.14.0 — Relatórios CSV de inscrições — proposta de 23/10/2026
+## v0.14.0 — Relatórios CSV de inscrições — publicada em 23/10/2026
 
 **Resumo para a chefia:** os dois controles de relatório já visíveis em Eventos passam a exportar inscrições em CSV com evento, participante, órgão, setor, situação, protocolo e datas disponíveis. O administrador pode gerar o relatório geral ou por evento. A exportação de inscrições **não comprova presença**.
 
@@ -14,7 +14,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 
 **Segurança e preservação:** sem novas permissões, coleções, índices ou alterações nas regras do Firestore. Nada é gravado, excluído, migrado ou enviado a terceiros. CSV baixado contém dados pessoais e exige guarda autorizada. Eventos antigos permanecem sem situação presumida.
 
-**Validação:** testes de isolamento administrativo, filtros, compatibilidade legado, erro de consulta, estado dos botões e neutralização de fórmulas. CI do PR pendente de execução. Necessita homologação com dados fictícios e autorização antes de integrar/publicar. [Detalhes](docs/relatorios-inscricoes.md).
+**Validação e publicação:** testes de isolamento administrativo, filtros, compatibilidade legado, erro de consulta, estado dos botões e neutralização de fórmulas aprovados no [CI do PR #20](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40030540444), juntamente com regras Firestore, Auth e sete suítes de navegador com Firebase simulado. Após autorização do usuário, o PR foi integrado à `main` no commit `5014da060ceb36f4f5c250dea1b394f6bd183e84`; o [GitHub Pages confirmou a implantação](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40032116247). Sem teste de produção com dados reais nem verificação direta do HTML servido por navegador externo nesta sessão. A tag/release formal v0.14.0 ainda não foi criada. [Detalhes](docs/relatorios-inscricoes.md).
 
 ## v0.13.0 — Painel gerencial e Colaboradores unificados — entrega de 23/10/2026
 

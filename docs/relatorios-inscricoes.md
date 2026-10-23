@@ -1,4 +1,4 @@
-# Relatórios de inscrições — v0.14.0 (proposta em revisão)
+# Relatórios de inscrições — v0.14.0 (publicada em 23/10/2026)
 
 **Base:** `main@9e4e7df89cba247e2db07557ef41ab02b01e001e`. Implementação sobre o HTML e Firebase existentes. Nenhuma nova regra ou índice necessário.
 
@@ -23,10 +23,11 @@ O lote **não grava, não exclui, não migra, não altera regras, não cria índ
 
 **Inscrição não é presença.** Esta versão não implanta confirmação de frequência, assinatura, QR, certificado ou comunicações automáticas. Isso exige uma proposta própria de negócio, privacidade, regras e responsáveis.
 
-## Validação antes de publicar
+## Validação e publicação
 
-1. Executar `npm test`, `npm run test:rules` e `npm run test:auth`, além das suítes Chromium existentes no CI.
-2. Com Firebase simulado ou projeto de homologação separado, conferir inscrição confirmada/cancelada, registro legado e evento vazio.
-3. Testar administrador versus gestor, substituto, GRGD e auditoria. Testar logout e perda de acesso ao Firestore.
-4. Abrir CSV no Excel/LibreOffice com nomes acentuados, aspas, separadores e fórmulas, sem interpretar conteúdo como comando.
-5. Após revisão e autorização, integrar à `main` e confirmar a versão do GitHub Pages. Não é necessário republicar `firestore.rules` por causa deste lote.
+- A [validação automatizada do PR #20](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40030540444) foi **aprovada**: testes da aplicação, regras do Firestore, Auth e sete suítes Chromium com Firebase simulado.
+- O usuário autorizou a publicação. O [PR #20](https://github.com/arlindossantos-collab/crm-ati-pe/pull/20) foi integrado à `main` no commit `5014da060ceb36f4f5c250dea1b394f6bd183e84`.
+- A [implantação do GitHub Pages](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40032116247) foi confirmada pelo GitHub como bem-sucedida em 23/10/2026.
+- Não houve alteração de `firestore.rules`; essa entrega não exige republicação de regras ou índices.
+- **Pendente de validação institucional com dados fictícios em ambiente isolado:** conferir os CSVs no Excel/LibreOffice, perfis, eventos legados, falhas de leitura e visualização na interface. Os testes automatizados não equivalem a homologação em produção.
+- **Pendente:** criação de tag e release formal, processo separado da implantação do site. Nenhuma foi declarada como criada nesta entrega.
