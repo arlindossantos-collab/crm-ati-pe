@@ -1,6 +1,6 @@
 # Painel gerencial e Colaboradores — v0.13.0
 
-Proposta no repositório crm-ati-pe, baseada em `main@ecb2b0db473bdeb25b22844d27bfa63024316436`. Ainda não publicada.
+Entrega no repositório crm-ati-pe, baseada em `main@ecb2b0db473bdeb25b22844d27bfa63024316436`. Publicação autorizada em 23/10/2026, após o usuário confirmar a publicação das novas regras do Firestore (relato do usuário, sem inspeção direta do console). Integração e GitHub Pages acompanhados no [PR #19](https://github.com/arlindossantos-collab/crm-ati-pe/pull/19).
 
 ## Nomes e abrangência
 

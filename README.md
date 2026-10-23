@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.13.0 — painel gerencial e Colaboradores unificados (proposta).** Base: `main@ecb2b0db473bdeb25b22844d27bfa63024316436` (v0.12.0 publicada). Reúne pessoas, contas de acesso, permissões, setores e grupos no módulo Colaboradores. Acrescenta matrícula, resumo por órgão e criação de acesso vinculado pelo administrador. **Todos os dados existentes serão preservados. Exige atualização das regras do Firestore para matrícula, sem novos índices. Não publicada.** Veja [funcionamento e implantação](docs/painel-gerencial-colaboradores.md).
+**Versão deste código: v0.13.0 — painel gerencial e Colaboradores unificados.** Base: `main@ecb2b0db473bdeb25b22844d27bfa63024316436` (v0.12.0 publicada). Reúne pessoas, contas de acesso, permissões, setores e grupos no módulo Colaboradores. Acrescenta matrícula, resumo por órgão e criação de acesso vinculado pelo administrador. **Todos os dados existentes serão preservados. Publicação autorizada em 23/10/2026, após o usuário confirmar as novas regras do Firestore; sem novos índices. Integração e GitHub Pages acompanhados no [PR #19](https://github.com/arlindossantos-collab/crm-ati-pe/pull/19).** Veja [funcionamento e implantação](docs/painel-gerencial-colaboradores.md).
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 

@@ -2,9 +2,9 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.13.0 — Painel gerencial e Colaboradores unificados — proposta de 23/10/2026
+## v0.13.0 — Painel gerencial e Colaboradores unificados — entrega de 23/10/2026
 
-**Resumo para a chefia:** adota os nomes Painel gerencial (equipe interna) e Painel externo (órgãos e demais usuários externos). No painel gerencial, Colaboradores reúne os cadastros de pessoas, contas de acesso, permissões, setores e grupos. Base: `main@ecb2b0db473bdeb25b22844d27bfa63024316436`. Proposta em branch própria, sem publicação autorizada desta versão.
+**Resumo para a chefia:** adota os nomes Painel gerencial (equipe interna) e Painel externo (órgãos e demais usuários externos). No painel gerencial, Colaboradores reúne os cadastros de pessoas, contas de acesso, permissões, setores e grupos. Base: `main@ecb2b0db473bdeb25b22844d27bfa63024316436`. Publicação autorizada pelo usuário em 23/10/2026, após confirmar a publicação das novas regras (relato do usuário, sem inspeção direta do console). Integração e GitHub Pages acompanhados no [PR #19](https://github.com/arlindossantos-collab/crm-ati-pe/pull/19).
 
 | Antes | Depois |
 | --- | --- |
@@ -13,7 +13,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 | Abrir conta e associar a pessoa em etapas separadas. | Administrador pode criar acesso a partir do colaborador: conta, vínculo recíproco, identidade, projeção e auditorias confirmados na mesma transação Firestore. Falha desfaz a conta recém-criada no Auth; eventual falha de compensação informa o UID para revisão. |
 | Vínculo de conta não mostra se o acesso está liberado. | Indicação da situação efetiva; botão para gerenciar permissões na própria pessoa; associação a conta existente preservada. |
 
-**Validação:** 120 testes da aplicação, 82 de regras Firestore e 3 de Auth (205 ao todo), mais sete suítes Chromium, aprovados localmente com Firebase simulado. Inclui criação de acesso vinculado, restrição administrativa, matrícula fora da projeção de contato, filtros, áreas internas, F5, logout e celular. Verificação remota acompanhada no PR. Nenhum teste opera sobre contas reais.
+**Validação:** 120 testes da aplicação, 82 de regras Firestore e 3 de Auth (205 ao todo), mais sete suítes Chromium, aprovados localmente com Firebase simulado. Inclui criação de acesso vinculado, restrição administrativa, matrícula fora da projeção de contato, filtros, áreas internas, F5, logout e celular. [Verificação remota do código funcional aprovada](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40012402076), também com 205 testes e sete suítes. Nenhum teste opera sobre contas reais.
 
 **Implantação e pendências:** exige republicar `firestore.rules` para aceitar matrícula; sem novos índices. Administrador PRGD atual é o perfil master nesta entrega, sem criar um novo papel ou promover colaboradores automaticamente. Matrícula não é propagada aos contatos em Clientes. Por decisão do usuário, todos os cadastros, contas, vínculos, inscrições e históricos existentes serão preservados. Não haverá limpeza da base nem exclusão automática ao atualizar o site. [Detalhes](docs/painel-gerencial-colaboradores.md).
 
