@@ -15,7 +15,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 
 **Validação:** 109 testes da aplicação, 71 de regras Firestore e 3 de Auth, totalizando 183, além de cinco suítes de navegador com dados fictícios. Nova suíte exercita ordem variável dos snapshots, metadados, setores atrasados, criação por setor, filtros, evento elegível de hoje, falhas, alteração real de escopo, referências em branco e celular. Não equivale à homologação com o cadastro institucional do usuário.
 
-**Implantação:** exige publicar o novo `firestore.rules` antes do HTML; não altera índices. Não cria setores ou habilita vínculos automaticamente, não converte eventos legados nem deduz órgão pelo texto ou e-mail. Setores continuam cadastrados pelo administrador em Usuários → Setores por órgão. Detalhes em [correções do portal](docs/correcoes-portal-nsi.md).
+**Implantação:** exige publicar o novo `firestore.rules` antes do HTML; não altera índices. Não cria setores, não altera situações ou libera operações em lote, não converte eventos legados nem deduz órgão pelo texto ou e-mail. Vínculos já aprovados passam a funcionar com os campos textuais vazios, respeitados os demais limites. Setores continuam cadastrados pelo administrador em Usuários → Setores por órgão. Detalhes em [correções do portal](docs/correcoes-portal-nsi.md).
 
 ## v0.10.0 — Colaboradores e inscrições institucionais — entrega de 23/10/2026
 

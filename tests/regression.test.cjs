@@ -820,6 +820,8 @@ test('evento de hoje permanece futuro até o horário final e respeita situaçã
     assert.equal(a.run("eventoEncerrado({dataInicio:'2026-10-23',horaFim:'14:00'},new Date(2026,9,23,15))"),true);
     assert.equal(a.run("eventoEncerrado({dataInicio:'2026-10-22'},new Date(2026,9,23,15))"),true);
     assert.equal(a.run("eventoEncerrado({dataInicio:'2026-10-23',status:'Realizado'},new Date(2026,9,23,15))"),true);
+    assert.equal(a.run("eventoEncerrado({dataInicio:'2020-01-01T15:00:00Z'},new Date('2026-10-23T15:00:00Z'))"),true);
+    assert.equal(a.run("eventoEncerrado({dataInicio:'2099-01-01T15:00:00Z'},new Date('2026-10-23T15:00:00Z'))"),false);
 });
 
 test('referências e responsáveis opcionais não bloqueiam vínculo aprovado pelo administrador',()=>{
