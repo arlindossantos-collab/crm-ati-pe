@@ -847,14 +847,14 @@ test('situação de acesso separa cadastro, validade do vínculo, revisão e mó
     a.context.usuario={...base,acessoInstitucional:null};assert.equal(a.run('estadoAcessoUsuario(usuario).id'),'sem_modulos');
 });
 test('contato do cliente acompanha colaborador por ID e preserva dados manuais sem vínculo',()=>{
-    const a=app();a.run("dbData.contatosColaboradores=[{id:'p',orgaoId:'o',nome:'Atual',emailInstitucional:'p@example.invalid',telefone:'81999',cargo:'Analista',funcoesContato:['nsi'],ativo:true}]");
+    const a=app();a.run("dbData.contatosColaboradores=[{id:'p',orgaoId:'o',nome:'Atual',emailInstitucional:'p@example.invalid',telefone:'81999',cargo:'Analista',funcoesContato:['nsi'],divulgavel:true,ativo:true}]");
     let o=a.run("orgaoComContatos({id:'o',gestorNsi:'Antigo',gestorSei:'Manual'})");assert.equal(o.gestorNsi,'Atual');assert.equal(o.gestorSei,'Manual');
     a.run("dbData.contatosColaboradores[0].nome='Atualizado'");o=a.run("orgaoComContatos({id:'o',contatosVinculados:{nsi:'p'}})");assert.equal(o.gestorNsi,'Atualizado');
     assert.equal(a.run("orgaoComContatos({id:'outro',contatosVinculados:{nsi:'p'},gestorNsi:'Antigo'}).gestorNsi"),'Contato vinculado indisponível');
     assert.equal(a.run("orgaoComContatos({id:'o',gestorNsi:'Manual',contatosVinculados:{nsi:'manual'}}).gestorNsi"),'Manual');
 });
 test('contato com revisão vencida é sinalizado e função NSI não cria autorização',()=>{
-    const a=app();a.run("dbData.contatosColaboradores=[{id:'p',orgaoId:'o',nome:'Pessoa',funcoesContato:['nsi'],ativo:true,validadeCadastro:1}]");
+    const a=app();a.run("dbData.contatosColaboradores=[{id:'p',orgaoId:'o',nome:'Pessoa',funcoesContato:['nsi'],divulgavel:true,ativo:true,validadeCadastro:1}]");
     assert.match(a.run("orgaoComContatos({id:'o'}).gestorNsi"),/revisão vencida/);
     assert.equal(a.run("situacaoCadastroColaborador({ativo:true}).id"),'sem_prazo');
     assert.equal(a.run("modulosDoUsuario({ativo:true,tipoUsuario:'externo',perfil:'comum',funcoesContato:['nsi'],modulosPermitidos:[]}).length"),0);

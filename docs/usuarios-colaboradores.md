@@ -23,7 +23,7 @@ O gestor ou administrador pode marcar as funções de contato: Gestor do órgão
 Em Clientes → Detalhes/Editar → Fonte dos contatos institucionais:
 
 1. **Automático pela função institucional:** mostra os colaboradores do próprio órgão marcados com aquela função. Havendo vários ativos, mostra todos, sem escolher silenciosamente uma pessoa. Se restarem somente inativos, sinaliza essa situação.
-2. **Pessoa selecionada:** mantém referência ao ID daquele colaborador do órgão; alterações de nome, contato, setor e revisão aparecem nas consultas em tempo real. Referência indisponível gera aviso e não é trocada por outra pessoa ou pelos dados antigos.
+2. **Pessoa selecionada:** permite escolher pessoas com ao menos uma função institucional indicada e mantém referência ao ID daquele colaborador do órgão; alterações de nome, contato, setor e revisão aparecem nas consultas em tempo real. Referência indisponível gera aviso e não é trocada por outra pessoa ou pelos dados antigos.
 3. **Manter somente dados manuais:** conserva os campos anteriores como fonte, sem associação automática.
 
 Campos antigos não são apagados. Sem contato automático, permanecem os dados manuais, identificados como anteriores no painel. A seleção por ID é validada nas regras para o mesmo órgão. Não se deduz vínculo por nome, sigla, e-mail ou nome do setor. Órgão novo deve ser salvo antes de cadastrar seus colaboradores e vincular pessoas a ele.
@@ -32,7 +32,7 @@ O resumo vivo atualiza sem reiniciar o editor nem perder alterações em andamen
 
 ### Projeção de contato
 
-`colaboradores/{id}` continua sendo a origem. `contatosColaboradores/{id}` é uma projeção derivada contendo apenas nome, e-mail institucional, telefone institucional, cargo, órgão, setor, atividade, funções de contato, revisão cadastral e horário de atualização. Não contém UID de login, perfil, senha ou dados privados.
+`colaboradores/{id}` continua sendo a origem. `contatosColaboradores/{id}` é uma projeção derivada contendo apenas nome, e-mail institucional, telefone institucional, cargo, órgão, setor, atividade, funções de contato, revisão cadastral e horário de atualização. Não contém UID de login, perfil, senha ou dados privados. O campo derivado `divulgavel` só é verdadeiro quando há função de contato indicada. Quem consulta Clientes usa uma consulta filtrada por esse campo; as regras recusam a lista geral e o contato de colaboradores sem função institucional. Administração pode consultar todas as projeções. Remover a última função retira a divulgação; referências explícitas anteriores permanecem registradas e passam a ser sinalizadas como indisponíveis.
 
 A projeção é necessária porque usuários com consulta a Clientes podem consultar os contatos institucionais, mas não ganham acesso ao cadastro completo de colaboradores ou à lista de contas. A consulta a Clientes também permite ler o catálogo de setores para apresentar seus nomes, sem conceder edição. Gestores e substitutos seguem acessando colaboradores no próprio escopo e não recebem listagem global da projeção.
 

@@ -629,7 +629,7 @@ test('portal sem referências consulta fontes de eventos e setores, preservando 
     await assertFails(getDocs(query(collection(f,'setores'),where('orgaoId','==','orgao-b'))));
 });
 
-function contatoProjetado(p){return {nome:p.nome,emailInstitucional:p.emailInstitucional,telefone:p.telefone,cargo:p.cargo,orgaoId:p.orgaoId,setorId:p.setorId,ativo:p.ativo,validadeCadastro:p.validadeCadastro??null,funcoesContato:p.funcoesContato||[],atualizadoEm:p.atualizadoEm};}
+function contatoProjetado(p){return {nome:p.nome,emailInstitucional:p.emailInstitucional,telefone:p.telefone,cargo:p.cargo,orgaoId:p.orgaoId,setorId:p.setorId,ativo:p.ativo,validadeCadastro:p.validadeCadastro??null,funcoesContato:p.funcoesContato||[],divulgavel:(p.funcoesContato||[]).length>0,atualizadoEm:p.atualizadoEm};}
 async function atualizarPessoaV012(uid,p,patch,{projetar=true,projecaoExtra={},somentePessoa=false}={}){
     const f=db(uid),id=idPessoaLote2(p),log=doc(collection(f,'historicoAlteracoes')),b=writeBatch(f);
     const novo={...p,...patch,atualizadoEm:serverTimestamp(),atualizadoPorUid:uid,ultimaAuditoriaId:log.id};
@@ -651,7 +651,8 @@ test('gestor atualiza funções e revisão com projeção correspondente; admin 
 });
 test('projeção não aceita contato falsificado, UID ou promoção de acesso',async()=>{
     const {p}=await seedLote2();
-    for(const projecaoExtra of [{nome:'Forjado'},{orgaoId:'orgao-b'},{usuarioUid:'admin'}])await assertFails(atualizarPessoaV012('titular',p,{funcoesContato:['nsi']},{projecaoExtra}));
+    for(const projecaoExtra of [{nome:'Forjado'},{orgaoId:'orgao-b'},{usuarioUid:'admin'},{divulgavel:false}])await assertFails(atualizarPessoaV012('titular',p,{funcoesContato:['nsi']},{projecaoExtra}));
+    await assertFails(atualizarPessoaV012('titular',p,{funcoesContato:[]},{projecaoExtra:{divulgavel:true}}));
     await assertFails(atualizarPessoaV012('titular',p,{funcoesContato:['admin']}));
     await assertFails(atualizarPessoaV012('titular',p,{usuarioUid:'admin'}));
     await assertFails(atualizarPessoaV012('titular',p,{validadeCadastro:'texto'}));
@@ -661,16 +662,21 @@ test('contato já projetado não pode ficar desatualizado quando a origem muda',
     const atual=(await getDoc(doc(db('admin'),'colaboradores',idPessoaLote2(p)))).data();
     await assertFails(atualizarPessoaV012('titular',atual,{telefone:'81999999999'},{projetar:false}));
     await assertSucceeds(atualizarPessoaV012('titular',atual,{telefone:'81999999999'}));
+    const contato=(await getDoc(doc(db('admin'),'contatosColaboradores',idPessoaLote2(p)))).data();
+    await assertFails(setDoc(doc(db('admin'),'contatosColaboradores',idPessoaLote2(p)),contato));
 });
 test('consulta de clientes recebe somente projeção institucional e vínculo não aceita outro órgão',async()=>{
     const {p,outro}=await seedLote2();await assertSucceeds(atualizarPessoaV012('admin',p,{funcoesContato:['nsi']}));await assertSucceeds(atualizarPessoaV012('admin',outro,{funcoesContato:['sei']}));
     await env.withSecurityRulesDisabled(c=>updateDoc(doc(c.firestore(),'usuarios','interno'),{modulosPermitidos:['clientes']}));
-    await assertSucceeds(getDocs(collection(db('interno'),'contatosColaboradores')));
+    await assertSucceeds(getDocs(query(collection(db('interno'),'contatosColaboradores'),where('divulgavel','==',true))));
+    await assertFails(getDocs(collection(db('interno'),'contatosColaboradores')));
     await assertSucceeds(getDocs(collection(db('interno'),'setores')));
     await assertFails(getDocs(collection(db('titular'),'setores')));
     await assertFails(getDocs(collection(db('interno'),'colaboradores')));
     await assertFails(getDocs(collection(db('titular'),'contatosColaboradores')));
     await assertFails(updateDoc(doc(db('admin'),'orgaos','orgao-a'),{contatosVinculados:{nsi:idPessoaLote2(outro)}}));
+    const privado=pessoaLote2('privado@example.invalid');await assertSucceeds(gravarPessoaLote2('admin',privado));await assertSucceeds(atualizarPessoaV012('admin',(await getDoc(doc(db('admin'),'colaboradores',idPessoaLote2(privado)))).data(),{telefone:'81999'}));
+    await assertFails(getDoc(doc(db('interno'),'contatosColaboradores',idPessoaLote2(privado))));
     await assertSucceeds(updateDoc(doc(db('admin'),'orgaos','orgao-a'),{contatosVinculados:{nsi:idPessoaLote2(p)}}));
 });
 test('associação de usuário exige espelho e auditoria; não altera permissões',async()=>{

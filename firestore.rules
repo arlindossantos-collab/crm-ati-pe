@@ -184,13 +184,13 @@ service cloud.firestore {
     }
     // A projeção compartilha somente contato institucional; nunca perfil, UID de login ou dados privados.
     function contactProjectionMatches(data, id) {
-      let path = /databases/$(database)/documents/contatosColaboradores/$(id);
-      let c = getAfter(path).data;
-      return c != null && c.keys().hasOnly(['nome','emailInstitucional','telefone','cargo','orgaoId','setorId','ativo','validadeCadastro','funcoesContato','atualizadoEm'])
-        && c.nome == data.nome && c.emailInstitucional == data.emailInstitucional
-        && c.telefone == data.telefone && c.cargo == data.cargo && c.orgaoId == data.orgaoId && c.setorId == data.setorId
-        && c.ativo == data.ativo && c.validadeCadastro == data.get('validadeCadastro',null)
-        && c.funcoesContato == data.get('funcoesContato',[]) && c.atualizadoEm == data.atualizadoEm;
+      let c = getAfter(/databases/$(database)/documents/contatosColaboradores/$(id)).data;
+      let funcoes=data.get('funcoesContato',[]);
+      // Igualdade do mapa inteiro valida os valores e recusa campos extras com menos expressões.
+      return c == {'nome':data.nome,'emailInstitucional':data.emailInstitucional,'telefone':data.telefone,
+        'cargo':data.cargo,'orgaoId':data.orgaoId,'setorId':data.setorId,'ativo':data.ativo,
+        'validadeCadastro':data.get('validadeCadastro',null),'funcoesContato':funcoes,
+        'divulgavel':funcoes.size()>0,'atualizadoEm':data.atualizadoEm};
     }
     function maintainContactProjection(data,id) {
       let path = /databases/$(database)/documents/contatosColaboradores/$(id);
@@ -218,7 +218,8 @@ service cloud.firestore {
       let value=data.get('contatosVinculados',{}).get(key,'auto');
       let previous=resource == null ? 'auto' : resource.data.get('contatosVinculados',{}).get(key,'auto');
       return value is string && (value in ['auto','manual'] || value == previous
-        || get(/databases/$(database)/documents/contatosColaboradores/$(value)).data.orgaoId == id);
+        || (get(/databases/$(database)/documents/contatosColaboradores/$(value)).data.orgaoId == id
+          && get(/databases/$(database)/documents/contatosColaboradores/$(value)).data.divulgavel == true));
     }
     function validOrgContacts(data,id) {
       return data.get('contatosVinculados',{}) is map
@@ -227,6 +228,9 @@ service cloud.firestore {
         && validContactRef(data,'si',id) && validContactRef(data,'sei',id) && validContactRef(data,'focal',id);
     }
     function validParticipant(data, id) {
+      let funcoes=data.get('funcoesContato',[]);
+      let usuarioUid=data.get('usuarioUid','');
+      let validade=data.get('validadeCadastro',null);
       return data.keys().hasOnly(['nome','emailInstitucional','orgaoId','setorId','telefone','cargo','ativo','validadeCadastro','funcoesContato','usuarioUid','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
         && data.nome is string && data.nome.size() > 1 && data.nome.size() <= 150
         && data.emailInstitucional is string && data.emailInstitucional.size() <= 254
@@ -234,10 +238,10 @@ service cloud.firestore {
         && data.emailInstitucional.matches('^[^ /@]+@[^ /@]+[.][^ /@]+$')
         && data.orgaoId is string && data.setorId is string && id == participantKey(data)
         && data.telefone is string && data.telefone.size() <= 40 && data.cargo is string && data.cargo.size() <= 150
-        && (data.get('validadeCadastro',null) == null || (data.validadeCadastro is int && data.validadeCadastro > 0))
-        && data.get('funcoesContato',[]) is list && data.get('funcoesContato',[]).size() <= 6
-        && data.get('funcoesContato',[]).hasOnly(['orgao','nsi','telematica','si','sei','focal'])
-        && data.get('usuarioUid','') is string && data.get('usuarioUid','').size() <= 150
+        && (validade == null || (validade is int && validade > 0))
+        && funcoes is list && funcoes.size() <= 6
+        && funcoes.hasOnly(['orgao','nsi','telematica','si','sei','focal'])
+        && usuarioUid is string && usuarioUid.size() <= 150
         && participantUserLinkMatches(data,id) && maintainContactProjection(data,id)
         && data.ativo is bool && data.criadoEm is timestamp && data.criadoPorUid is string
         && data.atualizadoEm == request.time && data.atualizadoPorUid == request.auth.uid
@@ -410,10 +414,17 @@ service cloud.firestore {
       allow delete: if false;
     }
     match /contatosColaboradores/{id} {
-      allow read: if isAdmin() || canReadModule('clientes');
-      allow create, update: if (isAdmin() || managerAction('participantes.cadastrar',request.resource.data)
-          || managerAction('participantes.editar',request.resource.data))
-        && contactProjectionMatches(getAfter(/databases/$(database)/documents/colaboradores/$(id)).data,id);
+      // A própria origem precisa mudar neste envio e passar pelas regras de colaboradores.
+      // Evita repetir a validação pesada do substituto na escrita da projeção derivada.
+      function sourceChangedInRequest() {
+        let path=/databases/$(database)/documents/colaboradores/$(id);
+        let source=getAfter(path).data;
+        return signedIn() && source.atualizadoPorUid == request.auth.uid && source.atualizadoEm == request.time
+          && (!exists(path) || get(path).data.get('ultimaAuditoriaId','') != source.ultimaAuditoriaId)
+          && contactProjectionMatches(source,id);
+      }
+      allow read: if isAdmin() || (canReadModule('clientes') && resource.data.divulgavel == true);
+      allow create, update: if sourceChangedInRequest();
       allow delete: if false;
     }
     match /{col}/{id} {

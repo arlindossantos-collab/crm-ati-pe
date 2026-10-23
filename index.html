@@ -1252,7 +1252,7 @@
             return data;
         }
         function projecaoContato(p){
-            return {nome:p.nome,emailInstitucional:p.emailInstitucional,telefone:p.telefone,cargo:p.cargo,orgaoId:p.orgaoId,setorId:p.setorId,ativo:p.ativo,validadeCadastro:p.validadeCadastro??null,funcoesContato:p.funcoesContato||[],atualizadoEm:p.atualizadoEm};
+            return {nome:p.nome,emailInstitucional:p.emailInstitucional,telefone:p.telefone,cargo:p.cargo,orgaoId:p.orgaoId,setorId:p.setorId,ativo:p.ativo,validadeCadastro:p.validadeCadastro??null,funcoesContato:p.funcoesContato||[],divulgavel:(p.funcoesContato||[]).length>0,atualizadoEm:p.atualizadoEm};
         }
         function preencherOpcoesPreservando(id,lista,rotulo,titulo){
             const campo=document.getElementById(id),valor=campo.value;
@@ -1337,7 +1337,7 @@
         function contatosDaFuncao(o,funcao){
             const escolhido=o.contatosVinculados?.[funcao]||'auto',orgaoId=String(o.firestoreId||o.id||'');
             if(escolhido==='manual')return [];
-            const contatos=dbData.contatosColaboradores||[];
+            const contatos=(dbData.contatosColaboradores||[]).filter(p=>p.divulgavel===true);
             if(escolhido!=='auto')return contatos.filter(p=>p.id===escolhido&&p.orgaoId===orgaoId);
             const candidatos=contatos.filter(p=>p.orgaoId===orgaoId&&(p.funcoesContato||[]).includes(funcao)),ativos=candidatos.filter(p=>p.ativo!==false);
             return (ativos.length?ativos:candidatos).sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
@@ -1354,13 +1354,13 @@
         }
         function camposContatosOrgao(o){
             const orgaoId=String(o.firestoreId||o.id||'');
-            return `<fieldset class="md:col-span-2 bg-blue-50/70 border border-blue-100 rounded-xl p-4"><legend class="font-bold text-blue-900">Fonte dos contatos institucionais</legend><p class="text-xs mb-3">Automático usa as funções indicadas pelos gestores no cadastro dos colaboradores. Ou selecione uma pessoa do órgão. Os campos manuais abaixo são preservados como referência anterior.</p><div class="grid sm:grid-cols-2 gap-3">${Object.entries(FUNCOES_CONTATO).map(([id,f])=>{const valor=o.contatosVinculados?.[id]||'auto',lista=dbData.contatosColaboradores.filter(p=>p.orgaoId===orgaoId);return `<label class="text-xs">${esc(f.nome)}<select data-contato-funcao="${id}" class="block w-full border rounded-lg p-2 mt-1"><option value="auto" ${valor==='auto'?'selected':''}>Automático pela função institucional</option><option value="manual" ${valor==='manual'?'selected':''}>Manter somente dados manuais</option>${lista.map(p=>`<option value="${esc(p.id)}" ${valor===p.id?'selected':''}>${esc(p.nome)} · ${esc(p.emailInstitucional)}${p.ativo===false?' (inativo)':''}</option>`).join('')}${!['auto','manual'].includes(valor)&&!lista.some(p=>p.id===valor)?`<option value="${esc(valor)}" selected>Contato anterior indisponível</option>`:''}</select></label>`;}).join('')}</div><div id="orgao-resumo-form" class="mt-3">${resumoContatosOrgao(o)}</div></fieldset>`;
+            return `<fieldset class="md:col-span-2 bg-blue-50/70 border border-blue-100 rounded-xl p-4"><legend class="font-bold text-blue-900">Fonte dos contatos institucionais</legend><p class="text-xs mb-3">Automático usa as funções indicadas pelos gestores no cadastro dos colaboradores. Ou selecione um contato do órgão. Para disponibilizar uma pessoa, indique ao menos uma função institucional no cadastro do colaborador. Os campos manuais abaixo são preservados como referência anterior.</p><div class="grid sm:grid-cols-2 gap-3">${Object.entries(FUNCOES_CONTATO).map(([id,f])=>{const valor=o.contatosVinculados?.[id]||'auto',lista=dbData.contatosColaboradores.filter(p=>p.orgaoId===orgaoId&&p.divulgavel===true);return `<label class="text-xs">${esc(f.nome)}<select data-contato-funcao="${id}" class="block w-full border rounded-lg p-2 mt-1"><option value="auto" ${valor==='auto'?'selected':''}>Automático pela função institucional</option><option value="manual" ${valor==='manual'?'selected':''}>Manter somente dados manuais</option>${lista.map(p=>`<option value="${esc(p.id)}" ${valor===p.id?'selected':''}>${esc(p.nome)} · ${esc(p.emailInstitucional)}${p.ativo===false?' (inativo)':''}</option>`).join('')}${!['auto','manual'].includes(valor)&&!lista.some(p=>p.id===valor)?`<option value="${esc(valor)}" selected>Contato anterior indisponível</option>`:''}</select></label>`;}).join('')}</div><div id="orgao-resumo-form" class="mt-3">${resumoContatosOrgao(o)}</div></fieldset>`;
         }
         function lerContatosOrgao(o){
             const refs={};for(const campo of document.querySelectorAll('[data-contato-funcao]')){
                 const f=campo.dataset.contatoFuncao,id=campo.value;
                 if(!FUNCOES_CONTATO[f])continue;
-                if(!['auto','manual'].includes(id)&&o.contatosVinculados?.[f]!==id&&!dbData.contatosColaboradores.some(p=>p.id===id&&p.orgaoId===String(o.firestoreId||o.id)))throw new Error('Selecione um colaborador do próprio órgão.');
+                if(!['auto','manual'].includes(id)&&o.contatosVinculados?.[f]!==id&&!dbData.contatosColaboradores.some(p=>p.id===id&&p.orgaoId===String(o.firestoreId||o.id)&&p.divulgavel===true))throw new Error('Selecione um colaborador do próprio órgão.');
                 refs[f]=id;
             }return refs;
         }
@@ -1368,7 +1368,7 @@
             if(document.getElementById('edit-colecao').value!=='orgaos')return;
             const o=dbData.orgaos.find(o=>String(o.firestoreId||o.id)===document.getElementById('edit-doc-id').value);if(!o)return;
             document.querySelectorAll('[data-contato-funcao]').forEach(campo=>{
-                const valor=campo.value,lista=dbData.contatosColaboradores.filter(p=>p.orgaoId===String(o.firestoreId||o.id));
+                const valor=campo.value,lista=dbData.contatosColaboradores.filter(p=>p.orgaoId===String(o.firestoreId||o.id)&&p.divulgavel===true);
                 const opcoes=`<option value="auto">Automático pela função institucional</option><option value="manual">Manter somente dados manuais</option>`+lista.map(p=>`<option value="${esc(p.id)}">${esc(p.nome)} · ${esc(p.emailInstitucional)}${p.ativo===false?' (inativo)':''}</option>`).join('')+(!['auto','manual'].includes(valor)&&!lista.some(p=>p.id===valor)?`<option value="${esc(valor)}">Contato anterior indisponível</option>`:'');
                 if(campo.innerHTML!==opcoes){campo.innerHTML=opcoes;campo.value=valor;}
             });
@@ -2163,7 +2163,7 @@
             }
             if(modulos.includes('clientes')){
                 portalCarregando.contatosColaboradores=true;
-                snapshotUnsubs.push(observarFirestore(collection(db,'contatosColaboradores'),snap=>{dbData.contatosColaboradores=snap.docs.map(d=>({...d.data(),id:d.id}));delete portalCarregando.contatosColaboradores;delete portalErros.contatosColaboradores;renderClientes();atualizarResumoContatosAberto();},()=>{dbData.contatosColaboradores=[];delete portalCarregando.contatosColaboradores;portalErros.contatosColaboradores=true;renderClientes();atualizarResumoContatosAberto();}));
+                snapshotUnsubs.push(observarFirestore(admin?collection(db,'contatosColaboradores'):query(collection(db,'contatosColaboradores'),where('divulgavel','==',true)),snap=>{dbData.contatosColaboradores=snap.docs.map(d=>({...d.data(),id:d.id}));delete portalCarregando.contatosColaboradores;delete portalErros.contatosColaboradores;renderClientes();atualizarResumoContatosAberto();},()=>{dbData.contatosColaboradores=[];delete portalCarregando.contatosColaboradores;portalErros.contatosColaboradores=true;renderClientes();atualizarResumoContatosAberto();}));
             }
             if (admin) {
                 const ref = collection(db,'usuarios');
