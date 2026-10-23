@@ -1,6 +1,6 @@
 # Correções do portal do gestor de NSI — v0.10.1
 
-Proposta de 23/10/2026, baseada em `main@53f51a33f6b027f8643438e2724c01a016ac1fbc` (v0.10.0). Sem publicação automática do site ou das regras.
+Entrega de 23/10/2026, baseada em `main@53f51a33f6b027f8643438e2724c01a016ac1fbc` (v0.10.0). Publicação autorizada pelo usuário em 23/10/2026 após informar a publicação das regras da v0.10.1 no Firebase. Registro baseado no relato do usuário, sem verificação direta do console. Integração e GitHub Pages acompanhados no [PR #16](https://github.com/arlindossantos-collab/crm-ati-pe/pull/16).
 
 ## Comportamento corrigido
 
@@ -26,6 +26,6 @@ As duas regressões de comparação do perfil e classificação de eventos foram
 
 ## Implantação e retorno
 
-Este lote altera `firestore.rules`, sem novos índices. Publicar as novas regras antes do HTML; a publicação do GitHub Pages não implanta o Firebase. Homologar em ambiente separado, coordenar a publicação e conferir os cadastros existentes. A versão publicada permanece v0.10.0 até autorização e implantação deste lote.
+Este lote altera `firestore.rules`, sem novos índices. Em 23/10/2026, o usuário informou a publicação dessas regras e autorizou concluir a implantação do site. Essa confirmação não substitui verificação direta do console ou homologação institucional. A publicação do GitHub Pages não implanta o Firebase. Conferir os cadastros existentes e homologar as operações com os responsáveis institucionais.
 
 Não restaurar regras antigas automaticamente: elas voltariam a exigir os campos textuais e podem bloquear vínculos salvos com campos vazios. Preservar usuários, inscrições, contadores e histórico; qualquer retorno deve considerar a nova política de ativação. LDAP/PostgreSQL permanecem na migração separada.

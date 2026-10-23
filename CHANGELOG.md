@@ -2,9 +2,9 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.10.1 — Correções do portal do gestor de NSI — proposta de 23/10/2026
+## v0.10.1 — Correções do portal do gestor de NSI — entrega de 23/10/2026
 
-**Resumo para a chefia:** estabiliza o nome do órgão e as consultas do portal, melhora o cadastro e o filtro de colaboradores por setor e corrige eventos de hoje na lista de futuros. A pedido do usuário, responsáveis e referências de aprovação passam a ser opcionais, mantendo ativação administrativa, órgão/setores, ações, validade, revisão e histórico. Base: `main@53f51a33f6b027f8643438e2724c01a016ac1fbc`. Proposta em revisão, sem integração ou publicação.
+**Resumo para a chefia:** estabiliza o nome do órgão e as consultas do portal, melhora o cadastro e o filtro de colaboradores por setor e corrige eventos de hoje na lista de futuros. A pedido do usuário, responsáveis e referências de aprovação passam a ser opcionais, mantendo ativação administrativa, órgão/setores, ações, validade, revisão e histórico. Base: `main@53f51a33f6b027f8643438e2724c01a016ac1fbc`. Publicação autorizada pelo usuário em 23/10/2026 após informar que publicou as regras da v0.10.1 no Firebase. Relato do usuário, sem verificação direta do console. Integração e GitHub Pages acompanhados no [PR #16](https://github.com/arlindossantos-collab/crm-ati-pe/pull/16).
 
 | Antes | Depois |
 | --- | --- |
@@ -15,7 +15,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 
 **Validação:** 109 testes da aplicação, 71 de regras Firestore e 3 de Auth, totalizando 183, além de cinco suítes de navegador com dados fictícios. Nova suíte exercita ordem variável dos snapshots, metadados, setores atrasados, criação por setor, filtros, evento elegível de hoje, falhas, alteração real de escopo, referências em branco e celular. Não equivale à homologação com o cadastro institucional do usuário.
 
-**Implantação:** exige publicar o novo `firestore.rules` antes do HTML; não altera índices. Não cria setores, não altera situações ou libera operações em lote, não converte eventos legados nem deduz órgão pelo texto ou e-mail. Vínculos já aprovados passam a funcionar com os campos textuais vazios, respeitados os demais limites. Setores continuam cadastrados pelo administrador em Usuários → Setores por órgão. Detalhes em [correções do portal](docs/correcoes-portal-nsi.md).
+**Implantação:** novas regras da v0.10.1 informadas como publicadas pelo usuário em 23/10/2026; sem alteração de índices. Homologação institucional e conferência dos setores/elegibilidade existentes continuam necessárias. Não cria setores, não altera situações ou libera operações em lote, não converte eventos legados nem deduz órgão pelo texto ou e-mail. Vínculos já aprovados passam a funcionar com os campos textuais vazios, respeitados os demais limites. Setores continuam cadastrados pelo administrador em Usuários → Setores por órgão. Detalhes em [correções do portal](docs/correcoes-portal-nsi.md).
 
 ## v0.10.0 — Colaboradores e inscrições institucionais — entrega de 23/10/2026
 
