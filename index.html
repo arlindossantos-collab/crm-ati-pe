@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.9.0 - GOVERNANÇA E TELAS POR PERFIL   -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.10.0 - GOVERNANÇA E TELAS POR PERFIL   -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -18,6 +18,8 @@
     <style>
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
         .hidden { display: none; }
+        /* A restauração e os modais não dependem da ordem de chegada dos utilitários CSS. */
+        [id^="modal-"].hidden, #main-content.hidden, #sessao-carregando.hidden { display: none !important; }
         body:not([data-admin="true"]) .btn-admin-only:not([data-acao]) { display: none !important; }
         [hidden] { display: none !important; }
         .tab-active { background-color: #ffffff; color: #1e3a8a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -34,6 +36,7 @@
         #locais-indicadores [data-tone="verde"] .local-card-icone { color:#427660; }
 
     </style>
+<style>@media print { body > * { display:none !important; } body > #modal-comprovante:not(.hidden) { display:block !important; position:static !important; background:white !important; padding:0 !important; } #modal-comprovante > div { max-height:none !important; overflow:visible !important; max-width:none !important; } .nao-imprimir { display:none !important; } }</style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
@@ -66,7 +69,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.9.0</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.10.0</span></p>
             </div>
         </div>
     </div>
@@ -79,7 +82,7 @@
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.9.0</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.10.0</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -134,8 +137,9 @@
         <!-- ABA DASHBOARD -->
         <p id="portal-erros" role="alert" class="text-sm text-red-700 mb-3"></p>
         <section id="aba-meu_orgao" class="hidden space-y-4"><div id="portal-resumo" class="bg-white border border-blue-100 rounded-xl p-5"></div><p class="text-sm text-slate-600">Consulte os módulos liberados para acompanhar os registros do seu órgão.</p></section>
-        <section id="aba-colaboradores" class="hidden space-y-4"><h3 class="text-xl font-bold">Colaboradores do órgão</h3><p class="text-sm text-slate-600">Participantes de eventos podem ser cadastrados sem conta de acesso. O cadastro e a inscrição por representação serão disponibilizados no próximo lote.</p><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Nome</th><th class="p-3 text-left">E-mail institucional</th><th class="p-3 text-left">Setor</th><th class="p-3 text-left">Situação</th></tr></thead><tbody id="portal-colaboradores"></tbody></table></div></section>
-        <section id="aba-inscricoes_orgao" class="hidden space-y-4"><h3 class="text-xl font-bold">Inscrições do órgão</h3><p class="text-sm text-slate-600">Consulta dos registros vinculados ao órgão e aos setores autorizados.</p><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Participante</th><th class="p-3 text-left">Evento</th><th class="p-3 text-left">Situação</th><th class="p-3 text-left">Protocolo</th></tr></thead><tbody id="portal-inscricoes"></tbody></table></div></section>
+        <div id="portal-operacao-msg" role="status" class="hidden"></div>
+        <section id="aba-colaboradores" class="hidden space-y-4"><h3 class="text-xl font-bold">Colaboradores do órgão</h3><p class="text-sm text-slate-600">Cadastre os colaboradores do órgão e inscreva-os nos eventos elegíveis. O cadastro não cria conta de acesso.</p><div class="flex flex-wrap gap-3 items-center"><label class="text-sm flex-1">Buscar colaborador<input id="colaborador-busca" type="search" placeholder="Nome, e-mail ou cargo" class="block w-full border rounded-lg p-2"></label><button type="button" id="btn-novo-colaborador" class="hidden px-4 py-2 rounded-lg bg-blue-900 text-white">Cadastrar colaborador</button></div><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Nome</th><th class="p-3 text-left">E-mail institucional</th><th class="p-3 text-left">Setor</th><th class="p-3 text-left">Situação</th><th class="p-3 text-left">Ações</th></tr></thead><tbody id="portal-colaboradores"></tbody></table></div></section>
+        <section id="aba-inscricoes_orgao" class="hidden space-y-4"><h3 class="text-xl font-bold">Inscrições do órgão</h3><p class="text-sm text-slate-600">Consulta dos registros vinculados ao órgão e aos setores autorizados.</p><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Participante</th><th class="p-3 text-left">Evento</th><th class="p-3 text-left">Situação</th><th class="p-3 text-left">Protocolo</th><th class="p-3 text-left">Ações</th></tr></thead><tbody id="portal-inscricoes"></tbody></table></div></section>
         <section id="aba-auditoria_orgao" class="hidden space-y-4"><h3 class="text-xl font-bold">Auditoria autorizada</h3><p class="text-sm text-slate-600">Somente leitura das trilhas identificadas com o órgão e os setores aprovados.</p><div class="overflow-x-auto bg-white border rounded-xl"><table class="w-full text-sm"><thead><tr><th class="p-3 text-left">Autor</th><th class="p-3 text-left">Ação</th><th class="p-3 text-left">Registro</th><th class="p-3 text-left">Data e hora</th></tr></thead><tbody id="portal-auditoria"></tbody></table></div></section>
         <div id="aba-dashboard" class="block space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -536,14 +540,39 @@
         </div>
     </div>
 
-    <!-- Script Principal v0.9.0 -->
+    <div id="modal-colaborador" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl p-5 w-full max-w-2xl max-h-[90vh] overflow-y-auto"><div class="flex justify-between gap-3"><h3 id="colab-titulo" class="text-lg font-bold">Cadastrar colaborador</h3><button type="button" class="btn-fechar-modal border rounded-lg px-3 py-1" data-target="modal-colaborador">Fechar</button></div>
+        <p id="colab-contexto" class="text-sm text-blue-900 bg-blue-50 p-3 rounded-xl my-3"></p>
+        <form id="form-colaborador" class="grid sm:grid-cols-2 gap-3 text-sm">
+          <label class="sm:col-span-2">Nome completo<input id="colab-nome" required minlength="2" maxlength="150" class="block border rounded-lg p-2 w-full"></label>
+          <label>E-mail institucional<input id="colab-emailInstitucional" type="email" required maxlength="254" class="block border rounded-lg p-2 w-full"></label>
+          <label>Setor<select id="colab-setorId" required class="block border rounded-lg p-2 w-full"></select></label>
+          <label>Telefone<input id="colab-telefone" type="tel" maxlength="40" class="block border rounded-lg p-2 w-full"></label>
+          <label>Cargo / função<input id="colab-cargo" maxlength="150" class="block border rounded-lg p-2 w-full"></label>
+          <label class="sm:col-span-2"><input id="colab-ativo" type="checkbox" checked> Colaborador ativo</label>
+          <p class="text-xs text-slate-500 sm:col-span-2">Órgão, setor e e-mail são preservados após o cadastro. Para correção desses vínculos, solicite revisão à GRGD.</p>
+          <p id="colab-erro" role="alert" class="text-red-800 sm:col-span-2"></p><button id="colab-salvar" type="submit" class="sm:col-span-2 rounded-lg bg-blue-900 text-white px-4 py-3 disabled:opacity-50">Salvar colaborador</button>
+        </form>
+      </div>
+    </div>
+    <div id="modal-inscricao-institucional" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl p-5 w-full max-w-xl"><div class="flex justify-between gap-3"><h3 class="text-lg font-bold">Inscrever colaborador</h3><button type="button" class="btn-fechar-modal border rounded-lg px-3 py-1" data-target="modal-inscricao-institucional">Fechar</button></div>
+        <p id="insc-contexto" class="text-sm text-blue-900 bg-blue-50 p-3 rounded-xl my-3"></p>
+        <form id="form-inscricao-institucional" class="space-y-3 text-sm"><label class="block">Colaborador do órgão<select id="insc-participante" required class="block border rounded-lg p-2 w-full"></select></label><p id="insc-erro" role="alert" class="text-red-800"></p><button id="insc-confirmar" type="submit" class="rounded-lg bg-blue-900 text-white px-4 py-3 w-full disabled:opacity-50">Confirmar inscrição</button></form>
+      </div>
+    </div>
+    <div id="modal-comprovante" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"><div class="flex justify-end gap-2 nao-imprimir"><button id="comprovante-imprimir" type="button" class="border rounded-lg px-3 py-2 text-blue-900">Imprimir / salvar PDF</button><button type="button" class="btn-fechar-modal border rounded-lg px-3 py-2" data-target="modal-comprovante">Fechar</button></div><div id="comprovante-conteudo" class="mt-4"></div></div>
+    </div>
+
+    <!-- Script Principal v0.10.0 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, doc, onSnapshot, getDoc, query, where, getDocs, runTransaction, serverTimestamp, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, onSnapshot, getDoc, query, where, getDocs, runTransaction, increment, serverTimestamp, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.9.0: Governança dos vínculos e telas por perfil');
+        console.info('PRGD v0.10.0: Colaboradores e inscrições institucionais');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -696,16 +725,16 @@
             snapshotUnsubs.push(observarFirestore(ref,snap=>{
                 dbData[colecao]=snap.docs ? snap.docs.map(d=>({...d.data(),id:d.id,firestoreId:d.id})) : snap.exists()?[{...snap.data(),id:snap.id,firestoreId:snap.id}]:[];
                 delete portalErros[colecao];renderPortalInstitucional();
-            },()=>{dbData[colecao]=[];portalErros[colecao]=true;renderPortalInstitucional();}));
+            },()=>{dbData[colecao]=[];portalErros[colecao]=true;if(['colaboradores','inscricoes'].includes(colecao))limparOperacoesInstitucionais();renderPortalInstitucional();}));
         }
         function iniciarPortalInstitucional() {
             if(!acessoInstitucionalAtivo())return;
             const v=currentUser.acessoInstitucional;
             if(podeAcao('orgao'))observarPortal('orgaos',doc(db,'orgaos',v.orgaoId));
             if(podeAcao('participantes'))observarPortal('colaboradores',consultasDoEscopo('colaboradores'));
-            if(podeAcao('inscricoes')||podeAcao('relatorios'))observarPortal('inscricoes',consultasDoEscopo('inscricoes'));
+            if(podeAcao('inscricoes')||podeAcao('comprovantes')||podeAcao('relatorios'))observarPortal('inscricoes',consultasDoEscopo('inscricoes'));
             if(podeAcao('auditoria'))observarPortal('auditoriaOrgao',consultasDoEscopo('historicoAlteracoes'));
-            if(podeAcao('eventos'))snapshotUnsubs.push(observarFirestore(query(collection(db,'eventos'),where('eventoPublico','==',true)),snap=>atualizarEventosVisiveis(snap.docs.map(d=>({...d.data(),id:d.id,firestoreId:d.id}))),()=>{dbData.eventos=[];portalErros.eventos=true;renderPortalInstitucional();}));
+            if(podeAcao('eventos'))observarEventosPortal();
         }
         function renderPortalInstitucional() {
             const v=currentUser?.acessoInstitucional;
@@ -726,8 +755,197 @@
             document.getElementById('portal-colaboradores').innerHTML=linhas('colaboradores',[i=>i.nome||'-',i=>i.emailInstitucional||'-',i=>dbData.setores.find(s=>s.id===i.setorId)?.nome||i.setorId||'-',i=>i.ativo===false?'Inativo':'Ativo']);
             document.getElementById('portal-inscricoes').innerHTML=linhas('inscricoes',[i=>i.participanteNome||i.nome||'-',i=>dbData.eventos.find(e=>String(e.firestoreId||e.id)===i.eventId)?.titulo||i.eventoTitulo||i.eventId||'-',i=>i.situacao||'-',i=>i.protocolo||'-']);
             document.getElementById('portal-auditoria').innerHTML=linhas('auditoriaOrgao',[i=>i.autorNome||i.autorUid||'-',i=>i.acao||'-',i=>i.registroNome||i.registroId||'-',i=>i.criadoEm?.toDate?i.criadoEm.toDate().toLocaleString('pt-BR'):'-']);
+            renderAcoesPortal();
             const msg=document.getElementById('portal-erros');msg.textContent=Object.keys(portalErros).length?'Algumas consultas não puderam ser confirmadas. Nenhum dado dessas consultas é exibido.':'';
         }
+        // Operações institucionais: beneficiários sem conta; nenhum cadastro no Authentication.
+        let colaboradorEmEdicao=null, eventoInscricaoId='', portalOperacao=false, comprovanteAtualId='';
+        let eventosPortalFontes={};
+        const MODELO_INSCRICAO='institucional-v1';
+        function gestorPode(acao) {
+            const v=currentUser?.acessoInstitucional;
+            if(!portalInstitucional() || !['gestor_nsi','substituto'].includes(v?.papel) || !acessoInstitucionalAtivo() || v.operacoesVersao!=='v1' || !v.acoes.includes(acao))return false;
+            return acao.startsWith('participantes.') ? podeAcao('participantes') : podeAcao('inscricoes')&&podeAcao('eventos')&&(acao!=='inscricoes.criar'||podeAcao('participantes'));
+        }
+        function emailParticipante(valor) {return String(valor||'').trim().toLowerCase();}
+        async function hashInstitucional(texto) {
+            const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(texto));
+            return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
+        }
+        async function chaveColaborador(orgaoId,email) {return hashInstitucional(orgaoId+'|'+emailParticipante(email));}
+        async function chaveInscricao(eventId,email) {return eventId+'__'+await hashInstitucional(emailParticipante(email));}
+        function validarDadosColaborador(p) {
+            if(!p.nome||p.nome.length<2||p.nome.length>150)throw new Error('Informe o nome do colaborador (2 a 150 caracteres).');
+            if(p.emailInstitucional.length>254||!/^[^ /@]+@[^ /@]+\.[^ /@]+$/.test(p.emailInstitucional))throw new Error('Informe um e-mail institucional válido.');
+            if(!p.setorId||!dbData.setores.some(s=>s.id===p.setorId&&s.orgaoId===p.orgaoId&&s.ativo!==false)||!registroNoEscopo(p))throw new Error('Selecione um setor ativo dentro da sua delegação.');
+            if(p.telefone.length>40||p.cargo.length>150)throw new Error('Revise o telefone e o cargo.');
+            return p;
+        }
+        function eventoElegivelInstitucional(e,agora=Date.now()) {
+            const orgao=currentUser?.acessoInstitucional?.orgaoId;
+            return e?.modeloInscricao===MODELO_INSCRICAO && Array.isArray(e.orgaosElegiveis) && e.orgaosElegiveis.includes(orgao)
+                && e.inscricoesAbertas===true && Number.isFinite(e.inscricaoInicio)&&Number.isFinite(e.inscricaoFim)
+                && e.inscricaoInicio<=agora&&e.inscricaoFim>agora&&!['Cancelado','Realizado'].includes(e.status)
+                && Number.isInteger(e.inscritosCount)&&e.inscritosCount>=0&&Number.isInteger(e.limiteVagas)&&e.inscritosCount<e.limiteVagas;
+        }
+        function limparOperacoesInstitucionais() {
+            colaboradorEmEdicao=null;eventoInscricaoId='';comprovanteAtualId='';
+            ['modal-colaborador','modal-inscricao-institucional','modal-comprovante'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+            document.getElementById('comprovante-conteudo').innerHTML='';
+            for(const id of ['colab-nome','colab-emailInstitucional','colab-telefone','colab-cargo','colaborador-busca'])document.getElementById(id).value='';
+            for(const id of ['colab-setorId','insc-participante'])document.getElementById(id).innerHTML='';
+            for(const id of ['colab-erro','insc-erro','insc-contexto','colab-contexto'])document.getElementById(id).textContent='';
+        }
+        function mensagemPortal(texto,erro=false) {
+            const el=document.getElementById('portal-operacao-msg');if(!el)return;
+            el.textContent=texto;el.className='p-3 rounded-xl text-sm border '+(erro?'bg-red-50 text-red-800 border-red-100':'bg-emerald-50 text-emerald-900 border-emerald-100');el.classList.toggle('hidden',!texto);
+        }
+        function logPortal(ref,registro,acao,campos,logRef) {
+            return {autorUid:currentUser.uid,autorNome:currentUser.nome||currentUser.email||currentUser.uid,criadoEm:serverTimestamp(),
+                colecao:ref.collection||ref.path.split('/')[0],registroId:ref.id,registroNome:String(registro.nome||registro.participanteNome||ref.id).slice(0,180),
+                acao,campos,orgaoId:registro.orgaoId,setorId:registro.setorId};
+        }
+        function abrirColaborador(id='') {
+            const p=id?dbData.colaboradores.find(i=>i.id===id):null;
+            if(!gestorPode(id?'participantes.editar':'participantes.cadastrar')||(id&&(!p||!registroNoEscopo(p))))return;
+            colaboradorEmEdicao=p?{id:p.id,uid:currentUser.uid,sessao:versaoSessao}:null;
+            document.getElementById('colab-titulo').textContent=id?'Editar colaborador':'Cadastrar colaborador';
+            for(const k of ['nome','emailInstitucional','telefone','cargo'])document.getElementById('colab-'+k).value=p?.[k]||'';
+            document.getElementById('colab-emailInstitucional').readOnly=!!p;
+            const v=currentUser.acessoInstitucional,setores=dbData.setores.filter(s=>s.orgaoId===v.orgaoId&&s.ativo!==false&&(!v.setoresIds.length||v.setoresIds.includes(s.id)));
+            document.getElementById('colab-setorId').innerHTML='<option value="">Selecione o setor</option>'+setores.map(s=>`<option value="${esc(s.id)}" ${s.id===p?.setorId?'selected':''}>${esc(s.nome||s.id)}</option>`).join('');
+            document.getElementById('colab-setorId').disabled=!!p;document.getElementById('colab-ativo').checked=p?.ativo!==false;
+            document.getElementById('colab-contexto').textContent='Órgão vinculado: '+v.orgaoId+'. O cadastro não cria conta de acesso.';
+            document.getElementById('colab-erro').textContent='';document.getElementById('modal-colaborador').classList.remove('hidden');
+        }
+        async function salvarColaborador(ev) {
+            ev.preventDefault();if(portalOperacao)return;
+            const edicao=colaboradorEmEdicao,acao=edicao?'participantes.editar':'participantes.cadastrar',uid=currentUser?.uid,sessao=versaoSessao;
+            if(!gestorPode(acao))return;
+            portalOperacao=true;const botao=document.getElementById('colab-salvar');botao.disabled=true;
+            try {
+                if(edicao&&(edicao.uid!==uid||edicao.sessao!==sessao))throw new Error('Sua sessão mudou. Abra o cadastro novamente.');
+                const val=k=>document.getElementById('colab-'+k).value.trim(),v=currentUser.acessoInstitucional;
+                const dados=validarDadosColaborador({nome:val('nome'),emailInstitucional:emailParticipante(val('emailInstitucional')),orgaoId:v.orgaoId,setorId:val('setorId'),telefone:val('telefone'),cargo:val('cargo'),ativo:document.getElementById('colab-ativo').checked});
+                const id=await chaveColaborador(dados.orgaoId,dados.emailInstitucional),ref=doc(db,'colaboradores',id),log=doc(collection(db,'historicoAlteracoes'));
+                if(edicao&&edicao.id!==id)throw new Error('Órgão e e-mail identificam este cadastro e não podem ser alterados.');
+                await runTransaction(db,async t=>{
+                    const snap=await t.get(ref),antes=snap.exists()?snap.data():null;
+                    if(sessao!==versaoSessao||currentUser?.uid!==uid||!gestorPode(acao))throw new Error('Sua sessão ou delegação mudou.');
+                    if(edicao?(!antes||!registroNoEscopo(antes)):!!antes)throw new Error(edicao?'Cadastro não disponível no seu escopo.':'Já existe um colaborador com esse e-mail no órgão.');
+                    if(antes&&(antes.setorId!==dados.setorId||antes.emailInstitucional!==dados.emailInstitucional))throw new Error('Setor e e-mail são preservados na edição. Solicite revisão à GRGD.');
+                    const novo={...dados,criadoEm:antes?.criadoEm||serverTimestamp(),criadoPorUid:antes?.criadoPorUid||uid,atualizadoEm:serverTimestamp(),atualizadoPorUid:uid,ultimaAuditoriaId:log.id};
+                    const campos=Object.keys(dados).filter(k=>JSON.stringify(antes?.[k])!==JSON.stringify(dados[k]));
+                    if(antes&&!campos.length)return;
+                    t.set(ref,novo);t.set(log,logPortal(ref,novo,edicao?'editar':'criar',campos,log));
+                });
+                if(sessao===versaoSessao&&currentUser?.uid===uid){fecharModal('modal-colaborador');colaboradorEmEdicao=null;mensagemPortal('Colaborador salvo. Nenhuma conta de acesso foi criada.');}
+            }catch(err){if(sessao===versaoSessao&&currentUser?.uid===uid)document.getElementById('colab-erro').textContent=traduzirErroSistema(err);}
+            finally{portalOperacao=false;botao.disabled=false;}
+        }
+        function abrirInscricaoInstitucional(eventId) {
+            if(!gestorPode('inscricoes.criar'))return;
+            const e=dbData.eventos.find(e=>String(e.firestoreId||e.id)===eventId);
+            if(!eventoElegivelInstitucional(e)){mensagemPortal('Este evento não está elegível, está fora do período ou está lotado.',true);return;}
+            eventoInscricaoId=eventId;const pessoas=dbData.colaboradores.filter(p=>p.ativo!==false&&registroNoEscopo(p));
+            document.getElementById('insc-contexto').textContent=e.titulo+' · '+e.inscritosCount+'/'+e.limiteVagas+' vagas ocupadas. A confirmação será verificada no servidor.';
+            document.getElementById('insc-participante').innerHTML='<option value="">Selecione o colaborador</option>'+pessoas.map(p=>`<option value="${esc(p.id)}">${esc(p.nome)} — ${esc(p.emailInstitucional)}</option>`).join('');
+            document.getElementById('insc-erro').textContent=pessoas.length?'':'Cadastre um colaborador ativo antes de inscrever.';
+            document.getElementById('insc-confirmar').disabled=!pessoas.length;document.getElementById('modal-inscricao-institucional').classList.remove('hidden');
+        }
+        async function gravarInscricaoInstitucional(eventId,participanteId,cancelarId='') {
+            const uid=currentUser?.uid,sessao=versaoSessao,acao=cancelarId?'inscricoes.cancelar':'inscricoes.criar';
+            if(!(cancelarId&&ehAdministrador())&&!gestorPode(acao))throw new Error('Ação não autorizada na sua delegação.');
+            const pessoa=cancelarId?null:dbData.colaboradores.find(p=>p.id===participanteId&&registroNoEscopo(p));
+            if(!cancelarId&&!pessoa)throw new Error('Selecione um colaborador do seu escopo.');
+            const id=cancelarId||await chaveInscricao(eventId,pessoa.emailInstitucional),ref=doc(db,'inscricoes',id),eventoRef=doc(db,'eventos',eventId),log=doc(collection(db,'historicoAlteracoes'));
+            await runTransaction(db,async t=>{
+                const [eventoSnap,inscricaoSnap,pessoaSnap]=await Promise.all([cancelarId?Promise.resolve(null):t.get(eventoRef),t.get(ref),cancelarId?Promise.resolve(null):t.get(doc(db,'colaboradores',participanteId))]);
+                const evento=eventoSnap?.exists()?eventoSnap.data():null,antes=inscricaoSnap.exists()?inscricaoSnap.data():null,p=pessoaSnap?.exists()?pessoaSnap.data():null;
+                if(sessao!==versaoSessao||currentUser?.uid!==uid||(!(cancelarId&&ehAdministrador())&&!gestorPode(acao)))throw new Error('Sua sessão ou delegação mudou.');
+                if(!cancelarId&&(!evento||evento.modeloInscricao!==MODELO_INSCRICAO))throw new Error('Este evento não aceita inscrição por representação.');
+                if(cancelarId){if(!antes||(!ehAdministrador()&&!registroNoEscopo(antes))||antes.situacao!=='confirmada'||antes.eventId!==eventId)throw new Error('Inscrição já cancelada ou indisponível no seu escopo.');}
+                else {
+                    if(!p||p.ativo===false||!registroNoEscopo(p))throw new Error('O colaborador não está ativo no seu escopo.');
+                    if(p.emailInstitucional!==pessoa.emailInstitucional)throw new Error('O cadastro mudou. Reabra a inscrição.');
+                    if(!eventoElegivelInstitucional(evento))throw new Error('Inscrições encerradas, órgão não elegível ou vagas esgotadas.');
+                    if(antes&&(!registroNoEscopo(antes)||antes.participanteId!==participanteId||antes.situacao!=='cancelada'))throw new Error('Já existe inscrição para esse e-mail no evento.');
+                }
+                const novo=cancelarId?{...antes,situacao:'cancelada'}:{modeloInscricao:MODELO_INSCRICAO,eventId,participanteId,emailInstitucional:p.emailInstitucional,participanteNome:p.nome,orgaoId:p.orgaoId,setorId:p.setorId,
+                    eventoTitulo:evento.titulo,eventoData:evento.dataInicio||'',situacao:'confirmada',protocolo:id,criadoEm:antes?.criadoEm||serverTimestamp(),criadoPorUid:antes?.criadoPorUid||uid};
+                Object.assign(novo,{atualizadoEm:serverTimestamp(),atualizadoPorUid:uid,ultimaAuditoriaId:log.id});
+                const total=cancelarId?null:evento.inscritosCount+1;if(!cancelarId&&(!Number.isInteger(total)||total<0||total>evento.limiteVagas))throw new Error('A contagem de vagas precisa ser revisada pela GRGD.');
+                t.set(ref,novo);t.set(eventoRef,{inscritosCount:cancelarId?increment(-1):total,ultimaInscricaoId:id},{merge:true});
+                t.set(log,logPortal(ref,novo,cancelarId?'cancelar_inscricao':'inscrever',['situacao'],log));
+            });
+            return {id,uid,sessao};
+        }
+        async function confirmarInscricaoInstitucional(ev) {
+            ev.preventDefault();if(portalOperacao)return;portalOperacao=true;const btn=document.getElementById('insc-confirmar');btn.disabled=true;
+            const uid=currentUser?.uid,sessao=versaoSessao;
+            try{await gravarInscricaoInstitucional(eventoInscricaoId,document.getElementById('insc-participante').value);if(sessao===versaoSessao&&currentUser?.uid===uid){fecharModal('modal-inscricao-institucional');mensagemPortal('Inscrição confirmada. Consulte o protocolo em Inscrições do órgão.');}}
+            catch(err){if(sessao===versaoSessao&&currentUser?.uid===uid)document.getElementById('insc-erro').textContent=traduzirErroSistema(err);}
+            finally{portalOperacao=false;btn.disabled=false;}
+        }
+        async function cancelarInscricaoInstitucional(id) {
+            const i=dbData.inscricoes.find(i=>i.id===id&&(ehAdministrador()||registroNoEscopo(i)));if(!i||(!ehAdministrador()&&!gestorPode('inscricoes.cancelar'))||portalOperacao)return;
+            if(!confirm('Cancelar a inscrição de '+i.participanteNome+'? A vaga será liberada e o histórico preservado.'))return;
+            const uid=currentUser.uid,sessao=versaoSessao;portalOperacao=true;
+            try{await gravarInscricaoInstitucional(i.eventId,'',id);if(sessao===versaoSessao&&currentUser?.uid===uid)mensagemPortal('Inscrição cancelada. A vaga foi liberada.');}
+            catch(err){if(sessao===versaoSessao&&currentUser?.uid===uid)mensagemPortal(traduzirErroSistema(err),true);}
+            finally{portalOperacao=false;}
+        }
+        async function consultarComprovante(id,imprimir=false) {
+            if(!podeAcao('comprovantes')||(!ehAdministrador()&&!portalInstitucional()))return;
+            const uid=currentUser.uid,sessao=versaoSessao;
+            try{
+                const snap=await getDoc(doc(db,'inscricoes',id)),i=snap.exists()?snap.data():null;
+                if(sessao!==versaoSessao||currentUser?.uid!==uid)return;
+                if(!i||i.modeloInscricao!==MODELO_INSCRICAO||(!ehAdministrador()&&!registroNoEscopo(i))||!podeAcao('comprovantes'))throw new Error('Comprovante indisponível no seu escopo.');
+                comprovanteAtualId=id;const orgao=dbData.orgaos.find(o=>String(o.firestoreId||o.id)===i.orgaoId),setor=dbData.setores.find(s=>s.id===i.setorId);
+                const campo=(nome,valor)=>`<div class="border-b py-2"><dt class="text-xs text-slate-500">${esc(nome)}</dt><dd class="font-semibold break-words">${esc(valor||'—')}</dd></div>`;
+                document.getElementById('comprovante-conteudo').innerHTML=`<p class="text-sm text-blue-800 font-bold">ATI/PE · PRGD</p><h3 class="text-xl font-bold my-3">Comprovante de inscrição</h3><p class="font-bold ${i.situacao==='cancelada'?'text-red-800':'text-emerald-800'}">${i.situacao==='confirmada'?'Inscrição confirmada':'Inscrição cancelada'}</p><dl class="text-sm mt-4">${campo('Participante',i.participanteNome)}${campo('Órgão',orgao?.nome||i.orgaoId)}${campo('Setor',setor?.nome||i.setorId)}${campo('Evento',i.eventoTitulo)}${campo('Data informada na inscrição',formatarData(i.eventoData))}${campo('Protocolo',i.protocolo)}${campo('Última atualização do registro',i.atualizadoEm?.toDate?i.atualizadoEm.toDate().toLocaleString('pt-BR'):'Consultar registro no sistema')}</dl><p class="text-xs text-slate-500 mt-4">Este documento comprova o registro e a situação da inscrição no momento da consulta. A presença no evento exige comprovação própria. Documento sem assinatura digital ou consulta pública de autenticidade.</p>`;
+                document.getElementById('modal-comprovante').classList.remove('hidden');if(imprimir)window.print();
+            }catch(err){if(sessao===versaoSessao&&currentUser?.uid===uid){document.getElementById('comprovante-conteudo').innerHTML='';fecharModal('modal-comprovante');mensagemPortal(traduzirErroSistema(err),true);}}
+        }
+        function renderAcoesPortal() {
+            document.getElementById('btn-novo-colaborador')?.classList.toggle('hidden',!gestorPode('participantes.cadastrar'));
+            const busca=emailParticipante(document.getElementById('colaborador-busca')?.value),pessoas=dbData.colaboradores.filter(p=>registroNoEscopo(p)&&(!busca||[p.nome,p.emailInstitucional,p.cargo].some(s=>String(s||'').toLowerCase().includes(busca))));
+            if(portalErros.colaboradores!==true)document.getElementById('portal-colaboradores').innerHTML=pessoas.map(p=>`<tr><td class="p-3 border-t">${esc(p.nome)}</td><td class="p-3 border-t">${esc(p.emailInstitucional)}</td><td class="p-3 border-t">${esc(dbData.setores.find(s=>s.id===p.setorId)?.nome||p.setorId)}</td><td class="p-3 border-t">${p.ativo===false?'Inativo':'Ativo'}</td><td class="p-3 border-t">${gestorPode('participantes.editar')?`<button type="button" data-colaborador-editar="${esc(p.id)}" class="border rounded-lg px-3 py-2 text-blue-900">Editar</button>`:''}</td></tr>`).join('')||'<tr><td colspan="5" class="p-4 text-slate-500">Nenhum colaborador encontrado no seu escopo.</td></tr>';
+            if(portalErros.inscricoes!==true)document.getElementById('portal-inscricoes').innerHTML=dbData.inscricoes.filter(i=>registroNoEscopo(i)).map(i=>`<tr><td class="p-3 border-t">${esc(i.participanteNome||i.nome||'—')}</td><td class="p-3 border-t">${esc(i.eventoTitulo||i.eventId)}</td><td class="p-3 border-t">${esc(i.situacao||'Legada')}</td><td class="p-3 border-t break-all text-xs">${esc(i.protocolo||'—')}</td><td class="p-3 border-t"><div class="flex flex-wrap gap-2">${i.modeloInscricao===MODELO_INSCRICAO&&podeAcao('comprovantes')?`<button type="button" data-comprovante="${esc(i.id)}" class="border rounded-lg px-3 py-2 text-blue-900">Comprovante</button>`:''}${i.modeloInscricao===MODELO_INSCRICAO&&i.situacao==='confirmada'&&gestorPode('inscricoes.cancelar')?`<button type="button" data-inscricao-cancelar="${esc(i.id)}" class="border rounded-lg px-3 py-2 text-slate-700">Cancelar inscrição</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="5" class="p-4 text-slate-500">Nenhuma inscrição disponível no seu escopo.</td></tr>';
+        }
+        function observarEventosPortal() {
+            eventosPortalFontes={};const fontes={publicos:query(collection(db,'eventos'),where('eventoPublico','==',true)),elegiveis:query(collection(db,'eventos'),where('orgaosElegiveis','array-contains',currentUser.acessoInstitucional.orgaoId))};
+            Object.entries(fontes).forEach(([fonte,ref])=>snapshotUnsubs.push(observarFirestore(ref,snap=>{
+                eventosPortalFontes[fonte]=snap.docs.map(d=>({...d.data(),id:d.id,firestoreId:d.id}));delete portalErros['eventos_'+fonte];
+                atualizarEventosVisiveis(Object.values(eventosPortalFontes).flat());renderPortalInstitucional();
+            },()=>{eventosPortalFontes[fonte]=[];portalErros['eventos_'+fonte]=true;atualizarEventosVisiveis(Object.values(eventosPortalFontes).flat());renderPortalInstitucional();})));
+        }
+        function camposInscricaoEvento(item={},novo=false) {
+            if(!novo&&item.modeloInscricao!==MODELO_INSCRICAO)return '<p class="text-xs text-slate-500 mt-3">Evento anterior: inscrições no fluxo original. Para inscrições por representação, crie um novo evento institucional.</p>';
+            const data=n=>n?new Date(n-new Date(n).getTimezoneOffset()*60000).toISOString().slice(0,16):'',sel=item.orgaosElegiveis||[];
+            return `<fieldset class="border rounded-xl p-3 space-y-3 mt-4"><legend class="font-bold text-sm">Inscrições pelo gestor do órgão</legend>${novo?'<label class="block"><input id="evt-institucional" type="checkbox"> Habilitar inscrição institucional neste novo evento</label>':'<p class="text-xs text-blue-900">Modelo institucional: contador e protocolos são atualizados pelas inscrições.</p>'}<label class="block text-xs"><input id="evt-inscricoes-abertas" type="checkbox" ${item.inscricoesAbertas!==false?'checked':''}> Receber inscrições dentro do período</label><div class="grid sm:grid-cols-3 gap-3"><label class="text-xs">Início das inscrições<input id="evt-inscricao-inicio" type="datetime-local" value="${data(item.inscricaoInicio)}" class="block w-full border p-2 rounded-lg"></label><label class="text-xs">Fim das inscrições<input id="evt-inscricao-fim" type="datetime-local" value="${data(item.inscricaoFim)}" class="block w-full border p-2 rounded-lg"></label><label class="text-xs">Total de vagas<input id="evt-limite-vagas" type="number" min="1" step="1" value="${item.limiteVagas||''}" class="block w-full border p-2 rounded-lg"></label></div><label class="block text-xs">Órgãos elegíveis (selecione um ou mais)<select id="evt-orgaos-elegiveis" multiple size="5" class="block w-full border rounded-lg p-2">${dbData.orgaos.map(o=>{const id=String(o.firestoreId||o.id);return `<option value="${esc(id)}" ${sel.includes(id)?'selected':''}>${esc(o.sigla||o.nome||id)}</option>`;}).join('')}${sel.filter(id=>!dbData.orgaos.some(o=>String(o.firestoreId||o.id)===id)).map(id=>`<option value="${esc(id)}" selected>${esc(id)} (vínculo anterior)</option>`).join('')}</select></label><p class="text-xs text-slate-500">Use Ctrl para selecionar vários órgãos. A elegibilidade usa os IDs aprovados, sem deduzir acesso pelo domínio do e-mail.</p></fieldset>`;
+        }
+        function lerInscricaoEvento(item={},novo=false) {
+            const habilitado=novo?document.getElementById('evt-institucional')?.checked:item.modeloInscricao===MODELO_INSCRICAO;
+            if(!habilitado)return {};
+            const inicio=new Date(document.getElementById('evt-inscricao-inicio').value).getTime(),fim=new Date(document.getElementById('evt-inscricao-fim').value).getTime(),vagas=Number(document.getElementById('evt-limite-vagas').value),orgaos=[...document.getElementById('evt-orgaos-elegiveis').selectedOptions].map(o=>o.value);
+            if(!Number.isInteger(inicio)||!Number.isInteger(fim)||fim<=inicio||!Number.isInteger(vagas)||vagas<1||vagas<(item.inscritosCount||0)||!orgaos.length||orgaos.length>100)throw new Error('Revise o período de inscrições, os órgãos elegíveis e as vagas (sem reduzir abaixo das ocupadas).');
+            return {modeloInscricao:MODELO_INSCRICAO,inscricoesAbertas:document.getElementById('evt-inscricoes-abertas').checked,inscricaoInicio:inicio,inscricaoFim:fim,limiteVagas:vagas,orgaosElegiveis:orgaos,...(novo?{inscritosCount:0}: {})};
+        }
+        document.getElementById('form-colaborador')?.addEventListener('submit',salvarColaborador);
+        document.getElementById('form-inscricao-institucional')?.addEventListener('submit',confirmarInscricaoInstitucional);
+        document.getElementById('btn-novo-colaborador')?.addEventListener('click',()=>abrirColaborador());
+        document.getElementById('colaborador-busca')?.addEventListener('input',renderPortalInstitucional);
+        document.getElementById('comprovante-imprimir')?.addEventListener('click',()=>consultarComprovante(comprovanteAtualId,true));
+        document.addEventListener('click',ev=>{
+            const el=ev.target.closest?.('[data-colaborador-editar],[data-inscrever-colaborador],[data-inscricao-cancelar],[data-comprovante]');if(!el)return;
+            if(el.hasAttribute('data-colaborador-editar'))abrirColaborador(el.getAttribute('data-colaborador-editar'));
+            else if(el.hasAttribute('data-inscrever-colaborador'))abrirInscricaoInstitucional(el.getAttribute('data-inscrever-colaborador'));
+            else if(el.hasAttribute('data-inscricao-cancelar'))cancelarInscricaoInstitucional(el.getAttribute('data-inscricao-cancelar'));
+            else consultarComprovante(el.getAttribute('data-comprovante'));
+        });
+
         function camposVinculo(usuario) {
             const v=usuario.acessoInstitucional||{}, cls='w-full border rounded-lg p-2 bg-white text-xs';
             const input=(id,label,value='',type='text')=>`<label class="block">${label}<input id="vinculo-${id}" type="${type}" value="${esc(value)}" class="${cls}"></label>`;
@@ -740,7 +958,7 @@
                 ${input('inicio','Início',data(v.inicio),'datetime-local')}${input('fim','Validade até',data(v.fim),'datetime-local')}${input('revisao','Próxima revisão até',data(v.revisao),'datetime-local')}
                 <label>Titular (somente substituto)<select id="vinculo-titular" class="${cls}"><option value="">Selecione</option>${dbData.usuarios.filter(u=>u.acessoInstitucional?.papel==='gestor_nsi'&&uidCadastro(u)!==uidCadastro(usuario)).map(u=>`<option value="${esc(uidCadastro(u))}" ${v.titularUid===uidCadastro(u)?'selected':''}>${esc(u.nome||u.email)}</option>`).join('')}</select></label>
                 ${input('grgd-nome','Responsável pela aprovação GRGD',v.aprovacaoGrgd?.responsavel)}${input('grgd-ref','Referência da aprovação GRGD',v.aprovacaoGrgd?.referencia)}${input('autoridade-nome','Autoridade do órgão / ATI',v.aprovacaoAutoridade?.responsavel)}${input('autoridade-ref','Referência da aprovação da autoridade',v.aprovacaoAutoridade?.referencia)}
-                <fieldset class="md:col-span-2 border rounded-lg p-2"><legend class="font-bold">Ações expressamente autorizadas</legend><div id="vinculo-acoes" class="grid md:grid-cols-2 gap-2"></div></fieldset>
+                <label class="md:col-span-2 bg-blue-50 border rounded-lg p-3"><input id="vinculo-operacoes" type="checkbox" ${v.operacoesVersao==='v1'?'checked':''}> Habilitar cadastro e inscrições institucionais após revisão das aprovações.<span class="block text-xs text-slate-500 mt-1">Vínculos anteriores continuam em consulta até esta liberação expressa. O substituto também depende da liberação do titular.</span></label><fieldset class="md:col-span-2 border rounded-lg p-2"><legend class="font-bold">Ações expressamente autorizadas</legend><div id="vinculo-acoes" class="grid md:grid-cols-2 gap-2"></div></fieldset>
                 </div><p class="text-slate-500 mt-2">Participante sem login é cadastrado como pessoa, sem receber perfil ou conta. LDAP será integrado na migração institucional.</p></fieldset>`;
         }
         function atualizarCamposVinculo(selecionados=null) {
@@ -748,7 +966,7 @@
             const anterior=dbData.usuarios.find(u=>uidCadastro(u)===document.getElementById('edit-doc-id').value)?.acessoInstitucional||{};
             const acoes=selecionados||Array.from(document.querySelectorAll('[name="vinculo-acao"]:checked')).map(el=>el.value);
             const box=document.getElementById('vinculo-acoes');
-            box.innerHTML=(PAPEIS_INSTITUCIONAIS[papel.value]?.acoes||[]).map(a=>`<label><input type="checkbox" name="vinculo-acao" value="${a}" ${acoes.includes(a)?'checked':''}> ${esc(nomeAcaoInstitucional(a))}${papel.value!=='grgd'&&(!a.endsWith('.consultar')||a.startsWith('comprovantes.'))?' <span class="text-slate-500">(próximo lote)</span>':''}</label>`).join('')||'<p>Selecione um papel para definir suas ações.</p>';
+            box.innerHTML=(PAPEIS_INSTITUCIONAIS[papel.value]?.acoes||[]).map(a=>`<label><input type="checkbox" name="vinculo-acao" value="${a}" ${acoes.includes(a)?'checked':''}> ${esc(nomeAcaoInstitucional(a))}</label>`).join('')||'<p>Selecione um papel para definir suas ações.</p>';
             const orgaoCampo=document.getElementById('vinculo-orgao');
             const grgd=papel.value==='grgd';orgaoCampo.disabled=grgd;if(grgd)orgaoCampo.value='';
             const orgao=orgaoCampo.value;
@@ -761,6 +979,7 @@
                 +anteriores.map(id=>`<option value="${esc(id)}" selected>Vínculo anterior: ${esc(id)} (revisar)</option>`).join('');
             setores.disabled=grgd;
             document.getElementById('vinculo-titular').disabled=papel.value!=='substituto';
+            const operacoes=document.getElementById('vinculo-operacoes');operacoes.disabled=!['gestor_nsi','substituto'].includes(papel.value);if(operacoes.disabled)operacoes.checked=false;
         }
         function lerVinculoInstitucional(anterior={}) {
             const el=document.getElementById('vinculo-papel');
@@ -773,6 +992,8 @@
                 situacao:val('situacao'),inicio:new Date(val('inicio')).getTime(),fim:new Date(val('fim')).getTime(),revisao:new Date(val('revisao')).getTime(),titularUid:papel==='substituto'?val('titular'):'',
                 acoes:Array.from(document.querySelectorAll('[name="vinculo-acao"]:checked')).map(el=>el.value),
                 aprovacaoGrgd:{responsavel:val('grgd-nome'),referencia:val('grgd-ref')},aprovacaoAutoridade:{responsavel:val('autoridade-nome'),referencia:val('autoridade-ref')}};
+            const liberarOperacoes=['gestor_nsi','substituto'].includes(papel)&&document.getElementById('vinculo-operacoes')?.checked===true;
+            if(liberarOperacoes||anterior.acessoInstitucional?.operacoesVersao!==undefined)v.operacoesVersao=liberarOperacoes?'v1':'';
             if(!['pendente','aprovado','suspenso'].includes(v.situacao)||v.setoresIds.length>5||!v.acoes.every(a=>PAPEIS_INSTITUCIONAIS[papel].acoes.includes(a)))throw new Error('Revise a situação, os setores e as ações autorizadas.');
             if(!Number.isFinite(v.inicio)||!Number.isFinite(v.fim)||!Number.isFinite(v.revisao)||v.fim<=v.inicio||v.revisao>v.fim||v.revisao<=v.inicio)throw new Error('Informe início, validade e revisão coerentes. A revisão deve ocorrer dentro da validade.');
             if(v.situacao==='aprovado'&&papel!=='grgd'&&!dbData.orgaos.some(o=>String(o.firestoreId||o.id)===orgaoId))throw new Error('Selecione um órgão cadastrado.');
@@ -781,7 +1002,7 @@
             if(papel==='substituto'&&v.situacao==='aprovado'){
                 const titular=dbData.usuarios.find(u=>uidCadastro(u)===v.titularUid);
                 const t=titular?.acessoInstitucional;
-                if(!acessoInstitucionalAtivo(titular)||t.papel!=='gestor_nsi'||t.orgaoId!==v.orgaoId||v.inicio<t.inicio||v.fim>t.fim||v.revisao>t.revisao||!v.acoes.every(a=>t.acoes.includes(a))||(t.setoresIds.length&&(!v.setoresIds.length||!v.setoresIds.every(id=>t.setoresIds.includes(id)))))throw new Error('A delegação não pode exceder as ações, setores ou validade do titular aprovado.');
+                if(!acessoInstitucionalAtivo(titular)||(v.operacoesVersao==='v1'&&t?.operacoesVersao!=='v1')||t.papel!=='gestor_nsi'||t.orgaoId!==v.orgaoId||v.inicio<t.inicio||v.fim>t.fim||v.revisao>t.revisao||!v.acoes.every(a=>t.acoes.includes(a))||(t.setoresIds.length&&(!v.setoresIds.length||!v.setoresIds.every(id=>t.setoresIds.includes(id)))))throw new Error('A delegação não pode exceder as ações, setores ou validade do titular aprovado.');
             }
             const canon=value=>Array.isArray(value)?value.slice().sort():value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(k=>[k,canon(value[k])])):value;
             const base=anterior.acessoInstitucional;
@@ -881,8 +1102,8 @@
             const registro = {colecao:'autenticacao',registroId:uid,registroNome:'Conta de acesso',acao:'alterar_senha',campos:['senha'],autorUid:uid,autorNome:currentUser.nome || currentUser.email || uid,criadoEm:serverTimestamp()};
             await runTransaction(db,async transacao=>transacao.set(doc(collection(db,'historicoAlteracoes')),registro));
         }
-        const NOMES_COLECOES = {usuarios:'Usuários',orgaos:'Clientes',demandas:'Demandas',eventos:'Eventos',locais:'Locais',fornecedores:'Fornecedores',bases:'Bases',grupos:'Grupos',inscricoes:'Inscrições',perfilPrivado:'Perfil pessoal',autenticacao:'Conta de acesso'};
-        const NOMES_ACOES = {criar:'Criou',editar:'Editou',excluir:'Excluiu',excluir_usuario:'Excluiu do cadastro ativo',alterar_senha:'Alterou a própria senha (valor não registrado)'};
+        const NOMES_COLECOES = {colaboradores:'Colaboradores',usuarios:'Usuários',orgaos:'Clientes',demandas:'Demandas',eventos:'Eventos',locais:'Locais',fornecedores:'Fornecedores',bases:'Bases',grupos:'Grupos',inscricoes:'Inscrições',perfilPrivado:'Perfil pessoal',autenticacao:'Conta de acesso'};
+        const NOMES_ACOES = {criar:'Criou',editar:'Editou',excluir:'Excluiu',excluir_usuario:'Excluiu do cadastro ativo',alterar_senha:'Alterou a própria senha (valor não registrado)',inscrever:'Inscreveu colaborador',cancelar_inscricao:'Cancelou inscrição'};
         function renderHistoricoAlteracoes() {
             if (!ehAdministrador()) return;
             const busca = (document.getElementById('historico-busca').value || '').toLocaleLowerCase('pt-BR');
@@ -932,7 +1153,7 @@
                 if(v.acoes.includes('orgao.consultar'))mods.push('meu_orgao');
                 if(v.acoes.includes('participantes.consultar'))mods.push('colaboradores');
                 if(v.acoes.includes('eventos.consultar'))mods.push('eventos');
-                if(v.acoes.includes('inscricoes.consultar')||v.acoes.includes('relatorios.consultar'))mods.push('inscricoes_orgao');
+                if(v.acoes.includes('inscricoes.consultar')||v.acoes.includes('comprovantes.consultar')||v.acoes.includes('relatorios.consultar'))mods.push('inscricoes_orgao');
                 if(v.acoes.includes('auditoria.consultar'))mods.push('auditoria_orgao');
                 return mods;
             }
@@ -1126,7 +1347,7 @@
         function inscricoesEventoHtml(evento) {
             const ids = [String(evento.id),String(evento.firestoreId || evento.id)];
             const lista = dbData.inscricoes.filter(i => ids.includes(String(i.eventId)));
-            return `<section class="border-t pt-3 mt-4"><h4 class="font-bold text-sm mb-2">${ehAdministrador() ? 'Inscrições' : 'Minha inscrição'}</h4><div class="space-y-2">${lista.map(i => `<div class="p-2 rounded-lg bg-slate-50 text-xs">${identificacaoUsuario({uid:i.uid,nome:i.nome || i.email || 'Participante'})}</div>`).join('') || '<p class="text-xs text-slate-500">Nenhuma inscrição disponível.</p>'}</div></section>`;
+            return `<section class="border-t pt-3 mt-4"><h4 class="font-bold text-sm mb-2">${ehAdministrador()||currentUser?.acessoInstitucional?.papel==='grgd'?'Inscrições':portalInstitucional()?'Inscrições do órgão':'Minha inscrição'}</h4><div class="space-y-2">${lista.map(i => `<div class="p-2 rounded-lg bg-slate-50 text-xs">${identificacaoUsuario({uid:i.uid,nome:i.participanteNome || i.nome || i.email || 'Participante'})}${i.modeloInscricao===MODELO_INSCRICAO?' · '+esc(i.situacao):''}${ehAdministrador()&&i.modeloInscricao===MODELO_INSCRICAO?` <button type="button" data-comprovante="${esc(i.id)}" class="border rounded px-2 py-1">Comprovante</button>${i.situacao==='confirmada'?` <button type="button" data-inscricao-cancelar="${esc(i.id)}" class="border rounded px-2 py-1">Cancelar inscrição</button>`:''}`:''}</div>`).join('') || '<p class="text-xs text-slate-500">Nenhuma inscrição disponível.</p>'}</div></section>`;
         }
         function pessoasResponsaveis(demanda = {}) {
             return [...(demanda.responsaveisGrgdIds || []).map(uid => ({...dadosResponsavel(uid, demanda), uid})),
@@ -1488,7 +1709,7 @@
             verificarAutenticacaoObrigatoria();
             document.body?.setAttribute('data-admin', String(ehAdministrador()));
             document.getElementById('detalhe-area-admin')?.classList.toggle('hidden', !podeAlterarColecao(document.getElementById('edit-colecao').value));
-            document.getElementById('btn-excluir-registro').disabled = !ehAdministrador();
+            document.getElementById('btn-excluir-registro').disabled = !ehAdministrador() || (document.getElementById('edit-colecao').value==='eventos' && dbData.eventos.some(e=>String(e.firestoreId||e.id)===document.getElementById('edit-doc-id').value&&e.modeloInscricao===MODELO_INSCRICAO));
             if (!ehAdministrador()) {
                 document.getElementById('modal-historico-alteracoes')?.classList.add('hidden');
                 document.getElementById('historico-registros').innerHTML = '';
@@ -2036,7 +2257,7 @@
             if (!grid) return;
             const agora = new Date();
             const gruposUser = currentUser?.grupos || [];
-            const visiveis = dbData.eventos.filter(e => ehAdministrador() || (currentUser?.acessoInstitucional?.papel==='grgd'&&podeAcao('eventos')) || e.eventoPublico || !(e.gruposPermitidos?.length) || e.gruposPermitidos.some(g => gruposUser.includes(g)));
+            const visiveis = dbData.eventos.filter(e => ehAdministrador() || (currentUser?.acessoInstitucional?.papel==='grgd'&&podeAcao('eventos')) || e.eventoPublico || !(e.gruposPermitidos?.length) || e.gruposPermitidos.some(g => gruposUser.includes(g)) || (portalInstitucional()&&e.orgaosElegiveis?.includes(currentUser.acessoInstitucional.orgaoId)));
             const filtrados = visiveis.filter(e => {
                 const fim = e.dataFim ? new Date(e.dataFim) : (e.dataInicio ? new Date(e.dataInicio) : new Date());
                 const real = fim < agora;
@@ -2064,7 +2285,7 @@
                 const real = fim < agora;
                 const vagas = Number(e.limiteVagas || 0);
                 const idsEvento = [String(e.id), String(e.firestoreId || e.id)];
-                const inscritosReal = (ehAdministrador() || (currentUser?.acessoInstitucional?.papel==='grgd'&&podeAcao('relatorios'))) ? (dbData.inscricoes || []).filter(i => idsEvento.includes(String(i.eventId))).length : (Number.isFinite(e.inscritosCount) ? e.inscritosCount : null);
+                const inscritosReal = e.modeloInscricao===MODELO_INSCRICAO ? e.inscritosCount : (ehAdministrador() || (currentUser?.acessoInstitucional?.papel==='grgd'&&podeAcao('relatorios'))) ? (dbData.inscricoes || []).filter(i => idsEvento.includes(String(i.eventId))).length : (Number.isFinite(e.inscritosCount) ? e.inscritosCount : null);
                 const lotado = vagas > 0 && inscritosReal !== null && inscritosReal >= vagas;
                 const minha = !!(dbData.inscricoes || []).some(i => idsEvento.includes(String(i.eventId)) && i.uid === currentUser?.uid);
                 const bannerImg = normalizarUrl(e.imagemCard);
@@ -2087,7 +2308,8 @@
                         </div>
                         <div class="pt-3 border-t mt-3 flex justify-between text-[11px] text-slate-500"><span>${audit.dataHtml}</span><span>Por: ${audit.autorHtml}</span></div>
                         <div class="mt-auto pt-4 flex flex-wrap gap-2 items-center">
-                            ${podeAcao('inscricoes','propria') && !minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.firestoreId || e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrever-se</button>` : ''}
+                            ${e.modeloInscricao!==MODELO_INSCRICAO && podeAcao('inscricoes','propria') && !minha && !lotado && !real ? `<button type="button" data-acao-inscricao="${esc(e.firestoreId || e.id)}" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer transition shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-user-check"></i> Inscrever-se</button>` : ''}
+                            ${gestorPode('inscricoes.criar')&&eventoElegivelInstitucional(e)&&!real?`<button type="button" data-inscrever-colaborador="${esc(e.firestoreId||e.id)}" class="bg-blue-900 text-white text-xs px-3 py-2 rounded-xl font-bold">Inscrever colaborador</button>`:''}
                             <div class="flex items-center gap-1 ml-auto">
                                 ${isAdmin ? `<button type="button" data-relatorio-evento="${esc(e.id)}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-2.5 py-2 rounded-xl font-bold cursor-pointer" title="Relatório"><i class="fa-solid fa-file-excel"></i></button>` : ''}
                                 <button type="button" class="tr-detalhe border bg-white hover:bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-xl font-bold cursor-pointer" data-colecao="eventos" data-id="${esc(e.firestoreId || e.id)}">Detalhes</button>
@@ -2456,7 +2678,7 @@
                 return;
             }
 
-            c.innerHTML = Object.entries(item).filter(([k]) => k !== 'id' && k !== 'firestoreId' && !(colecao === 'eventos' && ['localId','localEvento','dataInicio','dataFim','horaInicio','horaFim','custoLocacaoPrevisto','status'].includes(k))).map(([k, v]) => {
+            c.innerHTML = Object.entries(item).filter(([k]) => k !== 'id' && k !== 'firestoreId' && !(colecao === 'eventos' && ['localId','localEvento','dataInicio','dataFim','horaInicio','horaFim','custoLocacaoPrevisto','status',...(item.modeloInscricao===MODELO_INSCRICAO?['modeloInscricao','inscritosCount','ultimaInscricaoId','inscricoesAbertas','inscricaoInicio','inscricaoFim','orgaosElegiveis','limiteVagas']:[])].includes(k))).map(([k, v]) => {
                 const classe = 'w-full p-2 border rounded-lg text-xs bg-white';
                 const label = `<label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label>`;
                 if (['criadoEm', 'criadoPor', 'atualizadoEm', 'editadoPor', 'uid', 'criadoPorUid', 'editadoPorUid', 'perfilAtualizadoEm', 'ultimaAuditoriaId'].includes(k)) {
@@ -2479,7 +2701,7 @@
                 }
                 return `<div>${label}<input type="text" name="${esc(k)}" value="${esc(v)}" class="${classe}"></div>`;
             }).join('');
-            if (colecao === 'eventos') c.innerHTML += camposAgendaEvento(item);
+            if (colecao === 'eventos') c.innerHTML += camposAgendaEvento(item)+camposInscricaoEvento(item);
         }
 
         function detalharRegistro(colecao, firestoreId){
@@ -2644,6 +2866,7 @@
 
             if (colecao === 'demandas') document.getElementById('detalhe-conteudo').innerHTML += historicoDemandaHtml(item);
             if (colecao === 'eventos') document.getElementById('detalhe-conteudo').innerHTML += inscricoesEventoHtml(item);
+            document.getElementById('btn-excluir-registro').disabled = colecao==='eventos'&&item.modeloInscricao===MODELO_INSCRICAO;
             document.getElementById('btn-excluir-registro').textContent = colecao === 'usuarios' ? 'Excluir usuário' : 'Excluir registro';
             document.getElementById('btn-salvar-edicao').textContent = colecao === 'usuarios' ? 'Salvar usuário' : 'Salvar na Nuvem (Firestore)';
             document.getElementById('detalhe-area-admin').classList.toggle('hidden', !podeAlterarColecao(colecao));
@@ -2692,7 +2915,7 @@
                     else if (itemAntigo[el.name] === null && !el.value) obj[el.name] = null;
                     else obj[el.name] = el.value;
                 });
-                if (colecao === 'eventos') Object.assign(obj,lerAgendaEvento(itemAntigo));
+                if (colecao === 'eventos') Object.assign(obj,lerAgendaEvento(itemAntigo),lerInscricaoEvento(itemAntigo));
                 if (colecao === 'demandas') {
                     const respCheckboxes = form.querySelectorAll('input[name="responsavelGrgdCheckbox"]:checked');
                     Object.assign(obj, lerResponsaveis(respCheckboxes, itemAntigo));
@@ -2752,7 +2975,7 @@
                 document.getElementById('edit-campos-dinamicos').innerHTML='';container.innerHTML=camposCadastroLocal({},true);
             } else if (tipo === 'evento') {
                 document.getElementById('edit-campos-dinamicos').innerHTML='';
-                container.innerHTML='<div class="space-y-3 text-xs"><label class="block font-bold">Título do evento<input id="uc-1" required class="block w-full border rounded-lg p-2 mt-1"></label><label class="block font-bold">Descrição<textarea id="uc-2" class="block w-full border rounded-lg p-2 mt-1"></textarea></label>'+camposAgendaEvento({},true)+'</div>';
+                container.innerHTML='<div class="space-y-3 text-xs"><label class="block font-bold">Título do evento<input id="uc-1" required class="block w-full border rounded-lg p-2 mt-1"></label><label class="block font-bold">Descrição<textarea id="uc-2" class="block w-full border rounded-lg p-2 mt-1"></textarea></label>'+camposAgendaEvento({},true)+camposInscricaoEvento({},true)+'</div>';
             } else if (tipo === 'cliente') {
                 container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs max-h-[70vh] overflow-y-auto p-1">
                     <div><label class="block mb-1 font-bold">Nome do Órgão / Cliente</label><input id="uc-1" required class="w-full p-2 border rounded"></div>
@@ -2834,7 +3057,7 @@
                     await criarCadastroUsuario();
                 } else if (tipo === 'local' || tipo === 'evento') {
                     if (!podeAlterarColecao(tipo==='local'?'locais':'eventos','criar')) throw new Error('Ação não autorizada para este perfil.');
-                    const dados=tipo==='local' ? lerCadastroLocal(true) : {titulo:val('uc-1').trim(),nome:val('uc-1').trim(),descricao:val('uc-2'),...lerAgendaEvento({},true)};
+                    const dados=tipo==='local' ? lerCadastroLocal(true) : {titulo:val('uc-1').trim(),nome:val('uc-1').trim(),descricao:val('uc-2'),...lerAgendaEvento({},true),...lerInscricaoEvento({},true)};
                     if(tipo==='evento' && !dados.titulo)throw new Error('Informe o título do evento.');
                     await adicionarComHistorico(collection(db,tipo==='local'?'locais':'eventos'),{...dados,criadoEm:agora,atualizadoEm:agora,criadoPor:autor,criadoPorUid:currentUser.uid,editadoPor:autor,editadoPorUid:currentUser.uid});
                 } else if (tipo === 'cliente') {
@@ -3103,7 +3326,7 @@
 
         document.addEventListener('change', async ev => {
             if (['usuario-tipo','usuario-perfil'].includes(ev.target.id)) atualizarControlesUsuario();
-            if(['vinculo-papel','vinculo-orgao','vinculo-setores','vinculo-inicio','vinculo-fim','vinculo-revisao','vinculo-titular'].includes(ev.target.id)||ev.target.name==='vinculo-acao'){
+            if(['vinculo-papel','vinculo-orgao','vinculo-setores','vinculo-inicio','vinculo-fim','vinculo-revisao','vinculo-titular','vinculo-operacoes'].includes(ev.target.id)||ev.target.name==='vinculo-acao'){
                 document.getElementById('vinculo-situacao').value='pendente';
                 document.getElementById('vinculo-grgd-ref').value='';document.getElementById('vinculo-autoridade-ref').value='';
             }
@@ -3264,6 +3487,7 @@
 
         function limparDadosSessao() {
             if(acessoTimer)clearTimeout(acessoTimer);acessoTimer=null;portalErros={};
+            limparOperacoesInstitucionais();eventosPortalFontes={};mensagemPortal('');
             currentUser = null;
             document.body?.setAttribute('data-admin','false');
             cancelarExclusao(true);
@@ -3287,7 +3511,7 @@
                 if (el) el.value = '';
             });
             document.getElementById('main-content')?.classList.add('hidden');
-            ['modal-perfil','modal-detalhes', 'modal-observacoes', 'modal-form-universal'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+            ['modal-colaborador','modal-inscricao-institucional','modal-comprovante','modal-perfil','modal-detalhes', 'modal-observacoes', 'modal-form-universal'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
             ['detalhe-conteudo', 'edit-campos-dinamicos', 'form-univ-campos', 'obs-historico-lista', 'obs-demanda-titulo'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = '';

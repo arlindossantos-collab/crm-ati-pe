@@ -33,7 +33,7 @@ function app() {
         return nodes.get(id);
     };
     const context = vm.createContext({
-        console: { info() {}, warn() {} }, window: {}, setTimeout(){return 1;},clearTimeout(){},
+        console: { info() {}, warn() {} }, window: {}, crypto:require("node:crypto").webcrypto,TextEncoder, setTimeout(){return 1;},clearTimeout(){},
         document: { body:{setAttribute(){}},getElementById: element, createElement() { return {}; }, querySelectorAll() { return []; }, querySelector() { return null; }, addEventListener() {} },
         sessionStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},
         alert() {}, confirm() { return true; },
@@ -42,7 +42,7 @@ function app() {
         browserLocalPersistence: {tipo:'local'}, inMemoryPersistence: {tipo:'memory'}, setPersistence() { return Promise.resolve(); },
         signInWithEmailAndPassword() { return Promise.resolve(); }, signOut() { return Promise.resolve(); },
         collection(db, name) { return name; }, doc(db, collection, id, ...segments) { if(arguments.length===1){collection=db;id='auto-'+(++autoId);} return { collection, id, path:[collection,id,...segments].join('/') }; },
-        serverTimestamp(){return {servidor:true};},orderBy(...v){return v;},limit(n){return n;},startAfter(v){return v;},
+        increment(n){return {__increment:n};},serverTimestamp(){return {servidor:true};},orderBy(...v){return v;},limit(n){return n;},startAfter(v){return v;},
         async runTransaction(db, fn) {const pending=[];await fn({get:ref=>context.getDoc(ref),set:(ref,data,options)=>pending.push({ref,data,options}),delete:ref=>pending.push({ref,remover:true})});for(const w of pending){if(w.ref.collection==='historicoAlteracoes')audits.push(w.data);else if(w.remover)await context.deleteDoc(w.ref);else await context.setDoc(w.ref,w.data,w.options);}},
         writeBatch() { const pending=[]; return {set(ref,data,options){pending.push({ref,data,options});},async commit(){ for(const w of pending)await context.setDoc(w.ref,w.data,w.options); }}; },
         EmailAuthProvider:{credential(email,password){return {email,password};}}, async reauthenticateWithCredential(){},async updatePassword(){},
@@ -743,4 +743,65 @@ test('prazo do vínculo remove os dados e a navegação mesmo sem recarregar a p
     a.run("currentUser={uid:'nsi',ativo:true,tipoUsuario:'externo',perfil:'comum',acessoInstitucional:vinculo};programarRevisaoAcesso();dbData.colaboradores=[{nome:'Registro privado'}]");
     a.element('portal-colaboradores').innerHTML='Registro privado';a.run('currentUser.acessoInstitucional.fim=Date.now()-1');deadline();
     assert.equal(a.run('modulosDoUsuario().length'),0);assert.equal(a.run('dbData.colaboradores.length'),0);assert.equal(a.element('portal-colaboradores').innerHTML,'');
+});
+
+function usuarioGestorLote2(a,extra={}) {
+    a.run(`currentUser={uid:'gestor',nome:'Gestor de teste',email:'gestor@example.invalid',ativo:true,tipoUsuario:'externo',perfil:'comum',acessoInstitucional:${JSON.stringify(vinculoTeste({operacoesVersao:'v1',acoes:['orgao.consultar','participantes.consultar','participantes.cadastrar','participantes.editar','eventos.consultar','inscricoes.consultar','inscricoes.criar','inscricoes.cancelar','comprovantes.consultar'],...extra}))}};dbData.setores=[{id:'a1',nome:'NSI A',orgaoId:'orgao-a',ativo:true}];`);
+}
+test('chaves institucionais normalizam e-mail sem criar conta e preservam unicidade por evento',async()=>{
+    const a=app();const x=await a.run("chaveColaborador('orgao-a',' PESSOA@EXAMPLE.INVALID ')");const y=await a.run("chaveColaborador('orgao-a','pessoa@example.invalid')");
+    assert.equal(x,y);assert.match(x,/^[a-f0-9]{64}$/);assert.notEqual(x,await a.run("chaveColaborador('orgao-b','pessoa@example.invalid')"));
+    assert.equal(await a.run("chaveInscricao('evento',' PESSOA@EXAMPLE.INVALID ')"),await a.run("chaveInscricao('evento','pessoa@example.invalid')"));
+});
+test('elegibilidade institucional exige órgão aprovado, período aberto, vagas e evento ativo',()=>{
+    const a=app();usuarioGestorLote2(a);const e={modeloInscricao:'institucional-v1',orgaosElegiveis:['orgao-a'],inscricoesAbertas:true,inscricaoInicio:100,inscricaoFim:200,limiteVagas:1,inscritosCount:0};
+    assert.equal(a.run(`eventoElegivelInstitucional(${JSON.stringify(e)},150)`),true);
+    for(const patch of [{orgaosElegiveis:['orgao-b']},{inscricoesAbertas:false},{inscritosCount:1},{inscritosCount:-1},{status:'Cancelado'},{status:'Realizado'},{modeloInscricao:''}])assert.equal(a.run(`eventoElegivelInstitucional(${JSON.stringify({...e,...patch})},150)`),false);
+    assert.equal(a.run(`eventoElegivelInstitucional(${JSON.stringify(e)},200)`),false);
+});
+test('permissão de escrita isolada não substitui consulta, aprovação ou validade do gestor',()=>{
+    const a=app();usuarioGestorLote2(a);assert.equal(a.run("gestorPode('inscricoes.criar')"),true);
+    usuarioGestorLote2(a,{acoes:['inscricoes.criar']});assert.equal(a.run("gestorPode('inscricoes.criar')"),false);
+    usuarioGestorLote2(a,{situacao:'pendente'});assert.equal(a.run("gestorPode('participantes.cadastrar')"),false);
+    usuarioGestorLote2(a,{fim:Date.now()-1});assert.equal(a.run("gestorPode('inscricoes.cancelar')"),false);
+    usuarioGestorLote2(a,{operacoesVersao:''});assert.equal(a.run("gestorPode('inscricoes.criar')"),false);
+});
+test('cadastro pelo formulário gera somente colaborador e auditoria, com órgão do vínculo',async()=>{
+    const a=app();usuarioGestorLote2(a);for(const [k,v] of Object.entries({nome:'Pessoa de teste',emailInstitucional:' PESSOA@EXAMPLE.INVALID ',setorId:'a1',telefone:'81999999999',cargo:'Analista'}))a.element('colab-'+k).value=v;
+    a.element('colab-ativo').checked=true;await a.run('salvarColaborador({preventDefault(){}})');
+    assert.equal(a.element('colab-erro').textContent,'');assert.equal(a.writes.length,1);assert.equal(a.writes[0].collection,'colaboradores');assert.equal(a.writes[0].data.orgaoId,'orgao-a');assert.equal(a.writes[0].data.emailInstitucional,'pessoa@example.invalid');assert.equal(a.audits.length,1);assert.equal(a.audits[0].colecao,'colaboradores');
+});
+test('setor fora da delegação é recusado antes de gravar colaborador',async()=>{
+    const a=app();usuarioGestorLote2(a);a.element('colab-nome').value='Pessoa';a.element('colab-emailInstitucional').value='pessoa@example.invalid';a.element('colab-setorId').value='b1';a.element('colab-ativo').checked=true;
+    await a.run('salvarColaborador({preventDefault(){}})');assert.equal(a.writes.length,0);assert.match(a.element('colab-erro').textContent,/setor/i);
+});
+async function prepararInscricaoLote2(a) {
+    usuarioGestorLote2(a);const p={nome:'Pessoa fictícia',emailInstitucional:'pessoa@example.invalid',orgaoId:'orgao-a',setorId:'a1',ativo:true};const id=await a.run(`chaveColaborador('orgao-a','pessoa@example.invalid')`);
+    a.run(`dbData.colaboradores=[${JSON.stringify({...p,id})}];`);
+    const evento={titulo:'Evento fictício',dataInicio:'2099-01-01',modeloInscricao:'institucional-v1',orgaosElegiveis:['orgao-a'],inscricoesAbertas:true,inscricaoInicio:Date.now()-10000,inscricaoFim:Date.now()+3600000,limiteVagas:1,inscritosCount:0};
+    a.context.getDoc=async ref=>({exists:()=>ref.collection!=='inscricoes',data:()=>ref.collection==='eventos'?evento:p});return {id,p,evento};
+}
+test('cliente confirma inscrição, contador e autoria do operador no mesmo fluxo transacional',async()=>{
+    const a=app(),{id}=await prepararInscricaoLote2(a);await a.run(`gravarInscricaoInstitucional('e1','${id}')`);
+    assert.equal(a.writes.length,2);const registro=a.writes.find(w=>w.collection==='inscricoes'),evento=a.writes.find(w=>w.collection==='eventos');
+    assert.equal(registro.data.participanteNome,'Pessoa fictícia');assert.equal(registro.data.criadoPorUid,'gestor');assert.equal(registro.data.uid,undefined);assert.equal(registro.data.protocolo,registro.id);assert.equal(evento.data.inscritosCount,1);assert.equal(a.audits[0].acao,'inscrever');
+});
+test('mudança de sessão durante a transação não confirma inscrição nem contador',async()=>{
+    const a=app(),{id}=await prepararInscricaoLote2(a),get=a.context.getDoc;a.context.getDoc=async ref=>{a.run('++versaoSessao');return get(ref);};
+    await assert.rejects(a.run(`gravarInscricaoInstitucional('e1','${id}')`),/sessão/);assert.equal(a.writes.length,0);assert.equal(a.audits.length,0);
+});
+test('comprovante recusa registro de outro órgão e limpa conteúdo anterior',async()=>{
+    const a=app();usuarioGestorLote2(a);a.element('comprovante-conteudo').innerHTML='conteúdo anterior';a.context.getDoc=async()=>({exists:()=>true,data:()=>({modeloInscricao:'institucional-v1',orgaoId:'orgao-b',setorId:'b1'})});
+    await a.run("consultarComprovante('fora')");assert.equal(a.element('comprovante-conteudo').innerHTML,'');assert.match(a.element('portal-operacao-msg').textContent,/escopo/);
+});
+test('logout apaga formulários, mensagem e comprovante do portal',()=>{
+    const a=app();usuarioGestorLote2(a);a.element('colab-nome').value='Pessoa';a.element('comprovante-conteudo').innerHTML='Documento';a.run('limparDadosSessao()');
+    assert.equal(a.element('colab-nome').value,'');assert.equal(a.element('comprovante-conteudo').innerHTML,'');assert.equal(a.run('comprovanteAtualId'), '');
+});
+test('falha de consulta protegida apaga comprovante e opções de participantes do formulário',()=>{
+    const a=app();usuarioGestorLote2(a);a.run("observarPortal('inscricoes',collection(db,'inscricoes'))");
+    a.element('comprovante-conteudo').innerHTML='Pessoa anterior';a.element('insc-participante').innerHTML='<option>Pessoa anterior</option>';
+    a.snapshots.at(-1).error({message:'permission-denied'});
+    assert.equal(a.element('comprovante-conteudo').innerHTML,'');assert.equal(a.element('insc-participante').innerHTML,'');
+    assert.equal(a.element('modal-comprovante').classList.contains('hidden'),true);
 });

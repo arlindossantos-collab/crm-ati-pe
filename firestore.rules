@@ -27,6 +27,7 @@ service cloud.firestore {
       let titular = get(/databases/$(database)/documents/usuarios/$(v.titularUid)).data;
       let t = titular.acessoInstitucional;
       return v.titularUid != request.auth.uid && baseAccessActive(titular) && t.papel == 'gestor_nsi'
+        && (v.get('operacoesVersao','') != 'v1' || t.get('operacoesVersao','') == 'v1')
         && t.orgaoId == v.orgaoId && v.inicio >= t.inicio && v.fim <= t.fim && v.revisao <= t.revisao && v.acoes.hasOnly(t.acoes)
         && (t.setoresIds.size() == 0 || (v.setoresIds.size() > 0 && v.setoresIds.hasOnly(t.setoresIds)));
     }
@@ -67,8 +68,9 @@ service cloud.firestore {
     function validAccess(user) {
       let v = user.get('acessoInstitucional', null);
       return v == null || (v is map && user.perfil != 'admin'
-        && v.keys().hasOnly(['papel','orgaoId','setoresIds','situacao','inicio','fim','revisao','titularUid','acoes','aprovacaoGrgd','aprovacaoAutoridade','registradoPorUid','registradoEm'])
+        && v.keys().hasOnly(['papel','orgaoId','setoresIds','situacao','inicio','fim','revisao','titularUid','acoes','aprovacaoGrgd','aprovacaoAutoridade','registradoPorUid','registradoEm','operacoesVersao'])
         && v.papel in ['grgd','gestor_nsi','substituto','auditoria']
+        && v.get('operacoesVersao','') in ['','v1'] && (v.get('operacoesVersao','') != 'v1' || v.papel in ['gestor_nsi','substituto'])
         && v.situacao in ['pendente','aprovado','suspenso'] && v.orgaoId is string && v.orgaoId.size() <= 1500
         && v.setoresIds is list && v.setoresIds.size() <= 5 && v.acoes is list
         && v.inicio is int && v.fim is int && v.revisao is int
@@ -124,6 +126,7 @@ service cloud.firestore {
     }
     function canReadEvent(data) {
       return isAdmin() || grgdAction('eventos.consultar') || data.get('eventoPublico', false) == true
+        || (institutionalAction('eventos.consultar') && profile().acessoInstitucional.orgaoId in data.get('orgaosElegiveis', []))
         || (!hasInstitutionalAccess() && (
         !('gruposPermitidos' in data) || data.gruposPermitidos.size() == 0
         || (data.gruposPermitidos is list && data.gruposPermitidos.hasAny(profile().get('grupos', [])))));
@@ -154,6 +157,95 @@ service cloud.firestore {
       let item = data.acao == 'excluir' ? get(path).data : getAfter(path).data;
       return !hasInstitutionalAccess() && item != null && item.uid == request.auth.uid;
     }
+    function managedEvent(e) { return e.get('modeloInscricao', '') == 'institucional-v1'; }
+    function managerAction(action, data) {
+      let v = profile().get('acessoInstitucional', {});
+      return v.get('papel', '') in ['gestor_nsi','substituto'] && v.get('operacoesVersao','') == 'v1' && action in v.acoes && accessActive()
+        && (action.matches('^participantes[.].*') ? 'participantes.consultar' in v.acoes
+          : v.acoes.hasAll(['inscricoes.consultar','eventos.consultar']) && (action != 'inscricoes.criar' || 'participantes.consultar' in v.acoes))
+        && data.orgaoId == v.orgaoId && (v.setoresIds.size() == 0 || data.setorId in v.setoresIds);
+    }
+    function participantKey(data) { return hashing.sha256(data.orgaoId + '|' + data.emailInstitucional).toHexString().lower(); }
+    function enrollmentKey(data) { return data.eventId + '__' + hashing.sha256(data.emailInstitucional).toHexString().lower(); }
+    function participantChangedFields(data) {
+      return (resource == null ? data.keys().toSet() : data.diff(resource.data).affectedKeys())
+        .difference(['criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'].toSet());
+    }
+    function newAuditMatches(data, col, id, action) {
+      let path = /databases/$(database)/documents/historicoAlteracoes/$(data.ultimaAuditoriaId);
+      let log = getAfter(path).data;
+      return !exists(path) && log.autorUid == request.auth.uid && log.criadoEm == request.time
+        && log.colecao == col && log.registroId == id && log.acao == action
+        && log.orgaoId == data.orgaoId && log.setorId == data.setorId
+        && log.campos is list && (col == 'colaboradores' ? log.campos.toSet() == participantChangedFields(data) : log.campos == ['situacao']);
+    }
+    function portalAuditKind(data) { return data.colecao == 'colaboradores' || data.acao in ['inscrever','cancelar_inscricao']; }
+    function portalAuditMatches(id, data) {
+      let item = data.colecao in ['colaboradores','inscricoes'] ? getAfter(/databases/$(database)/documents/$(data.colecao)/$(data.registroId)).data : null;
+      return item != null
+        && item.get('ultimaAuditoriaId','') == id && item.get('atualizadoPorUid','') == request.auth.uid && item.get('atualizadoEm',null) == request.time
+        && data.orgaoId == item.orgaoId && data.setorId == item.setorId;
+    }
+    function validParticipant(data, id) {
+      return data.keys().hasOnly(['nome','emailInstitucional','orgaoId','setorId','telefone','cargo','ativo','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+        && data.nome is string && data.nome.size() > 1 && data.nome.size() <= 150
+        && data.emailInstitucional is string && data.emailInstitucional.size() <= 254
+        && data.emailInstitucional == data.emailInstitucional.lower().trim()
+        && data.emailInstitucional.matches('^[^ /@]+@[^ /@]+[.][^ /@]+$')
+        && data.orgaoId is string && data.setorId is string && id == participantKey(data)
+        && data.telefone is string && data.telefone.size() <= 40 && data.cargo is string && data.cargo.size() <= 150
+        && data.ativo is bool && data.criadoEm is timestamp && data.criadoPorUid is string
+        && data.atualizadoEm == request.time && data.atualizadoPorUid == request.auth.uid
+        && data.ultimaAuditoriaId is string;
+    }
+    function validEventPolicy(e) {
+      return managedEvent(e) && e.inscricoesAbertas is bool && e.orgaosElegiveis is list
+        && e.orgaosElegiveis.size() > 0 && e.orgaosElegiveis.size() <= 100
+        && e.inscricaoInicio is int && e.inscricaoFim is int && e.inscricaoFim > e.inscricaoInicio
+        && e.limiteVagas is int && e.limiteVagas > 0 && e.inscritosCount is int
+        && e.inscritosCount >= 0 && e.inscritosCount <= e.limiteVagas;
+    }
+    function enrollmentOpen(e, orgaoId) {
+      return validEventPolicy(e) && e.inscricoesAbertas && orgaoId in e.orgaosElegiveis
+        && e.inscricaoInicio <= request.time.toMillis() && e.inscricaoFim > request.time.toMillis()
+        && !(e.get('status','') in ['Cancelado','Realizado']);
+    }
+    function validEnrollment(data, id) {
+      return data.keys().hasOnly(['modeloInscricao','eventId','participanteId','emailInstitucional','participanteNome','orgaoId','setorId','eventoTitulo','eventoData','situacao','protocolo','criadoEm','criadoPorUid','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+        && data.modeloInscricao == 'institucional-v1' && data.eventId is string && data.eventId.size() > 0
+        && data.participanteId is string && data.emailInstitucional is string
+        && data.participanteNome is string && data.eventoTitulo is string && data.eventoData is string
+        && data.orgaoId is string && data.setorId is string && data.protocolo == id && id == enrollmentKey(data)
+        && data.situacao in ['confirmada','cancelada'] && data.criadoEm is timestamp && data.criadoPorUid is string
+        && data.atualizadoEm == request.time && data.atualizadoPorUid == request.auth.uid;
+    }
+    function enrollmentParticipantMatches(data) {
+      let p = get(/databases/$(database)/documents/colaboradores/$(data.participanteId)).data;
+      return p != null && p.ativo && p.orgaoId == data.orgaoId && p.setorId == data.setorId
+        && validSectorId(p.setorId,p.orgaoId)
+        && p.emailInstitucional == data.emailInstitucional && p.nome == data.participanteNome;
+    }
+    function enrollmentCounterMatches(data, id, delta) {
+      let path = /databases/$(database)/documents/eventos/$(data.eventId);
+      let old = get(path).data;
+      let next = getAfter(path).data;
+      return managedEvent(old) && next.inscritosCount == old.inscritosCount + delta && next.ultimaInscricaoId == id
+        && next.inscritosCount >= 0 && next.inscritosCount <= old.limiteVagas
+        && (delta < 0 || (enrollmentOpen(old, data.orgaoId) && data.eventoTitulo == old.titulo && data.eventoData == old.get('dataInicio','')));
+    }
+    function validCounterChange(eventId) {
+      let id = request.resource.data.ultimaInscricaoId;
+      let path = /databases/$(database)/documents/inscricoes/$(id);
+      let old = exists(path) ? get(path).data : null;
+      let next = getAfter(path).data;
+      let delta = next.situacao == 'confirmada' ? 1 : -1;
+      return active() && managedEvent(resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['inscritosCount','ultimaInscricaoId'])
+        && next.eventId == eventId && next.modeloInscricao == 'institucional-v1'
+        && ((delta == 1 && (old == null || old.situacao == 'cancelada')) || (delta == -1 && old != null && old.situacao == 'confirmada'))
+        && request.resource.data.inscritosCount == resource.data.inscritosCount + delta
+        && request.resource.data.inscritosCount >= 0 && request.resource.data.inscritosCount <= resource.data.limiteVagas;
+    }
     match /historicoAlteracoes/{id} {
       allow read: if isAdmin() || (institutionalAction('auditoria.consultar') && scopedRecord(resource.data));
       allow create: if active()
@@ -163,13 +255,13 @@ service cloud.firestore {
         && request.resource.data.criadoEm == request.time
         && request.resource.data.registroId is string && request.resource.data.registroId.size() > 0 && request.resource.data.registroId.size() <= 1500
         && request.resource.data.registroNome is string && request.resource.data.registroNome.size() <= 180
-        && request.resource.data.acao in ['criar','editar','excluir','excluir_usuario','alterar_senha']
+        && request.resource.data.acao in ['criar','editar','excluir','excluir_usuario','alterar_senha','inscrever','cancelar_inscricao']
         && request.resource.data.campos is list && request.resource.data.campos.size() <= 128
-        && ((isAdmin() && request.resource.data.colecao in ['usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes','perfilPrivado','setores'])
+        && (portalAuditKind(request.resource.data) ? portalAuditMatches(id, request.resource.data) : ((isAdmin() && request.resource.data.colecao in ['usuarios','orgaos','demandas','eventos','locais','fornecedores','bases','grupos','inscricoes','perfilPrivado','setores'])
           || (request.resource.data.colecao in ['demandas','orgaos','eventos','locais','fornecedores','bases'] && request.resource.data.acao in ['criar','editar'] && canWriteBusiness(request.resource.data.colecao == 'orgaos' ? 'clientes' : request.resource.data.colecao, request.resource.data.acao == 'criar' ? 'criar' : 'editar'))
           || (request.resource.data.colecao in ['usuarios','perfilPrivado'] && request.resource.data.registroId == request.auth.uid && request.resource.data.acao in ['criar','editar'])
           || (request.resource.data.colecao == 'inscricoes' && canReadModule('eventos') && request.resource.data.acao in ['criar','excluir'] && ownRegistrationAudit(request.resource.data))
-          || (request.resource.data.colecao == 'autenticacao' && request.resource.data.registroId == request.auth.uid && request.resource.data.acao == 'alterar_senha' && recentAuthentication()))
+          || (request.resource.data.colecao == 'autenticacao' && request.resource.data.registroId == request.auth.uid && request.resource.data.acao == 'alterar_senha' && recentAuthentication())))
         && validAuditScope(request.resource.data);
       // Histórico somente acrescentado: nem administradores podem editar ou apagar entradas.
       allow update, delete: if false;
@@ -213,21 +305,42 @@ service cloud.firestore {
     }
     match /eventos/{id} {
       allow read: if canReadModule('eventos') && canReadEvent(resource.data);
-      allow create: if canWriteBusiness('eventos','criar');
-      allow update: if canWriteBusiness('eventos','editar');
-      allow delete: if isAdmin() && recentAuthentication();
+      allow create: if canWriteBusiness('eventos','criar') && (!managedEvent(request.resource.data)
+        ? !request.resource.data.keys().hasAny(['modeloInscricao','inscritosCount','ultimaInscricaoId'])
+        : validEventPolicy(request.resource.data) && request.resource.data.inscritosCount == 0 && !request.resource.data.keys().hasAny(['ultimaInscricaoId']));
+      allow update: if (managedEvent(resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasAny(['inscritosCount','ultimaInscricaoId']) && validCounterChange(id)) || (canWriteBusiness('eventos','editar')
+        && request.resource.data.get('modeloInscricao','') == resource.data.get('modeloInscricao','')
+        && (!managedEvent(resource.data) || (validEventPolicy(request.resource.data)
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['inscritosCount','ultimaInscricaoId']))));
+      allow delete: if isAdmin() && recentAuthentication() && !managedEvent(resource.data);
     }
     match /inscricoes/{id} {
-      allow read: if isAdmin() || grgdAction('relatorios.consultar')
-        || ((institutionalAction('inscricoes.consultar') || institutionalAction('relatorios.consultar')) && scopedRecord(resource.data))
-        || (!hasInstitutionalAccess() && canReadModule('eventos') && resource.data.uid == request.auth.uid);
-      allow create: if !hasInstitutionalAccess() && canReadModule('eventos') && request.resource.data.uid == request.auth.uid
-        && request.resource.data.keys().hasOnly(['eventId','uid','nome','email','criadoEm'])
-        && request.resource.data.eventId is string
-        && exists(/databases/$(database)/documents/eventos/$(request.resource.data.eventId))
-        && canReadEvent(get(/databases/$(database)/documents/eventos/$(request.resource.data.eventId)).data);
-      allow delete: if isAdmin() || (!hasInstitutionalAccess() && canReadModule('eventos') && resource.data.uid == request.auth.uid);
-      allow update: if false;
+      allow read: if resource != null && (isAdmin() || grgdAction('relatorios.consultar')
+        || ((institutionalAction('inscricoes.consultar') || institutionalAction('comprovantes.consultar') || institutionalAction('relatorios.consultar')) && scopedRecord(resource.data))
+        || (!hasInstitutionalAccess() && canReadModule('eventos') && resource.data.uid == request.auth.uid));
+      // Permite verificar apenas a ausência de um ID determinístico. Registros de outro órgão continuam negados.
+      allow get: if resource == null && institutionalAction('inscricoes.criar') && profile().acessoInstitucional.get('operacoesVersao','') == 'v1';
+      allow create: if request.resource.data.get('modeloInscricao','') == 'institucional-v1'
+        ? (managerAction('inscricoes.criar',request.resource.data) && validEnrollment(request.resource.data,id)
+          && request.resource.data.situacao == 'confirmada' && request.resource.data.criadoEm == request.time && request.resource.data.criadoPorUid == request.auth.uid
+          && enrollmentParticipantMatches(request.resource.data) && enrollmentCounterMatches(request.resource.data,id,1)
+          && newAuditMatches(request.resource.data,'inscricoes',id,'inscrever'))
+        : (!hasInstitutionalAccess() && canReadModule('eventos') && request.resource.data.uid == request.auth.uid
+          && request.resource.data.keys().hasOnly(['eventId','uid','nome','email','criadoEm'])
+          && request.resource.data.eventId is string
+          && exists(/databases/$(database)/documents/eventos/$(request.resource.data.eventId))
+          && !managedEvent(get(/databases/$(database)/documents/eventos/$(request.resource.data.eventId)).data)
+          && canReadEvent(get(/databases/$(database)/documents/eventos/$(request.resource.data.eventId)).data));
+      allow update: if resource.data.get('modeloInscricao','') == 'institucional-v1' && validEnrollment(request.resource.data,id)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['situacao','participanteNome','eventoTitulo','eventoData','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+        && (request.resource.data.situacao == 'cancelada'
+          ? (resource.data.situacao == 'confirmada' && (isAdmin() || managerAction('inscricoes.cancelar',resource.data))
+            && request.resource.data.participanteNome == resource.data.participanteNome && request.resource.data.eventoTitulo == resource.data.eventoTitulo && request.resource.data.eventoData == resource.data.eventoData
+            && enrollmentCounterMatches(request.resource.data,id,-1) && newAuditMatches(request.resource.data,'inscricoes',id,'cancelar_inscricao'))
+          : (resource.data.situacao == 'cancelada' && managerAction('inscricoes.criar',resource.data)
+            && enrollmentParticipantMatches(request.resource.data) && enrollmentCounterMatches(request.resource.data,id,1) && newAuditMatches(request.resource.data,'inscricoes',id,'inscrever')));
+      allow delete: if resource.data.get('modeloInscricao','') != 'institucional-v1'
+        && (isAdmin() || (!hasInstitutionalAccess() && canReadModule('eventos') && resource.data.uid == request.auth.uid));
     }
     match /setores/{id} {
       allow read: if isAdmin() || (accessActive() && resource.data.orgaoId == profile().acessoInstitucional.orgaoId);
@@ -237,9 +350,16 @@ service cloud.firestore {
       allow delete: if false;
     }
     match /colaboradores/{id} {
-      allow read: if isAdmin() || (institutionalAction('participantes.consultar') && scopedRecord(resource.data));
-      // Cadastro por representação é o próximo lote; não liberar escrita apenas pela tela.
-      allow create, update, delete: if false;
+      allow read: if resource != null && (isAdmin() || (institutionalAction('participantes.consultar') && scopedRecord(resource.data)));
+      allow get: if resource == null && institutionalAction('participantes.cadastrar') && profile().acessoInstitucional.get('operacoesVersao','') == 'v1';
+      allow create: if managerAction('participantes.cadastrar',request.resource.data) && validParticipant(request.resource.data,id)
+        && validSectorId(request.resource.data.setorId,request.resource.data.orgaoId)
+        && request.resource.data.criadoEm == request.time && request.resource.data.criadoPorUid == request.auth.uid
+        && newAuditMatches(request.resource.data,'colaboradores',id,'criar');
+      allow update: if managerAction('participantes.editar',resource.data) && validParticipant(request.resource.data,id)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','telefone','cargo','ativo','atualizadoEm','atualizadoPorUid','ultimaAuditoriaId'])
+        && newAuditMatches(request.resource.data,'colaboradores',id,'editar');
+      allow delete: if false;
     }
     match /{col}/{id} {
       // A regra genérica não se aplica a usuários, grupos, eventos ou inscrições.

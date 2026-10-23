@@ -22,6 +22,7 @@ export function collection(db,name){return {collection:name};}
 export function doc(db,col,id,...rest){if(arguments.length===1){col=db.collection;id='gerado-'+(++seq);}return {collection:col,id,path:[col,id,...rest].join('/')};}
 export function query(ref,...args){return {...ref,args};}export function where(...args){return args;}
 export function orderBy(...args){return args;}export function limit(n){return n;}export function startAfter(s){return s;}
+export function increment(n){return {__increment:n};}
 export function serverTimestamp(){return {toDate:()=>new Date('2026-10-21T15:00:00Z')};}
 const snap=(id,d)=>({id,exists:()=>!!d,data:()=>d});
 function read(ref){if(ref.path?.includes('/privado/'))return snap(ref.id,{});return snap(ref.id,(f[ref.collection]||[]).find(d=>(d.id||d.uid)===ref.id));}
@@ -41,7 +42,7 @@ export async function runTransaction(db,fn){
   const {ref}=op;if(ref.path.includes('/privado/'))continue;
   const rows=f[ref.collection]||(f[ref.collection]=[]),i=rows.findIndex(d=>(d.id||d.uid)===ref.id);
   if(op.remover){if(i>=0)rows.splice(i,1);continue;}
-  const data={...(op.options?.merge&&i>=0?rows[i]:{}),...op.data,id:ref.id};
+  const data={...(op.options?.merge&&i>=0?rows[i]:{}),...op.data,id:ref.id};for(const [k,v] of Object.entries(data))if(v&&typeof v==='object'&&'__increment' in v)data[k]=(rows[i]?.[k]||0)+v.__increment;
   if(i>=0)rows[i]=data;else rows.push(data);
  }
  watchers.filter(w=>w.active).forEach(w=>w.cb(snapshot(w.ref)));
@@ -56,9 +57,11 @@ export async function runTransaction(db,fn){
    const context=await browser.newContext({viewport:{width:1440,height:1050}}),page=await context.newPage();
    page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
    await page.addInitScript(f=>{
-     globalThis.__fixture=f;globalThis.__transactions=[];globalThis.__reauths=0;globalThis.__refreshes=0;globalThis.__loginApareceu=false;
-     new MutationObserver(()=>{const el=document.getElementById('modal-login');if(el&&getComputedStyle(el).display!=='none')globalThis.__loginApareceu=true;}).observe(document,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
+     globalThis.__fixture=f;globalThis.__transactions=[];globalThis.__reauths=0;globalThis.__refreshes=0;globalThis.__loginApareceu=false;globalThis.__loginFrames=[];
+     new MutationObserver(()=>{const el=document.getElementById('modal-login');if(el&&getComputedStyle(el).display!=='none'){globalThis.__loginApareceu=true;if(globalThis.__loginFrames.length<5)globalThis.__loginFrames.push({classe:el.className,display:getComputedStyle(el).display,documento:document.readyState});}}).observe(document,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
    },fixture);
+   // Reproduz utilitários de display chegando após o HTML, durante os 500ms de restauração simulada.
+   await page.route('https://cdn.tailwindcss.com/**',r=>r.fulfill({contentType:'application/javascript',body:"document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{const s=document.createElement('style');s.textContent='.flex{display:flex}';document.head.appendChild(s);},50));"}));
    await page.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
    await page.route('**/*',r=>/googleapis\.com|firebaseio\.com|firebaseapp\.com/.test(r.request().url())?r.abort():r.fallback());
    await page.goto('http://127.0.0.1:'+server.address().port);if(process.env.PRGD_TEST_CSS)await page.addStyleTag({content:fs.readFileSync(process.env.PRGD_TEST_CSS,'utf8')});return {page,context};
@@ -67,7 +70,7 @@ export async function runTransaction(db,fn){
    browser=await chromium.launch();
    const {page,context}=await pageFor(base);
    await page.locator('#main-content').waitFor({state:'visible'});
-   assert.equal(await page.evaluate(()=>globalThis.__loginApareceu),false,'Login não pode aparecer enquanto a sessão é recuperada.');
+   assert.equal(await page.evaluate(()=>globalThis.__loginApareceu),false,'Login não pode aparecer enquanto a sessão é recuperada: '+JSON.stringify(await page.evaluate(()=>globalThis.__loginFrames)));
    assert.equal(await page.locator('#user-name-display').isVisible(),true,'Identificação permanece visível no computador.');
    assert.equal(await page.getByRole('heading',{name:'Plataforma de Relacionamento do Governo Digital',exact:true}).isVisible(),true);
    await page.locator('[data-tab="usuarios"]').click();

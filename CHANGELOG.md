@@ -2,6 +2,24 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.10.0 — Colaboradores e inscrições institucionais — entrega de 23/10/2026
+
+**Resumo para a chefia:** permite que o gestor do órgão e seu substituto cadastrem colaboradores sem criar contas de acesso e façam inscrições em eventos elegíveis. Entrega controle de vagas, cancelamento e comprovante com autoria individual. Base: `main@d033b8f2b2f76a414a170f7904821357b2b60485` (v0.9.0). Publicação autorizada pelo usuário em 23/10/2026, após informar que publicou as novas regras no Firebase. Confirmação baseada no relato do usuário, sem verificação direta do console. Integração e GitHub Pages acompanhados no [PR #15](https://github.com/arlindossantos-collab/crm-ati-pe/pull/15).
+
+| Antes | Depois |
+| --- | --- |
+| Portal do órgão em consulta; operações futuras sem escrita. | Liberação expressa após revisão das aprovações, preservando vínculos anteriores em consulta. |
+| Colaboradores sem formulário operacional. | Cadastro, edição de dados de contato e inativação por gestor/substituto, no órgão/setores delegados, sem Authentication. |
+| Inscrição somente da própria conta. | Novos eventos institucionais com órgãos elegíveis, período e vagas; beneficiário separado do operador. Eventos anteriores preservados. |
+| Sem garantia transacional de vaga por representação. | Registro determinístico por evento/e-mail, contador e histórico no mesmo lote, inclusive disputa da última vaga. |
+| Sem cancelamento institucional ou comprovante. | Cancelamento preserva protocolo e libera vaga; retomada usa o mesmo registro. Comprovante consultado novamente antes de imprimir/salvar PDF. |
+
+**Validação:** 105 testes da aplicação, 69 de regras e 3 de Auth, além das quatro suítes de navegador com Firebase simulado. Casos incluem escopo, revisão operacional, substituição, concorrência, auditoria, duplicidade entre órgãos, cancelamento após retirada da elegibilidade, comprovantes, F5/logout e celular. Dados fictícios e projeto de demonstração; nenhuma conta institucional alterada.
+
+**Restauração da sessão:** a verificação final identificou uma disputa na ordem de chegada do CSS: o login podia estar com a classe de ocultação e ainda receber `display:flex`. Uma regra local prioritária protege login, modais e área de restauração. O teste simula utilitários CSS chegando após o HTML, sem dispensar a verificação de F5 sem exibir login.
+
+**Implantação e limites:** novas regras informadas como publicadas pelo usuário em 23/10/2026; índices compostos da v0.9.0 preservados. Homologação institucional e habilitação individual dos vínculos após revisão das aprovações continuam pendentes; os testes automatizados não equivalem à homologação em produção. [Validação completa do código funcional no GitHub Actions](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/39851782396), revisão `319a2ff`. Não converte eventos legados, não transfere órgão/setor/e-mail de colaborador, não emite certificado de presença nem assinatura digital e não integra LDAP/PostgreSQL. Detalhes e retorno em [inscrições institucionais](docs/inscricoes-institucionais.md).
+
 ## v0.9.0 — Governança dos vínculos e telas por perfil — entrega de 22/10/2026
 
 **Resumo para a chefia:** prepara a PRGD para atender equipe GRGD, gestores de NSI, substitutos e auditoria com acessos aprovados por órgão e setor. Participantes permanecem pessoas sem conta obrigatória. Base: `main@61cdbf259b283071d8d6be8cb27abefc835eaa5e` (v0.8.0). Publicação autorizada pelo usuário em 22/10/2026, após informar que publicou as regras e os índices no Firebase. Integração e GitHub Pages acompanhados no [PR #14](https://github.com/arlindossantos-collab/crm-ati-pe/pull/14).

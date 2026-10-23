@@ -2,7 +2,7 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.9.0 — governança dos vínculos e telas por perfil.** Base: v0.8.0, commit `61cdbf2`. Publicação autorizada pelo usuário em 22/10/2026, após confirmar que publicou as regras e os índices Firebase. Essa confirmação é baseada no relato do usuário; a validação institucional permanece pendente. Integração e GitHub Pages são acompanhados no [PR #14](https://github.com/arlindossantos-collab/crm-ati-pe/pull/14). A migração LDAP/PostgreSQL permanece planejada, sem integração nesta entrega.
+**Versão deste código: v0.10.0 — colaboradores e inscrições institucionais.** Base: v0.9.0, commit `d033b8f`. Publicação autorizada pelo usuário em 23/10/2026, após informar a publicação das novas regras no Firebase. Essa etapa foi relatada pelo usuário, sem verificação direta do console nesta sessão. Integração e implantação do site acompanhadas no [PR #15](https://github.com/arlindossantos-collab/crm-ati-pe/pull/15). Conserva os índices compostos existentes; homologação institucional e revisão individual dos vínculos continuam necessárias. LDAP/PostgreSQL seguem na migração planejada.
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
@@ -18,6 +18,8 @@ A versão do site depende da integração e da publicação deste código. Uma b
 | Locais | Indicadores, filtros, capacidade, contatos, recursos, painel de detalhes, histórico e consulta de agenda. |
 | Fornecedores | Cadastros e consultas de apoio às atividades. |
 | Usuários | Tipos **Interno - GRGD** e **Externo**, situação, perfil e módulos permitidos. |
+| Colaboradores do órgão | Cadastro, edição e inativação no escopo delegado, sem conta de acesso para o beneficiário. |
+| Inscrições institucionais | Novos eventos com órgãos elegíveis, período, vagas em transação, cancelamento, retomada e comprovante imprimível. |
 | Perfil pessoal | Edição do próprio nome, telefone e endereço, foto enviada do computador e troca de senha com confirmação da senha atual. |
 | Identificação | Foto ou iniciais no cabeçalho e nos registros com vínculo ao identificador da pessoa. |
 | Histórico de alterações | Consulta administrativa com pessoa, data/hora, registro, ação e campos modificados; busca e carregamento por páginas. |
@@ -27,11 +29,17 @@ Usuários internos ativos podem ser selecionados como responsáveis GRGD. O tipo
 
 ## O que mudou nesta entrega
 
+A v0.10.0 habilita o gestor e seu substituto para cadastrar colaboradores e inscrevê-los em novos eventos institucionais, com elegibilidade por órgão, controle atômico de vagas, prevenção de duplicidade por e-mail, cancelamento com liberação da vaga e comprovante consultado no servidor. Cada alteração preserva autoria e histórico.
+
+As operações exigem uma liberação administrativa expressa, além das duas referências de aprovação, das ações e dos prazos. Vínculos da v0.9.0 continuam em consulta até revisão individual. Eventos anteriores conservam o fluxo original e não são convertidos automaticamente. Consultar [modelo e roteiro do lote](docs/inscricoes-institucionais.md).
+
+### Base v0.9.0
+
 A v0.9.0 acrescenta vínculos institucionais por órgão e setores, ações por função, referências das aprovações GRGD/autoridade e prazos de validade/revisão. Contatos e autenticação não concedem o papel de NSI automaticamente. O administrador registra as aprovações recebidas e a aplicação protege o escopo também nas regras.
 
-O lote entrega consultas de Meu órgão, Colaboradores, Inscrições do órgão e Auditoria autorizada, além da edição GRGD nos módulos explicitamente permitidos. A inscrição por representação, o cadastro de participantes pelo gestor e os comprovantes são o próximo lote; suas ações estão identificadas como em preparação. Usuários antigos são preservados para revisão individual.
+O primeiro lote entregou consultas de Meu órgão, Colaboradores, Inscrições do órgão e Auditoria autorizada, além da edição GRGD nos módulos explicitamente permitidos. A v0.10.0 acrescenta inscrição por representação, cadastro de colaboradores pelo gestor e comprovantes, mediante liberação operacional expressa. Usuários antigos são preservados para revisão individual.
 
-Abrir a [prévia com dados fictícios](previa-perfis.html) para explorar a matriz de perfis sem conexão a serviços. Consultar [modelo, limites, validação e implantação](docs/perfis-vinculos.md). A disponibilidade no site depende da conclusão da implantação do GitHub Pages, acompanhada no PR #14.
+Abrir a [prévia com dados fictícios](previa-perfis.html) para explorar a matriz de perfis sem conexão a serviços. Consultar [modelo, limites, validação e implantação](docs/perfis-vinculos.md). A prévia é ilustrativa; o fluxo completo do novo lote é validado com dados fictícios nas suítes de navegador.
 
 ### Entregas anteriores
 
