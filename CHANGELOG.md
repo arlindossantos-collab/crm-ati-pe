@@ -2,6 +2,21 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.10.1 — Correções do portal do gestor de NSI — proposta de 23/10/2026
+
+**Resumo para a chefia:** estabiliza o nome do órgão e as consultas do portal, melhora o cadastro e o filtro de colaboradores por setor e corrige eventos de hoje na lista de futuros. A pedido do usuário, responsáveis e referências de aprovação passam a ser opcionais, mantendo ativação administrativa, órgão/setores, ações, validade, revisão e histórico. Base: `main@53f51a33f6b027f8643438e2724c01a016ac1fbc`. Proposta em revisão, sem integração ou publicação.
+
+| Antes | Depois |
+| --- | --- |
+| Comparação textual do vínculo inclui ordem dos mapas e metadados; pode limpar e reiniciar consultas equivalentes. | Compara permissões efetivas em ordem estável; metadados não apagam o formulário nem o nome já carregado. Mudança real de acesso continua limpando os dados. |
+| Setores carregados após abrir o formulário não atualizam o seletor. | Seletor atualizado sem perder os dados digitados, filtro por setor e mensagens distintas de carregamento, falha e ausência de setores ativos. |
+| Evento de hoje é passado desde meia-noite. | Permanece em Futuros até o horário final ou fim do dia local; situação Realizado continua respeitada. |
+| Campos textuais das aprovações impedem ativação. | Campos opcionais no formulário, prévia e regras; somente o administrador mantém a decisão e o registro de autoria. |
+
+**Validação:** 109 testes da aplicação, 71 de regras Firestore e 3 de Auth, totalizando 183, além de cinco suítes de navegador com dados fictícios. Nova suíte exercita ordem variável dos snapshots, metadados, setores atrasados, criação por setor, filtros, evento elegível de hoje, falhas, alteração real de escopo, referências em branco e celular. Não equivale à homologação com o cadastro institucional do usuário.
+
+**Implantação:** exige publicar o novo `firestore.rules` antes do HTML; não altera índices. Não cria setores ou habilita vínculos automaticamente, não converte eventos legados nem deduz órgão pelo texto ou e-mail. Setores continuam cadastrados pelo administrador em Usuários → Setores por órgão. Detalhes em [correções do portal](docs/correcoes-portal-nsi.md).
+
 ## v0.10.0 — Colaboradores e inscrições institucionais — entrega de 23/10/2026
 
 **Resumo para a chefia:** permite que o gestor do órgão e seu substituto cadastrem colaboradores sem criar contas de acesso e façam inscrições em eventos elegíveis. Entrega controle de vagas, cancelamento e comprovante com autoria individual. Base: `main@d033b8f2b2f76a414a170f7904821357b2b60485` (v0.9.0). Publicação autorizada pelo usuário em 23/10/2026, após informar que publicou as novas regras no Firebase. Confirmação baseada no relato do usuário, sem verificação direta do console. Integração e GitHub Pages acompanhados no [PR #15](https://github.com/arlindossantos-collab/crm-ati-pe/pull/15).

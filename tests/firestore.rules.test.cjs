@@ -330,9 +330,9 @@ test('inscrição institucional distingue participante e operador e não usa UID
     await assertFails(setDoc(doc(f,'inscricoes','nova'),{uid:'titular',eventId:'e1'}));
     await assertFails(setDoc(doc(f,'colaboradores','novo'),{nome:'Novo',orgaoId:'orgao-a',setorId:'a1'}));
 });
-test('autenticação não supera aprovação pendente, falta de referência, expiração ou revisão vencida',async()=>{
+test('autenticação não supera ativação pendente, suspensão, expiração ou revisão vencida',async()=>{
     await seedInstitutional();
-    for(const extra of [{situacao:'pendente'},{situacao:'suspenso'},{fim:Date.now()-1},{revisao:Date.now()-1},{aprovacaoAutoridade:{responsavel:'Nome',referencia:''}},{aprovacaoGrgd:{responsavel:'Nome',referencia:''}}]){
+    for(const extra of [{situacao:'pendente'},{situacao:'suspenso'},{fim:Date.now()-1},{revisao:Date.now()-1}]){
         await env.withSecurityRulesDisabled(ctx=>updateDoc(doc(ctx.firestore(),'usuarios','titular'),{acessoInstitucional:institutionalAccess(extra)}));
         await assertFails(getDoc(doc(db('titular'),'colaboradores','a1')));
         await assertFails(getDoc(doc(db('titular'),'eventos','e1')));
@@ -366,11 +366,11 @@ test('GRGD pode editar evento autorizado sem receber criação, exclusão, usuá
     await assertFails(updateDoc(doc(f,'demandas','d1'),{titulo:'Não permitido'}));
     await assertFails(updateDoc(doc(f,'usuarios','outro'),{perfil:'admin'}));
 });
-test('administrador registra vínculo com duas aprovações, órgão real e metadados do autor',async()=>{
+test('administrador registra vínculo com órgão real, evidências opcionais e metadados do autor',async()=>{
     await seedInstitutional();const f=db('admin');
     const v=institutionalAccess({registradoEm:serverTimestamp()});
     await assertSucceeds(setDoc(doc(f,'usuarios','novo-nsi'),profile('novo-nsi',{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:v})));
-    for(const extra of [{aprovacaoAutoridade:{responsavel:'Nome',referencia:''}},{aprovacaoGrgd:{responsavel:'Nome',referencia:''}},{orgaoId:'inexistente'},{setoresIds:['b1']},{acoes:['usuarios.editar']},{registradoPorUid:'outro'}]){
+    for(const extra of [{aprovacaoAutoridade:{responsavel:42,referencia:''}},{aprovacaoGrgd:{responsavel:'Nome',referencia:'x'.repeat(301)}},{orgaoId:'inexistente'},{setoresIds:['b1']},{acoes:['usuarios.editar']},{registradoPorUid:'outro'}]){
         await assertFails(setDoc(doc(f,'usuarios','novo-negado'),profile('novo-negado',{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:{...v,...extra}})));
     }
     await assertFails(updateDoc(doc(f,'usuarios','novo-nsi'),{acessoInstitucional:null,modulosPermitidos:['eventos']}));
@@ -595,4 +595,36 @@ test('mesmo e-mail em dois órgãos não gera duas inscrições no mesmo evento'
     const b={...p,orgaoId:'orgao-b',setorId:'b1'};await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'colaboradores',idPessoaLote2(b)),b));
     await inscreverLote2('titular',p);await assertFails(inscreverLote2('gestorB',b));
     assert.equal((await getDoc(doc(db('admin'),'eventos','institucional'))).data().inscritosCount,1);
+});
+
+
+test('administrador ativa vínculo sem responsáveis ou referências; NSI não pode se autoativar',async()=>{
+    await seedInstitutional();const f=db('admin');
+    for(const omitir of [false,true]){
+        const v=institutionalAccess({registradoEm:serverTimestamp(),aprovacaoGrgd:{responsavel:'',referencia:''},aprovacaoAutoridade:{responsavel:'',referencia:''}});
+        if(omitir){delete v.aprovacaoGrgd;delete v.aprovacaoAutoridade;}
+        const uid=omitir?'nsi-sem-mapas':'nsi-sem-ref';
+        await assertSucceeds(setDoc(doc(f,'usuarios',uid),profile(uid,{tipoUsuario:'externo',modulosPermitidos:[],acessoInstitucional:v})));
+        await assertSucceeds(getDoc(doc(db(uid),'orgaos','orgao-a')));
+        await assertSucceeds(getDocs(query(collection(db(uid),'setores'),where('orgaoId','==','orgao-a'))));
+        await assertFails(getDoc(doc(db(uid),'orgaos','orgao-b')));
+    }
+    await assertFails(updateDoc(doc(db('nsi-sem-ref'),'usuarios','nsi-sem-ref'),{'acessoInstitucional.setoresIds':[]}));
+    await env.withSecurityRulesDisabled(c=>updateDoc(doc(c.firestore(),'usuarios','nsi-sem-ref'),{'acessoInstitucional.situacao':'pendente'}));
+    await assertFails(updateDoc(doc(db('nsi-sem-ref'),'usuarios','nsi-sem-ref'),{'acessoInstitucional.situacao':'aprovado'}));
+    await assertFails(getDoc(doc(db('nsi-sem-ref'),'orgaos','orgao-a')));
+});
+test('portal sem referências consulta fontes de eventos e setores, preservando órgão elegível',async()=>{
+    await seedLote2();
+    await env.withSecurityRulesDisabled(async c=>{
+        const f=c.firestore();await updateDoc(doc(f,'usuarios','titular'),{'acessoInstitucional.aprovacaoGrgd':{},'acessoInstitucional.aprovacaoAutoridade':{}});
+        await setDoc(doc(f,'eventos','publico-hoje'),{titulo:'Público',eventoPublico:true,dataInicio:new Date().toISOString().slice(0,10)});
+        await setDoc(doc(f,'eventos','outro-orgao'),{titulo:'Privado B',eventoPublico:false,orgaosElegiveis:['orgao-b']});
+    });
+    const f=db('titular');
+    const eventos=await assertSucceeds(getDocs(query(collection(f,'eventos'),where('orgaosElegiveis','array-contains','orgao-a'))));assert.equal(eventos.size,1);
+    await assertSucceeds(getDocs(query(collection(f,'eventos'),where('eventoPublico','==',true))));
+    await assertFails(getDocs(query(collection(f,'eventos'),where('orgaosElegiveis','array-contains','orgao-b'))));
+    await assertSucceeds(getDocs(query(collection(f,'setores'),where('orgaoId','==','orgao-a'))));
+    await assertFails(getDocs(query(collection(f,'setores'),where('orgaoId','==','orgao-b'))));
 });

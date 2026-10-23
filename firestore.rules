@@ -19,9 +19,7 @@ service cloud.firestore {
       return user.get('ativo', true) == true && user.get('excluido', false) != true
         && v is map && v.get('situacao', '') == 'aprovado'
         && v.get('papel', '') in ['grgd','gestor_nsi','substituto','auditoria']
-        && v.inicio <= request.time.toMillis() && v.fim > request.time.toMillis() && v.revisao > request.time.toMillis()
-        && v.aprovacaoGrgd.responsavel.size() > 0 && v.aprovacaoGrgd.referencia.size() > 0
-        && v.aprovacaoAutoridade.responsavel.size() > 0 && v.aprovacaoAutoridade.referencia.size() > 0;
+        && v.inicio <= request.time.toMillis() && v.fim > request.time.toMillis() && v.revisao > request.time.toMillis();
     }
     function validSubstitute(v) {
       let titular = get(/databases/$(database)/documents/usuarios/$(v.titularUid)).data;
@@ -76,19 +74,17 @@ service cloud.firestore {
         && v.inicio is int && v.fim is int && v.revisao is int
         && v.fim > v.inicio && v.revisao > v.inicio && v.revisao <= v.fim
         && v.registradoPorUid is string && v.registradoEm is timestamp && v.titularUid is string && (v.papel != 'substituto' || v.titularUid != user.uid)
-        && v.aprovacaoGrgd.keys().hasOnly(['responsavel','referencia']) && v.aprovacaoAutoridade.keys().hasOnly(['responsavel','referencia'])
-        && v.aprovacaoGrgd.responsavel is string && v.aprovacaoGrgd.responsavel.size() <= 150
-        && v.aprovacaoGrgd.referencia is string && v.aprovacaoGrgd.referencia.size() <= 300
-        && v.aprovacaoAutoridade.responsavel is string && v.aprovacaoAutoridade.responsavel.size() <= 150
-        && v.aprovacaoAutoridade.referencia is string && v.aprovacaoAutoridade.referencia.size() <= 300
+        && v.get('aprovacaoGrgd', {}).keys().hasOnly(['responsavel','referencia']) && v.get('aprovacaoAutoridade', {}).keys().hasOnly(['responsavel','referencia'])
+        && v.get('aprovacaoGrgd', {}).get('responsavel', '') is string && v.get('aprovacaoGrgd', {}).get('responsavel', '').size() <= 150
+        && v.get('aprovacaoGrgd', {}).get('referencia', '') is string && v.get('aprovacaoGrgd', {}).get('referencia', '').size() <= 300
+        && v.get('aprovacaoAutoridade', {}).get('responsavel', '') is string && v.get('aprovacaoAutoridade', {}).get('responsavel', '').size() <= 150
+        && v.get('aprovacaoAutoridade', {}).get('referencia', '') is string && v.get('aprovacaoAutoridade', {}).get('referencia', '').size() <= 300
         && (v.papel == 'grgd' ? (user.tipoUsuario == 'interno' && v.orgaoId == '' && v.setoresIds.size() == 0 && v.acoes.hasOnly(['demandas.consultar','demandas.criar','demandas.editar','clientes.consultar','clientes.criar','clientes.editar','eventos.consultar','eventos.criar','eventos.editar','locais.consultar','locais.criar','locais.editar','fornecedores.consultar','fornecedores.criar','fornecedores.editar','bases.consultar','bases.criar','bases.editar','relatorios.consultar']))
           : ((v.situacao != 'aprovado' || (v.orgaoId != '' && exists(/databases/$(database)/documents/orgaos/$(v.orgaoId))))
             && (v.papel == 'auditoria' ? v.acoes.hasOnly(['auditoria.consultar','relatorios.consultar'])
               : v.acoes.hasOnly(['orgao.consultar','participantes.consultar','participantes.cadastrar','participantes.editar','eventos.consultar','inscricoes.consultar','inscricoes.criar','inscricoes.cancelar','comprovantes.consultar']))))
         && (v.situacao != 'aprovado' || (validSector(v,0) && validSector(v,1) && validSector(v,2) && validSector(v,3) && validSector(v,4)))
-        && (v.situacao != 'aprovado' || (v.acoes.size() > 0 && v.aprovacaoGrgd.responsavel.size() > 0 && v.aprovacaoGrgd.referencia.size() > 0
-          && v.aprovacaoAutoridade.responsavel.size() > 0 && v.aprovacaoAutoridade.referencia.size() > 0
-          && (v.papel != 'substituto' || validSubstitute(v)))));
+        && (v.situacao != 'aprovado' || (v.acoes.size() > 0 && (v.papel != 'substituto' || validSubstitute(v)))));
     }
     function validAccessRegistration(data, previous) {
       let v = data.get('acessoInstitucional', null);

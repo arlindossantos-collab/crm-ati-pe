@@ -2,6 +2,8 @@
 
 Modelo do primeiro lote, baseado em `main@61cdbf259b283071d8d6be8cb27abefc835eaa5e` (v0.8.0). A v0.9.0 foi integrada e publicada pelo PR #14. As operações adicionais da v0.10.0 estão em [inscrições institucionais](inscricoes-institucionais.md); este documento descreve o primeiro lote de governança.
 
+**Ajuste na v0.10.1 (em revisão):** por solicitação do usuário em 23/10/2026, responsáveis e referências das aprovações são opcionais. A decisão de ativar permanece administrativa, com autoria e horário; papel, órgão/setores, ações, validade, revisão e limites do substituto continuam obrigatórios. O texto histórico abaixo sobre registrar duas referências descreve a implantação anterior. Ver [correções do portal](correcoes-portal-nsi.md).
+
 ## Modelo adotado
 
 Autenticação identifica a pessoa. Cadastro de contato não concede acesso. O administrador registra um vínculo aprovado com papel, órgão, setores, ações, período, próxima revisão e referências das aprovações. Não há associação automática por nome, e-mail, domínio ou posição no LDAP.
