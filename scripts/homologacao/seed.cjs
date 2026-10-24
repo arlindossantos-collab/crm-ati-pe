@@ -25,6 +25,9 @@ async function account(name){
    'orgaos/orgao-b':{nome:'Órgão B fictício',sigla:'TESTE-B',ativo:true},
    'setores/a1':{nome:'Setor A fictício',orgaoId:'orgao-a',ativo:true},
    'setores/b1':{nome:'Setor B fictício',orgaoId:'orgao-b',ativo:true},
+   'eventos/consulta-planejado':{titulo:'Agenda local — formação digital',tipoEvento:'Seminário',palestrante:'João fictício',localEvento:'Auditório fictício',status:'Planejado',dataInicio:'2099-02-10',dataFim:'2099-02-12',eventoPublico:true},
+   'eventos/consulta-cancelado':{titulo:'Agenda local — evento cancelado',tipoEvento:'Oficina',status:'Cancelado',dataInicio:'2099-02-15',eventoPublico:true},
+   'eventos/consulta-passado':{titulo:'Agenda local — evento passado',tipoEvento:'Oficina',status:'Confirmado',dataInicio:'2000-01-01',eventoPublico:true},
    'eventos/evento-local':{titulo:'Oficina de homologação fictícia',dataInicio:'2099-01-01',modeloInscricao:'institucional-v1',eventoPublico:false,orgaosElegiveis:['orgao-a'],inscricoesAbertas:true,inscricaoInicio:now-60000,inscricaoFim:now+86400000,limiteVagas:3,inscritosCount:0,status:'Confirmado'}
   };
   for(const [name,a] of Object.entries(accounts)){

@@ -1014,3 +1014,66 @@ test('órgão preserva fonte, ponto focal e referências manuais informadas',()=
     for(const value of ['CNPJ cadastrado','Fonte registrada','Pessoa cadastrada','Cargo cadastrado','pessoa@example.invalid','Telefone cadastrado'])assert.ok(html.includes(value));
     assert.equal(a.writes.length,0);
 });
+
+test('consulta de eventos combina busca sem acentos, tipo, situação e duração no período',()=>{
+    const a=app();a.context.agenda=[
+        {id:'ok',titulo:'Formação digital',palestrante:'João',localEvento:'Auditório',tipoEvento:'Oficina',status:'Confirmado',dataInicio:'2099-01-10',dataFim:'2099-01-13'},
+        {id:'cancelado',titulo:'Formação digital',tipoEvento:'Oficina',status:'Cancelado',dataInicio:'2099-01-11'},
+        {id:'outro',titulo:'Outra formação',tipoEvento:'Encontro',status:'Confirmado',dataInicio:'2099-01-12'}
+    ];
+    const options={periodo:'todos',busca:'FORMACAO',tipo:'Oficina',status:'Confirmado',de:'2099-01-12',ate:'2099-01-12'};a.context.filtros=options;
+    assert.deepEqual(Array.from(a.run('consultarAgendaEventos(agenda,filtros).eventos'),e=>e.id),['ok']);
+    for(const text of ['joao','auditorio']){a.context.texto=text;assert.equal(a.run('consultarAgendaEventos(agenda,{periodo:"todos",busca:texto}).eventos[0].id'),'ok');}
+    assert.equal(a.run('agenda[0].dataInicio'),'2099-01-10');assert.equal(a.writes.length,0);
+});
+test('filtro de período inclui limites, converte timestamps no fuso institucional e exclui datas ausentes',()=>{
+    const a=app();a.context.agenda=[
+        {id:'timestamp',dataInicio:'2099-01-13T01:00:00Z'},
+        {id:'limite',dataInicio:'2099-01-12'},
+        {id:'fora',dataInicio:'2099-01-13'},
+        {id:'sem-data'}, {id:'invalida',dataInicio:'2099-02-30'},
+        {id:'invertida',dataInicio:'2099-01-12',dataFim:'2099-01-11'}, {id:'fim-invalido',dataInicio:'2099-01-12',dataFim:'invalida'}
+    ];
+    assert.deepEqual(Array.from(a.run('consultarAgendaEventos(agenda,{periodo:"todos",de:"2099-01-12",ate:"2099-01-12"}).eventos'),e=>e.id),['limite','timestamp']);
+    assert.equal(a.run('consultarAgendaEventos(agenda,{periodo:"todos"}).eventos.length'),7);
+});
+test('período de consulta inválido explica o erro e não devolve resultados parciais',()=>{
+    const a=app();a.context.agenda=[{dataInicio:'2099-01-10'}];
+    for(const filtros of [{de:'2099-02-30'},{ate:'data-invalida'},{de:'2099-01-12',ate:'2099-01-10'}]){
+        a.context.filtros=filtros;assert.ok(a.run('consultarAgendaEventos(agenda,filtros).erro'));assert.equal(a.run('consultarAgendaEventos(agenda,filtros).eventos.length'),0);
+    }
+});
+test('ordem da agenda é previsível e mantém eventos sem data por último, sem reordenar a origem',()=>{
+    const a=app();a.context.agenda=[{id:'z',titulo:'Sem data'},{id:'b',dataInicio:'2020-01-02',horaInicio:'10:00'},{id:'a',dataInicio:'2020-01-02',horaInicio:'09:00'},{id:'c',dataInicio:'2020-01-03'}];
+    assert.deepEqual(Array.from(a.run('consultarAgendaEventos(agenda,{periodo:"todos",ordem:"crescente"}).eventos'),e=>e.id),['a','b','c','z']);
+    assert.deepEqual(Array.from(a.run('consultarAgendaEventos(agenda,{periodo:"realizados"}).eventos'),e=>e.id),['c','b','a']);
+    assert.deepEqual(Array.from(a.run('agenda'),e=>e.id),['z','b','a','c']);
+});
+test('filtros e opções de Eventos não incluem metadados de eventos fora do perfil',()=>{
+    const a=app();a.run("currentUser={uid:'u',ativo:true,tipoUsuario:'interno',perfil:'comum',grupos:[]};dbData.eventos=[{id:'publico',titulo:'Visível',eventoPublico:true,tipoEvento:'Oficina',status:'Confirmado',dataInicio:'2099-01-01'},{id:'restrito',titulo:'Título restrito',gruposPermitidos:['outro'],tipoEvento:'Tipo restrito',status:'Situação restrita',dataInicio:'2099-01-01'}];filtroEventoAtual='todos';renderEventos()");
+    assert.equal(a.element('count-eventos').textContent,1);
+    assert.doesNotMatch(a.element('grid-eventos').innerHTML,/Título restrito/);
+    assert.doesNotMatch(a.element('filtro-evento-tipo').innerHTML,/Tipo restrito/);
+    assert.doesNotMatch(a.element('filtro-evento-status').innerHTML,/Situação restrita/);
+});
+test('eventos passados ou cancelados não ganham situação Realizado automaticamente',()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin',ativo:true};dbData.eventos=[{id:'antigo',titulo:'Evento passado',dataInicio:'2020-01-01',status:'Planejado'},{id:'cancelado',titulo:'Evento cancelado',dataInicio:'2099-01-01',status:'Cancelado'},{id:'sem',titulo:'Registro incompleto',dataInicio:'2020-01-02'}];filtroEventoAtual='todos';renderEventos()");
+    const html=a.element('grid-eventos').innerHTML;
+    assert.match(html,/Planejado/);assert.match(html,/Cancelado/);assert.match(html,/Situação não informada/);assert.match(html,/Tipo não informado/);assert.doesNotMatch(html,/>Realizado</);
+    assert.equal(a.run('dbData.eventos[0].status'),'Planejado');assert.equal(a.writes.length,0);
+});
+test('limpar filtros e encerrar sessão limpam consulta, ordenação e período da agenda',()=>{
+    const a=app();
+    for(const finalizar of [false,true]){
+        for(const id of ['busca-eventos','filtro-evento-status','filtro-evento-tipo','filtro-evento-de','filtro-evento-ate','ordenacao-eventos'])a.element(id).value='anterior';
+        a.run("buscaEventosVal='busca anterior';filtroEventoAtual='todos'");
+        if(finalizar)a.run('limparDadosSessao()');else a.listeners.get('limpar-filtros-eventos:click')();
+        for(const id of ['busca-eventos','filtro-evento-status','filtro-evento-tipo','filtro-evento-de','filtro-evento-ate','ordenacao-eventos'])assert.equal(a.element(id).value,'');
+        assert.equal(a.run('filtroEventoAtual'),'futuros');assert.equal(a.run('buscaEventosVal'),'');
+    }
+});
+test('rótulos de filtros e tipos vindos do banco continuam escapados no HTML',()=>{
+    const a=app();a.run(`currentUser={uid:'admin',perfil:'admin',ativo:true};dbData.eventos=[{id:'e',titulo:'Evento',status:'<img src=x>',tipoEvento:'\"<svg onload=alert(1)>',dataInicio:'2099-01-01'}];renderEventos()`);
+    assert.doesNotMatch(a.element('filtro-evento-status').innerHTML,/<img/);assert.match(a.element('filtro-evento-status').innerHTML,/&lt;img/);
+    assert.doesNotMatch(a.element('filtro-evento-tipo').innerHTML,/<svg/);assert.match(a.element('filtro-evento-tipo').innerHTML,/&quot;/);
+});

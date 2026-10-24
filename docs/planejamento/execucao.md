@@ -71,3 +71,7 @@ Ver [homologação local](homologacao-local.md) para instalação, inicializaç�
 ## Incremento de Órgãos
 
 Revisão encontrou e corrigiu o uso de localização, fonte e ponto focal de exemplo em dados ausentes. Ver [proposta v0.14.1](orgaos-dados-ausentes.md). Este incremento não conclui o Lote 03 nem substitui a pendência de backup real do Lote 00.
+
+## Incremento de consulta da agenda de Eventos
+
+A proposta v0.15.0 acrescenta filtros por situação/tipo/período, ordenação e Todos, mantendo a situação cadastrada distinta de data encerrada. Ver [consulta da agenda](eventos-consulta-agenda.md). Este incremento não conclui o Lote 06 nem altera a pendência de backup dos dados reais ou de aceite funcional.

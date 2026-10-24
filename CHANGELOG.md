@@ -2,14 +2,24 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.14.1 — Dados ausentes de órgãos — publicação autorizada, implantação em acompanhamento
+## v0.15.0 — Consulta da agenda de eventos — proposta, não publicada
+
+**Resumo para a gestão:** Eventos ganha consulta por situação, tipo e período, busca sem acentos e ordenação por data. A opção Todos permite combinar a consulta de eventos futuros e encerrados. A situação apresentada é a cadastrada: uma data passada não comprova realização ou presença.
+
+- **Antes:** busca simples e abas Futuros/Realizados; data passada aparecia como “Realizado”, mesmo sem essa situação no cadastro.
+- **Depois:** filtros combináveis, duração do evento considerada no período, validação das datas, botão para limpar e mensagem de resultados; Encerrados substitui o rótulo Realizados e os cards preservam a situação cadastrada.
+- **Dados e acesso:** consulta apenas os eventos já carregados para o perfil, sem gravar, migrar ou mudar regras/índices. Opções de tipo e situação seguem os mesmos eventos acessíveis. Relatório Geral de Inscrições mantém seu escopo e informa que não segue os filtros da agenda.
+- **Validação:** testes e evidências em [consulta da agenda](docs/planejamento/eventos-consulta-agenda.md).
+- **Pendências:** revisão/aceite funcional e autorização específica para publicar esta versão.
+
+## v0.14.1 — Dados ausentes de órgãos — publicada em 23/10/2026
 
 **Resumo para a gestão:** o cadastro deixa de preencher endereço, coordenadas e foto com exemplos. Os detalhes indicam dados ausentes, sem apresentar um ponto focal fictício ou uma fonte não cadastrada. Informações existentes e vínculos são preservados; não há migração ou alteração das regras Firebase.
 
 - **Antes:** campos de localização vazios eram gravados com valores fixos; detalhes exibiam foto, mapa, CNPJ, fonte e contato de exemplo.
 - **Depois:** campos vazios continuam vazios; mapa aparece somente quando existe endereço ou coordenadas; fonte e contato ausentes aparecem como “Não informado”.
 - **Validação:** 131 testes de regressão aprovados; cadastro e consulta verificados no navegador com Auth/Firestore emulados, sem requisições externas. Ver [evidências e limites](docs/planejamento/orgaos-dados-ausentes.md).
-- **Pendências:** aceite funcional e revisão humana dos dados antigos. Publicação autorizada pelo usuário nesta sessão; confirmação da implantação pendente. Nenhum registro de negócio remoto foi alterado.
+- **Pendências:** aceite funcional e revisão humana dos dados antigos. Implantação confirmada no [PR #22](https://github.com/arlindossantos-collab/crm-ati-pe/pull/22) e [Pages](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40040274197). Nenhum registro de negócio remoto foi alterado.
 
 ## v0.14.0 — Relatórios CSV de inscrições — publicada em 23/10/2026
 
