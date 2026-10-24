@@ -2,7 +2,9 @@
 
 Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, para acompanhar demandas, órgãos, eventos e cadastros de apoio.
 
-**Versão deste código: v0.14.1 — dados ausentes de órgãos sem informações de exemplo. Publicação autorizada pelo usuário; implantação em acompanhamento.** Novos órgãos deixam endereço, coordenadas e foto vazios quando não informados; a consulta não inventa localização, ponto focal ou fonte. Não há migração de registros existentes. Ver [escopo, validação e retorno](docs/planejamento/orgaos-dados-ausentes.md) e [execução do plano diretor](docs/planejamento/execucao.md).
+**Versão desta proposta: v0.15.0 — consulta e filtros da agenda de eventos. Não publicada.** Busca sem acentos, situação, tipo, período e ordenação; opção Todos; eventos passados preservam sua situação cadastrada. Ver [escopo e roteiro de teste](docs/planejamento/eventos-consulta-agenda.md).
+
+**Última publicação confirmada: v0.14.1.** Correção de informações de exemplo em Órgãos, integrada pelo [PR #22](https://github.com/arlindossantos-collab/crm-ati-pe/pull/22), com [GitHub Pages concluído](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40040274197) e HTML servido conferido. Detalhes em [dados ausentes de órgãos](docs/planejamento/orgaos-dados-ausentes.md).
 
 **Publicação anterior: v0.14.0 — relatórios de inscrições por evento no painel gerencial.** Base: `main@9e4e7df89cba247e2db07557ef41ab02b01e001e` (v0.13.0 integrada). Os botões de relatório de Eventos passam a exportar CSV com inscrições carregadas, distinguindo registros institucionais dos antigos e inscrições confirmadas de canceladas. A exportação é exclusiva do administrador, não comprova presença e não altera dados, regras ou índices do Firebase. **Publicação autorizada em 23/10/2026 e implantada no GitHub Pages com sucesso** ([PR #20](https://github.com/arlindossantos-collab/crm-ati-pe/pull/20); [implantação](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40032116247); commit `5014da0`). A validação integrada com dados reais não foi realizada. Consulte [funcionamento e limites](docs/relatorios-inscricoes.md).
 

@@ -22,7 +22,20 @@ const {chromium}=require(path.join(process.env.PRGD_BROWSER_TOOLS||'/workspace/t
   await page.locator('#modal-colaborador').waitFor({state:'hidden'});
   const id=require('node:crypto').createHash('sha256').update('orgao-a|'+email).digest('hex');
   await page.locator(`[data-colaborador-editar="${id}"]`).waitFor();
-  await page.locator('[data-tab="eventos"]').click();await page.locator('[data-inscrever-colaborador="evento-local"]').click();
+  await page.locator('[data-tab="eventos"]').click();
+  await page.locator('#filtro-evento-todos').click();await page.locator('#busca-eventos').fill('formacao');
+  await page.locator('#filtro-evento-status').selectOption('Planejado');await page.locator('#filtro-evento-tipo').selectOption('Seminário');
+  await page.locator('#filtro-evento-de').fill('2099-02-11');await page.locator('#filtro-evento-ate').fill('2099-02-11');
+  assert.equal(await page.locator('#grid-eventos article').count(),1);
+  assert.match(await page.locator('#grid-eventos').innerText(),/Agenda local — formação digital/);
+  await page.screenshot({path:'test-results/eventos-emuladores-desktop.png'});
+  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'test-results/eventos-emuladores-celular.png'});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await page.locator('#limpar-filtros-eventos').click();await page.locator('#filtro-evento-realizados').click();
+  await page.locator('#busca-eventos').fill('Agenda local — evento passado');
+  assert.match(await page.locator('#grid-eventos').innerText(),/Confirmado/);assert.doesNotMatch(await page.locator('#grid-eventos').innerText(),/Realizado/);
+  await page.locator('#limpar-filtros-eventos').click();await page.setViewportSize({width:1440,height:1000});
+  await page.locator('[data-inscrever-colaborador="evento-local"]').click();
   await page.locator('#insc-participante').selectOption(id);await page.locator('#insc-confirmar').click();await page.locator('#modal-inscricao-institucional').waitFor({state:'hidden'});
   await page.locator('[data-tab="inscricoes_orgao"]').click();await page.getByRole('button',{name:'Cancelar inscrição',exact:true}).last().waitFor();
   await page.screenshot({path:'test-results/homologacao-emuladores-desktop.png'});
@@ -69,6 +82,6 @@ const {chromium}=require(path.join(process.env.PRGD_BROWSER_TOOLS||'/workspace/t
   await page.locator('#btn-executar-logout').click();await page.locator('#modal-login').waitFor({state:'visible'});
   await login('sem-vinculo');await page.locator('#aviso-sem-modulos').waitFor({state:'visible'});
   assert.deepEqual(external,[],'Nenhuma requisição externa deve ocorrer.');assert.deepEqual(errors,[]);
-  console.log('PASSOU: login real local, cadastro, inscrição, cancelamento, recusa entre órgãos, admin, sem vínculo e desktop/celular; zero requisições externas.');
+  console.log('PASSOU: filtros da agenda e situações nos emuladores, login real local, cadastro, inscrição, cancelamento, recusa entre órgãos, admin, sem vínculo e desktop/celular; zero requisições externas.');
  }finally{await context.close();await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

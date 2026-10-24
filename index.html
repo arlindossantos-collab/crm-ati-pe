@@ -1,5 +1,5 @@
 <!-- ===================================================================== -->
-<!-- VERSÃO DA APLICAÇÃO: PRGD v0.14.1 - DADOS CADASTRAIS SEM EXEMPLOS -->
+<!-- VERSÃO DA APLICAÇÃO: PRGD v0.15.0 - CONSULTA E FILTROS DA AGENDA DE EVENTOS -->
 <!-- PLATAFORMA DE RELACIONAMENTO DO GOVERNO DIGITAL - ATI-PE              -->
 <!-- ===================================================================== -->
 <!DOCTYPE html>
@@ -132,7 +132,7 @@
                 </form>
             </div>
             <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.14.1</span></p>
+                <p class="text-[11px] text-slate-400">PRGD - ATI-PE <span class="font-bold text-blue-900">v0.15.0</span></p>
             </div>
         </div>
     </div>
@@ -145,7 +145,7 @@
                 <div class="hidden md:block">
                     <div class="flex items-center gap-2">
                         <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
-                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.14.1</span>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.15.0</span>
                     </div>
                     <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
                 </div>
@@ -446,23 +446,41 @@
 
         <!-- ABA EVENTOS -->
         <div id="aba-eventos" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex items-center gap-3 flex-wrap">
+            <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4" aria-label="Consulta de eventos">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                     <div id="eventos-titulo-interno">
                         <h3 class="text-base font-bold text-slate-800">Módulo de Eventos (<span id="count-eventos">0</span>)</h3>
                         <p class="text-xs text-slate-500">Gestão de capacitações, encontros e trilhas digitais da ATI-PE</p>
                     </div>
-                    <input type="text" id="busca-eventos" placeholder="Buscar evento, palestrante, local..." class="p-2 border rounded-lg text-xs bg-white w-56 focus:ring-2 focus:ring-blue-600 focus:outline-none">
-                    <div class="inline-flex bg-slate-100 p-1 rounded-lg text-xs font-semibold">
-                        <button type="button" id="filtro-evento-futuros" class="px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition">Futuros</button>
-                        <button type="button" id="filtro-evento-realizados" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Realizados</button>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" id="btn-relatorio-geral-eventos" class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-file-csv"></i> Relatório Geral de Inscrições (CSV)</button>
+                        <button type="button" data-modal-target="evento" data-acao="eventos.criar" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Novo Evento</button>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" id="btn-relatorio-geral-eventos" class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-file-csv"></i> Relatório Geral de Inscrições (CSV)</button>
-                    <button type="button" data-modal-target="evento" data-acao="eventos.criar" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Novo Evento</button>
+                <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+                    <label class="text-xs font-semibold text-slate-600 flex-1 min-w-0">Buscar evento
+                        <input type="search" id="busca-eventos" placeholder="Título, palestrante ou local" class="block w-full p-2 border rounded-lg mt-1 bg-white font-normal focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </label>
+                    <div class="inline-flex self-start sm:self-auto bg-slate-100 p-1 rounded-lg text-xs font-semibold" role="group" aria-label="Período da agenda">
+                        <button type="button" id="filtro-evento-futuros" aria-pressed="true" class="px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition">Futuros</button>
+                        <button type="button" id="filtro-evento-realizados" aria-pressed="false" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Encerrados</button>
+                        <button type="button" id="filtro-evento-todos" aria-pressed="false" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Todos</button>
+                    </div>
                 </div>
-            </div>
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 text-xs text-slate-600">
+                    <label class="font-semibold min-w-0">Situação<select id="filtro-evento-status" class="block w-full mt-1 border rounded-lg p-2 bg-white font-normal"><option value="">Todas as situações</option></select></label>
+                    <label class="font-semibold min-w-0">Tipo<select id="filtro-evento-tipo" class="block w-full mt-1 border rounded-lg p-2 bg-white font-normal"><option value="">Todos os tipos</option></select></label>
+                    <label class="font-semibold min-w-0">De<input type="date" id="filtro-evento-de" class="block w-full min-w-0 mt-1 border rounded-lg p-2 bg-white font-normal"></label>
+                    <label class="font-semibold min-w-0">Até<input type="date" id="filtro-evento-ate" class="block w-full min-w-0 mt-1 border rounded-lg p-2 bg-white font-normal"></label>
+                    <label class="font-semibold min-w-0 col-span-2 lg:col-span-1">Ordenar<select id="ordenacao-eventos" class="block w-full mt-1 border rounded-lg p-2 bg-white font-normal"><option value="">Ordem da agenda</option><option value="crescente">Data crescente</option><option value="decrescente">Data decrescente</option></select></label>
+                </div>
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <p class="text-xs text-slate-500">O período considera a duração do evento. Data encerrada não confirma realização ou presença.</p>
+                    <button type="button" id="limpar-filtros-eventos" class="text-xs font-semibold text-blue-900 border rounded-lg px-3 py-2 hover:bg-blue-50">Limpar filtros</button>
+                </div>
+                <p id="eventos-filtros-erro" role="alert" class="text-xs text-red-800"></p>
+                <p id="eventos-resultado-consulta" role="status" aria-live="polite" class="text-xs text-slate-600"></p>
+            </section>
             <p id="eventos-relatorio-status" role="status" class="btn-admin-only text-xs text-slate-500"></p><p id="eventos-portal-status" role="status" class="hidden text-sm bg-blue-50/60 border border-blue-100 rounded-xl p-3"></p><div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
@@ -660,14 +678,14 @@
       <div class="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"><div class="flex justify-end gap-2 nao-imprimir"><button id="comprovante-imprimir" type="button" class="border rounded-lg px-3 py-2 text-blue-900">Imprimir / salvar PDF</button><button type="button" class="btn-fechar-modal border rounded-lg px-3 py-2" data-target="modal-comprovante">Fechar</button></div><div id="comprovante-conteudo" class="mt-4"></div></div>
     </div>
 
-    <!-- Script Principal v0.14.1 -->
+    <!-- Script Principal v0.15.0 -->
     <script type="module">
         import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, doc, onSnapshot, getDoc, query, where, getDocs, runTransaction, increment, serverTimestamp, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         window.__PRGD_MODULE_OK = true;
-        console.info('PRGD v0.14.1: dados ausentes de órgãos sem informações de exemplo');
+        console.info('PRGD v0.15.0: consulta e filtros da agenda de eventos');
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2OoAqzaki4ijS_wQDD5T07KKRtVDNl2E",
@@ -2771,31 +2789,59 @@
             const [h,m]=hora.split(':').map(Number),fim=new Date(ano,mes-1,dia,h,m,59,999);
             return fim<agora;
         }
+        function consultarAgendaEventos(lista, filtros={}, agora=new Date()) {
+            const de=filtros.de || '', ate=filtros.ate || '';
+            if ((de && diaEventoLocal(de)!==de) || (ate && diaEventoLocal(ate)!==ate)) return {eventos:[],erro:'Informe datas válidas para consultar a agenda.'};
+            if (de && ate && de>ate) return {eventos:[],erro:'A data final do filtro deve ser igual ou posterior à inicial.'};
+            const texto=normalizarLocal(filtros.busca), periodo=filtros.periodo || 'futuros';
+            const eventos=lista.filter(e=>{
+                const encerrado=eventoEncerrado(e,agora), inicio=diaEventoLocal(e.dataInicio), fim=e.dataFim ? diaEventoLocal(e.dataFim) : inicio;
+                return (periodo==='todos' || (periodo==='realizados' ? encerrado : !encerrado))
+                    && (!filtros.status || String(e.status || '').trim()===filtros.status)
+                    && (!filtros.tipo || String(e.tipoEvento || '').trim()===filtros.tipo)
+                    && (!texto || [e.titulo,e.palestrante,e.localEvento].some(v=>normalizarLocal(v).includes(texto)))
+                    && (!(de || ate) || (inicio && fim>=inicio && (!de || fim>=de) && (!ate || inicio<=ate)));
+            });
+            const direcao=(filtros.ordem || (periodo==='realizados'?'decrescente':'crescente'))==='decrescente'?-1:1;
+            eventos.sort((a,b)=>{
+                const da=diaEventoLocal(a.dataInicio),db=diaEventoLocal(b.dataInicio);
+                if(!da || !db){if(da!==db)return da?-1:1;}
+                const data=da.localeCompare(db) || horarioEventoLocal(a,'dataInicio').localeCompare(horarioEventoLocal(b,'dataInicio'));
+                return direcao*data || String(a.titulo || '').localeCompare(String(b.titulo || ''),'pt-BR') || String(a.firestoreId || a.id || '').localeCompare(String(b.firestoreId || b.id || ''));
+            });
+            return {eventos,erro:''};
+        }
+        function atualizarOpcoesConsultaEventos(id, campo, lista, rotulo) {
+            const el=document.getElementById(id);if(!el)return;
+            const selecionado=el.value;
+            const valores=[...new Set(lista.map(e=>String(e[campo] || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+            const html='<option value="">'+rotulo+'</option>'+valores.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');
+            if(el.innerHTML!==html)el.innerHTML=html;
+            el.value=valores.includes(selecionado)?selecionado:'';
+        }
+        function limparConsultaEventos() {
+            buscaEventosVal='';filtroEventoAtual='futuros';
+            ['busca-eventos','filtro-evento-status','filtro-evento-tipo','filtro-evento-de','filtro-evento-ate','ordenacao-eventos'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+        }
         function renderEventos() {
             const grid = document.getElementById('grid-eventos');
             if (!grid) return;
             const agora = new Date();
             const gruposUser = currentUser?.grupos || [];
             const visiveis = dbData.eventos.filter(e => ehAdministrador() || (currentUser?.acessoInstitucional?.papel==='grgd'&&podeAcao('eventos')) || e.eventoPublico || !(e.gruposPermitidos?.length) || e.gruposPermitidos.some(g => gruposUser.includes(g)) || (portalInstitucional()&&e.orgaosElegiveis?.includes(currentUser.acessoInstitucional.orgaoId)));
-            const filtrados = visiveis.filter(e => {
-                const real = eventoEncerrado(e,agora);
-                const matchTab = (filtroEventoAtual === 'futuros' && !real) || (filtroEventoAtual === 'realizados' && real);
-                const txt = buscaEventosVal;
-                const matchBusca = !txt || (e.titulo || '').toLowerCase().includes(txt) || (e.palestrante || '').toLowerCase().includes(txt) || (e.localEvento || '').toLowerCase().includes(txt);
-                return matchTab && matchBusca;
-            });
-
+            atualizarOpcoesConsultaEventos('filtro-evento-status','status',visiveis,'Todas as situações');
+            atualizarOpcoesConsultaEventos('filtro-evento-tipo','tipoEvento',visiveis,'Todos os tipos');
+            const valor=id=>document.getElementById(id)?.value || '';
+            const consulta=consultarAgendaEventos(visiveis,{periodo:filtroEventoAtual,busca:buscaEventosVal,status:valor('filtro-evento-status'),tipo:valor('filtro-evento-tipo'),de:valor('filtro-evento-de'),ate:valor('filtro-evento-ate'),ordem:valor('ordenacao-eventos')},agora);
+            const filtrados=consulta.eventos;
             document.getElementById('count-eventos').textContent = filtrados.length;
-            const btnFuturos = document.getElementById('filtro-evento-futuros');
-            const btnRealizados = document.getElementById('filtro-evento-realizados');
-            if (btnFuturos && btnRealizados) {
-                if (filtroEventoAtual === 'futuros') {
-                    btnFuturos.className = 'px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition font-bold';
-                    btnRealizados.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition';
-                } else {
-                    btnFuturos.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition';
-                    btnRealizados.className = 'px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition font-bold';
-                }
+            document.getElementById('eventos-filtros-erro').textContent=consulta.erro;
+            document.getElementById('eventos-resultado-consulta').textContent=consulta.erro?'Consulta não realizada. Corrija o período informado.':`${filtrados.length} de ${visiveis.length} eventos carregados neste acesso.`;
+            for(const [periodo,id] of [['futuros','filtro-evento-futuros'],['realizados','filtro-evento-realizados'],['todos','filtro-evento-todos']]){
+                const btn=document.getElementById(id);if(!btn)continue;
+                const ativo=filtroEventoAtual===periodo;
+                btn.className='px-3 py-1.5 rounded-md transition '+(ativo?'bg-white text-blue-900 shadow-sm font-bold':'text-slate-600 hover:text-slate-900');
+                btn.setAttribute('aria-pressed',String(ativo));
             }
 
             const podeExportar=relatorioInscricoesPronto();
@@ -2805,12 +2851,12 @@
             if (avisoRelatorio) avisoRelatorio.textContent=!ehAdministrador()?'':agendaLocaisEstado==='erro'
                 ?'Falha ao carregar eventos: exportação indisponível.'
                 :inscricoesRelatorioEstado==='erro'?'Falha ao carregar inscrições: exportação indisponível.'
-                :podeExportar?'Relatórios disponíveis: inscrições não comprovam presença.'
+                :podeExportar?'Relatório geral considera todas as inscrições carregadas, sem os filtros da agenda. Inscrições não comprovam presença.'
                 :'Carregando dados para os relatórios. Aguarde a confirmação das consultas.';
             const statusPortal=document.getElementById('eventos-portal-status');
             if(statusPortal){const portal=portalInstitucional(),carregando=portal&&(portalCarregando.eventos_publicos||portalCarregando.eventos_elegiveis),erro=portal&&(portalErros.eventos_publicos||portalErros.eventos_elegiveis);
                 statusPortal.classList.toggle('hidden',!portal);
-                statusPortal.textContent=!portal?'':carregando?'Carregando eventos do seu órgão…':erro?'Não foi possível confirmar todas as consultas de eventos. Os dados das consultas recusadas foram removidos. Procure a GRGD.':filtrados.length?'Eventos públicos e eventos destinados ao seu órgão. A inscrição depende do período, das vagas e da sua autorização.':'Nenhum evento encontrado neste filtro. Confira Realizados ou solicite à GRGD a inclusão do seu órgão nos órgãos elegíveis de um novo evento institucional.';
+                statusPortal.textContent=!portal?'':carregando?'Carregando eventos do seu órgão…':erro?'Não foi possível confirmar todas as consultas de eventos. Os dados das consultas recusadas foram removidos. Procure a GRGD.':filtrados.length?'Eventos públicos e eventos destinados ao seu órgão. A inscrição depende do período, das vagas e da sua autorização.':'Nenhum evento encontrado neste filtro. Limpe os filtros, confira Todos ou solicite à GRGD a inclusão do seu órgão nos órgãos elegíveis de um novo evento institucional.';
             }
             grid.innerHTML = filtrados.map(e => {
                 const real = eventoEncerrado(e,agora);
@@ -2824,16 +2870,17 @@
                 const isAdmin = ehAdministrador();
                 const cardBgClass = real ? 'bg-slate-100 border-slate-300 opacity-95 grayscale-[20%]' : 'bg-white border-slate-200';
                 const headerBgClass = real ? 'bg-slate-700 text-slate-200' : 'bg-blue-900 text-white';
+                const situacao=normalizarLocal(e.status),classeSituacao=situacao==='cancelado'?'text-rose-800 bg-rose-100':situacao==='confirmado'||situacao==='realizado'?'text-emerald-800 bg-emerald-100':situacao==='planejado'?'text-amber-800 bg-amber-100':'text-slate-700 bg-slate-100';
 
                 return `<article class="${cardBgClass} rounded-2xl border shadow-sm overflow-hidden flex flex-col transition hover:shadow-md">
                     ${bannerImg ? `<div class="relative w-full h-44 bg-slate-900 overflow-hidden"><img src="${esc(bannerImg)}" class="w-full h-full object-cover" alt="Capa"><div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent flex items-end p-3"><h3 class="text-white font-black text-base tracking-wide drop-shadow line-clamp-2">${esc(e.titulo)}</h3></div></div>` : `<div class="w-full h-32 ${headerBgClass} flex items-center justify-center font-black text-base px-4 text-center tracking-wide"><i class="fa-solid fa-calendar-star mr-2"></i> ${esc(e.titulo)}</div>`}
                     <div class="p-5 flex flex-col flex-1">
-                        <div class="flex justify-between gap-2 items-center"><span class="${real ? 'bg-slate-200 text-slate-700' : 'bg-amber-100 text-amber-800'} text-[10px] font-bold px-2.5 py-1 rounded-full">${esc(e.tipoEvento || 'Capacitação')}</span><span class="text-[10px] font-bold ${real ? 'text-slate-600 bg-slate-200 px-2 py-0.5 rounded' : 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded'}">${real ? 'Realizado' : 'Futuro'}</span></div>
+                        <div class="flex justify-between gap-2 items-center"><span class="${real ? 'bg-slate-200 text-slate-700' : 'bg-amber-100 text-amber-800'} text-[10px] font-bold px-2.5 py-1 rounded-full">${esc(e.tipoEvento || 'Tipo não informado')}</span><span class="text-[10px] font-bold ${classeSituacao} px-2 py-0.5 rounded">${esc(e.status || 'Situação não informada')}</span></div>
                         <h4 class="font-bold text-base mt-2 ${real ? 'text-slate-700' : 'text-slate-900'}">${esc(e.titulo)}</h4>
                         <p class="text-xs ${real ? 'text-slate-600' : 'text-indigo-900'} font-semibold mt-1"><i class="fa-solid fa-chalkboard-user mr-1"></i> ${identificacaoUsuario({nome:e.palestrante || 'Equipe ATI',uid:e.palestranteUid})}</p>
                         <p class="text-xs text-slate-500 mt-2 line-clamp-2">${esc(e.descricao || e.textoCard || '')}</p>
                         <div class="mt-3 text-xs space-y-1.5 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
-                            <div><i class="fa-solid fa-calendar text-blue-800 mr-1.5"></i> ${formatarData(e.dataInicio)}</div>
+                            <div><i class="fa-solid fa-calendar text-blue-800 mr-1.5"></i> ${formatarData(e.dataInicio)}${e.dataFim && e.dataFim!==e.dataInicio ? ' a '+formatarData(e.dataFim) : ''}</div>
                             <div><i class="fa-solid fa-location-dot text-purple-700 mr-1.5"></i> ${esc(e.localEvento || 'Local não informado')}</div>
                             <div><i class="fa-solid fa-users text-emerald-700 mr-1.5"></i> ${inscritosReal === null ? (vagas ? `Capacidade: ${vagas} vagas` : 'Vagas não informadas') : (vagas ? `${inscritosReal}/${vagas} vagas` : `${inscritosReal} inscritos`)}</div>
                         </div>
@@ -2848,7 +2895,7 @@
                         </div>
                     </div>
                 </article>`;
-            }).join('') || '<p class="text-slate-400 text-sm col-span-3 text-center py-8">Nenhum evento encontrado.</p>';
+            }).join('') || '<p class="text-slate-500 text-sm col-span-full text-center py-8">Nenhum evento encontrado. Revise os filtros ou use Todos para consultar a agenda completa disponível ao seu perfil.</p>';
         }
 
 
@@ -3829,6 +3876,9 @@
             byId('busca-eventos')?.addEventListener('input', e => { buscaEventosVal = e.target.value.toLowerCase().trim(); renderEventos(); });
             byId('filtro-evento-futuros')?.addEventListener('click', () => { filtroEventoAtual = 'futuros'; renderEventos(); });
             byId('filtro-evento-realizados')?.addEventListener('click', () => { filtroEventoAtual = 'realizados'; renderEventos(); });
+            byId('filtro-evento-todos')?.addEventListener('click', () => { filtroEventoAtual = 'todos'; renderEventos(); });
+            ['filtro-evento-status','filtro-evento-tipo','filtro-evento-de','filtro-evento-ate','ordenacao-eventos'].forEach(id=>byId(id)?.addEventListener('change',renderEventos));
+            byId('limpar-filtros-eventos')?.addEventListener('click',()=>{limparConsultaEventos();renderEventos();});
             byId('btn-relatorio-geral-eventos')?.addEventListener('click', () => {
                 try { baixarRelatorioInscricoes(); } catch(err) { alert(err.message || 'Não foi possível preparar o relatório.'); }
             });
@@ -4057,6 +4107,7 @@
             document.getElementById('perfil-foto-preview').innerHTML = '';
             dbData = { demandas: [], eventos: [], locais: [], orgaos: [], fornecedores: [], bases: [], usuarios: [], grupos: [], inscricoes: [], setores:[], colaboradores:[], auditoriaOrgao:[], contatosColaboradores:[] };
             eventosCacheMap = {};
+            limparConsultaEventos();
             buscaDemandasVal = buscaEventosVal = buscaLocaisVal = buscaClientesVal = buscaFornecedoresVal = buscaBasesVal = buscaUsuariosVal = '';
             filtroTipoUsuarioAtual = filtroTagAtual = filtroOrgaoUsuarioAtual = filtroSetorUsuarioAtual = filtroGestorModalidadeAtual = filtroSituacaoClienteAtual = filtroDemandaStatusAtual = filtroDemandaPrioAtual = '';
             ['busca-demandas', 'busca-eventos', 'busca-locais', 'busca-clientes', 'busca-fornecedores', 'busca-bases', 'busca-usuarios', 'filtro-tipo-usuario', 'filtro-tag-usuario', 'filtro-setor-usuario', 'filtro-orgao-usuario', 'filtro-gestor-modalidade', 'filtro-situacao-cliente', 'filtro-demanda-status', 'filtro-demanda-prio'].forEach(id => {
