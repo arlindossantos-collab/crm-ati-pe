@@ -1,0 +1,4 @@
+/* Utilitários da interface compilados localmente, sem CDN em execução. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

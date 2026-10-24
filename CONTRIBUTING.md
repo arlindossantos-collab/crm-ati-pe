@@ -4,7 +4,7 @@
 
 Antes de editar, consultar o código atual da branch alvo no GitHub e registrar o commit de origem. Preservar funcionalidades, telas e campos existentes; diferenças entre versões precisam ser identificadas antes da edição.
 
-A aplicação permanece em um único HTML enquanto a separação em módulos estiver adiada. Não aplicar automaticamente a proposta de modularização.
+A separação foi autorizada pelo usuário na proposta v0.17.0. Fontes vivem em src, com templates/CSS separados, módulos ES por responsabilidade e uma única fronteira Firebase. Não recolocar lógica/CSS no index.html nem copiar código legado para a aplicação sem comparação e testes.
 
 ## Descrição de cada alteração
 
@@ -32,7 +32,7 @@ Sincronizar antes da publicação:
 
 1. `package.json`: campo `version`.
 2. `package-lock.json`: versão da raiz e de `packages[""]`; não alterar dependências sem necessidade.
-3. `index.html`: comentário inicial, tela de login, cabeçalho, comentário do script e log de inicialização.
+3. `index.html`, templates de sessão/cabeçalho e `src/app/bootstrap.js`: identificação visual e log de inicialização.
 4. `README.md`: versão do código e resumo coerente com os recursos presentes.
 5. `CHANGELOG.md`: versão, antes/depois, validação e pendências.
 
@@ -44,7 +44,7 @@ Preparar alterações em branch própria, conferir preservação e validar os fl
 
 Commit, integração à main, publicação do site e release são etapas distintas. Autorização para commit não autoriza automaticamente integrar ou publicar. A versão de uma proposta não deve ser apresentada como já disponível no site.
 
-GitHub Pages publica os arquivos do site. Alterações em regras exigem publicação separada no Firebase, coordenada com o HTML. Informar explicitamente quando as regras não mudaram e não precisam ser republicadas.
+Publicar somente dist, gerado por npm run build. Pages deve usar GitHub Actions e o workflow pages.yml; antes da primeira integração desta arquitetura, ajustar a fonte do serviço com autorização. Firebase Hosting também aponta para dist. Não publicar a raiz do checkout nem copiar templates-fonte como site final. Alterações em regras exigem publicação separada no Firebase; informar quando não mudaram.
 
 ## Releases
 
@@ -63,3 +63,11 @@ Ao publicar uma release autorizada:
 Consultar [o mapa de organização](docs/mapa-organizacao.md) antes de excluir arquivos ou branches. Verificar referências e recursos exclusivos das versões históricas.
 
 Remover uma branch integrada não substitui backup dos dados. Preservar commits e referências necessárias ao retorno. Não reescrever o histórico Git para reduzir um repositório pequeno.
+
+## Validação da estrutura modular
+
+Use Node 22/npm ci. Execute npm run check, npm test, npm run build, testes de regras/Auth em emuladores separados e npm run test:browser (Chromium instalado). npm run test:deploy é opcional quando Docker local estiver disponível e valida os templates/staging descartáveis. Não executar as suítes de regras no mesmo emulador usado para uma demonstração que deva conservar dados fictícios.
+
+Não adicionar SDK Firebase em outro módulo: importe src/services/firebase.js. Estado transitório em app/state não substitui validação/autorização do servidor. Novos módulos devem declarar imports; o check rejeita nomes sem origem e dependências fora da fronteira. A compatibilidade VM dos testes usa as fontes reais com acessores para os nomes legados; o navegador exerce imports ES reais.
+
+Mudanças para PostgreSQL/LDAP devem preservar IDs, modelos de inscrição e auditoria, com staging e reconciliação. Ler docs/migracao antes de conectar serviços institucionais. Exemplos de .env são contratos de requisitos; nunca preencher valores secretos no Git.

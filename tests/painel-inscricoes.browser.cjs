@@ -14,10 +14,10 @@ function fixture(me){return {me,usuarios:[me],orgaos:[{id:'a',nome:'Órgão A fi
  {id:'i4',eventId:'antigo',nome:'Pessoa do fluxo antigo',situacao:'confirmada'}]};}
 (async()=>{
  fs.mkdirSync('test-results',{recursive:true});const errors=[];let browser;
- const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(fs.readFileSync('index.html'));});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ const server=http.createServer(require('./helpers/browser.cjs').serveProjectAsset);await new Promise(r=>server.listen(0,'127.0.0.1',r));
  async function open(me){const context=await browser.newContext({locale:'pt-BR',viewport:{width:1440,height:1000}}),page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
   await page.addInitScript(f=>{globalThis.__fixture=f;globalThis.__transactions=[];globalThis.__reauths=0;globalThis.__refreshes=0;},fixture(me));
-  await page.route('**/*',r=>{const u=r.request().url();if(u.includes('www.gstatic.com/firebasejs/'))return r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub});if(u.includes('chart.js'))return r.fulfill({contentType:'application/javascript',body:'globalThis.Chart=class {destroy(){}};'});if(u.startsWith('http://127.0.0.1:'))return r.continue();return r.fulfill({contentType:u.endsWith('.css')?'text/css':'text/javascript',body:''});});
+  await page.route('**/*',r=>{const u=r.request().url();if(u.endsWith('/src/services/firebase.js'))return r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub});if(u.includes('chart.js'))return r.fulfill({contentType:'application/javascript',body:'globalThis.Chart=class {destroy(){}};'});if(u.startsWith('http://127.0.0.1:'))return r.continue();return r.fulfill({contentType:u.endsWith('.css')?'text/css':'text/javascript',body:''});});
   await page.goto('http://127.0.0.1:'+server.address().port);if(process.env.PRGD_TEST_CSS)await page.addStyleTag({content:fs.readFileSync(process.env.PRGD_TEST_CSS,'utf8')});await page.locator('#main-content').waitFor({state:'visible'});await page.locator('[data-tab="eventos"]').click();return {page,context};
  }
  try{browser=await chromium.launch();

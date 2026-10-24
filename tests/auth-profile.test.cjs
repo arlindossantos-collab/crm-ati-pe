@@ -1,7 +1,5 @@
 const {test,before,after} = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 const vm = require('node:vm');
 const {initializeApp,deleteApp} = require('firebase/app');
 const {getAuth,connectAuthEmulator,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,updatePassword,reauthenticateWithCredential,EmailAuthProvider} = require('firebase/auth');
@@ -14,16 +12,13 @@ before(()=>{
 });
 after(async()=>{if(firebaseApp)await deleteApp(firebaseApp);});
 function fluxoReal(uid) {
-    const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
-    const inicio=html.indexOf('        async function alterarMinhaSenha(e)');
-    const fim=html.indexOf('        const CORES_CARD_DEMANDA',inicio);
-    assert.ok(inicio>0 && fim>inicio,'Função real de troca de senha deve existir.');
+    const source=require('../scripts/lib/source.cjs').readFunctionSource('alterarMinhaSenha');
     const nodes=new Map(),mensagens=[];
     const element=id=>{if(!nodes.has(id))nodes.set(id,{value:'',disabled:false});return nodes.get(id);};
     const context=vm.createContext({auth,currentUser:{uid},versaoSessao:1,salvandoSenhaPerfil:false,EmailAuthProvider,reauthenticateWithCredential,updatePassword,
         registrarMudancaSenha:async()=>{},document:{getElementById:element},mensagemPerfil:(texto,erro)=>mensagens.push({texto,erro}),traduzirErroSistema:err=>err.code,
         limparSenhasPerfil:()=>['perfil-senha-atual','perfil-senha-nova','perfil-senha-confirmar'].forEach(id=>{element(id).value='';})});
-    vm.runInContext(html.slice(inicio,fim),context);
+    context.prgdState=context;vm.runInContext(source,context);
     return {element,mensagens,executar:()=>vm.runInContext('alterarMinhaSenha({preventDefault(){}})',context)};
 }
 test('senha inicial é substituída pela nova e o login anterior deixa de funcionar',async()=>{
@@ -44,9 +39,7 @@ test('senha atual incorreta não altera o login existente',async()=>{
 });
 
 function fluxoExclusaoReal(user) {
-    const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
-    const inicio=html.indexOf('        async function confirmarExclusao(e)'),fim=html.indexOf('        function configurarInterface()',inicio);
-    assert.ok(inicio>0&&fim>inicio);
+    const source=require('../scripts/lib/source.cjs').readFunctionSource('confirmarExclusao');
     const nodes=new Map(),writes=[];
     const element=id=>{if(!nodes.has(id))nodes.set(id,{value:'',disabled:false,textContent:''});return nodes.get(id);};
     const context=vm.createContext({auth,currentUser:{uid:user.uid,perfil:'admin',nome:'Admin'},versaoSessao:1,exclusaoEmCurso:false,
@@ -54,7 +47,7 @@ function fluxoExclusaoReal(user) {
       EmailAuthProvider,reauthenticateWithCredential,document:{getElementById:element},ehAdministrador:()=>true,
       gravarUsuarioComIdentidade:async(uid,data)=>writes.push({uid,data}),fecharModal(){},alert(){},
       cancelarExclusao(){context.exclusaoPendente=null;},traduzirErroSistema:err=>err.code});
-    vm.runInContext(html.slice(inicio,fim),context);
+    context.prgdState=context;vm.runInContext(source,context);
     return {element,writes,executar:()=>vm.runInContext('confirmarExclusao({preventDefault(){}})',context)};
 }
 test('exclusão valida a senha real do autor no Auth antes de gravar o usuário alvo',async()=>{

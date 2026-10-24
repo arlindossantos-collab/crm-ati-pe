@@ -1,7 +1,5 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 const vm = require('node:vm');
 
 function vinculoTeste(extra={}) {
@@ -15,10 +13,8 @@ function vinculoTeste(extra={}) {
 
 // Exercita o módulo real com DOM/Firebase simulados, sem acessar serviços ou dados reais.
 function app({revisaoAutomatica=true}={}) {
-    const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-    const source = html.match(/<script type="module">([\s\S]*?)<\/script>/)[1]
-        .replace(/^\s*import .*?;\s*$/gm, '');
-    const nodes = new Map(), writes = [], audits = [], charts = [], listeners = new Map(), snapshots = [], storage = new Map();
+    const source = require('../scripts/lib/source.cjs').readApplicationSource();
+    const nodes = new Map(), writes = [], audits = [], charts = [], listeners = new Map(), snapshots = [], storage = new Map(), persistence = [];
     let autoId = 0;
     const element = id => {
         if (!nodes.has(id)) nodes.set(id, {
@@ -39,7 +35,7 @@ function app({revisaoAutomatica=true}={}) {
         alert() {}, confirm() { return true; },
         initializeApp(config, name = '[DEFAULT]') { return {name}; }, getApps() { return []; }, getFirestore() { return {}; }, getAuth(app) { return app; },
         async createUserWithEmailAndPassword(auth, email, password) { return {user:{uid:'novo-uid'}}; }, async deleteUser() {},
-        browserLocalPersistence: {tipo:'local'}, inMemoryPersistence: {tipo:'memory'}, setPersistence() { return Promise.resolve(); },
+        browserLocalPersistence: {tipo:'local'}, inMemoryPersistence: {tipo:'memory'}, setPersistence(auth,kind) { persistence.push({auth,kind});return Promise.resolve(); },
         signInWithEmailAndPassword() { return Promise.resolve(); }, signOut() { return Promise.resolve(); },
         collection(db, name) { return name; }, doc(db, collection, id, ...segments) { if(arguments.length===1){collection=db;id='auto-'+(++autoId);} return { collection, id, path:[collection,id,...segments].join('/') }; },
         increment(n){return {__increment:n};},serverTimestamp(){return {servidor:true};},orderBy(...v){return v;},limit(n){return n;},startAfter(v){return v;},
@@ -55,7 +51,7 @@ function app({revisaoAutomatica=true}={}) {
     });
     vm.runInContext(source, context);
     if(revisaoAutomatica)vm.runInContext("revisarUsuario=async()=>true",context);
-    return { run: code => vm.runInContext(code, context), element, writes, audits, charts, listeners, snapshots, context,storage };
+    return { run: code => vm.runInContext(code, context), element, writes, audits, charts, listeners, snapshots, context,storage,persistence };
 }
 
 async function confirmarExclusaoTeste(a) {
@@ -483,10 +479,13 @@ test('locais e fornecedores mostram autoria com foto nas colunas existentes', ()
     for(const id of ['tabela-locais','tabela-fornecedores'])assert.ok(a.element(id).innerHTML.includes('data-avatar'));
 });
 
-test('sessão principal persiste e cadastro auxiliar continua em memória', () => {
-    const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
-    assert.ok(html.includes('setPersistence(auth, browserLocalPersistence)'));
-    assert.ok(html.includes('setPersistence(authCadastro, inMemoryPersistence)'));
+test('sessão principal persiste e cadastro auxiliar continua em memória', async () => {
+    const a=app();preencherUsuario(a);a.run("currentUser={uid:'admin',perfil:'admin',nome:'Admin'}");
+    assert.equal(a.persistence[0].kind.tipo,'local');
+    await a.run('criarCadastroUsuario()');
+    assert.equal(a.persistence[1].kind.tipo,'memory');
+    assert.equal(a.persistence[1].auth.name,'prgd-cadastro');
+    assert.equal(a.run('currentUser.uid'),'admin');
 });
 test('usuário excluído sai da lista e do contador, preservando os dados carregados', () => {
     const a=app();

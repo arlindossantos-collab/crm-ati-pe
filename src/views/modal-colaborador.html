@@ -1,0 +1,18 @@
+    <div id="modal-colaborador" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl p-5 w-full max-w-2xl max-h-[90vh] overflow-y-auto"><div class="flex justify-between gap-3"><h3 id="colab-titulo" class="text-lg font-bold">Cadastrar colaborador</h3><button type="button" class="btn-fechar-modal border rounded-lg px-3 py-1" data-target="modal-colaborador">Fechar</button></div>
+        <p id="colab-contexto" class="text-sm text-blue-900 bg-blue-50 p-3 rounded-xl my-3"></p>
+        <form id="form-colaborador" class="grid sm:grid-cols-2 gap-3 text-sm">
+          <label class="sm:col-span-2">Nome completo<input id="colab-nome" required minlength="2" maxlength="150" class="block border rounded-lg p-2 w-full"></label>
+          <label>E-mail institucional<input id="colab-emailInstitucional" type="email" required maxlength="254" class="block border rounded-lg p-2 w-full"></label>
+          <label>Setor<select id="colab-setorId" required class="block border rounded-lg p-2 w-full"></select><span id="colab-setores-msg" role="status" class="block text-xs text-slate-600 mt-1"></span></label>
+          <label>Telefone<input id="colab-telefone" type="tel" maxlength="40" class="block border rounded-lg p-2 w-full"></label>
+          <label>Matrícula<input id="colab-matricula" maxlength="50" autocomplete="off" class="block border rounded-lg p-2 w-full"></label><label>Cargo / função<input id="colab-cargo" maxlength="150" class="block border rounded-lg p-2 w-full"></label>
+          <label id="colab-orgao-label" class="hidden sm:col-span-2">Órgão<select id="colab-orgao" class="block border rounded-lg p-2 w-full"></select></label>
+          <label>Revisar cadastro até<input id="colab-validade" type="date" class="block border rounded-lg p-2 w-full"><span class="text-xs text-slate-500">Prazo de atualização cadastral. Não altera a validade do acesso.</span></label>
+          <fieldset class="sm:col-span-2 border rounded-lg p-3"><legend class="font-semibold">Contatos institucionais do órgão</legend><div id="colab-funcoes" class="flex flex-wrap gap-3"></div><p class="text-xs text-slate-500 mt-2">As funções atualizam os contatos em Clientes. Não concedem permissão de acesso à PRGD.</p></fieldset>
+          <label class="sm:col-span-2"><input id="colab-ativo" type="checkbox" checked> Colaborador ativo</label>
+          <p class="text-xs text-slate-500 sm:col-span-2">Órgão e e-mail são preservados após o cadastro. O setor pode ser alterado dentro da sua abrangência. Inscrições anteriores e permissões da conta não são transferidas.</p>
+          <p id="colab-erro" role="alert" class="text-red-800 sm:col-span-2"></p><button id="colab-salvar" type="submit" class="sm:col-span-2 rounded-lg bg-blue-900 text-white px-4 py-3 disabled:opacity-50">Salvar colaborador</button>
+        </form>
+      </div>
+    </div>

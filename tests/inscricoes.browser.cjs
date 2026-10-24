@@ -18,11 +18,11 @@ function fixture(me){return {me,usuarios:[admin,me.uid==='nsi'?me:nsi],orgaos:[{
  eventos:[{id:'e1',titulo:'Oficina institucional fictícia',dataInicio:'2099-01-01',modeloInscricao:'institucional-v1',eventoPublico:false,orgaosElegiveis:['orgao-a'],inscricoesAbertas:true,inscricaoInicio:now-60000,inscricaoFim:now+3600000,limiteVagas:1,inscritosCount:0,status:'Confirmado'}]};}
 (async()=>{
  fs.mkdirSync('test-results',{recursive:true});const errors=[];
- const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(fs.readFileSync('index.html'));});await new Promise(r=>server.listen(0,'127.0.0.1',r));let browser;
+ const server=http.createServer(require('./helpers/browser.cjs').serveProjectAsset);await new Promise(r=>server.listen(0,'127.0.0.1',r));let browser;
  async function open(me,width=1440){
   const context=await browser.newContext({viewport:{width,height:1050}}),page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
   await page.addInitScript(f=>{const salvo=sessionStorage.getItem('__lote2Fixture');globalThis.__fixture=salvo?JSON.parse(salvo):f;globalThis.__transactions=[];globalThis.__reads=[];globalThis.__authCreates=0;globalThis.__reauths=0;globalThis.__refreshes=0;globalThis.__printed=0;window.print=()=>globalThis.__printed++;},fixture(me));
-  await page.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
+  await page.route('**/src/services/firebase.js',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
   await page.route('**/*',r=>/googleapis\.com|firebaseio\.com|firebaseapp\.com/.test(r.request().url())?r.abort():r.fallback());
   await page.goto('http://127.0.0.1:'+server.address().port);if(process.env.PRGD_TEST_CSS)await page.addStyleTag({content:fs.readFileSync(process.env.PRGD_TEST_CSS,'utf8')});await page.locator('#main-content').waitFor({state:'visible'});return {page,context};
  }

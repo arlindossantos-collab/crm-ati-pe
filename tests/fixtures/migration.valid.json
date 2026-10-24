@@ -1,0 +1,118 @@
+{
+  "format": "prgd-export-v1",
+  "source": {
+    "projectId": "demo-prgd-usuarios",
+    "exportedAt": "2026-10-24T12:00:00Z"
+  },
+  "documents": [
+    {
+      "path": "orgaos/o1",
+      "fields": {
+        "nome": {
+          "stringValue": "Órgão fictício"
+        },
+        "id": {
+          "stringValue": "CLI-antigo"
+        }
+      }
+    },
+    {
+      "path": "setores/s1",
+      "fields": {
+        "nome": {
+          "stringValue": "Setor fictício"
+        },
+        "orgaoId": {
+          "stringValue": "o1"
+        }
+      }
+    },
+    {
+      "path": "usuarios/u1",
+      "fields": {
+        "uid": {
+          "stringValue": "u1"
+        },
+        "colaboradorId": {
+          "stringValue": "p1"
+        }
+      }
+    },
+    {
+      "path": "usuarios/u1/privado/perfil",
+      "fields": {
+        "telefone": {
+          "stringValue": "Contato fictício"
+        }
+      }
+    },
+    {
+      "path": "identidadesUsuarios/u1",
+      "fields": {
+        "uid": {
+          "stringValue": "u1"
+        }
+      }
+    },
+    {
+      "path": "colaboradores/p1",
+      "fields": {
+        "nome": {
+          "stringValue": "Pessoa fictícia"
+        },
+        "orgaoId": {
+          "stringValue": "o1"
+        },
+        "setorId": {
+          "stringValue": "s1"
+        },
+        "usuarioUid": {
+          "stringValue": "u1"
+        }
+      }
+    },
+    {
+      "path": "eventos/e1",
+      "fields": {
+        "titulo": {
+          "stringValue": "Evento fictício"
+        },
+        "limiteVagas": {
+          "integerValue": "3"
+        },
+        "metadados": {
+          "mapValue": {
+            "fields": {
+              "inteiroGrande": {
+                "integerValue": "9007199254740993"
+              },
+              "instante": {
+                "timestampValue": "2026-10-24T12:00:00.123456789Z"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "inscricoes/i1",
+      "fields": {
+        "eventId": {
+          "stringValue": "e1"
+        },
+        "participanteId": {
+          "stringValue": "p1"
+        },
+        "orgaoId": {
+          "stringValue": "o1"
+        },
+        "setorId": {
+          "stringValue": "s1"
+        },
+        "modeloInscricao": {
+          "stringValue": "institucional-v1"
+        }
+      }
+    }
+  ]
+}

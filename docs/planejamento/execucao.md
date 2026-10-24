@@ -1,5 +1,7 @@
 # Execução do plano diretor — PRGD
 
+> Estado atual: a v0.16.0 foi publicada pelo PR #25. A proposta v0.17.0 reorganiza o código e prepara a migração; consulte [o mapa atual](../mapa-organizacao.md) e [a auditoria](../auditoria-testes.md). O inventário abaixo registra a base examinada quando o plano foi iniciado.
+
 Início: 23/10/2026. Estado: Lote 00 em execução, sem aceite institucional.
 Base: `4cb768a6ea8d2f9cd307c9cf9c265f356c1aff02`, v0.14.0, repositório `arlindossantos-collab/crm-ati-pe`.
 Branch de trabalho: `docs/plano-evolucao-lote-00`.
@@ -78,4 +80,4 @@ A proposta v0.15.0 acrescenta filtros por situação/tipo/período, ordenação 
 
 ## Incremento do Lote 07 — inscrições e vagas
 
-A proposta v0.16.0 acrescenta painel administrativo por evento, filtros e conferência de capacidade/contador, preservando registros antigos e as operações de comprovante/cancelamento. Ver [painel de inscrições e vagas](painel-inscricoes-vagas.md). Não conclui a homologação integral do Lote 07, nem a revisão dos dados legados ou o backup real do Lote 00.
+A v0.16.0 publicada acrescenta painel administrativo por evento, filtros e conferência de capacidade/contador, preservando registros antigos e as operações de comprovante/cancelamento. Ver [painel de inscrições e vagas](painel-inscricoes-vagas.md). Não conclui a homologação integral do Lote 07, nem a revisão dos dados legados ou o backup real do Lote 00.

@@ -16,7 +16,7 @@ const eventos=[
 ];
 (async()=>{
  fs.mkdirSync('test-results',{recursive:true});const errors=[];
- const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(fs.readFileSync('index.html'));});
+ const server=http.createServer(require('./helpers/browser.cjs').serveProjectAsset);
  await new Promise(r=>server.listen(0,'127.0.0.1',r));let browser;
  async function open(me){
   const context=await browser.newContext({locale:'pt-BR',viewport:{width:1440,height:1000}}),page=await context.newPage();
@@ -24,7 +24,7 @@ const eventos=[
   await page.addInitScript(f=>{globalThis.__fixture=f;globalThis.__transactions=[];globalThis.__reauths=0;globalThis.__refreshes=0;},{me,usuarios:[me],eventos,inscricoes:[],orgaos:[],locais:[]});
   await page.route('**/*',route=>{
    const url=route.request().url();
-   if(url.includes('www.gstatic.com/firebasejs/'))return route.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub});
+   if(url.endsWith('/src/services/firebase.js'))return route.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub});
    if(url.includes('chart.js'))return route.fulfill({contentType:'application/javascript',body:'globalThis.Chart=class {destroy(){}};'});
    if(url.startsWith('http://127.0.0.1:'))return route.continue();
    return route.fulfill({contentType:url.endsWith('.css')?'text/css':'text/javascript',body:''});

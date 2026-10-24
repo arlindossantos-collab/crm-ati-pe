@@ -1,114 +1,43 @@
-# Mapa de organização do repositório PRGD
+# Mapa atual do repositório — proposta v0.17.0
 
-**Data:** 20/10/2026. **Base:** `main@c2c13c3b31b9765930f1e32ea04d416aa79846cf`.
+Base preservada: v0.16.0, commit 113d629c4565a631bd89a5af4c24c3bf40e26a46. A reorganização foi solicitada explicitamente pelo usuário, substituindo o adiamento anterior da extração. Ainda não está publicada.
 
-Este documento distingue diagnóstico de execução. Nenhum arquivo, branch, tag ou registro do Firebase foi excluído nesta revisão. As alterações preparadas são de documentação e identificação da versão.
+## Estrutura e dependências
 
-## Resultado para a gestão
+```mermaid
+flowchart TD
+    Main[src/main.js] --> Boot[app/bootstrap + listeners]
+    Boot --> State[app/state: sessão/UI]
+    Boot --> Modules[modules: fluxos e telas]
+    Modules --> Domain[domain + shared]
+    Modules --> Services[services: Firebase e subscriptions]
+    Services --> SDK[SDK Firebase único]
+    Views[views + styles + public] --> Build[build]
+    Main --> Build
+    Build --> Dist[dist: único artefato público]
+```
 
-O repositório é pequeno: **17 arquivos rastreados, 853.843 bytes no total (aproximadamente 834 KiB)**, além do histórico Git. O problema principal é a mistura entre material histórico e atual, documentação desatualizada e falta de releases formais.
+O estado antes implícito no escopo de um script passou a um objeto transitório explícito. Módulos usam imports/exports reais. Existem dependências entre fluxos; a separação não afirma independência total nem substitui autorização/transações do servidor. Agenda e CSV possuem funções reutilizáveis sem navegador. As integrações Firebase ficam centralizadas, com uma única instância de SDK por build.
 
-A pasta `v0.40/` ocupa **211.879 bytes, cerca de 25% dos arquivos atuais**. A retirada futura desses dois arquivos deixaria 15 arquivos na base examinada, antes de contar os novos documentos desta revisão. Isso reduz cópias e confusão; não implica melhora direta de desempenho da página principal.
+Formulários genéricos foram divididos em criação, detalhes, campos, salvamento e exclusão. Listeners foram separados de renderização e inicialização. Templates e CSS próprios não contêm lógica de negócio. O build preserva IDs e gera apenas arquivos públicos locais; código de teste, deploy, backups, regras e exportações não entram no pacote do site.
 
-`package-lock.json` é o maior arquivo, mas é necessário para repetir instalações com as mesmas dependências. Não é um arquivo inútil.
+## Limpeza executada
 
-## Inventário completo dos 17 arquivos da base
+- Retirada do HTML antigo v0.40 e seu README da árvore ativa; recuperação garantida por referência Git/bundle, sem reescrever histórico.
+- URL antiga preservada como orientação estática sem Firebase, sem reativar os fluxos antigos.
+- Prévia de perfis movida para public, mantendo sua URL no artefato.
+- Remoção do empacotamento duplicado e das substituições por regex da homologação; produção e demo usam o mesmo build e modo explícito.
+- Ferramentas de build/navegador passaram a dependências fixadas do projeto, sem depender de diretório de ferramentas externo.
+- Importações não usadas removidas durante a extração; fonte formatada por responsabilidade.
+- README/CONTRIBUTING atualizados; mapa anterior preservado em historico/mapa-organizacao-2026-10-20.md.
+- Saídas, backups, exportações e .env ignorados; publicação por lista controlada a partir de dist.
 
-| Arquivo | Tamanho em bytes | Decisão proposta | Motivo |
-| --- | ---: | --- | --- |
-| `index.html` | 205.689 | Manter | Aplicação principal em uso. A separação em módulos continua adiada. |
-| `firestore.rules` | 7.224 | Manter | Controla acesso e validação no banco; necessário para o cadastro funcionar. |
-| `firebase.json` | 152 | Manter e revisar o bloco de hospedagem futuramente | Aponta para as regras. O bloco Hosting não é a publicação atual por GitHub Pages. |
-| `firebase.test.json` | 235 | Manter | Configura os emuladores usados pelos testes de regras e de senha. |
-| `package.json` | 634 | Manter | Comandos de teste, ferramentas e versão funcional. |
-| `package-lock.json` | 319.170 | Manter | Fixa as versões necessárias a instalações reproduzíveis. |
-| `.gitignore` | 37 | Manter | Evita incluir dependências e arquivos locais gerados no repositório. |
-| `tests/regression.test.cjs` | 34.586 | Manter | Verifica comportamentos da aplicação e preservação das correções. |
-| `tests/firestore.rules.test.cjs` | 14.947 | Manter | Verifica permissões e proteção de perfis/dados pessoais no emulador. |
-| `tests/auth-profile.test.cjs` | 3.528 | Manter | Verifica troca de senha e rejeição da senha atual incorreta no emulador. |
-| `README.md` | 35.391 | Resumir e atualizar | Tinha 737 linhas, referências a anexos ausentes e descrições anteriores às últimas correções. |
-| `CONTRIBUTING.md` | 2.183 | Atualizar o processo de versões | A regra anterior condicionava incremento de versão à solicitação de release. |
-| `docs/cadastro-usuarios.md` | 7.152 | Manter como registro do lote e revisar informações superadas | Explica vínculo por UID, permissões e preservação. O diretório descrito foi alterado pelo lote de perfil. |
-| `docs/perfil-pessoal.md` | 6.855 | Manter | Explica foto, senha, dados privados e identificação compartilhada. |
-| `docs/correcoes-primeiro-lote.md` | 4.181 | Manter como registro histórico | Pendências e totais de testes retratam o primeiro lote, não o estado atual consolidado. |
-| `v0.40/index.html` | 159.761 | Avaliar retirada após comparar recursos | Cópia alternativa antiga, independente da aplicação atual, mas com recursos exclusivos. |
-| `v0.40/README.md` | 52.118 | Retirar junto da cópia antiga após decisão | Documenta a implementação alternativa; não deve orientar a operação atual. |
+Demandas, Apoio, Locais, regras, índices, testes e lockfile permanecem necessários. Não foram apagados por estarem fora da prioridade de Eventos. [Auditoria de legado](auditoria-legado.md).
 
-Os tamanhos acima pertencem à base examinada, antes da atualização de README, CONTRIBUTING, versões e criação deste mapa/CHANGELOG.
+## Preservação e migração
 
-## O que exige cuidado antes de excluir
+Nenhuma operação de negócio foi feita no Firebase real. O build de desenvolvimento força o projeto demo e emuladores. O SDK Firebase foi atualizado na linha compatível com Node 22, e a CLI/ferramentas também foram atualizadas após auditoria de dependências; as versões exatas estão no lockfile e as validações finais no relatório de testes.
 
-Não foi encontrada referência da aplicação principal ou dos testes ao HTML de `v0.40/`. O site principal não o importa. Isso indica independência técnica; não comprova que ninguém utilize o endereço antigo.
+Branches e tags remotas foram inventariadas e preservadas; nomes antigos não foram tratados como prova de irrelevância. Havia 21 referências remotas integradas e quatro alternativas com diferenças fora da main no inventário local, além da branch desta proposta. O bundle externo inclui todas as referências disponíveis antes da limpeza. Isso não é backup dos bancos/Auth.
 
-Em 20/10/2026, a consulta HTTP confirmou resposta 200 tanto no [site principal](https://arlindossantos-collab.github.io/crm-ati-pe/) quanto no [endereço histórico v0.40](https://arlindossantos-collab.github.io/crm-ati-pe/v0.40/), com as respectivas identificações v0.3.4 e v0.40. A versão alternativa ainda pode ser aberta pela internet.
-
-A comparação estática encontrou 25 nomes de funções definidos na versão antiga e não definidos com o mesmo nome na atual. Parte são auxiliares; não representam necessariamente 25 funcionalidades diferentes.
-
-Exemplos de código que merece comparação funcional:
-
-- recuperação de senha por e-mail (`sendPasswordResetEmail`);
-- ficha de presença com QR Code (`abrirFichaPresencaQR`);
-- comprovante e cancelamento de inscrição;
-- inscrição utilizando `runTransaction`;
-- seleção de campos e relatórios de eventos;
-- importação/exportação de usuários e manutenção de grupos.
-
-Isso não certifica que os fluxos antigos funcionem com os dados e regras atuais. Não copiar o HTML antigo sobre o atual. A retirada da pasta pode ser feita depois de decidir quais recursos recuperar e de registrar o commit histórico necessário.
-
-O arquivo experimental `gemini-code-1792431399542.html` já havia sido excluído antes desta análise. Não há ação pendente sobre ele.
-
-## Branches
-
-Foram encontradas seis branches. A comparação de ancestralidade confirmou que as cinco branches diferentes de `main` não possuem commits exclusivos fora da `main`.
-
-| Branch | Situação verificada | Proposta |
-| --- | --- | --- |
-| `main` | Base atual do sistema | Manter. |
-| `codex/corrigir-falhas-interface-20261020` | Trabalho integrado; PRs #2 e #5 encerrados | Pode ser removida da lista ativa. |
-| `feat/usuarios-internos-externos-grgd-20261020` | PR #3 integrado | Pode ser removida da lista ativa. |
-| `fix/rotulo-interno-grgd-20261020` | PR #4 integrado | Pode ser removida da lista ativa. |
-| `feat/perfil-pessoal-foto-20261020` | PR #6 integrado | Pode ser removida da lista ativa. |
-| `backup/antes-correcoes-20261020` | Referência explícita de retorno para `4497024` | Manter até organizar uma referência histórica e conferir o procedimento de retorno. |
-
-Não havia PR aberto na consulta. O PR #1 de modularização está fechado, não integrado, e sua branch não aparece entre as branches atuais. Não deve ser reaberto automaticamente.
-
-Excluir uma branch integrada remove um nome da lista, não as mudanças já integradas na main. Isso não oferece ganho relevante de espaço neste repositório. O backup de código não substitui backup dos dados do Firebase.
-
-## Documentação e versões
-
-Problemas confirmados antes desta revisão:
-
-1. HTML, `package.json` e raiz do lockfile ainda declaravam v0.3.4.
-2. Os últimos lotes adicionaram recursos mantendo essa identificação.
-3. O README afirmava existir fallback de perfil após erro, embora o código atual bloqueie perfil ausente/inativo.
-4. O README não descrevia adequadamente o novo cadastro e o perfil com foto.
-5. O README dizia que regras/testes não haviam sido fornecidos, embora esses arquivos já estejam no repositório.
-6. Documentos de lotes anteriores ainda incluem pendências resolvidas por lotes posteriores.
-7. Não foram encontradas tags pelo Git nem releases pela consulta do GitHub. Títulos antigos de commits não equivalem a releases.
-
-A proposta **v0.4.0** consolida os recursos recentes da aplicação principal. Não tenta ordenar retroativamente os rótulos históricos incompatíveis entre si.
-
-O novo CHANGELOG começa com uma descrição para a chefia e registra origem, antes/depois, validação, limites e próxima versão sugerida. A primeira publicação formal proposta é **Release 01 — v0.4.0**, sujeita à conferência do histórico imediatamente antes de publicá-la.
-
-## Sequência de execução proposta
-
-1. **Nesta proposta:** sincronizar versão, resumir README, atualizar CONTRIBUTING e registrar CHANGELOG/mapa. Sem exclusões e sem alteração funcional.
-2. **Limpeza de branches:** remover as quatro branches concluídas indicadas na tabela, conferindo novamente se não receberam novos commits.
-3. **Comparação funcional:** avaliar os recursos exclusivos de `v0.40/`, registrar o que será aproveitado e verificar uso do endereço histórico.
-4. **Retirada da cópia antiga:** excluir os dois arquivos de `v0.40/` em uma alteração própria. Manter o commit histórico acessível e conferir os links/publicação.
-5. **Documentos históricos:** identificar explicitamente o contexto dos lotes anteriores e manter o estado consolidado no README/CHANGELOG.
-6. **Hospedagem:** revisar a configuração alternativa de Firebase Hosting, que aponta `public` para a raiz. Se vier a ser usada, publicar somente os arquivos públicos necessários. A VM futura continua no planejamento, sem migração nesta etapa.
-
-Não excluir testes, lockfile ou regras para reduzir a quantidade de arquivos. Não reescrever o histórico Git ou criar pastas com novas cópias integrais de cada versão. As tags/releases devem guardar os marcos publicados.
-
-## Verificação desta revisão
-
-- Árvore recursiva completa do GitHub e clone local no mesmo commit.
-- Leitura de arquivos de configuração, documentação, testes e trechos relevantes das duas implementações.
-- Busca de referências aos arquivos históricos, dependências locais e pontos de versão.
-- Comparação de ancestralidade de todas as branches e consulta a PRs, tags e releases.
-- **54 testes de regressão aprovados** nesta revisão.
-- Versões sincronizadas e sintaxe JavaScript válida. Comparação integral confirmou somente versão/comentário/log no HTML, sem alteração funcional, e preservação de dependências, regras, testes e legado.
-- Links locais conferidos; README reduzido de 737 para 91 linhas, com link para a versão anterior no histórico Git. Diff sem erros de espaço.
-- Nenhum acesso a contas ou dados reais do Firebase; nenhum arquivo ou branch excluído.
-
+A VM pode servir dist com os templates Nginx preparados. PostgreSQL recebe somente staging de ensaio e ferramenta offline; identidade institucional tem contrato explícito para OIDC/LDAPS no servidor. A API, esquema de negócio, carga final e provedor reais ainda dependem de implementação e aprovação. Ver [migração](migracao/README.md).

@@ -1,0 +1,39 @@
+        <!-- ABA EVENTOS -->
+        <div id="aba-eventos" class="hidden space-y-4">
+            <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4" aria-label="Consulta de eventos">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                    <div id="eventos-titulo-interno">
+                        <h3 class="text-base font-bold text-slate-800">Módulo de Eventos (<span id="count-eventos">0</span>)</h3>
+                        <p class="text-xs text-slate-500">Gestão de capacitações, encontros e trilhas digitais da ATI-PE</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" id="btn-relatorio-geral-eventos" class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-file-csv"></i> Relatório Geral de Inscrições (CSV)</button>
+                        <button type="button" data-modal-target="evento" data-acao="eventos.criar" class="btn-abrir-form btn-admin-only bg-amber-600 hover:bg-amber-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-calendar-plus"></i> Novo Evento</button>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+                    <label class="text-xs font-semibold text-slate-600 flex-1 min-w-0">Buscar evento
+                        <input type="search" id="busca-eventos" placeholder="Título, palestrante ou local" class="block w-full p-2 border rounded-lg mt-1 bg-white font-normal focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                    </label>
+                    <div class="inline-flex self-start sm:self-auto bg-slate-100 p-1 rounded-lg text-xs font-semibold" role="group" aria-label="Período da agenda">
+                        <button type="button" id="filtro-evento-futuros" aria-pressed="true" class="px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition">Futuros</button>
+                        <button type="button" id="filtro-evento-realizados" aria-pressed="false" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Encerrados</button>
+                        <button type="button" id="filtro-evento-todos" aria-pressed="false" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition">Todos</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 text-xs text-slate-600">
+                    <label class="font-semibold min-w-0">Situação<select id="filtro-evento-status" class="block w-full mt-1 border rounded-lg p-2 bg-white font-normal"><option value="">Todas as situações</option></select></label>
+                    <label class="font-semibold min-w-0">Tipo<select id="filtro-evento-tipo" class="block w-full mt-1 border rounded-lg p-2 bg-white font-normal"><option value="">Todos os tipos</option></select></label>
+                    <label class="font-semibold min-w-0">De<input type="date" id="filtro-evento-de" class="block w-full min-w-0 mt-1 border rounded-lg p-2 bg-white font-normal"></label>
+                    <label class="font-semibold min-w-0">Até<input type="date" id="filtro-evento-ate" class="block w-full min-w-0 mt-1 border rounded-lg p-2 bg-white font-normal"></label>
+                    <label class="font-semibold min-w-0 col-span-2 lg:col-span-1">Ordenar<select id="ordenacao-eventos" class="block w-full mt-1 border rounded-lg p-2 bg-white font-normal"><option value="">Ordem da agenda</option><option value="crescente">Data crescente</option><option value="decrescente">Data decrescente</option></select></label>
+                </div>
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <p class="text-xs text-slate-500">O período considera a duração do evento. Data encerrada não confirma realização ou presença.</p>
+                    <button type="button" id="limpar-filtros-eventos" class="text-xs font-semibold text-blue-900 border rounded-lg px-3 py-2 hover:bg-blue-50">Limpar filtros</button>
+                </div>
+                <p id="eventos-filtros-erro" role="alert" class="text-xs text-red-800"></p>
+                <p id="eventos-resultado-consulta" role="status" aria-live="polite" class="text-xs text-slate-600"></p>
+            </section>
+            <p id="eventos-relatorio-status" role="status" class="btn-admin-only text-xs text-slate-500"></p><p id="eventos-portal-status" role="status" class="hidden text-sm bg-blue-50/60 border border-blue-100 rounded-xl p-3"></p><div id="grid-eventos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </div>

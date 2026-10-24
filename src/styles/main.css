@@ -1,0 +1,387 @@
+body {
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background-color: #f8fafc;
+}
+.hidden {
+  display: none;
+}
+/* A restauração e os modais não dependem da ordem de chegada dos utilitários CSS. */
+[id^="modal-"].hidden,
+#main-content.hidden,
+#sessao-carregando.hidden {
+  display: none !important;
+}
+body:not([data-admin="true"]) .btn-admin-only:not([data-acao]) {
+  display: none !important;
+}
+[hidden] {
+  display: none !important;
+}
+.tab-active {
+  background-color: #ffffff;
+  color: #1e3a8a;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.tab-inactive {
+  color: #64748b;
+  font-weight: 500;
+}
+.tab-inactive:hover {
+  color: #0f172a;
+}
+.post-it {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.post-it:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Somente os indicadores de Locais: azul e verde com baixa opacidade. */
+#locais-indicadores .local-card-suave {
+  background-color: rgba(59, 130, 246, 0.055);
+  border-color: rgba(59, 130, 246, 0.16);
+}
+#locais-indicadores .local-card-suave[data-tone="verde"] {
+  background-color: rgba(16, 185, 129, 0.055);
+  border-color: rgba(16, 185, 129, 0.16);
+}
+#locais-indicadores .local-card-rotulo {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+#locais-indicadores .local-card-icone {
+  flex: none;
+  font-size: 15px;
+  line-height: 1.2;
+  color: #4b6d8b;
+}
+#locais-indicadores [data-tone="verde"] .local-card-icone {
+  color: #427660;
+}
+
+/* Portal externo: a organização visual é derivada do perfil, sem alterar as permissões. */
+.somente-portal {
+  display: none;
+}
+body[data-layout="portal"] {
+  background: #f5f8fb;
+  color: #20374a;
+}
+body[data-layout="portal"] #app-header {
+  background: #173c65;
+  box-shadow: none;
+}
+body[data-layout="portal"] #app-header > div {
+  max-width: 1440px;
+  padding-top: 17px;
+  padding-bottom: 17px;
+}
+body[data-layout="portal"] #main-content {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  max-width: 1440px;
+  padding: 0;
+  min-height: calc(100vh - 90px);
+  align-items: start;
+}
+body[data-layout="portal"] #status-sessao {
+  display: none;
+}
+body[data-layout="portal"] .somente-portal {
+  display: block;
+}
+body[data-layout="portal"] #app-navegacao {
+  position: sticky;
+  top: 88px;
+  display: block;
+  min-width: 0;
+  padding: 28px 18px;
+  margin: 0;
+  border-right: 1px solid #dce5ed;
+  min-height: calc(100vh - 90px);
+}
+body[data-layout="portal"] #container-abas-navegacao {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 5px;
+  padding: 0;
+  background: transparent;
+  overflow: visible;
+}
+body[data-layout="portal"] .nav-tab {
+  width: 100%;
+  text-align: left;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+body[data-layout="portal"] .nav-tab.tab-active {
+  background: #e7f0f8;
+  color: #204b75;
+  box-shadow: none;
+}
+body[data-layout="portal"] .nav-tab.tab-inactive {
+  color: #566c81;
+}
+body[data-layout="portal"] #app-conteudo {
+  padding: 28px 32px 40px;
+  min-width: 0;
+}
+.portal-sobre {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #6a8298;
+  font-weight: 700;
+  margin: 0 0 9px;
+}
+#portal-orgao-nome {
+  font-size: 15px;
+  font-weight: 700;
+  color: #234b6a;
+  overflow-wrap: anywhere;
+}
+#portal-papel-nome {
+  font-size: 12px;
+  color: #617286;
+  margin: 5px 0 24px;
+}
+.portal-nota {
+  margin-top: 24px;
+  padding: 12px;
+  border-left: 3px solid #9cc1db;
+  background: #eff5fa;
+  color: #4b6780;
+  font-size: 12px;
+  line-height: 1.65;
+}
+#portal-topo {
+  margin-bottom: 24px;
+}
+#portal-pagina-titulo {
+  color: #183b5b;
+  font-size: 27px;
+  font-weight: 750;
+  line-height: 1.25;
+  margin: 7px 0 9px;
+}
+#portal-pagina-descricao {
+  color: #617286;
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 760px;
+}
+#portal-saudacao {
+  color: #64819a;
+  font-size: 12px;
+}
+.portal-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.portal-card {
+  border: 1px solid #d9e5ef;
+  background: #eff5fa;
+  border-radius: 13px;
+  padding: 20px;
+  min-width: 0;
+}
+.portal-card[data-tone="verde"] {
+  background: #eef6f2;
+  border-color: #d8e8de;
+}
+.portal-card-label {
+  color: #355d79;
+  font-size: 12px;
+  font-weight: 650;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.portal-card strong {
+  display: block;
+  color: #2c5577;
+  font-size: 29px;
+  font-weight: 750;
+  margin: 10px 0 5px;
+}
+.portal-card small {
+  display: block;
+  color: #5f7b90;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.portal-painel {
+  background: white;
+  border: 1px solid #dce5ed;
+  border-radius: 13px;
+  padding: 22px;
+}
+.portal-painel-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.portal-painel h3 {
+  color: #284e6c;
+  font-size: 15px;
+  font-weight: 700;
+}
+.portal-atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.portal-atalho {
+  border: 1px solid #cbdde9;
+  background: white;
+  color: #245782;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 650;
+}
+.portal-atalho.primario {
+  background: #245782;
+  border-color: #245782;
+  color: white;
+}
+body[data-layout="portal"] #portal-resumo {
+  border-color: #dce5ed;
+  border-radius: 13px;
+  padding: 22px;
+}
+body[data-layout="portal"] #portal-operacao-msg {
+  margin-bottom: 18px;
+}
+body[data-layout="portal"]
+  :is(#aba-colaboradores, #aba-inscricoes_orgao, #aba-auditoria_orgao)
+  > h3,
+body[data-layout="portal"]
+  :is(#aba-colaboradores, #aba-inscricoes_orgao, #aba-auditoria_orgao)
+  > p:first-of-type,
+body[data-layout="portal"] #eventos-titulo-interno {
+  display: none;
+}
+body[data-layout="portal"] #grid-eventos > article {
+  border-color: #dce5ed;
+  border-radius: 13px;
+  box-shadow: none;
+}
+body[data-layout="portal"] #grid-eventos > article > .h-32 {
+  background: #edf4fa;
+  color: #284e6c;
+  height: auto;
+  min-height: 88px;
+  padding: 20px;
+  justify-content: flex-start;
+  text-align: left;
+  border-bottom: 1px solid #dce5ed;
+}
+body[data-layout="portal"] #grid-eventos article h4 {
+  display: none;
+}
+body[data-layout="portal"] #app-conteudo table {
+  font-size: 13px;
+}
+body[data-layout="portal"] #app-conteudo th {
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  color: #61768b;
+  background: #f8fafc;
+}
+body[data-layout="portal"] #app-conteudo td {
+  border-color: #e9eef3;
+}
+body[data-layout="portal"]
+  #app-conteudo
+  :is(button, input, select, a):focus-visible {
+  outline: 3px solid #6ca4d5;
+  outline-offset: 3px;
+}
+@media (max-width: 900px) {
+  body[data-layout="portal"] #main-content {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+  body[data-layout="portal"] #app-conteudo {
+    padding: 24px 20px;
+  }
+  .portal-cards {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  body[data-layout="portal"] #main-content {
+    grid-template-columns: 1fr;
+  }
+  body[data-layout="portal"] #app-navegacao {
+    position: static;
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid #dce5ed;
+    padding: 16px;
+  }
+  body[data-layout="portal"] #portal-papel-nome {
+    margin-bottom: 14px;
+  }
+  body[data-layout="portal"] #container-abas-navegacao {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  body[data-layout="portal"] .nav-tab {
+    width: auto;
+    flex-shrink: 0;
+  }
+  body[data-layout="portal"] .portal-nota {
+    display: none;
+  }
+  body[data-layout="portal"] #app-conteudo {
+    padding: 22px 16px;
+  }
+  #portal-pagina-titulo {
+    font-size: 23px;
+  }
+  .portal-painel {
+    padding: 16px;
+  }
+}
+
+@media print {
+  body > * {
+    display: none !important;
+  }
+  body > #modal-comprovante:not(.hidden) {
+    display: block !important;
+    position: static !important;
+    background: white !important;
+    padding: 0 !important;
+  }
+  #modal-comprovante > div {
+    max-height: none !important;
+    overflow: visible !important;
+    max-width: none !important;
+  }
+  .nao-imprimir {
+    display: none !important;
+  }
+}
