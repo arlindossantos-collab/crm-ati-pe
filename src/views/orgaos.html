@@ -1,0 +1,55 @@
+        <!-- ABA CLIENTES -->
+        <div id="aba-clientes" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Clientes (<span id="count-clientes">0</span>)</h3>
+                        <p class="text-xs text-slate-500">Cadastro institucional compartilhado pelo relacionamento e por CX.</p>
+                    </div>
+                    <input type="text" id="busca-clientes" placeholder="Buscar por nome, sigla ou gestor..." class="p-2 border rounded-lg text-xs bg-white w-72 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+
+                    <select id="filtro-gestor-modalidade" class="p-2 border rounded-lg text-xs bg-white font-medium" title="Filtrar por modalidade de gestor">
+                        <option value="">Gestor do Órgão (Principal)</option>
+                        <option value="NSI">Gestor do NSI</option>
+                        <option value="Telemática">Gestor de Telemática</option>
+                        <option value="SI">Gestor de SI</option>
+                        <option value="SEI">Gestor do SEI</option>
+                    </select>
+
+                    <select id="filtro-situacao-cliente" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="">Todas as situações</option>
+                        <option value="Validado">Validado (Atualizado)</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Desatualizado">Desatualizado</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" id="btn-limpar-clientes" class="btn-admin-only bg-red-600 hover:bg-red-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer" title="Apagar todos os clientes da nuvem">
+                        <i class="fa-solid fa-trash-can"></i> Limpar Todos
+                    </button>
+                    <label class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                        <i class="fa-solid fa-file-arrow-up"></i> Importar CSV <input type="file" id="input-import-orgaos-csv" accept=".csv" class="hidden">
+                    </label>
+                    <button type="button" data-modal-target="cliente" data-acao="clientes.criar" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Novo Cliente</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[1200px]">
+                    <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
+                        <tr>
+                            <th class="p-3">Nome / Sigla</th>
+                            <th class="p-3">Telefone fixo</th>
+                            <th class="p-3">Gestor do Órgão</th>
+                            <th class="p-3">Selecionar Modalidade de Gestor</th>
+                            <th class="p-3">E-mail</th>
+                            <th class="p-3">Telefone / WhatsApp</th>
+                            <th class="p-3">Situação</th>
+                            <th class="p-3">Atualização</th>
+                            <th class="p-3 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-clientes" class="divide-y text-xs"></tbody>
+                </table>
+            </div>
+        </div>

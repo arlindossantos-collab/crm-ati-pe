@@ -22,50 +22,19 @@ jobs:
           distribution: temurin
           java-version: "21"
       - run: npm ci
+      - run: npm run check
+      - run: npm run build
       - run: npm test
       - run: npm run test:rules
       - run: npm run test:auth
-      - name: Preparar navegador isolado
-        run: |
-          npm install --no-save --package-lock=false playwright@1.56.1 tailwindcss@3.4.17
-          npx playwright install --with-deps chromium
-          npx tailwindcss -i tests/tailwind-input.css --content index.html -o /tmp/prgd-test.css --minify
-      - name: Testar Locais no navegador com Firebase simulado
+      - name: Preparar navegador
+        run: npx playwright install --with-deps chromium
+      - name: Testar todos os módulos no navegador
         env:
-          PRGD_TEST_CSS: /tmp/prgd-test.css
-        run: node tests/locais.browser.cjs
-      - name: Testar exclusão, histórico e restauração da sessão
-        env:
-          PRGD_TEST_CSS: /tmp/prgd-test.css
-        run: node tests/seguranca-sessao.browser.cjs
-      - name: Testar governança e telas por perfil
-        env:
-          PRGD_TEST_CSS: /tmp/prgd-test.css
-        run: node tests/perfis.browser.cjs
-      - name: Testar cadastro e inscrições institucionais
-        env:
-          PRGD_TEST_CSS: /tmp/prgd-test.css
-        run: node tests/inscricoes.browser.cjs
-      - name: Testar estabilidade e operação do portal NSI
-        env:
-          PRGD_TEST_CSS: /tmp/prgd-test.css
-        run: node tests/portal-nsi.browser.cjs
-      - name: Testar áreas externa e interna por perfil
-        env:
-          PRGD_TEST_CSS: /tmp/prgd-test.css
-        run: node tests/layout-perfis.browser.cjs
-      - name: Testar administração de usuários, colaboradores e contatos vinculados
-        env:
-          PRGD_TEST_CSS: /tmp/prgd-test.css
-        run: node tests/usuarios-colaboradores.browser.cjs
-      - name: Testar consulta e filtros da agenda de eventos
-        env:
-          PRGD_TEST_CSS: /tmp/prgd-test.css
-        run: node tests/eventos-consulta.browser.cjs
-      - name: Testar painel de inscrições e conferência de vagas
-        env:
-          PRGD_TEST_CSS: /tmp/prgd-test.css
-        run: node tests/painel-inscricoes.browser.cjs
+          PRGD_TEST_CSS: ${{ github.workspace }}/dist/assets/tailwind.css
+        run: npm run test:browser
+      - name: Testar artefato com SDK e emuladores reais
+        run: npm run test:integration
       - name: Guardar capturas da interface de teste
         if: always()
         uses: actions/upload-artifact@v4
@@ -73,3 +42,8 @@ jobs:
           name: interface-prgd
           path: test-results/
           if-no-files-found: ignore
+      - name: Guardar artefato estático revisável
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-prgd
+          path: dist/

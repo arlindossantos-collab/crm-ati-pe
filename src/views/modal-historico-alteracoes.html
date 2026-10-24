@@ -1,0 +1,12 @@
+    <div id="modal-historico-alteracoes" role="dialog" aria-modal="true" aria-labelledby="historico-titulo" class="fixed inset-0 bg-slate-900/60 hidden flex justify-center items-center p-4 z-50">
+        <section class="bg-white rounded-2xl shadow-xl max-w-5xl w-full p-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center gap-3 mb-4"><h2 id="historico-titulo" class="text-lg font-bold text-blue-900">Histórico de alterações</h2><button type="button" data-target="modal-historico-alteracoes" class="btn-fechar-modal border rounded-lg px-3 py-1.5" aria-label="Fechar histórico">Fechar</button></div>
+            <p class="text-xs text-slate-500 mb-3">Registros a partir desta versão. Horários de Recife. Senhas e valores dos dados pessoais não são armazenados aqui.</p>
+            <div class="flex flex-wrap gap-2 mb-4"><input id="historico-busca" type="search" placeholder="Buscar usuário, registro ou campo carregado…" aria-label="Buscar no histórico carregado" class="p-2 border rounded-lg text-sm flex-1 min-w-0"><button id="historico-atualizar" type="button" class="border rounded-lg px-3 text-sm">Atualizar</button></div>
+            <p id="historico-mensagem" role="status" class="text-sm text-slate-600 mb-3"></p>
+            <div class="overflow-x-auto"><table class="w-full text-left text-xs min-w-[720px]"><thead class="bg-blue-50"><tr><th class="p-3">Data e hora</th><th class="p-3">Usuário</th><th class="p-3">Ação / Registro</th><th class="p-3">Modificação</th></tr></thead><tbody id="historico-registros" class="divide-y"></tbody></table></div>
+            <button id="historico-mais" type="button" class="mt-4 border rounded-lg px-3 py-2 text-sm disabled:opacity-50">Carregar mais</button>
+        </section>
+    </div>
+
+    <!-- Modal de Observações -->
