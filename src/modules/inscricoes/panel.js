@@ -1,3 +1,4 @@
+import { nomeReferencia } from "../../shared/record-display.js";
 // Responsabilidade: modules/inscricoes/panel. Estado transitório compartilhado apenas em app/state.js.
 import { prgdState } from "../../app/state.js";
 import { ehAdministrador, portalInstitucional } from "../acessos/policies.js";
@@ -25,12 +26,6 @@ export function dadosPainelInscricoes(eventoId, filtros = {}) {
   const ids = [evento.firestoreId, evento.id]
     .filter((id) => id != null)
     .map(String);
-  const nomeRegistro = (lista, id) =>
-    lista.find((r) =>
-      [r.firestoreId, r.id].some((v) => v != null && String(v) === String(id)),
-    )?.nome ||
-    id ||
-    "Não informado";
   const registros = prgdState.dbData.inscricoes
     .filter((i) => i.eventId != null && ids.includes(String(i.eventId)))
     .map((i) => ({
@@ -38,8 +33,8 @@ export function dadosPainelInscricoes(eventoId, filtros = {}) {
       nome:
         i.participanteNome || i.nome || i.email || "Participante não informado",
       email: i.emailInstitucional || i.email || "",
-      orgao: String(nomeRegistro(prgdState.dbData.orgaos, i.orgaoId)),
-      setor: String(nomeRegistro(prgdState.dbData.setores, i.setorId)),
+      orgao: nomeReferencia("orgaos", i.orgaoId),
+      setor: nomeReferencia("setores", i.setorId),
       protocolo: String(i.protocolo || i.firestoreId || i.id || ""),
       situacao:
         i.modeloInscricao !== prgdState.MODELO_INSCRICAO
@@ -79,9 +74,15 @@ export function dadosPainelInscricoes(eventoId, filtros = {}) {
         (!filtros.orgao ||
           String(i.registro.orgaoId || "") === filtros.orgao) &&
         (!texto ||
-          [i.nome, i.email, i.orgao, i.setor, i.protocolo].some((v) =>
-            normalizarLocal(v).includes(texto),
-          )),
+          [
+            i.nome,
+            i.email,
+            i.orgao,
+            i.setor,
+            i.protocolo,
+            i.registro.orgaoId,
+            i.registro.setorId,
+          ].some((v) => normalizarLocal(v).includes(texto))),
     )
     .sort(
       (a, b) =>

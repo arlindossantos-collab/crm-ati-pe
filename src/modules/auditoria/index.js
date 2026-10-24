@@ -1,3 +1,4 @@
+import { rotuloCampo, formatarDataExibicao } from "../../domain/display.js";
 // Responsabilidade: modules/auditoria/index. Estado transitório compartilhado apenas em app/state.js.
 import { prgdState } from "../../app/state.js";
 import { ehAdministrador } from "../acessos/policies.js";
@@ -175,6 +176,7 @@ export function renderHistoricoAlteracoes() {
       r.registroId,
       prgdState.NOMES_COLECOES[r.colecao],
       ...(r.campos || []),
+      ...(r.campos || []).map(rotuloCampo),
     ]
       .join(" ")
       .toLocaleLowerCase("pt-BR")
@@ -183,14 +185,10 @@ export function renderHistoricoAlteracoes() {
   document.getElementById("historico-registros").innerHTML =
     registros
       .map((r) => {
-        const data = r.criadoEm?.toDate?.();
-        const horario = data
-          ? data.toLocaleString("pt-BR", {
-              timeZone: "America/Recife",
-              hour12: false,
-            })
+        const horario = r.criadoEm
+          ? formatarDataExibicao(r.criadoEm, true)
           : "Aguardando horário do servidor";
-        return `<tr><td class="p-3 whitespace-nowrap">${esc(horario)}</td><td class="p-3">${esc(r.autorNome)}<br><span class="text-slate-500">${esc(r.autorUid)}</span></td><td class="p-3"><b>${esc(prgdState.NOMES_ACOES[r.acao] || r.acao)}</b> · ${esc(prgdState.NOMES_COLECOES[r.colecao] || r.colecao)}<br>${esc(r.registroNome)}<br><span class="text-slate-500">${esc(r.registroId)}</span></td><td class="p-3">${esc((r.campos || []).join(", ") || "Metadados do registro")}</td></tr>`;
+        return `<tr><td class="p-3 whitespace-nowrap">${esc(horario)}</td><td class="p-3">${esc(r.autorNome || "Responsável não informado")}</td><td class="p-3"><b>${esc(prgdState.NOMES_ACOES[r.acao] || rotuloCampo(r.acao))}</b> · ${esc(prgdState.NOMES_COLECOES[r.colecao] || rotuloCampo(r.colecao))}<br>${esc(r.registroNome || "Registro sem nome")}<details class="mt-2 text-xs"><summary class="cursor-pointer">Identificadores do registro</summary><p class="break-all">Referência: ${esc(r.registroId || "Não informada")}</p><p class="break-all">Conta responsável: ${esc(r.autorUid || "Não informada")}</p></details></td><td class="p-3">${esc((r.campos || []).map(rotuloCampo).join(", ") || "Informações do registro")}</td></tr>`;
       })
       .join("") ||
     '<tr><td colspan="4" class="p-4 text-slate-500">Nenhuma alteração encontrada nos registros carregados.</td></tr>';

@@ -1,3 +1,9 @@
+import { formatarDataExibicao } from "../../domain/display.js";
+import {
+  nomeReferencia,
+  referenciasCadastroHtml,
+} from "../../shared/record-display.js";
+import { nomeAcaoInstitucional } from "./policies.js";
 // Responsabilidade: modules/acessos/accounts. Estado transitório compartilhado apenas em app/state.js.
 import { prgdState } from "../../app/state.js";
 import {
@@ -126,8 +132,8 @@ export async function revisarUsuario(dados) {
   const uid = prgdState.currentUser?.uid,
     sessao = prgdState.versaoSessao;
   document.getElementById("revisar-usuario-resumo").innerHTML =
-    `<p><b>Pessoa:</b> ${esc(dados.nome)} · ${esc(dados.email)}</p>${prgdState.novoAcessoColaborador ? "<p><b>Vincular ao colaborador:</b> " + esc(prgdState.dbData.colaboradores.find((p) => p.id === prgdState.novoAcessoColaborador.id)?.nome || "Cadastro indisponível") + "</p>" : ""}<p><b>Cadastro:</b> ${dados.ativo ? "Ativo" : "Inativo"}</p><p><b>Perfil:</b> ${esc(nomePerfilAcesso(dados))}</p><p><b>Abrangência:</b> ${dados.perfil === "admin" || dados.acessoInstitucional?.papel === "grgd" ? "Todos os órgãos, conforme o perfil" : esc(nomeOrgaoUsuario(dados))}</p><p><b>Situação do acesso:</b> ${esc(estadoAcessoUsuario(dados).nome)}</p><p><b>Setores:</b> ${esc(dados.acessoInstitucional ? dados.acessoInstitucional.setoresIds.map((id) => prgdState.dbData.setores.find((s) => s.id === id)?.nome || id).join(", ") || "Todos os setores do órgão" : "Conforme módulos liberados")}</p><p><b>Ações / módulos:</b> ${esc(
-      dados.acessoInstitucional?.acoes.join(", ") ||
+    `<p><b>Pessoa:</b> ${esc(dados.nome)} · ${esc(dados.email)}</p>${prgdState.novoAcessoColaborador ? "<p><b>Vincular ao colaborador:</b> " + esc(prgdState.dbData.colaboradores.find((p) => p.id === prgdState.novoAcessoColaborador.id)?.nome || "Cadastro indisponível") + "</p>" : ""}<p><b>Cadastro:</b> ${dados.ativo ? "Ativo" : "Inativo"}</p><p><b>Perfil:</b> ${esc(nomePerfilAcesso(dados))}</p><p><b>Abrangência:</b> ${dados.perfil === "admin" || dados.acessoInstitucional?.papel === "grgd" ? "Todos os órgãos, conforme o perfil" : esc(nomeOrgaoUsuario(dados))}</p><p><b>Situação do acesso:</b> ${esc(estadoAcessoUsuario(dados).nome)}</p><p><b>Setores:</b> ${esc(dados.acessoInstitucional ? dados.acessoInstitucional.setoresIds.map((id) => nomeReferencia("setores", id)).join(", ") || "Todos os setores do órgão" : "Conforme módulos liberados")}</p><p><b>Ações / módulos:</b> ${esc(
+      dados.acessoInstitucional?.acoes.map(nomeAcaoInstitucional).join(", ") ||
         modulosDoUsuario(dados)
           .map(
             (id) =>
@@ -135,7 +141,7 @@ export async function revisarUsuario(dados) {
           )
           .join(", ") ||
         "Nenhum",
-    )}</p>${dados.acessoInstitucional ? `<p><b>Validade:</b> ${esc(new Date(dados.acessoInstitucional.fim).toLocaleString("pt-BR"))}</p><p><b>Revisão:</b> ${esc(new Date(dados.acessoInstitucional.revisao).toLocaleString("pt-BR"))}</p>` : ""}`;
+    )}</p>${dados.acessoInstitucional ? `<p><b>Validade:</b> ${esc(formatarDataExibicao(dados.acessoInstitucional.fim, true))}</p><p><b>Revisão:</b> ${esc(formatarDataExibicao(dados.acessoInstitucional.revisao, true))}</p>` : ""}`;
   document.getElementById("modal-revisar-usuario").classList.remove("hidden");
   const resultado = await new Promise((resolve) => {
     prgdState.revisaoUsuarioResolver = resolve;
@@ -324,13 +330,13 @@ export function camposUsuario(usuario = {}, novo = false) {
       : usuario[chave] || "";
   return `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs p-1">
                 <div class="md:col-span-2 font-bold text-blue-900 border-b pb-2">1. Dados do usuário</div><div><label for="usuario-nome" class="block font-bold mb-1">Nome completo</label><input id="usuario-nome" value="${esc(usuario.nome || "")}" required maxlength="150" class="${cls}"></div>
-                <div><label for="usuario-email" class="block font-bold mb-1">E-mail de acesso</label><input id="usuario-email" type="email" value="${esc(usuario.email || "")}" required ${!novo && usuario.email ? "readonly" : ""} class="${cls}">${!novo ? '<p class="mt-1 text-slate-500">Alterações no e-mail de acesso exigem ajuste no Firebase Authentication.</p>' : ""}</div>
+                <div><label for="usuario-email" class="block font-bold mb-1">E-mail de acesso</label><input id="usuario-email" type="email" value="${esc(usuario.email || "")}" required ${!novo && usuario.email ? "readonly" : ""} class="${cls}">${!novo ? '<p class="mt-1 text-slate-500">Para alterar o e-mail de acesso, solicite a revisão da conta à GRGD.</p>' : ""}</div>
                 <div class="md:col-span-2 font-bold text-blue-900 border-b pb-2 mt-2">2. Perfil, situação e organização</div><div><label for="usuario-tipo" class="block font-bold mb-1">Tipo de usuário</label><select id="usuario-tipo" required class="${cls}"><option value="">Selecione</option><option value="interno" ${usuario.tipoUsuario === "interno" ? "selected" : ""}>Interno - GRGD</option><option value="externo" ${usuario.tipoUsuario === "externo" ? "selected" : ""}>Externo</option></select></div>
                 <div><label for="usuario-ativo" class="block font-bold mb-1">Situação</label><select id="usuario-ativo" class="${cls}"><option value="true" ${usuario.ativo !== false ? "selected" : ""}>Ativo</option><option value="false" ${usuario.ativo === false ? "selected" : ""}>Inativo</option></select></div>
                 <div><label for="usuario-perfil" class="block font-bold mb-1">Perfil do sistema</label><select id="usuario-perfil" class="${cls}"><option value="comum">Consulta</option><option value="admin" ${ehAdministrador(usuario) ? "selected" : ""}>Administrador</option></select></div>
                 <div><label for="usuario-orgao" class="block font-bold mb-1">Cliente / Secretaria</label><input id="usuario-orgao" value="${esc(usuario.orgao || "")}" class="${cls}"></div>
                 <div><label for="usuario-tags" class="block font-bold mb-1">Tags / Categorias (separe por vírgula)</label><input id="usuario-tags" value="${esc(lista("tags"))}" class="${cls}"></div>
-                <div><label for="usuario-grupos" class="block font-bold mb-1">Grupos de eventos</label><select id="usuario-grupos" multiple class="${cls}" aria-describedby="usuario-grupos-ajuda">${[...new Map([...prgdState.dbData.grupos.map((g) => [String(g.firestoreId || g.id), g.nome || g.id]), ...(Array.isArray(usuario.grupos) ? usuario.grupos : []).map((id) => [id, prgdState.dbData.grupos.find((g) => String(g.firestoreId || g.id) === id)?.nome || id])]).entries()].map(([id, nome]) => `<option value="${esc(id)}" ${(usuario.grupos || []).includes(id) ? "selected" : ""}>${esc(nome)}</option>`).join("")}</select><p id="usuario-grupos-ajuda" class="text-slate-500 mt-1">Use Ctrl ou Command para selecionar vários.</p></div>
+                <div><label for="usuario-grupos" class="block font-bold mb-1">Grupos de eventos</label><select id="usuario-grupos" multiple class="${cls}" aria-describedby="usuario-grupos-ajuda">${[...new Map([...prgdState.dbData.grupos.map((g) => [String(g.firestoreId || g.id), g.nome || "Grupo sem nome"]), ...(Array.isArray(usuario.grupos) ? usuario.grupos : []).map((id) => [id, nomeReferencia("grupos", id)])]).entries()].map(([id, nome]) => `<option value="${esc(id)}" ${(usuario.grupos || []).includes(id) ? "selected" : ""}>${esc(nome)}</option>`).join("")}</select><p id="usuario-grupos-ajuda" class="text-slate-500 mt-1">Use Ctrl ou Command para selecionar vários.</p></div>
                 <fieldset class="md:col-span-2 border rounded-lg p-3"><legend class="font-bold px-1">Módulos do acesso anterior</legend><p id="usuario-permissoes-ajuda" class="text-slate-500 mb-2"></p><div class="grid grid-cols-2 gap-2">${prgdState.MÓDULOS_SISTEMA.filter(
                   (m) =>
                     m.id !== "usuarios" &&
@@ -343,7 +349,7 @@ export function camposUsuario(usuario = {}, novo = false) {
                   .join("")}</div></fieldset>
                 <div class="md:col-span-2 font-bold text-blue-900 border-b pb-2 mt-2">3. Vínculo, ações e validade</div>${camposVinculo(usuario)}
                 ${!novo ? resumoColaboradorUsuario(usuario) : ""}
-                ${novo ? `<div class="md:col-span-2"><label for="usuario-senha" class="block font-bold mb-1">Senha inicial de acesso (mínimo 8 caracteres)</label><input id="usuario-senha" type="password" autocomplete="new-password" minlength="8" required class="${cls}"><p class="text-slate-500 mt-1">A senha é enviada apenas ao Firebase Authentication. Não é gravada no cadastro.</p></div>` : `<p class="md:col-span-2 text-slate-500">Identificador do cadastro: ${esc(uidCadastro(usuario))}. A inativação bloqueia o acesso e preserva os vínculos anteriores.</p>`}
+                ${novo ? `<div class="md:col-span-2"><label for="usuario-senha" class="block font-bold mb-1">Senha inicial de acesso (mínimo 8 caracteres)</label><input id="usuario-senha" type="password" autocomplete="new-password" minlength="8" required class="${cls}"><p class="text-slate-500 mt-1">A senha é usada somente para autenticação. Não é gravada no cadastro.</p></div>` : `<div class="md:col-span-2"><p class="text-slate-500">A inativação bloqueia o acesso e preserva os vínculos anteriores.</p>${referenciasCadastroHtml([["uid", uidCadastro(usuario)]])}</div>`}
             </div>`;
 }
 
@@ -407,7 +413,9 @@ export function lerDadosUsuario(anterior = {}) {
       "Sua própria conta deve permanecer ativa como administrador interno. Solicite a outro administrador a alteração.",
     );
   if (anterior.email && email !== anterior.email.toLowerCase())
-    throw new Error("Altere o e-mail pelo fluxo do Firebase Authentication.");
+    throw new Error(
+      "Para alterar o e-mail de acesso, solicite a revisão da conta à GRGD.",
+    );
   const selecionados = Array.from(
     document.querySelectorAll('input[name="usuario-modulo"]:checked'),
   ).map((cb) => cb.value);
@@ -661,7 +669,7 @@ export function renderUsuarios() {
     us
       .map((u) => {
         const audit = renderAuditInfo(u);
-        return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${identificacaoUsuario({ ...u, uid: uidCadastro(u) })}</td><td class="p-4 text-slate-600">${esc(u.email || u.id)}</td><td class="p-4 text-xs"><b>${nomeTipoUsuario(u)}</b><br>${u.ativo === false ? "Inativo" : "Ativo"}<small class="block mt-1 text-blue-900">${esc(estadoAcessoUsuario(u).nome)}</small></td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(nomeOrgaoUsuario(u))}${u.acessoInstitucional ? '<small class="block mt-1 font-normal">' + esc(u.acessoInstitucional.setoresIds.map((id) => prgdState.dbData.setores.find((s) => s.id === id)?.nome || id).join(", ") || "Órgão integral") + "</small>" : ""}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(", ") : u.tags || "-")}</td><td class="p-4"><span class="${u.perfil === "admin" ? "bg-emerald-100" : "bg-amber-100"} font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.acessoInstitucional ? nomePerfilAcesso(u) : u.perfil || "comum")}${u.acessoInstitucional ? '<small class="block normal-case font-normal mt-1">' + esc(situacaoVinculo(u)) + "</small>" : ""}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button>${ehAdministrador() ? `<button type="button" class="ml-1 text-xs bg-blue-100 px-2.5 py-1 rounded font-semibold text-blue-900" data-usuario-editar="${esc(u.firestoreId)}">Editar</button><button type="button" class="ml-1 text-xs bg-red-50 px-2.5 py-1 rounded font-semibold text-red-700" data-usuario-excluir="${esc(u.firestoreId)}" ${uidCadastro(u) === prgdState.currentUser?.uid ? 'disabled title="Você não pode excluir a própria conta"' : ""}>Excluir</button>` : ""}</td></tr>`;
+        return `<tr class="hover:bg-slate-50"><td class="p-4 font-bold">${identificacaoUsuario({ ...u, uid: uidCadastro(u) })}</td><td class="p-4 text-slate-600">${esc(u.email || "E-mail não informado")}</td><td class="p-4 text-xs"><b>${nomeTipoUsuario(u)}</b><br>${u.ativo === false ? "Inativo" : "Ativo"}<small class="block mt-1 text-blue-900">${esc(estadoAcessoUsuario(u).nome)}</small></td><td class="p-4"><span class="bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded text-xs">${esc(nomeOrgaoUsuario(u))}${u.acessoInstitucional ? '<small class="block mt-1 font-normal">' + esc(u.acessoInstitucional.setoresIds.map((id) => nomeReferencia("setores", id)).join(", ") || "Órgão integral") + "</small>" : ""}</span></td><td class="p-4 text-xs">${esc(Array.isArray(u.tags) ? u.tags.join(", ") : u.tags || "-")}</td><td class="p-4"><span class="${u.perfil === "admin" ? "bg-emerald-100" : "bg-amber-100"} font-bold px-2 py-0.5 rounded text-xs uppercase">${esc(u.acessoInstitucional ? nomePerfilAcesso(u) : u.perfil || "comum")}${u.acessoInstitucional ? '<small class="block normal-case font-normal mt-1">' + esc(situacaoVinculo(u)) + "</small>" : ""}</span></td><td class="p-4">${audit.dataHtml}</td><td class="p-4">${audit.autorHtml}</td><td class="p-4 text-center"><button class="text-xs bg-slate-100 px-2.5 py-1 rounded tr-detalhe font-semibold text-blue-900 cursor-pointer" data-colecao="usuarios" data-id="${esc(u.firestoreId)}">Detalhes</button>${ehAdministrador() ? `<button type="button" class="ml-1 text-xs bg-blue-100 px-2.5 py-1 rounded font-semibold text-blue-900" data-usuario-editar="${esc(u.firestoreId)}">Editar</button><button type="button" class="ml-1 text-xs bg-red-50 px-2.5 py-1 rounded font-semibold text-red-700" data-usuario-excluir="${esc(u.firestoreId)}" ${uidCadastro(u) === prgdState.currentUser?.uid ? 'disabled title="Você não pode excluir a própria conta"' : ""}>Excluir</button>` : ""}</td></tr>`;
       })
       .join("") ||
     '<tr><td colspan="9" class="text-slate-400 text-sm text-center py-6">Nenhum usuário encontrado.</td></tr>';

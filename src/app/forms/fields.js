@@ -1,3 +1,8 @@
+import { referenciaTecnica } from "../../domain/display.js";
+import {
+  campoEdicaoCadastro,
+  referenciasCadastroHtml,
+} from "../../shared/record-display.js";
 import { prgdState } from "../state.js";
 
 import { camposInscricaoEvento } from "../../modules/inscricoes/operations.js";
@@ -103,76 +108,42 @@ export function montarEdicaoEstruturada(colecao, item) {
     return;
   }
 
-  c.innerHTML = Object.entries(item)
-    .filter(
-      ([k]) =>
-        k !== "id" &&
-        k !== "firestoreId" &&
-        !(
-          colecao === "eventos" &&
-          [
-            "localId",
-            "localEvento",
-            "dataInicio",
-            "dataFim",
-            "horaInicio",
-            "horaFim",
-            "custoLocacaoPrevisto",
-            "status",
-            ...(item.modeloInscricao === prgdState.MODELO_INSCRICAO
-              ? [
-                  "modeloInscricao",
-                  "inscritosCount",
-                  "ultimaInscricaoId",
-                  "inscricoesAbertas",
-                  "inscricaoInicio",
-                  "inscricaoFim",
-                  "orgaosElegiveis",
-                  "limiteVagas",
-                ]
-              : []),
-          ].includes(k)
-        ),
-    )
-    .map(([k, v]) => {
-      const classe = "w-full p-2 border rounded-lg text-xs bg-white";
-      const label = `<label class="block font-bold text-[11px] uppercase mb-1">${esc(k)}</label>`;
-      if (
+  const entradas = Object.entries(item).filter(
+    ([k]) =>
+      k !== "id" &&
+      k !== "firestoreId" &&
+      !(
+        colecao === "eventos" &&
         [
-          "criadoEm",
-          "criadoPor",
-          "atualizadoEm",
-          "editadoPor",
-          "uid",
-          "criadoPorUid",
-          "editadoPorUid",
-          "perfilAtualizadoEm",
-          "ultimaAuditoriaId",
+          "localId",
+          "localEvento",
+          "dataInicio",
+          "dataFim",
+          "horaInicio",
+          "horaFim",
+          "custoLocacaoPrevisto",
+          "status",
+          ...(item.modeloInscricao === prgdState.MODELO_INSCRICAO
+            ? [
+                "modeloInscricao",
+                "inscritosCount",
+                "ultimaInscricaoId",
+                "inscricoesAbertas",
+                "inscricaoInicio",
+                "inscricaoFim",
+                "orgaosElegiveis",
+                "limiteVagas",
+              ]
+            : []),
         ].includes(k)
-      ) {
-        return `<div>${label}<input type="text" name="${esc(k)}" value="${esc(v)}" readonly class="${classe}"></div>`;
-      }
-      if (typeof v === "boolean") {
-        return `<div>${label}<select name="${esc(k)}" data-field-type="boolean" class="${classe}"><option value="true" ${v ? "selected" : ""}>Sim</option><option value="false" ${!v ? "selected" : ""}>Não</option></select></div>`;
-      }
-      if (typeof v === "number") {
-        return `<div>${label}<input type="number" step="any" name="${esc(k)}" data-field-type="number" value="${esc(v)}" required class="${classe}"></div>`;
-      }
-      if (Array.isArray(v)) {
-        if (
-          !["historicoAcoes", "versoesAnteriores"].includes(k) &&
-          v.every((x) => typeof x === "string")
-        ) {
-          return `<div>${label}<input type="text" name="${esc(k)}" data-field-type="string-list" value="${esc(v.join(", "))}" class="${classe}"><span class="text-slate-500">Separe os itens por vírgula.</span></div>`;
-        }
-        return `<div>${label}<p class="p-2 border rounded-lg text-slate-500">${v.length} registro(s) preservado(s). Edição disponível no fluxo específico.</p></div>`;
-      }
-      if (v !== null && typeof v === "object") {
-        return `<div>${label}<p class="p-2 border rounded-lg text-slate-500">Dados estruturados preservados. Edição disponível no fluxo específico.</p></div>`;
-      }
-      return `<div>${label}<input type="text" name="${esc(k)}" value="${esc(v)}" class="${classe}"></div>`;
-    })
-    .join("");
+      ),
+  );
+  c.innerHTML =
+    entradas
+      .filter(([k]) => !referenciaTecnica(k))
+      .map(([k, v]) => campoEdicaoCadastro(k, v))
+      .join("") +
+    referenciasCadastroHtml(entradas.filter(([k]) => referenciaTecnica(k)));
   if (colecao === "eventos")
     c.innerHTML += camposAgendaEvento(item) + camposInscricaoEvento(item);
 }

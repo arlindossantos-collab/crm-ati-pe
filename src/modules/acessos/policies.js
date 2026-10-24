@@ -138,7 +138,11 @@ export function nomeOrgaoUsuario(usuario) {
   return (
     prgdState.dbData.orgaos.find((o) => String(o.firestoreId || o.id) === chave)
       ?.sigla ||
-    chave ||
+    prgdState.dbData.orgaos.find((o) => String(o.firestoreId || o.id) === chave)
+      ?.nome ||
+    (usuario.acessoInstitucional?.orgaoId
+      ? "Órgão indisponível nesta consulta"
+      : chave) ||
     (usuario.tipoUsuario === "externo" ? "Não vinculado" : "ATI")
   );
 }

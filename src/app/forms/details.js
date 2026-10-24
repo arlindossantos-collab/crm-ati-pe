@@ -1,3 +1,9 @@
+import { formatarDataExibicao } from "../../domain/display.js";
+import {
+  detalhesCadastroHtml,
+  referenciasCadastroHtml,
+} from "../../shared/record-display.js";
+import { ehAdministrador } from "../../modules/acessos/policies.js";
 import { prgdState } from "../state.js";
 import {
   podeAlterarColecao,
@@ -14,10 +20,7 @@ import {
 } from "../../modules/orgaos/contacts.js";
 
 import { uidCadastro, pessoasResponsaveis } from "../../shared/identity.js";
-import {
-  avatarUsuario,
-  identificacaoUsuario,
-} from "../../modules/perfil/index.js";
+import { avatarUsuario } from "../../modules/perfil/index.js";
 import { historicoDemandaHtml } from "../../modules/demandas/index.js";
 import {
   atualizarPainelInscricoesEvento,
@@ -39,7 +42,16 @@ export function detalharRegistro(colecao, firestoreId) {
   document.getElementById("detalhe-titulo-modal").textContent =
     colecao === "orgaos"
       ? "Governança e Contatos Institucionais"
-      : "Detalhes (" + colecao.toUpperCase() + ")";
+      : "Detalhes de " +
+        ({
+          usuarios: "acesso",
+          eventos: "evento",
+          demandas: "demanda",
+          locais: "local",
+          fornecedores: "fornecedor",
+          bases: "base",
+          grupos: "grupo",
+        }[colecao] || "cadastro");
   document.getElementById("edit-colecao").value = colecao;
   document.getElementById("edit-doc-id").value =
     item.firestoreId || firestoreId;
@@ -224,18 +236,13 @@ export function detalharRegistro(colecao, firestoreId) {
   } else if (colecao === "usuarios") {
     const v = item.acessoInstitucional;
     document.getElementById("detalhe-conteudo").innerHTML =
-      `<div class="flex items-center gap-3">${avatarUsuario({ ...item, uid: uidCadastro(item) }, "lg")}<div><h4 class="font-bold">${esc(item.nome || item.email)}</h4><p class="text-xs text-slate-500">${esc(item.email || "")}</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs"><p><b>Perfil:</b> ${esc(nomePerfilAcesso(item))}</p><p><b>Órgão:</b> ${esc(nomeOrgaoUsuario(item))}</p><p><b>Situação:</b> ${item.ativo === false ? "Inativo" : "Ativo"}${v ? " · " + esc(situacaoVinculo(item)) : ""}</p><p><b>Acesso efetivo:</b> ${esc(estadoAcessoUsuario(item).nome)}</p><p><b>Identificador:</b> ${esc(uidCadastro(item))}</p>${v ? `<p><b>Validade:</b> ${esc(new Date(v.fim).toLocaleDateString("pt-BR"))}</p><p><b>Revisão:</b> ${esc(new Date(v.revisao).toLocaleDateString("pt-BR"))}</p>` : ""}</div>`;
+      `<div class="flex items-center gap-3">${avatarUsuario({ ...item, uid: uidCadastro(item) }, "lg")}<div><h4 class="font-bold">${esc(item.nome || item.email)}</h4><p class="text-xs text-slate-500">${esc(item.email || "")}</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs"><p><b>Perfil:</b> ${esc(nomePerfilAcesso(item))}</p><p><b>Órgão:</b> ${esc(nomeOrgaoUsuario(item))}</p><p><b>Situação:</b> ${item.ativo === false ? "Inativo" : "Ativo"}${v ? " · " + esc(situacaoVinculo(item)) : ""}</p><p><b>Acesso efetivo:</b> ${esc(estadoAcessoUsuario(item).nome)}</p>${v ? `<p><b>Validade:</b> ${esc(formatarDataExibicao(v.fim))}</p><p><b>Revisão:</b> ${esc(formatarDataExibicao(v.revisao))}</p>` : ""}</div>` +
+      (ehAdministrador()
+        ? referenciasCadastroHtml([["uid", uidCadastro(item)]])
+        : "");
   } else {
-    document.getElementById("detalhe-conteudo").innerHTML = Object.entries(item)
-      .filter(
-        ([k]) =>
-          !["firestoreId", "fotoPerfil", "ultimaAuditoriaId"].includes(k),
-      )
-      .map(
-        ([k, v]) =>
-          `<div class="p-2 bg-slate-50 rounded"><span class="text-[10px] text-slate-400 font-bold uppercase block">${esc(k)}</span><span class="font-medium">${["criadoPor", "editadoPor"].includes(k) ? identificacaoUsuario({ nome: v, uid: item[k + "Uid"] }) : Array.isArray(v) ? esc(v.join(", ")) : esc(v)}</span></div>`,
-      )
-      .join("");
+    document.getElementById("detalhe-conteudo").innerHTML =
+      detalhesCadastroHtml(item, ehAdministrador());
   }
 
   if (colecao === "demandas")
@@ -259,9 +266,7 @@ export function detalharRegistro(colecao, firestoreId) {
   document.getElementById("btn-excluir-registro").textContent =
     colecao === "usuarios" ? "Excluir usuário" : "Excluir registro";
   document.getElementById("btn-salvar-edicao").textContent =
-    colecao === "usuarios"
-      ? "Revisar e salvar usuário"
-      : "Salvar na Nuvem (Firestore)";
+    colecao === "usuarios" ? "Revisar e salvar usuário" : "Salvar alterações";
   document
     .getElementById("detalhe-area-admin")
     .classList.toggle("hidden", !podeAlterarColecao(colecao));

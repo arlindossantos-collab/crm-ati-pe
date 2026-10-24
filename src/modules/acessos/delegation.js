@@ -1,3 +1,4 @@
+import { dataHoraLocalFormulario } from "../../domain/display.js";
 // Responsabilidade: modules/acessos/delegation. Estado transitório compartilhado apenas em app/state.js.
 import { prgdState } from "../../app/state.js";
 import {
@@ -15,12 +16,7 @@ export function camposVinculo(usuario) {
     cls = "w-full border rounded-lg p-2 bg-white text-xs";
   const input = (id, label, value = "", type = "text") =>
     `<label class="block">${label}<input id="vinculo-${id}" type="${type}" value="${esc(value)}" class="${cls}"></label>`;
-  const data = (t) =>
-    t
-      ? new Date(t - new Date(t).getTimezoneOffset() * 60000)
-          .toISOString()
-          .slice(0, 16)
-      : "";
+  const data = dataHoraLocalFormulario;
   return `<fieldset class="md:col-span-2 border rounded-xl p-3"><legend class="font-bold px-1">Vínculo institucional</legend><p class="text-slate-500 mb-3">Defina o papel, o órgão, os setores e as ações autorizadas. Responsáveis e referências de aprovação são opcionais; a ativação é registrada com seu usuário e horário.</p><div class="grid md:grid-cols-2 gap-3">
                 <label>Papel institucional<select id="vinculo-papel" class="${cls}"><option value="">Manter acesso anterior (sem novo vínculo)</option>${Object.entries(
                   prgdState.PAPEIS_INSTITUCIONAIS,
@@ -94,8 +90,8 @@ export function atualizarCamposVinculo(selecionados = null) {
       .join("") +
     anteriores
       .map(
-        (id) =>
-          `<option value="${esc(id)}" selected>Vínculo anterior: ${esc(id)} (revisar)</option>`,
+        (id, indice) =>
+          `<option value="${esc(id)}" selected>Setor anterior indisponível — referência ${indice + 1} (revisar)</option>`,
       )
       .join("");
   setores.disabled = grgd;

@@ -71,3 +71,9 @@ Use Node 22/npm ci. Execute npm run check, npm test, npm run build, testes de re
 Não adicionar SDK Firebase em outro módulo: importe src/services/firebase.js. Estado transitório em app/state não substitui validação/autorização do servidor. Novos módulos devem declarar imports; o check rejeita nomes sem origem e dependências fora da fronteira. A compatibilidade VM dos testes usa as fontes reais com acessores para os nomes legados; o navegador exerce imports ES reais.
 
 Mudanças para PostgreSQL/LDAP devem preservar IDs, modelos de inscrição e auditoria, com staging e reconciliação. Ler docs/migracao antes de conectar serviços institucionais. Exemplos de .env são contratos de requisitos; nunca preencher valores secretos no Git.
+
+## Propostas encadeadas ainda não integradas
+
+Por decisão do usuário, a PR #26 permanece pendente. A correção v0.17.1 parte de seu commit fd2c434, em branch própria, com PR base refactor/organizacao-migracao-v0170. Próximos incrementos devem partir da ponta da proposta anterior, preservando a cadeia e permitindo revisar somente cada diferença.
+
+Na autorização futura para integrar o conjunto, conferir o diff acumulado da última ponta contra main, revalidar e ajustar a base da proposta final. Preferir merge commit para preservar a ancestralidade; conferir as PRs anteriores após a integração, sem squash/reaplicação duplicada. Pages precisa mudar para Actions antes da integração desta arquitetura. [Registro da cadeia e validação](docs/planejamento/cadastros-legibilidade.md).

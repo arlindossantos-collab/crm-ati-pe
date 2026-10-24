@@ -1,3 +1,4 @@
+import { nomeReferencia } from "../../shared/record-display.js";
 // Responsabilidade: modules/orgaos/contacts. Estado transitório compartilhado apenas em app/state.js.
 import { prgdState } from "../../app/state.js";
 import { situacaoCadastroColaborador } from "../colaboradores/index.js";
@@ -66,7 +67,7 @@ export function resumoContatosOrgao(o) {
   )
     .map(([id, f]) => {
       const contatos = contatosDaFuncao(o, id);
-      return `<div class="py-2 border-b border-blue-100 last:border-0"><b>${esc(f.nome)}:</b> ${contatos.length ? contatos.map((p) => `${esc(p.nome)} · ${esc(p.emailInstitucional)} · ${esc(p.telefone || "Sem telefone")}<small class="block">${esc(prgdState.dbData.setores.find((s) => s.id === p.setorId)?.nome || p.setorId)} · ${esc(situacaoCadastroColaborador(p).nome)}</small>`).join("<br>") : o.contatosVinculados?.[id] && !["auto", "manual"].includes(o.contatosVinculados[id]) ? "Vínculo indisponível; revise o colaborador." : "Sem colaborador vinculado. Dados manuais anteriores preservados."}</div>`;
+      return `<div class="py-2 border-b border-blue-100 last:border-0"><b>${esc(f.nome)}:</b> ${contatos.length ? contatos.map((p) => `${esc(p.nome)} · ${esc(p.emailInstitucional)} · ${esc(p.telefone || "Sem telefone")}<small class="block">${esc(nomeReferencia("setores", p.setorId))} · ${esc(situacaoCadastroColaborador(p).nome)}</small>`).join("<br>") : o.contatosVinculados?.[id] && !["auto", "manual"].includes(o.contatosVinculados[id]) ? "Vínculo indisponível; revise o colaborador." : "Sem colaborador vinculado. Dados manuais anteriores preservados."}</div>`;
     })
     .join(
       "",

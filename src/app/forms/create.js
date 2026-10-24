@@ -38,7 +38,7 @@ export function abrirModalForm(tipo) {
       ? "Novo usuário"
       : "Novo Cadastro: " + tipo.toUpperCase();
   document.getElementById("btn-salvar-cadastro").textContent =
-    tipo === "usuario" ? "Salvar usuário" : "Salvar na Nuvem (Firestore)";
+    tipo === "usuario" ? "Salvar usuário" : "Salvar cadastro";
 
   if (tipo === "usuario") {
     document.getElementById("edit-campos-dinamicos").innerHTML = "";

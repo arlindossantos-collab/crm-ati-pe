@@ -2,7 +2,7 @@
 
 Sistema da GRGD/ATI-PE para órgãos, colaboradores, acessos, eventos, inscrições e cadastros de apoio.
 
-**Proposta v0.17.0 — organização modular e preparação de migração. Ainda não publicada.** A versão pública confirmada é a v0.16.0, integrada no [PR #25](https://github.com/arlindossantos-collab/crm-ati-pe/pull/25), com [Pages verificado](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40131869055). [Histórico](CHANGELOG.md).
+**Proposta v0.17.1 — legibilidade de cadastros, dependente da organização modular da [PR #26](https://github.com/arlindossantos-collab/crm-ati-pe/pull/26). As propostas aguardam integração conjunta; ainda não publicadas.** A versão pública confirmada é a v0.16.0, integrada no [PR #25](https://github.com/arlindossantos-collab/crm-ati-pe/pull/25), com [Pages verificado](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40131869055). [Histórico](CHANGELOG.md).
 
 ## Onde está cada responsabilidade
 
@@ -23,6 +23,8 @@ Sistema da GRGD/ATI-PE para órgãos, colaboradores, acessos, eventos, inscriç�
 | dist/ | Artefato gerado; único diretório publicável, fora do Git |
 
 O código antigo de v0.40 foi retirado da árvore ativa após comparação. A [auditoria do legado](docs/auditoria-legado.md) registra recursos exclusivos e a referência Git para recuperação. A URL histórica recebe uma página informativa sem acesso ao Firebase. A [prévia de perfis](public/previa-perfis.html) continua preservada e sem conexão a serviços.
+
+A correção de cadastros substitui rótulos internos, datas/estruturas serializadas e códigos em mensagens por apresentações legíveis. Preserva identificadores e os dados de edição. [Antes/depois, testes e integração conjunta](docs/planejamento/cadastros-legibilidade.md).
 
 ## O que está implementado
 

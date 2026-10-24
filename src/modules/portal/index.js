@@ -1,3 +1,9 @@
+import {
+  rotuloCampo,
+  formatarDataExibicao,
+  nomeSituacaoInscricao,
+} from "../../domain/display.js";
+import { nomeReferencia } from "../../shared/record-display.js";
 // Responsabilidade: modules/portal/index. Estado transitório compartilhado apenas em app/state.js.
 import { prgdState } from "../../app/state.js";
 import {
@@ -311,7 +317,7 @@ export function renderPortalInstitucional() {
   const orgao = prgdState.dbData.orgaos.find(
     (o) => String(o.firestoreId || o.id) === v.orgaoId,
   );
-  const resumo = `<div class="flex flex-wrap gap-3 justify-between items-start"><div><p class="text-xs text-blue-800 font-bold">${esc(nomePerfilAcesso())}</p><h3 class="font-bold text-xl mt-1">${esc(orgao?.nome || orgao?.sigla || (prgdState.portalErros.orgaos ? "Órgão indisponível" : prgdState.portalCarregando.orgaos ? "Carregando órgão…" : "Órgão vinculado"))}</h3><p class="text-sm text-slate-600 mt-2">${v.setoresIds.length ? esc(v.setoresIds.map((id) => prgdState.dbData.setores.find((s) => s.id === id)?.nome || "Setor vinculado").join(", ")) : "Todos os setores do órgão"}</p></div><span class="text-xs bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-full px-3 py-1">Vínculo ativo</span></div><p class="text-xs text-slate-500 mt-3">Válido até ${esc(new Date(v.fim).toLocaleDateString("pt-BR"))} · Revisão até ${esc(new Date(v.revisao).toLocaleDateString("pt-BR"))}</p>`;
+  const resumo = `<div class="flex flex-wrap gap-3 justify-between items-start"><div><p class="text-xs text-blue-800 font-bold">${esc(nomePerfilAcesso())}</p><h3 class="font-bold text-xl mt-1">${esc(orgao?.nome || orgao?.sigla || (prgdState.portalErros.orgaos ? "Órgão indisponível" : prgdState.portalCarregando.orgaos ? "Carregando órgão…" : "Órgão vinculado"))}</h3><p class="text-sm text-slate-600 mt-2">${v.setoresIds.length ? esc(v.setoresIds.map((id) => prgdState.dbData.setores.find((s) => s.id === id)?.nome || "Setor vinculado").join(", ")) : "Todos os setores do órgão"}</p></div><span class="text-xs bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-full px-3 py-1">Vínculo ativo</span></div><p class="text-xs text-slate-500 mt-3">Válido até ${esc(formatarDataExibicao(v.fim))} · Revisão até ${esc(formatarDataExibicao(v.revisao))}</p>`;
   if (box.innerHTML !== resumo) box.innerHTML = resumo;
   atualizarSetoresColaborador();
   const status = document.getElementById("portal-cadastro-status");
@@ -347,10 +353,7 @@ export function renderPortalInstitucional() {
     [
       (i) => i.nome || "-",
       (i) => i.emailInstitucional || "-",
-      (i) =>
-        prgdState.dbData.setores.find((s) => s.id === i.setorId)?.nome ||
-        i.setorId ||
-        "-",
+      (i) => nomeReferencia("setores", i.setorId),
       (i) => (i.ativo === false ? "Inativo" : "Ativo"),
     ],
   );
@@ -363,20 +366,18 @@ export function renderPortalInstitucional() {
           (e) => String(e.firestoreId || e.id) === i.eventId,
         )?.titulo ||
         i.eventoTitulo ||
-        i.eventId ||
-        "-",
-      (i) => i.situacao || "-",
+        nomeReferencia("eventos", i.eventId),
+      (i) => nomeSituacaoInscricao(i.situacao, i.modeloInscricao),
       (i) => i.protocolo || "-",
     ],
   );
   document.getElementById("portal-auditoria").innerHTML = linhas(
     "auditoriaOrgao",
     [
-      (i) => i.autorNome || i.autorUid || "-",
-      (i) => i.acao || "-",
-      (i) => i.registroNome || i.registroId || "-",
-      (i) =>
-        i.criadoEm?.toDate ? i.criadoEm.toDate().toLocaleString("pt-BR") : "-",
+      (i) => i.autorNome || "Responsável não informado",
+      (i) => prgdState.NOMES_ACOES[i.acao] || rotuloCampo(i.acao),
+      (i) => i.registroNome || "Registro sem nome",
+      (i) => formatarDataExibicao(i.criadoEm, true),
     ],
   );
   renderAcoesPortal();

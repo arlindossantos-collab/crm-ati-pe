@@ -20,7 +20,7 @@ import { firebaseConfiguration } from "../config/firebase.js";
 
 export function bootstrap() {
   window.__PRGD_MODULE_OK = true;
-  console.info("PRGD v0.17.0: organização modular e preparação de migração");
+  console.info("PRGD v0.17.1: legibilidade de cadastros e interface");
   prgdState.firebaseConfig = firebaseConfiguration();
   prgdState.app = initializeApp(prgdState.firebaseConfig);
   prgdState.db = getFirestore(prgdState.app);

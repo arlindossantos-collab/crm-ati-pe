@@ -1,3 +1,5 @@
+import { formatarDataExibicao } from "../../domain/display.js";
+import { nomeReferencia } from "../../shared/record-display.js";
 // Responsabilidade: modules/colaboradores/index. Estado transitório compartilhado apenas em app/state.js.
 import { prgdState } from "../../app/state.js";
 import {
@@ -299,11 +301,13 @@ export function abrirColaborador(id = "") {
   document
     .getElementById("colab-orgao-label")
     .classList.toggle("hidden", !ehAdministrador());
-  document.getElementById("colab-validade").value = p?.validadeCadastro
-    ? new Date(p.validadeCadastro).toLocaleDateString("en-CA", {
-        timeZone: "America/Recife",
-      })
-    : "";
+  document.getElementById("colab-validade").value =
+    p?.validadeCadastro &&
+    Number.isFinite(new Date(p.validadeCadastro).getTime())
+      ? new Date(p.validadeCadastro).toLocaleDateString("en-CA", {
+          timeZone: "America/Recife",
+        })
+      : "";
   document.getElementById("colab-funcoes").innerHTML = Object.entries(
     prgdState.FUNCOES_CONTATO,
   )
@@ -514,9 +518,8 @@ export function renderColaboradoresAdmin() {
     prgdState.dbData.orgaos.find(
       (o) => String(o.firestoreId || o.id) === p.orgaoId,
     )?.nome ||
-    p.orgaoId;
-  const nomeSetor = (p) =>
-    prgdState.dbData.setores.find((s) => s.id === p.setorId)?.nome || p.setorId;
+    nomeReferencia("orgaos", p.orgaoId);
+  const nomeSetor = (p) => nomeReferencia("setores", p.setorId);
   const lista = prgdState.dbData.colaboradores.filter(
     (p) =>
       (!org || p.orgaoId === org) &&
@@ -585,7 +588,7 @@ export function renderColaboradoresAdmin() {
             const acesso = acessoDoColaborador(p),
               usuario = acesso.usuario,
               st = situacaoCadastroColaborador(p);
-            return `<tr class="border-t"><td class="p-3"><b>${esc(p.nome)}</b><small class="block">${esc(p.emailInstitucional)}</small><small class="block text-slate-500">Matrícula: ${esc(p.matricula || "Não informada")}</small><small class="block text-slate-500">${esc(p.telefone || "")} ${esc(p.cargo || "")}</small></td><td class="p-3">${esc(nomeOrgao(p))}<small class="block">${esc(nomeSetor(p))}</small></td><td class="p-3">${esc((p.funcoesContato || []).map((f) => prgdState.FUNCOES_CONTATO[f]?.nome || f).join(", ") || "Sem função indicada")}</td><td class="p-3"><span class="text-blue-900">${esc(st.nome)}</span><small class="block">${p.validadeCadastro ? esc(new Date(p.validadeCadastro).toLocaleDateString("pt-BR", { timeZone: "America/Recife" })) : "Revisão não informada"}</small></td><td class="p-3"><b>${esc(acesso.nome)}</b><small class="block">${esc(usuario?.email || "")}</small><small class="block">${esc(usuario ? nomePerfilAcesso(usuario) : "")}</small></td><td class="p-3"><div class="flex flex-wrap gap-2"><button type="button" data-colaborador-editar="${esc(p.id)}" class="border rounded-lg px-3 py-2 text-blue-900">Editar</button><button type="button" data-colaborador-vincular="${esc(p.id)}" class="border rounded-lg px-3 py-2 text-blue-900">${p.usuarioUid ? "Ver vínculo" : "Vincular conta existente"}</button><button type="button" data-colaborador-acesso="${esc(p.id)}" class="border border-blue-200 bg-blue-50/70 rounded-lg px-3 py-2 text-blue-900">${p.usuarioUid ? "Gerenciar permissões" : "Criar acesso"}</button></div></td></tr>`;
+            return `<tr class="border-t"><td class="p-3"><b>${esc(p.nome)}</b><small class="block">${esc(p.emailInstitucional)}</small><small class="block text-slate-500">Matrícula: ${esc(p.matricula || "Não informada")}</small><small class="block text-slate-500">${esc(p.telefone || "")} ${esc(p.cargo || "")}</small></td><td class="p-3">${esc(nomeOrgao(p))}<small class="block">${esc(nomeSetor(p))}</small></td><td class="p-3">${esc((p.funcoesContato || []).map((f) => prgdState.FUNCOES_CONTATO[f]?.nome || f).join(", ") || "Sem função indicada")}</td><td class="p-3"><span class="text-blue-900">${esc(st.nome)}</span><small class="block">${p.validadeCadastro ? esc(formatarDataExibicao(p.validadeCadastro)) : "Revisão não informada"}</small></td><td class="p-3"><b>${esc(acesso.nome)}</b><small class="block">${esc(usuario?.email || "")}</small><small class="block">${esc(usuario ? nomePerfilAcesso(usuario) : "")}</small></td><td class="p-3"><div class="flex flex-wrap gap-2"><button type="button" data-colaborador-editar="${esc(p.id)}" class="border rounded-lg px-3 py-2 text-blue-900">Editar</button><button type="button" data-colaborador-vincular="${esc(p.id)}" class="border rounded-lg px-3 py-2 text-blue-900">${p.usuarioUid ? "Ver vínculo" : "Vincular conta existente"}</button><button type="button" data-colaborador-acesso="${esc(p.id)}" class="border border-blue-200 bg-blue-50/70 rounded-lg px-3 py-2 text-blue-900">${p.usuarioUid ? "Gerenciar permissões" : "Criar acesso"}</button></div></td></tr>`;
           })
           .join("") ||
         '<tr><td colspan="6" class="p-4 text-slate-500">Nenhum colaborador encontrado.</td></tr>';
@@ -672,7 +675,7 @@ export function renderColaboradoresPorOrgao(lista, indisponivel = false) {
         const o = prgdState.dbData.orgaos.find(
           (o) => String(o.firestoreId || o.id) === id,
         );
-        return `<button type="button" data-colab-orgao="${esc(id)}" class="text-left border border-blue-100 bg-blue-50/50 rounded-xl p-3"><b class="text-sm text-blue-900">${esc(o?.sigla || o?.nome || id)}</b><small class="block">${pessoas.length} colaborador(es) · ${pessoas.filter((p) => acessoDoColaborador(p).liberado).length} com acesso liberado</small></button>`;
+        return `<button type="button" data-colab-orgao="${esc(id)}" class="text-left border border-blue-100 bg-blue-50/50 rounded-xl p-3"><b class="text-sm text-blue-900">${esc(o?.sigla || o?.nome || nomeReferencia("orgaos", id))}</b><small class="block">${pessoas.length} colaborador(es) · ${pessoas.filter((p) => acessoDoColaborador(p).liberado).length} com acesso liberado</small></button>`;
       })
       .join("") +
     "</div>" +
@@ -715,7 +718,7 @@ export function abrirAcessoColaborador(id) {
   document.getElementById("usuario-orgao").value =
     prgdState.dbData.orgaos.find(
       (o) => String(o.firestoreId || o.id) === p.orgaoId,
-    )?.nome || p.orgaoId;
+    )?.nome || nomeReferencia("orgaos", p.orgaoId);
   document.getElementById("form-univ-titulo").textContent =
     "Criar acesso · " + p.nome;
   atualizarControlesUsuario();
@@ -780,5 +783,5 @@ export function resumoColaboradorUsuario(u) {
   const p = prgdState.dbData.colaboradores.find(
     (p) => p.id === u.colaboradorId && p.usuarioUid === uidCadastro(u),
   );
-  return `<section data-colaborador-usuario="${esc(uidCadastro(u))}" class="md:col-span-2 bg-blue-50/70 border border-blue-100 rounded-xl p-4 text-xs"><h4 class="font-bold mb-2">Colaborador vinculado</h4>${p ? `<p>${esc(p.nome)} · ${esc(p.emailInstitucional)}</p><p>${esc(prgdState.dbData.orgaos.find((o) => String(o.firestoreId || o.id) === p.orgaoId)?.sigla || prgdState.dbData.orgaos.find((o) => String(o.firestoreId || o.id) === p.orgaoId)?.nome || p.orgaoId)} · ${esc(prgdState.dbData.setores.find((s) => s.id === p.setorId)?.nome || p.setorId)}</p><p>${esc(situacaoCadastroColaborador(p).nome)}</p>` : `<p>${u.colaboradorId ? "O vínculo não pôde ser confirmado nesta consulta." : "Nenhum colaborador vinculado. Faça a associação em Colaboradores → Vincular usuário."}</p>`}<p class="text-slate-600 mt-2">Os dados do colaborador acompanham o cadastro de origem. Login, e-mail de acesso e permissões são administrados separadamente.</p></section>`;
+  return `<section data-colaborador-usuario="${esc(uidCadastro(u))}" class="md:col-span-2 bg-blue-50/70 border border-blue-100 rounded-xl p-4 text-xs"><h4 class="font-bold mb-2">Colaborador vinculado</h4>${p ? `<p>${esc(p.nome)} · ${esc(p.emailInstitucional)}</p><p>${esc(prgdState.dbData.orgaos.find((o) => String(o.firestoreId || o.id) === p.orgaoId)?.sigla || nomeReferencia("orgaos", p.orgaoId))} · ${esc(nomeReferencia("setores", p.setorId))}</p><p>${esc(situacaoCadastroColaborador(p).nome)}</p>` : `<p>${u.colaboradorId ? "O vínculo não pôde ser confirmado nesta consulta." : "Nenhum colaborador vinculado. Faça a associação em Colaboradores → Vincular usuário."}</p>`}<p class="text-slate-600 mt-2">Os dados do colaborador acompanham o cadastro de origem. Login, e-mail de acesso e permissões são administrados separadamente.</p></section>`;
 }

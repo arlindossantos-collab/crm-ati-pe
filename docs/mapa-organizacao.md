@@ -1,4 +1,4 @@
-# Mapa atual do repositório — proposta v0.17.0
+# Mapa atual do repositório — propostas v0.17.0/v0.17.1
 
 Base preservada: v0.16.0, commit 113d629c4565a631bd89a5af4c24c3bf40e26a46. A reorganização foi solicitada explicitamente pelo usuário, substituindo o adiamento anterior da extração. Ainda não está publicada.
 
@@ -20,6 +20,8 @@ flowchart TD
 O estado antes implícito no escopo de um script passou a um objeto transitório explícito. Módulos usam imports/exports reais. Existem dependências entre fluxos; a separação não afirma independência total nem substitui autorização/transações do servidor. Agenda e CSV possuem funções reutilizáveis sem navegador. As integrações Firebase ficam centralizadas, com uma única instância de SDK por build.
 
 Formulários genéricos foram divididos em criação, detalhes, campos, salvamento e exclusão. Listeners foram separados de renderização e inicialização. Templates e CSS próprios não contêm lógica de negócio. O build preserva IDs e gera apenas arquivos públicos locais; código de teste, deploy, backups, regras e exportações não entram no pacote do site.
+
+O incremento v0.17.1 adiciona domain/display.js (rótulos/datas) e shared/record-display.js (leitura/edição legível dos dados autorizados). São 43 módulos na cadeia atual. [Correção de cadastros e integração conjunta](planejamento/cadastros-legibilidade.md).
 
 ## Limpeza executada
 

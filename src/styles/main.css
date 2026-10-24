@@ -6,7 +6,8 @@ body {
     sans-serif;
   background-color: #f8fafc;
 }
-.hidden {
+/* Fallback: permite que utilitários responsivos exibam a identificação no desktop. */
+:where(.hidden) {
   display: none;
 }
 /* A restauração e os modais não dependem da ordem de chegada dos utilitários CSS. */
@@ -383,5 +384,30 @@ body[data-layout="portal"]
   }
   .nao-imprimir {
     display: none !important;
+  }
+}
+
+/* Cadastros: textos longos e referências não devem cobrir os controles. */
+#detalhe-conteudo dd,
+#revisar-usuario-resumo,
+#historico-registros td {
+  overflow-wrap: anywhere;
+}
+#modal-detalhes label,
+#modal-form-universal label {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-transform: none;
+}
+@media (max-width: 640px) {
+  #modal-detalhes input:not([type="checkbox"]):not([type="radio"]),
+  #modal-detalhes select,
+  #modal-detalhes textarea,
+  #modal-form-universal input:not([type="checkbox"]):not([type="radio"]),
+  #modal-form-universal select,
+  #modal-form-universal textarea {
+    font-size: 1rem;
+    max-width: 100%;
+    min-width: 0;
   }
 }

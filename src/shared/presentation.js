@@ -1,3 +1,4 @@
+import { formatarDataExibicao } from "../domain/display.js";
 // Responsabilidade: shared/presentation. Estado transitório compartilhado apenas em app/state.js.
 import { prgdState } from "../app/state.js";
 import { identificacaoUsuario } from "../modules/perfil/index.js";
@@ -31,11 +32,11 @@ export function aplicarMascaraData(valor) {
 export function traduzirErroSistema(err) {
   const msg = [err?.code, err?.message || err].filter(Boolean).join(" ");
   if (msg.includes("longer than") || msg.includes("bytes"))
-    return "A imagem selecionada é muito pesada para o banco de dados. Limite máximo: 500 KB.";
+    return "A imagem selecionada excede o limite permitido. Reduza o tamanho e tente novamente.";
   if (msg.includes("permission-denied"))
     return "Permissão negada. Você não tem autorização para realizar esta operação.";
   if (msg.includes("auth/email-already-in-use"))
-    return "Este e-mail já possui conta de acesso. Edite o cadastro existente; cadastros antigos sem perfil vinculado precisam ser conferidos no Firebase Authentication.";
+    return "Este e-mail já possui conta de acesso. Edite o cadastro existente ou procure a GRGD para conferir o vínculo.";
   if (msg.includes("auth/requires-recent-login"))
     return "Entre novamente para confirmar a alteração da senha.";
   if (msg.includes("auth/wrong-password"))
@@ -43,10 +44,32 @@ export function traduzirErroSistema(err) {
   if (msg.includes("auth/too-many-requests"))
     return "Muitas tentativas. Aguarde um pouco antes de tentar novamente.";
   if (msg.includes("auth/weak-password"))
-    return "A senha não atende à política do Firebase Authentication.";
+    return "A senha não atende aos requisitos de segurança. Use uma senha mais forte.";
   if (msg.includes("auth/invalid-credential"))
     return "E-mail ou senha incorretos. Verifique suas credenciais.";
-  return "Erro ao processar a operação: " + msg;
+  if (/auth\/(network-request-failed)|unavailable|deadline-exceeded/.test(msg))
+    return "Não foi possível conectar ao serviço. Verifique a conexão e tente novamente.";
+  if (
+    /auth\/(user-disabled|user-token-expired|invalid-user-token)|unauthenticated/.test(
+      msg,
+    )
+  )
+    return "Sua sessão não está disponível. Entre novamente ou procure a GRGD.";
+  if (
+    err?.code ||
+    (err?.name && err.name !== "Error") ||
+    /Firebase|\[object Object\]|undefined|is not a function|not defined|<[^>]+>|^\s*(?:const|function|import|export)\b/.test(
+      msg,
+    )
+  )
+    return "Não foi possível concluir a operação. Tente novamente; se persistir, procure a GRGD.";
+  if (
+    typeof err?.message === "string" &&
+    err.message.trim() &&
+    err.message.length <= 400
+  )
+    return err.message;
+  return "Não foi possível concluir a operação. Tente novamente; se persistir, procure a GRGD.";
 }
 
 export function gerarIniciais(nomeCompleto) {
@@ -192,11 +215,10 @@ export function normalizarUrl(url) {
 }
 
 export function renderAuditInfo(item) {
-  const modificado = item.atualizadoEm
-    ? new Date(item.atualizadoEm).toLocaleDateString("pt-BR")
-    : item.criadoEm
-      ? new Date(item.criadoEm).toLocaleDateString("pt-BR")
-      : "-";
+  const modificado =
+    item.atualizadoEm || item.criadoEm
+      ? formatarDataExibicao(item.atualizadoEm || item.criadoEm)
+      : "Não informado";
   const autor = item.editadoPor || item.criadoPor || "Sistema";
   return {
     dataHtml: `<span class="text-[11px] font-semibold text-slate-700">${modificado}</span>`,

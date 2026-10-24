@@ -2,6 +2,15 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## v0.17.1 — Legibilidade de cadastros e interface — proposta, não publicada
+
+**Resumo para a gestão:** corrige telas de cadastro que exibiam nomes internos, false, timestamps ou [object Object]. Detalhes e edição passam a apresentar rótulos legíveis, Sim/Não, datas brasileiras e informações estruturadas, preservando os registros.
+
+- **Antes/depois:** campos como razaoSocial e produtoServicoPrincipal ganham rótulos; referências técnicas ficam recolhidas; grupos usam seleção por nome sem perder IDs anteriores. Campos e textos longos ficam legíveis no celular.
+- **Varredura geral:** permissões e histórico traduzidos, referências sem nome indicadas como indisponíveis, mensagens de erro sem despejo técnico e ícone de calendário corrigido. Protocolo e referências úteis permanecem acessíveis.
+- **Validação:** falha reproduzida na base da PR #26; 247 testes numerados, dez suítes de navegador e smoke com SDK real em emuladores. Edição confere preservação de IDs, metadados e estruturas. [Evidências e limites](docs/planejamento/cadastros-legibilidade.md).
+- **Integração:** depende da PR #26, que permanece pendente. Branch encadeada permite revisar o incremento e integrar o conjunto posteriormente. CI habilitado também para PRs entre branches de proposta. Sem publicação, migração de dados ou alteração das regras/índices.
+
 ## v0.17.0 — Organização modular e preparação de migração — proposta, não publicada
 
 **Resumo para a gestão:** a aplicação sai do HTML único de 4.256 linhas. Telas, estilos, módulos e serviços ficam separados; o build gera somente o site publicável. A limpeza preserva o funcionamento atual e registra o caminho para a VM, PostgreSQL e identidade institucional.

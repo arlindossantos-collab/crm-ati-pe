@@ -81,7 +81,7 @@ export async function runTransaction(db,fn){
    await page.locator('#btn-historico-alteracoes').click();
    await page.locator('#historico-registros tr').filter({hasText:'Nome atualizado'}).waitFor();
    const historico=await page.locator('#historico-registros').innerText();
-   assert.match(historico,/Administrador de teste/);assert.match(historico,/nome/);assert.match(historico,/21\/10\/2026/);
+   assert.match(historico,/Administrador de teste/);assert.match(historico,/\bNome\b/);assert.match(historico,/21\/10\/2026/);
    await page.screenshot({path:'test-results/historico-alteracoes.png'});
    await page.locator('[data-target="modal-historico-alteracoes"]').click();
    await page.locator('[data-usuario-excluir="outro"]').click();

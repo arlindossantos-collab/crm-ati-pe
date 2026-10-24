@@ -1,3 +1,4 @@
+import { rotuloCampo } from "../../domain/display.js";
 import { prgdState } from "../state.js";
 import { podeAlterarColecao } from "../../modules/acessos/policies.js";
 import { lerInscricaoEvento } from "../../modules/inscricoes/operations.js";
@@ -79,12 +80,27 @@ export async function salvarEdicaoAdmin(e) {
           const tipo = el.dataset.fieldType;
           if (tipo === "boolean") {
             if (!["true", "false"].includes(el.value))
-              throw new Error("Selecione Sim ou Não para " + el.name + ".");
+              throw new Error(
+                "Selecione Sim ou Não para " + rotuloCampo(el.name) + ".",
+              );
             obj[el.name] = el.value === "true";
           } else if (tipo === "number") {
             if (!el.value.trim() || !Number.isFinite(Number(el.value)))
-              throw new Error("Informe um número válido para " + el.name + ".");
+              throw new Error(
+                "Informe um número válido para " + rotuloCampo(el.name) + ".",
+              );
             obj[el.name] = Number(el.value);
+          } else if (tipo === "reference-list") {
+            const selecionados = Array.from(el.selectedOptions || []).map(
+              (opcao) => opcao.value,
+            );
+            const anterior = itemAntigo[el.name];
+            obj[el.name] =
+              Array.isArray(anterior) &&
+              selecionados.length === new Set(anterior).size &&
+              selecionados.every((id) => anterior.includes(id))
+                ? anterior
+                : selecionados;
           } else if (tipo === "string-list") {
             const anterior = itemAntigo[el.name];
             obj[el.name] =
