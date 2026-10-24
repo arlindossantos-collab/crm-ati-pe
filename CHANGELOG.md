@@ -2,7 +2,17 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.15.0 — Consulta da agenda de eventos — proposta, não publicada
+## v0.16.0 — Painel de inscrições e vagas — proposta, não publicada
+
+**Resumo para a gestão:** o administrador abre Inscrições no card de um evento para consultar participantes, filtrar nome/e-mail/protocolo, situação e órgão e conferir o quadro de vagas. Comprovantes e cancelamento usam as operações existentes. Cancelamentos atualizam o painel e preservam histórico, filtros e edição não salva do evento.
+
+- **Antes:** lista simples nos detalhes, sem filtros ou conferência de contagem; alteração posterior não atualizava a lista aberta.
+- **Depois:** resumo separado de confirmadas, canceladas, fluxo anterior e situação desconhecida; vagas disponíveis só são calculadas quando dados institucionais e contador conferem. Divergência pede conferência e não corrige o banco.
+- **Preservação:** não converte registros antigos, não comprova presença e não amplia o painel geral para outros perfis. CSV do evento continua incluindo todas as inscrições daquele evento, independentemente dos filtros da lista.
+- **Validação e limites:** [painel de inscrições](docs/planejamento/painel-inscricoes-vagas.md). Sem alteração de regras, índices ou dependências; versão da raiz do lockfile sincronizada.
+- **Pendências:** aceite funcional e autorização específica para integrar/publicar a v0.16.0. O Lote 07 não é considerado integralmente homologado por este incremento.
+
+## v0.15.0 — Consulta da agenda de eventos — publicada em 24/10/2026
 
 **Resumo para a gestão:** Eventos ganha consulta por situação, tipo e período, busca sem acentos e ordenação por data. A opção Todos permite combinar a consulta de eventos futuros e encerrados. A situação apresentada é a cadastrada: uma data passada não comprova realização ou presença.
 
@@ -10,7 +20,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 - **Depois:** filtros combináveis, duração do evento considerada no período, validação das datas, botão para limpar e mensagem de resultados; Encerrados substitui o rótulo Realizados e os cards preservam a situação cadastrada.
 - **Dados e acesso:** consulta apenas os eventos já carregados para o perfil, sem gravar, migrar ou mudar regras/índices. Opções de tipo e situação seguem os mesmos eventos acessíveis. Relatório Geral de Inscrições mantém seu escopo e informa que não segue os filtros da agenda.
 - **Validação:** testes e evidências em [consulta da agenda](docs/planejamento/eventos-consulta-agenda.md).
-- **Pendências:** revisão/aceite funcional e autorização específica para publicar esta versão.
+- **Publicação:** autorizada pelo usuário; [PR #24](https://github.com/arlindossantos-collab/crm-ati-pe/pull/24) integrado e [Pages](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40111702674) concluído. Aceite funcional institucional permanece separado da publicação.
 
 ## v0.14.1 — Dados ausentes de órgãos — publicada em 23/10/2026
 

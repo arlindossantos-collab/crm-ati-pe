@@ -1,6 +1,6 @@
-# Eventos — consulta da agenda (proposta v0.15.0)
+# Eventos — consulta da agenda (v0.15.0)
 
-Incremento do Lote 06 do plano diretor, a partir de main@d965a91771f7f1be9cd6d2299819dc0b866aab6c (v0.14.1 publicada). Branch feat/eventos-consulta-agenda-v0150. Não integra nem publica automaticamente a proposta. Homologação funcional do módulo ainda pendente.
+Incremento do Lote 06 do plano diretor, a partir de main@d965a91771f7f1be9cd6d2299819dc0b866aab6c (v0.14.1 publicada). Branch feat/eventos-consulta-agenda-v0150. Publicada com autorização do usuário pelo PR #24, em 24/10/2026, com GitHub Pages e HTML servido conferidos. Homologação funcional do módulo ainda pendente.
 
 ## Resultado
 
@@ -47,7 +47,7 @@ Usar somente dados fictícios/emuladores para testes com gravações. O usuário
 
 ## Publicação e retorno
 
-Publicar exige revisão e autorização específica. CONTRIBUTING.md distingue commit, integração e publicação. A autorização anterior foi para v0.14.1; esta proposta não foi publicada.
+O usuário autorizou integrar e publicar esta versão. PR #24 e Pages confirmados: https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40111702674 . A autorização não antecipa a publicação de novas versões.
 
 Após autorização, somente site e documentação precisam ser publicados; regras e índices não mudaram. Reverter o HTML ao commit anterior restaura a consulta antiga sem restaurar/migrar dados, pois os filtros não fazem gravações. Nenhum lote é considerado homologado só pelos testes automatizados.
 
