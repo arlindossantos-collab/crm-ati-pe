@@ -1077,3 +1077,70 @@ test('rótulos de filtros e tipos vindos do banco continuam escapados no HTML',(
     assert.doesNotMatch(a.element('filtro-evento-status').innerHTML,/<img/);assert.match(a.element('filtro-evento-status').innerHTML,/&lt;img/);
     assert.doesNotMatch(a.element('filtro-evento-tipo').innerHTML,/<svg/);assert.match(a.element('filtro-evento-tipo').innerHTML,/&quot;/);
 });
+
+function painelInscricoesFixture() {
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin',tipoUsuario:'interno',ativo:true};agendaLocaisEstado='completa';inscricoesRelatorioEstado='pronto';dbData.eventos=[{id:'e',firestoreId:'doc-e',titulo:'Evento fictício',modeloInscricao:'institucional-v1',limiteVagas:4,inscritosCount:2}];dbData.orgaos=[{id:'a',nome:'Órgão A'},{id:'b',nome:'Órgão B'}];dbData.setores=[{id:'s',nome:'Setor fictício'}]");
+    a.context.registros=[
+        {id:'i1',eventId:'doc-e',modeloInscricao:'institucional-v1',participanteNome:'João',emailInstitucional:'joao@example.invalid',orgaoId:'a',setorId:'s',situacao:'confirmada',protocolo:'PROTO-1'},
+        {id:'i2',eventId:'e',modeloInscricao:'institucional-v1',participanteNome:'Ana',orgaoId:'b',situacao:'confirmada',protocolo:'PROTO-2'},
+        {id:'i3',eventId:'doc-e',modeloInscricao:'institucional-v1',participanteNome:'Cancelada',orgaoId:'a',situacao:'cancelada'},
+        {id:'i4',eventId:'e',nome:'Pessoa do fluxo anterior',situacao:'confirmada'},
+        {id:'i5',eventId:'doc-e',modeloInscricao:'institucional-v1',participanteNome:'Situação desconhecida',situacao:'outro'},
+        {id:'fora',eventId:'outro',participanteNome:'Outro evento',situacao:'confirmada'}
+    ];a.run('dbData.inscricoes=registros');return a;
+}
+test('painel separa confirmadas, canceladas, legado e situação desconhecida sem inferir presença',()=>{
+    const a=painelInscricoesFixture(),d=a.run("dadosPainelInscricoes('doc-e')");
+    assert.equal(d.total,5);assert.equal(d.confirmadas,2);assert.equal(d.canceladas,1);assert.equal(d.legadas,1);assert.equal(d.indefinidas,1);
+    assert.equal(d.vagas,null);assert.equal(d.conferir,true);assert.equal(a.writes.length,0);
+    assert.equal(a.run("dadosPainelInscricoes('e').total"),5);assert.throws(()=>a.run("dadosPainelInscricoes('outro')"),/não encontrado/);
+});
+test('busca do painel combina nome sem acento, protocolo, órgão e situação sem filtrar os totais',()=>{
+    const a=painelInscricoesFixture();
+    const d=a.run("dadosPainelInscricoes('e',{busca:'JOAO',situacao:'confirmada',orgao:'a'})");
+    assert.equal(d.registros.length,1);assert.equal(d.registros[0].nome,'João');assert.equal(d.total,5);assert.equal(d.confirmadas,2);
+    assert.equal(a.run("dadosPainelInscricoes('e',{busca:'PROTO-2'}).registros[0].nome"),'Ana');
+    assert.equal(a.run("dadosPainelInscricoes('e',{busca:'setor ficticio'}).registros.length"),1);
+    assert.equal(a.run("dadosPainelInscricoes('e',{situacao:'legada'}).registros.length"),1);
+    assert.equal(a.run("dadosPainelInscricoes('e',{orgao:'sem-inscricoes'}).registros.length"),0);
+});
+test('vagas do painel exigem contador e inscrições conciliados e capacidade válida',()=>{
+    const a=painelInscricoesFixture();a.run("dbData.inscricoes=dbData.inscricoes.filter(i=>!['i4','i5'].includes(i.id))");
+    let d=a.run("dadosPainelInscricoes('e')");assert.equal(d.vagas,2);assert.equal(d.conferir,false);
+    for(const patch of [{inscritosCount:3},{inscritosCount:-1},{inscritosCount:'2'},{limiteVagas:1},{limiteVagas:0},{limiteVagas:null}]){
+        a.context.patch=patch;a.run("Object.assign(dbData.eventos[0],{inscritosCount:2,limiteVagas:4},patch)");
+        d=a.run("dadosPainelInscricoes('e')");assert.equal(d.vagas,null);assert.equal(d.conferir,true);
+    }assert.equal(a.writes.length,0);
+});
+test('evento antigo não calcula vagas ou converte inscrições pelo rótulo de situação',()=>{
+    const a=painelInscricoesFixture();a.run('delete dbData.eventos[0].modeloInscricao');
+    const d=a.run("dadosPainelInscricoes('e')");assert.equal(d.vagas,null);assert.equal(d.institucional,false);assert.equal(d.conferir,false);assert.equal(d.legadas,1);
+});
+test('painel geral recusa gestor, GRGD, auditoria e administrador inativo',()=>{
+    const a=painelInscricoesFixture();
+    for(const usuario of [{uid:'x',perfil:'comum',ativo:true},{uid:'g',perfil:'comum',ativo:true,acessoInstitucional:vinculoTeste({papel:'grgd',acoes:['eventos.consultar','relatorios.consultar']})},{uid:'u',perfil:'admin',ativo:false}]){
+        a.context.usuario=usuario;a.run('currentUser=usuario');assert.throws(()=>a.run("dadosPainelInscricoes('e')"),/Somente o administrador/);
+    }
+});
+test('painel não mostra contagem zero quando eventos ou inscrições não estão confirmados',()=>{
+    const a=painelInscricoesFixture();const painel=a.element('painel-inscricoes-evento');painel.getAttribute=()=> 'doc-e';painel.removeAttribute=()=>{};
+    a.run('atualizarPainelInscricoesEvento()');assert.match(a.element('painel-inscricoes-lista').innerHTML,/João/);
+    for(const state of ['carregando','erro']){
+        a.context.state=state;a.run('inscricoesRelatorioEstado=state;atualizarPainelInscricoesEvento()');
+        assert.equal(a.element('painel-inscricoes-lista').innerHTML,'');assert.equal(a.element('painel-inscricoes-resumo').innerHTML,'');assert.equal(a.element('painel-inscricoes-csv').disabled,true);
+        assert.doesNotMatch(a.element('painel-inscricoes-status').textContent,/0 de 0/);
+    }
+    a.run("inscricoesRelatorioEstado='pronto';agendaLocaisEstado='erro'");assert.throws(()=>a.run("dadosPainelInscricoes('doc-e')"),/Aguarde/);
+});
+test('painel elimina dados pessoais após perda do papel administrador e ao fechar os detalhes',()=>{
+    const a=painelInscricoesFixture(),panel=a.element('painel-inscricoes-evento');let id='doc-e';panel.getAttribute=()=>id;panel.removeAttribute=()=>{id='';};
+    panel.innerHTML='dados pessoais';a.run("currentUser={uid:'u',perfil:'comum',ativo:true};atualizarPainelInscricoesEvento()");assert.equal(panel.innerHTML,'');assert.equal(id,'');
+    panel.innerHTML='dados pessoais';a.run("fecharModal('modal-detalhes')");assert.equal(panel.innerHTML,'');
+});
+test('dados pessoais no painel são escapados e CSV mantém todas as inscrições do evento',()=>{
+    const a=painelInscricoesFixture();a.run("dbData.inscricoes[0].participanteNome='<img src=x onerror=alert(1)>';dbData.inscricoes[0].emailInstitucional='a\"<svg>@example.invalid'");
+    const panel=a.element('painel-inscricoes-evento');panel.getAttribute=()=> 'doc-e';
+    a.element('painel-inscricoes-situacao').value='confirmada';a.run('atualizarPainelInscricoesEvento()');
+    assert.doesNotMatch(a.element('painel-inscricoes-lista').innerHTML,/<img|<svg/);assert.match(a.element('painel-inscricoes-lista').innerHTML,/&lt;img/);
+    assert.equal(a.run("prepararRelatorioInscricoes('doc-e').total"),5);assert.equal(a.writes.length,0);
+});

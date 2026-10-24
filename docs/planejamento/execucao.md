@@ -75,3 +75,7 @@ Revisão encontrou e corrigiu o uso de localização, fonte e ponto focal de exe
 ## Incremento de consulta da agenda de Eventos
 
 A proposta v0.15.0 acrescenta filtros por situação/tipo/período, ordenação e Todos, mantendo a situação cadastrada distinta de data encerrada. Ver [consulta da agenda](eventos-consulta-agenda.md). Este incremento não conclui o Lote 06 nem altera a pendência de backup dos dados reais ou de aceite funcional.
+
+## Incremento do Lote 07 — inscrições e vagas
+
+A proposta v0.16.0 acrescenta painel administrativo por evento, filtros e conferência de capacidade/contador, preservando registros antigos e as operações de comprovante/cancelamento. Ver [painel de inscrições e vagas](painel-inscricoes-vagas.md). Não conclui a homologação integral do Lote 07, nem a revisão dos dados legados ou o backup real do Lote 00.

@@ -47,9 +47,34 @@ const {chromium}=require(path.join(process.env.PRGD_BROWSER_TOOLS||'/workspace/t
   });assert.equal(denied,true,'Gestor A deve ser impedido de consultar órgão B.');
   await page.setViewportSize({width:390,height:844});await page.locator('[data-tab="colaboradores"]').click();
   await page.screenshot({path:'test-results/homologacao-emuladores-celular.png'});
+  // Reinscrever pelo gestor para verificar o cancelamento administrativo no novo painel.
+  await page.locator('[data-tab="eventos"]').click();await page.locator('[data-inscrever-colaborador="evento-local"]').click();
+  await page.locator('#insc-participante').selectOption(id);await page.locator('#insc-confirmar').click();await page.locator('#modal-inscricao-institucional').waitFor({state:'hidden'});
   await page.locator('#btn-executar-logout').click();await page.locator('#modal-login').waitFor({state:'visible'});
   await login('admin');assert.equal(await page.locator('body').getAttribute('data-admin'),'true');
   await page.setViewportSize({width:1440,height:1000});
+  await page.locator('[data-tab="eventos"]').click();await page.locator('[data-painel-inscricoes="evento-local"]').click();
+  const panel=page.locator('#painel-inscricoes-evento');await panel.locator('#painel-inscricoes-lista article').first().waitFor();
+  await page.locator('#painel-inscricoes-busca').fill(email);assert.equal(await panel.locator('article').count(),1);
+  const confirmedBefore=Number(await panel.locator('[data-inscricoes-total="confirmadas"]').innerText());
+  const vagasBefore=Number(await panel.locator('[data-inscricoes-total="vagas"]').innerText());
+  await page.locator('#edit-campos-dinamicos input[name="titulo"]').fill('Edição ainda não salva');
+  await panel.scrollIntoViewIfNeeded();await page.screenshot({path:'test-results/painel-inscricoes-emuladores-desktop.png'});
+  await page.setViewportSize({width:390,height:844});await panel.scrollIntoViewIfNeeded();await page.screenshot({path:'test-results/painel-inscricoes-emuladores-celular.png'});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await page.setViewportSize({width:1440,height:1000});
+  await panel.getByRole('button',{name:'Cancelar inscrição',exact:true}).click();await panel.getByText('Cancelada',{exact:true}).waitFor();
+  await page.waitForFunction(n=>document.querySelector('[data-inscricoes-total="confirmadas"]').textContent===String(n),confirmedBefore-1);
+  assert.equal(Number(await panel.locator('[data-inscricoes-total="vagas"]').innerText()),vagasBefore+1);
+  assert.equal(await page.locator('#painel-inscricoes-busca').inputValue(),email);
+  assert.equal(await page.locator('#edit-campos-dinamicos input[name="titulo"]').inputValue(),'Edição ainda não salva');
+  const audit=await page.evaluate(async participantId=>{
+   const sdk=await import('./firebase-local.js'),db=sdk.getFirestore(sdk.getApps()[0]);
+   const event=(await sdk.getDoc(sdk.doc(db,'eventos','evento-local'))).data();
+   const records=(await sdk.getDocs(sdk.collection(db,'historicoAlteracoes'))).docs.map(d=>d.data());
+   return {title:event.titulo,cancels:records.filter(i=>i.acao==='cancelar_inscricao'&&i.registroId.endsWith(participantId)).length};
+  },require('node:crypto').createHash('sha256').update(email).digest('hex'));
+  assert.equal(audit.title,'Oficina de homologação fictícia');assert.ok(audit.cancels>=2,'Cancelamentos devem preservar auditoria.');
+  await page.locator('[data-target="modal-detalhes"]').first().click();
   await page.locator('[data-tab="clientes"]').click();await page.locator('[data-modal-target="cliente"]').click();
   const orgName='Órgão sem localização '+Date.now();await page.locator('#uc-1').fill(orgName);
   await page.locator('#btn-salvar-cadastro').click();await page.locator('#modal-form-universal').waitFor({state:'hidden'});
@@ -82,6 +107,6 @@ const {chromium}=require(path.join(process.env.PRGD_BROWSER_TOOLS||'/workspace/t
   await page.locator('#btn-executar-logout').click();await page.locator('#modal-login').waitFor({state:'visible'});
   await login('sem-vinculo');await page.locator('#aviso-sem-modulos').waitFor({state:'visible'});
   assert.deepEqual(external,[],'Nenhuma requisição externa deve ocorrer.');assert.deepEqual(errors,[]);
-  console.log('PASSOU: filtros da agenda e situações nos emuladores, login real local, cadastro, inscrição, cancelamento, recusa entre órgãos, admin, sem vínculo e desktop/celular; zero requisições externas.');
+  console.log('PASSOU: painel de inscrições com cancelamento administrativo, vaga liberada e auditoria, filtros da agenda e situações nos emuladores, login real local, cadastro, inscrição, cancelamento, recusa entre órgãos, admin, sem vínculo e desktop/celular; zero requisições externas.');
  }finally{await context.close();await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

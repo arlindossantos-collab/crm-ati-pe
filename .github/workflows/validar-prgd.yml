@@ -62,6 +62,10 @@ jobs:
         env:
           PRGD_TEST_CSS: /tmp/prgd-test.css
         run: node tests/eventos-consulta.browser.cjs
+      - name: Testar painel de inscrições e conferência de vagas
+        env:
+          PRGD_TEST_CSS: /tmp/prgd-test.css
+        run: node tests/painel-inscricoes.browser.cjs
       - name: Guardar capturas da interface de teste
         if: always()
         uses: actions/upload-artifact@v4
