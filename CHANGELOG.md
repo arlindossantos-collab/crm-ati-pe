@@ -2,6 +2,13 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
+## Em revisão — execução dos Lotes 00/01 (ferramentas, sem nova versão funcional)
+
+- **Antes:** a homologação dependia de ferramentas externas ao checkout e de vários comandos manuais; o smoke não exercitava um evento com três órgãos.
+- **Depois:** dependências fixadas no lockfile, inicialização/teste por comando, cenário de três órgãos e piloto com inscrições, vagas, cancelamento/reinscrição, CSV e auditoria nos emuladores. CI ampliado; backlog e roteiro de aceite preparados.
+- **Validação:** ver [evidências e limites](docs/planejamento/validacao-continuidade.md). Código/histórico da base v0.14.1 preservados e restaurados localmente.
+- **Pendências:** backup/restauração de Firestore/Auth reais e aceite GRGD. Sem implantação, migração ou mudança funcional do HTML, regras e índices de produção.
+
 ## v0.14.1 — Dados ausentes de órgãos — publicação autorizada, implantação em acompanhamento
 
 **Resumo para a gestão:** o cadastro deixa de preencher endereço, coordenadas e foto com exemplos. Os detalhes indicam dados ausentes, sem apresentar um ponto focal fictício ou uma fonte não cadastrada. Informações existentes e vínculos são preservados; não há migração ou alteração das regras Firebase.

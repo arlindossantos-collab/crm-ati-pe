@@ -8,6 +8,8 @@ Sistema da Gerência de Relacionamento do Governo Digital (GRGD), da ATI/PE, par
 
 [Acessar o sistema](https://arlindossantos-collab.github.io/crm-ati-pe/) · [Histórico de mudanças](CHANGELOG.md) · [Mapa de organização](docs/mapa-organizacao.md)
 
+**Execução do plano — Lotes 00/01:** [backlog e pendências](docs/planejamento/backlog.md), [ambiente local reproduzível](docs/planejamento/homologacao-local.md) e [roteiro de aceite de Eventos](docs/planejamento/roteiro-aceite-eventos.md). Após `npm ci` e a instalação do Chromium do Playwright, `npm run homologacao:iniciar` abre o cenário local; `npm run test:homologacao` executa smoke e piloto técnico com três órgãos nos emuladores. Esse incremento de ferramentas mantém a versão funcional v0.14.1 e não representa homologação GRGD ou publicação.
+
 A versão do site depende da integração e da publicação deste código. Uma branch ou um Pull Request em rascunho não atualiza o site. As releases oficiais ficam na [página de versões do GitHub](https://github.com/arlindossantos-collab/crm-ati-pe/releases).
 
 ## O que o sistema oferece

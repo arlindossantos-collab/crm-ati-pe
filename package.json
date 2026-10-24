@@ -5,14 +5,22 @@
   "scripts": {
     "test": "node --test tests/regression.test.cjs",
     "test:rules": "firebase emulators:exec --config firebase.test.json --only firestore --project demo-prgd-usuarios \"node --test tests/firestore.rules.test.cjs\"",
-    "test:auth": "firebase emulators:exec --config firebase.test.json --only auth --project demo-prgd-usuarios \"node --test tests/auth-profile.test.cjs\""
+    "test:auth": "firebase emulators:exec --config firebase.test.json --only auth --project demo-prgd-usuarios \"node --test tests/auth-profile.test.cjs\"",
+    "homologacao:preparar": "node scripts/homologacao/prepare.cjs",
+    "homologacao:iniciar": "node scripts/homologacao/run.cjs",
+    "test:homologacao": "node scripts/homologacao/run.cjs --test"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "3.0.3",
+    "@fortawesome/fontawesome-free": "6.4.0",
+    "chart.js": "4.5.1",
+    "esbuild": "0.25.12",
     "firebase": "10.8.0",
-    "firebase-tools": "13.35.1"
+    "firebase-tools": "13.35.1",
+    "playwright": "1.56.1",
+    "tailwindcss": "3.4.17"
   }
 }

@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const {execFileSync} = require('node:child_process');
 const root = path.resolve(__dirname, '../..');
-const tools = process.env.PRGD_BROWSER_TOOLS || '/workspace/tools/prgd-browser/node_modules';
+const tools = process.env.PRGD_BROWSER_TOOLS || path.join(root, 'node_modules');
 const esbuild = require(path.join(tools, 'esbuild'));
 const output = path.join(root, '.firebase/homologacao');
 fs.mkdirSync(output, {recursive:true});

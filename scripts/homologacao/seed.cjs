@@ -16,25 +16,27 @@ async function account(name){
  assert.ok(response.ok,'Falha ao preparar conta fictícia: '+name);return {uid:body.localId,email};
 }
 (async()=>{
- const accounts={};for(const name of ['admin','gestor-a','gestor-b','sem-vinculo'])accounts[name]=await account(name);
+ const accounts={};for(const name of ['admin','gestor-a','gestor-b','gestor-c','sem-vinculo'])accounts[name]=await account(name);
  const env=await initializeTestEnvironment({projectId,firestore:{rules:fs.readFileSync(path.resolve(__dirname,'../../firestore.rules'),'utf8')}});
  try{await env.withSecurityRulesDisabled(async ctx=>{
   const db=ctx.firestore(),now=Date.now();
   const rows={
    'orgaos/orgao-a':{nome:'Órgão A fictício',sigla:'TESTE-A',ativo:true},
    'orgaos/orgao-b':{nome:'Órgão B fictício',sigla:'TESTE-B',ativo:true},
+   'orgaos/orgao-c':{nome:'Órgão C fictício',sigla:'TESTE-C',ativo:true},
    'setores/a1':{nome:'Setor A fictício',orgaoId:'orgao-a',ativo:true},
    'setores/b1':{nome:'Setor B fictício',orgaoId:'orgao-b',ativo:true},
+   'setores/c1':{nome:'Setor C fictício',orgaoId:'orgao-c',ativo:true},
    'eventos/evento-local':{titulo:'Oficina de homologação fictícia',dataInicio:'2099-01-01',modeloInscricao:'institucional-v1',eventoPublico:false,orgaosElegiveis:['orgao-a'],inscricoesAbertas:true,inscricaoInicio:now-60000,inscricaoFim:now+86400000,limiteVagas:3,inscritosCount:0,status:'Confirmado'}
   };
   for(const [name,a] of Object.entries(accounts)){
-   const admin=name==='admin',manager=name.startsWith('gestor-'),org=name==='gestor-b'?'orgao-b':'orgao-a';
+   const admin=name==='admin',manager=name.startsWith('gestor-'),letter=manager?name.slice(-1):'a',org='orgao-'+letter;
    const profile={...a,nome:name+' fictício',ativo:true,perfil:admin?'admin':'comum',tipoUsuario:admin?'interno':'externo',modulosPermitidos:admin?['usuarios','clientes','eventos','demandas']:[],tags:[],grupos:[]};
-   if(manager)profile.acessoInstitucional={papel:'gestor_nsi',orgaoId:org,setoresIds:[org==='orgao-a'?'a1':'b1'],operacoesVersao:'v1',situacao:'aprovado',inicio:now-60000,fim:now+86400000,revisao:now+43200000,titularUid:'',acoes:['orgao.consultar','participantes.consultar','participantes.cadastrar','participantes.editar','eventos.consultar','inscricoes.consultar','inscricoes.criar','inscricoes.cancelar','comprovantes.consultar'],aprovacaoGrgd:{responsavel:'GRGD fictícia',referencia:'LOCAL'},aprovacaoAutoridade:{responsavel:'Autoridade fictícia',referencia:'LOCAL'},registradoPorUid:accounts.admin.uid,registradoEm:new Date().toISOString()};
+   if(manager)profile.acessoInstitucional={papel:'gestor_nsi',orgaoId:org,setoresIds:[letter+'1'],operacoesVersao:'v1',situacao:'aprovado',inicio:now-60000,fim:now+86400000,revisao:now+43200000,titularUid:'',acoes:['orgao.consultar','participantes.consultar','participantes.cadastrar','participantes.editar','eventos.consultar','inscricoes.consultar','inscricoes.criar','inscricoes.cancelar','comprovantes.consultar'],aprovacaoGrgd:{responsavel:'GRGD fictícia',referencia:'LOCAL'},aprovacaoAutoridade:{responsavel:'Autoridade fictícia',referencia:'LOCAL'},registradoPorUid:accounts.admin.uid,registradoEm:new Date().toISOString()};
    rows['usuarios/'+a.uid]=profile;
    rows['identidadesUsuarios/'+a.uid]={uid:a.uid,nome:profile.nome,fotoPerfil:'',tipoUsuario:profile.tipoUsuario,ativo:true};
   }
   for(const [key,data] of Object.entries(rows))if(!(await getDoc(doc(db,key))).exists())await setDoc(doc(db,key),data);
  });}finally{await env.cleanup();}
- console.log('Dados fictícios preparados: admin, gestor-a, gestor-b e sem-vinculo (@example.invalid).');
+ console.log('Dados fictícios preparados: três órgãos; admin, gestor-a, gestor-b, gestor-c e sem-vinculo (@example.invalid).');
 })().catch(e=>{console.error(e);process.exitCode=1;});

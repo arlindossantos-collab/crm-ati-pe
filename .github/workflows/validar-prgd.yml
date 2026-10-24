@@ -27,9 +27,10 @@ jobs:
       - run: npm run test:auth
       - name: Preparar navegador isolado
         run: |
-          npm install --no-save --package-lock=false playwright@1.56.1 tailwindcss@3.4.17
-          npx playwright install --with-deps chromium
-          npx tailwindcss -i tests/tailwind-input.css --content index.html -o /tmp/prgd-test.css --minify
+          npx --no-install playwright install --with-deps chromium
+          npx --no-install tailwindcss -i tests/tailwind-input.css --content index.html -o /tmp/prgd-test.css --minify
+      - name: Testar homologação integrada e piloto com três órgãos nos emuladores
+        run: npm run test:homologacao
       - name: Testar Locais no navegador com Firebase simulado
         env:
           PRGD_TEST_CSS: /tmp/prgd-test.css

@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),path=require('node:path'),fs=require('node:fs');
-const {chromium}=require(path.join(process.env.PRGD_BROWSER_TOOLS||'/workspace/tools/prgd-browser/node_modules','playwright'));
+const {chromium}=require(path.join(process.env.PRGD_BROWSER_TOOLS||path.resolve(__dirname,'../../node_modules'),'playwright'));
 (async()=>{
  const browser=await chromium.launch();const external=[],errors=[];
  fs.mkdirSync('test-results',{recursive:true});

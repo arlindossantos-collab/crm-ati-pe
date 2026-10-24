@@ -1,5 +1,17 @@
 # Execução do plano diretor — PRGD
 
+## Continuidade — base v0.14.1
+
+A execução atual parte de `d965a91771f7f1be9cd6d2299819dc0b866aab6c`, confirmado como HEAD da main remota em 23/10/2026, na branch `feat/plano-lote01-reprodutivel`. O registro abaixo preserva o início histórico na v0.14.0.
+
+Nesta continuidade, código/histórico foram preservados e restaurados localmente; a homologação ganhou dependências fixadas, comandos únicos de inicialização/teste, um terceiro órgão fictício e piloto técnico com CSV e auditoria. O CI passa a executar a integração real com emuladores, além das suítes existentes. A aplicação continua na v0.14.1; não há alteração funcional do HTML, modularização, migração ou implantação neste incremento de ferramentas.
+
+Consultar [backlog por lote e responsável proposto](backlog.md), [homologação reproduzível](homologacao-local.md), [roteiro para aceite GRGD](roteiro-aceite-eventos.md) e [validação desta continuidade](validacao-continuidade.md).
+
+Lote 00 permanece aberto por backup/restauração dos serviços reais. Lote 01 tem preparação e validação técnica local, sem prévia pública nem aceite institucional. A modularização continua adiada conforme CONTRIBUTING; o PDF é referência de planejamento e não substitui decisões registradas no repositório.
+
+## Registro inicial — base v0.14.0
+
 Início: 23/10/2026. Estado: Lote 00 em execução, sem aceite institucional.
 Base: `4cb768a6ea8d2f9cd307c9cf9c265f356c1aff02`, v0.14.0, repositório `arlindossantos-collab/crm-ati-pe`.
 Branch de trabalho: `docs/plano-evolucao-lote-00`.
