@@ -1,6 +1,6 @@
 # Legibilidade dos cadastros — proposta v0.17.1
 
-Incremento dependente da [PR #26](https://github.com/arlindossantos-collab/crm-ati-pe/pull/26), sobre fd2c4340711637bd6c8cf178281b807a322c0f80. O usuário pediu varredura geral, com prioridade nas telas de cadastro, e manter a PR #26 pendente para integração conjunta futura. Nada foi publicado nesta etapa.
+Incremento dependente da [PR #26](https://github.com/arlindossantos-collab/crm-ati-pe/pull/26), sobre fd2c4340711637bd6c8cf178281b807a322c0f80. O usuário pediu varredura geral, com prioridade nas telas de cadastro, e manter a PR #26 pendente para integração conjunta futura. Esse foi o estado da preparação de 24/10/2026. Em 25/10/2026 o usuário autorizou integrar/publicar todas as pendentes; consulte [o roteiro de publicação](../publicacao-v0171.md).
 
 ## Falhas reproduzidas e correções
 
@@ -40,8 +40,8 @@ Os testes com Firebase simulado não são prova da integração hospedada. Emula
 
 ## Revisão e integração conjunta
 
-A PR desta correção deve ter como base refactor/organizacao-migracao-v0170, mostrando somente o incremento. Seu branch já contém os commits da PR #26. O CI passa a validar PRs para qualquer branch base, mantendo a publicação restrita à main.
+Na revisão incremental, a PR #27 teve como base refactor/organizacao-migracao-v0170, mostrando somente a correção. Seu branch contém os commits da PR #26. Após a autorização de 25/10/2026, a base é direcionada à main para integrar o conjunto. O CI valida PRs para qualquer branch base, mantendo a publicação restrita à main.
 
 Novas propostas seguem a mesma cadeia. Quando o usuário autorizar integrar o conjunto, a última proposta pode ser direcionada à main, revisando o diff acumulado, o CI e o estado remoto. Preferir merge commit para preservar a ancestralidade das propostas; conferir o encerramento das PRs anteriores depois. Não fazer squash/reaplicar cada lote sem avaliar a cadeia.
 
-A configuração Pages deve passar para GitHub Actions antes da integração da arquitetura da PR #26; publicar somente dist. Esta correção mantém a produção na v0.16.0 e não altera a PR #26 ou a fonte do serviço Pages.
+A configuração Pages deve passar para GitHub Actions antes da integração da arquitetura da PR #26; publicar somente dist. Na preparação, a produção permaneceu na v0.16.0. A confirmação da nova implantação é separada do merge e consta no roteiro de publicação.

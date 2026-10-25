@@ -2,7 +2,7 @@
 
 Sistema da GRGD/ATI-PE para órgãos, colaboradores, acessos, eventos, inscrições e cadastros de apoio.
 
-**Proposta v0.17.1 — legibilidade de cadastros, dependente da organização modular da [PR #26](https://github.com/arlindossantos-collab/crm-ati-pe/pull/26). As propostas aguardam integração conjunta; ainda não publicadas.** A versão pública confirmada é a v0.16.0, integrada no [PR #25](https://github.com/arlindossantos-collab/crm-ati-pe/pull/25), com [Pages verificado](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40131869055). [Histórico](CHANGELOG.md).
+**v0.17.1 — organização modular e legibilidade de cadastros.** Entrega conjunta das [PRs #26](https://github.com/arlindossantos-collab/crm-ati-pe/pull/26) e [#27](https://github.com/arlindossantos-collab/crm-ati-pe/pull/27), com integração e publicação autorizadas em 25/10/2026. Acompanhe a [implantação do site](https://github.com/arlindossantos-collab/crm-ati-pe/actions/workflows/pages.yml) e as [releases](https://github.com/arlindossantos-collab/crm-ati-pe/releases). [Histórico](CHANGELOG.md).
 
 ## Onde está cada responsabilidade
 
@@ -72,7 +72,7 @@ O servidor local usa a porta 4173 e recompila as fontes; atualizar o navegador a
 
 ## Publicar e preparar a VM
 
-Publicar somente dist, conforme [CONTRIBUTING](CONTRIBUTING.md). A reorganização muda o Pages para artefato de GitHub Actions; a configuração do serviço deve ser ajustada com autorização antes de integrar. Firebase Hosting também passa a usar dist. Site e regras/índices são publicações diferentes; regras e índices não foram alterados nesta proposta.
+Publicar somente dist, conforme [CONTRIBUTING](CONTRIBUTING.md). Pages deve usar a fonte GitHub Actions antes da integração desta arquitetura. A integração recebeu HTTP 403 ao tentar ajustar essa configuração; um administrador precisa selecionar Settings → Pages → Build and deployment → Source → GitHub Actions. [Roteiro da publicação conjunta](docs/publicacao-v0171.md). Firebase Hosting também passa a usar dist. Site e regras/índices são publicações diferentes; regras e índices não foram alterados nesta proposta.
 
 Os templates Nginx suportam raiz/subcaminho, assets relativos e 404. `npm run test:deploy` ensaia Nginx e staging PostgreSQL em containers descartáveis sem publicar portas. [VM e retorno](docs/migracao/vm.md).
 

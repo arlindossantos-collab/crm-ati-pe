@@ -2,16 +2,16 @@
 
 Registro das entregas em linguagem de negócio, para consulta da equipe e da gestão.
 
-## v0.17.1 — Legibilidade de cadastros e interface — proposta, não publicada
+## v0.17.1 — Legibilidade de cadastros e interface — entrega conjunta de 25/10/2026
 
 **Resumo para a gestão:** corrige telas de cadastro que exibiam nomes internos, false, timestamps ou [object Object]. Detalhes e edição passam a apresentar rótulos legíveis, Sim/Não, datas brasileiras e informações estruturadas, preservando os registros.
 
 - **Antes/depois:** campos como razaoSocial e produtoServicoPrincipal ganham rótulos; referências técnicas ficam recolhidas; grupos usam seleção por nome sem perder IDs anteriores. Campos e textos longos ficam legíveis no celular.
 - **Varredura geral:** permissões e histórico traduzidos, referências sem nome indicadas como indisponíveis, mensagens de erro sem despejo técnico e ícone de calendário corrigido. Protocolo e referências úteis permanecem acessíveis.
 - **Validação:** falha reproduzida na base da PR #26; 247 testes numerados, dez suítes de navegador e smoke com SDK real em emuladores. Edição confere preservação de IDs, metadados e estruturas. [Evidências e limites](docs/planejamento/cadastros-legibilidade.md).
-- **Integração:** depende da PR #26, que permanece pendente. Branch encadeada permite revisar o incremento e integrar o conjunto posteriormente. CI habilitado também para PRs entre branches de proposta. Sem publicação, migração de dados ou alteração das regras/índices.
+- **Integração/publicação:** autorizadas pelo usuário em 25/10/2026 para todas as PRs pendentes. A PR #27 contém a #26 e passa a ser integrada à main com merge commit, preservando a cadeia. [Roteiro e confirmação da implantação](docs/publicacao-v0171.md). Sem migração de dados ou alteração das regras/índices.
 
-## v0.17.0 — Organização modular e preparação de migração — proposta, não publicada
+## v0.17.0 — Organização modular e preparação de migração — incluída na entrega v0.17.1
 
 **Resumo para a gestão:** a aplicação sai do HTML único de 4.256 linhas. Telas, estilos, módulos e serviços ficam separados; o build gera somente o site publicável. A limpeza preserva o funcionamento atual e registra o caminho para a VM, PostgreSQL e identidade institucional.
 
@@ -20,7 +20,7 @@ Registro das entregas em linguagem de negócio, para consulta da equipe e da ges
 - **Preparação ATI:** templates Nginx raiz/subcaminho, auditor offline de exportação tipada, staging PostgreSQL e contratos de API/identidade/configuração do futuro backend. O sistema continua Firebase; SQL/LDAP ainda não estão integrados.
 - **Dependências:** Firebase 12.19.0, CLI 15.34.1 e ferramentas fixadas. Auditoria passou de 30 alertas (1 crítico/12 altos) a 8 moderados nas ferramentas; override gRPC e limites documentados.
 - **Validação:** 239 testes numerados, nove suítes de navegador, smoke com SDK/Auth/Firestore emulados, ciclo de desenvolvimento e ensaios Nginx/PostgreSQL aprovados localmente. CI ampliado para o mesmo smoke. [Auditoria completa](docs/auditoria-testes.md).
-- **Publicação e pendências:** não publicada. Antes de integrar, mudar a fonte do Pages para GitHub Actions com autorização; publicar somente dist. Regras/índices e dados reais não foram alterados. Homologação GRGD, backups reais e implantação da futura API/provedores permanecem pendentes.
+- **Entrega conjunta:** organização incluída na v0.17.1, com integração/publicação autorizadas em 25/10/2026. Pages precisa usar GitHub Actions/dist antes do merge. Regras/índices e dados reais não foram alterados. Homologação GRGD, backups reais e implantação da futura API/provedores permanecem pendentes.
 
 ## v0.16.0 — Painel de inscrições e vagas — publicada em 24/10/2026
 

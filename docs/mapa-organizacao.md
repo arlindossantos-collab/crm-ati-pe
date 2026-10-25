@@ -1,6 +1,6 @@
-# Mapa atual do repositório — propostas v0.17.0/v0.17.1
+# Mapa atual do repositório — entrega conjunta v0.17.1
 
-Base preservada: v0.16.0, commit 113d629c4565a631bd89a5af4c24c3bf40e26a46. A reorganização foi solicitada explicitamente pelo usuário, substituindo o adiamento anterior da extração. Ainda não está publicada.
+Base preservada: v0.16.0, commit 113d629c4565a631bd89a5af4c24c3bf40e26a46. A reorganização foi solicitada explicitamente pelo usuário, substituindo o adiamento anterior da extração. A integração/publicação conjuntas foram autorizadas em 25/10/2026; a confirmação operacional está no [roteiro de publicação](publicacao-v0171.md).
 
 ## Estrutura e dependências
 

@@ -72,8 +72,8 @@ Não adicionar SDK Firebase em outro módulo: importe src/services/firebase.js. 
 
 Mudanças para PostgreSQL/LDAP devem preservar IDs, modelos de inscrição e auditoria, com staging e reconciliação. Ler docs/migracao antes de conectar serviços institucionais. Exemplos de .env são contratos de requisitos; nunca preencher valores secretos no Git.
 
-## Propostas encadeadas ainda não integradas
+## Integração de propostas encadeadas
 
-Por decisão do usuário, a PR #26 permanece pendente. A correção v0.17.1 parte de seu commit fd2c434, em branch própria, com PR base refactor/organizacao-migracao-v0170. Próximos incrementos devem partir da ponta da proposta anterior, preservando a cadeia e permitindo revisar somente cada diferença.
+As PRs #26 e #27 foram preparadas em cadeia. O usuário autorizou integrar e publicar todas as pendentes em 25/10/2026, substituindo a orientação anterior de mantê-las pendentes. A PR #27 contém a reorganização da #26 e é direcionada à main para a integração conjunta, com merge commit e conferência das PRs anteriores.
 
-Na autorização futura para integrar o conjunto, conferir o diff acumulado da última ponta contra main, revalidar e ajustar a base da proposta final. Preferir merge commit para preservar a ancestralidade; conferir as PRs anteriores após a integração, sem squash/reaplicação duplicada. Pages precisa mudar para Actions antes da integração desta arquitetura. [Registro da cadeia e validação](docs/planejamento/cadastros-legibilidade.md).
+Próximos incrementos podem partir da ponta da proposta anterior, preservando a cadeia e permitindo revisar somente cada diferença. Na autorização para integrar o conjunto, conferir o diff acumulado contra main, o estado remoto e o CI; evitar squash/reaplicação duplicada. Pages precisa usar Actions antes de integrar esta arquitetura. [Publicação conjunta](docs/publicacao-v0171.md).
