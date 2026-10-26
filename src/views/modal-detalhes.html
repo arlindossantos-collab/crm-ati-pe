@@ -1,0 +1,13 @@
+    <div id="modal-detalhes" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-5xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 id="detalhe-titulo-modal" class="text-base font-bold">Detalhamento e Edição Completa</h3><button type="button" class="btn-fechar-modal text-slate-400 hover:text-slate-600 cursor-pointer" data-target="modal-detalhes" aria-label="Fechar detalhes"><span class="text-xs">Fechar</span></button></div>
+
+            <div id="dashboard-detalhe-evento-container" class="hidden mb-6 space-y-4"></div>
+
+            <div id="detalhe-conteudo" class="space-y-4 text-sm mb-4"></div>
+            <div id="detalhe-area-admin" class="hidden border-t pt-4 bg-slate-100 -mx-6 -mb-6 p-6 rounded-b-2xl">
+                <div class="flex justify-between items-center mb-3"><p class="text-xs font-bold text-slate-800">Editar cadastro</p><button type="button" id="btn-excluir-registro" class="btn-admin-only hidden bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold cursor-pointer">Excluir Registro</button></div>
+                <form id="form-edicao-admin" class="space-y-2.5 text-xs"><input type="hidden" id="edit-colecao"><input type="hidden" id="edit-doc-id"><div id="edit-campos-dinamicos" class="max-h-72 overflow-y-auto space-y-2"></div><div class="flex justify-end gap-2 pt-3 border-t"><button id="btn-salvar-edicao" type="submit" class="px-4 py-2 bg-blue-900 text-white font-bold rounded cursor-pointer">Salvar alterações</button></div></form>
+            </div>
+        </div>
+    </div>

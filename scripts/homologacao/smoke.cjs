@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),path=require('node:path'),fs=require('node:fs');
-const {chromium}=require(path.join(process.env.PRGD_BROWSER_TOOLS||'/workspace/tools/prgd-browser/node_modules','playwright'));
+const {chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch();const external=[],errors=[];
  fs.mkdirSync('test-results',{recursive:true});
@@ -40,7 +40,7 @@ const {chromium}=require(path.join(process.env.PRGD_BROWSER_TOOLS||'/workspace/t
   await page.locator('[data-tab="inscricoes_orgao"]').click();await page.getByRole('button',{name:'Cancelar inscrição',exact:true}).last().waitFor();
   await page.screenshot({path:'test-results/homologacao-emuladores-desktop.png'});
   page.on('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Cancelar inscrição',exact:true}).last().click();
-  await page.locator('#portal-inscricoes').getByText('cancelada',{exact:true}).first().waitFor();
+  await page.locator('#portal-inscricoes').getByText('Cancelada',{exact:true}).first().waitFor();
   const denied=await page.evaluate(async()=>{
    const sdk=await import('./firebase-local.js'),db=sdk.getFirestore(sdk.getApps()[0]);
    try{await sdk.getDoc(sdk.doc(db,'orgaos','orgao-b'));return false;}catch(e){return e.code==='permission-denied';}

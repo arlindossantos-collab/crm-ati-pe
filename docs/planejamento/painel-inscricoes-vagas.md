@@ -1,5 +1,7 @@
 # Lote 07 — painel administrativo de inscrições e vagas (v0.16.0)
 
+> Publicação posterior autorizada: [PR #25](https://github.com/arlindossantos-collab/crm-ati-pe/pull/25), commit 113d629, [Pages aprovado](https://github.com/arlindossantos-collab/crm-ati-pe/actions/runs/40131869055). O roteiro abaixo preserva o registro da proposta e seus limites de homologação.
+
 Proposta não publicada, baseada em main@61ec077966e051abda6026dfa5b58a1ea6e7b875 (v0.15.0). Branch feat/painel-inscricoes-v0160. O Lote 07 completo e o piloto continuam sujeitos a homologação funcional e dados legados; este é um incremento de operação e conferência.
 
 ## Resultado e limites de acesso

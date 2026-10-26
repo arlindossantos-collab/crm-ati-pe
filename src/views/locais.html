@@ -1,0 +1,44 @@
+        <!-- ABA LOCAIS -->
+        <div id="aba-locais" class="hidden min-w-0 max-w-full space-y-5">
+            <section class="rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-900 p-5 sm:p-6 text-white shadow-lg">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div><p class="text-[10px] font-bold uppercase tracking-widest text-blue-200">Planejamento de espaços</p><h3 class="mt-1 text-2xl font-bold">Locais e auditórios</h3><p class="mt-2 text-sm text-blue-100">Compare espaços, consulte a agenda e acompanhe as locações.</p></div>
+                    <button type="button" data-modal-target="local" data-acao="locais.criar" class="btn-abrir-form btn-admin-only rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-blue-900 shadow hover:bg-blue-50"><i class="fa-solid fa-plus mr-1"></i> Novo Local / Auditório</button>
+                </div>
+                <p class="mt-4 text-xs text-blue-200">Indicadores de todos os locais carregados. Os filtros abaixo afetam apenas a tabela.</p>
+            </section>
+            <div id="locais-indicadores" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3" aria-label="Indicadores de locais"></div>
+            <p id="locais-qualidade" class="text-xs text-slate-500" aria-live="polite"></p>
+            <section class="rounded-2xl bg-white border border-slate-200 shadow-sm p-4 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h4 class="font-bold text-slate-800">Espaços cadastrados <span id="count-locais" class="text-blue-700">0</span></h4>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <label class="sr-only" for="busca-locais">Buscar nome, endereço ou contato</label>
+                        <input type="search" id="busca-locais" placeholder="Nome, endereço ou contato..." class="p-2.5 border rounded-xl text-xs bg-slate-50 w-full sm:w-72 focus:ring-2 focus:ring-blue-600">
+                        <button type="button" id="btn-filtros-locais" aria-expanded="false" aria-controls="locais-filtros" class="border rounded-xl p-2.5 text-xs font-bold hover:bg-slate-50"><i class="fa-solid fa-sliders mr-1"></i> Filtros</button>
+                    </div>
+                </div>
+                <div id="locais-filtros" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3 bg-slate-50 rounded-xl">
+                    <label class="text-xs font-semibold">Tipo de locação<select id="local-filtro-tipo" class="block w-full p-2 border rounded-lg mt-1"><option value="">Todos</option><option value="gratuito">Gratuito</option><option value="pago">Pago</option><option value="nao-informado">Não informado</option></select></label>
+                    <label class="text-xs font-semibold">Capacidade mínima<input id="local-filtro-capacidade" type="number" min="0" step="1" placeholder="Pessoas" class="block w-full p-2 border rounded-lg mt-1"></label>
+                    <label class="text-xs font-semibold">Recurso necessário<input id="local-filtro-recurso" placeholder="Ex.: projetor" class="block w-full p-2 border rounded-lg mt-1"></label>
+                    <button type="button" id="local-limpar-filtros" class="self-end p-2 border rounded-lg text-xs font-bold bg-white">Limpar filtros e busca</button>
+                </div>
+                <div class="overflow-x-auto"><table class="w-full text-left border-collapse min-w-[1100px]"><thead class="bg-slate-50 border-b text-[10px] text-slate-500 uppercase font-semibold"><tr><th class="p-4">Nome / Espaço</th><th class="p-4">Capacidade / Área</th><th class="p-4">Valor Aluguel</th><th class="p-4">Eventos vinculados</th><th class="p-4">Recursos</th><th class="p-4">Criação / Modificação</th><th class="p-4">Modificado por</th><th class="p-4 text-center">Detalhes</th></tr></thead><tbody id="tabela-locais" class="divide-y text-sm"></tbody></table></div>
+            </section>
+            <section id="local-painel" tabindex="-1" class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5" aria-label="Detalhes do local selecionado">
+                <p class="text-sm text-slate-500">Selecione <strong>Detalhes</strong> na tabela para conhecer o espaço e seu histórico de eventos.</p>
+            </section>
+            <section class="rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+                <h4 class="text-base font-bold text-slate-800"><i class="fa-regular fa-calendar-check text-blue-700 mr-2"></i>Consultar disponibilidade</h4>
+                <p class="text-xs text-slate-500 mt-1">Consulta a agenda registrada no sistema. Não realiza reserva nem confirma a disponibilidade com o responsável pelo espaço.</p>
+                <form id="form-disponibilidade-local" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-4">
+                    <label class="text-xs font-semibold">Local<select id="disponibilidade-local" required class="w-full block mt-1 border rounded-lg p-2.5"><option value="">Selecione um local</option></select></label>
+                    <label class="text-xs font-semibold">Data pretendida<input type="date" id="disponibilidade-data" required class="w-full block mt-1 border rounded-lg p-2.5"></label>
+                    <label class="text-xs font-semibold">Início (opcional)<input type="time" id="disponibilidade-inicio" class="w-full block mt-1 border rounded-lg p-2.5"></label>
+                    <label class="text-xs font-semibold">Fim (opcional)<input type="time" id="disponibilidade-fim" class="w-full block mt-1 border rounded-lg p-2.5"></label>
+                    <button type="submit" class="self-end rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs p-2.5">Consultar disponibilidade</button>
+                </form>
+                <div id="disponibilidade-resultado" class="mt-4 text-sm" role="status" aria-live="polite"></div>
+            </section>
+        </div>

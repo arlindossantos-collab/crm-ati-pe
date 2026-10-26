@@ -1,0 +1,116 @@
+        <!-- ABA DEMANDAS -->
+        <div id="aba-demandas" class="hidden space-y-4">
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4 text-xs">
+                <div class="flex items-center gap-4 flex-wrap">
+                    <span class="font-bold text-slate-700"><i class="fa-solid fa-bookmark text-blue-900 mr-1"></i> Legenda de Prioridades:</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Alta</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span> Média</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Baixa</span>
+                </div>
+                <div class="flex items-center gap-4 flex-wrap">
+                    <span class="font-bold text-slate-700"><i class="fa-solid fa-info-circle text-blue-900 mr-1"></i> Legenda de Status:</span>
+                    <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-500 text-white inline-flex items-center justify-center text-[9px]"><i class="fa-solid fa-spinner"></i></span> Em Andamento</span>
+                    <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-slate-500 text-white inline-flex items-center justify-center text-[9px]"><i class="fa-solid fa-pause"></i></span> Pausado</span>
+                    <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-red-600 text-white inline-flex items-center justify-center text-[9px] font-bold">X</span> Cancelado</span>
+                    <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-emerald-600 text-white inline-flex items-center justify-center text-[9px] font-bold">✓</span> Concluído</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h3 class="text-base font-bold text-slate-800">Demandas (<span id="count-demandas">0</span>)</h3>
+                    <input type="text" id="busca-demandas" placeholder="Busca universal (nome, órgão, detalhes, data...)" class="p-2 border rounded-lg text-xs bg-white w-72 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+
+                    <select id="filtro-demanda-status" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="">Todos os Status</option>
+                        <option value="Em Andamento">Em Andamento</option>
+                        <option value="Pausado">Pausado</option>
+                        <option value="Cancelado">Cancelado</option>
+                        <option value="Concluído">Concluído</option>
+                    </select>
+
+                    <select id="filtro-demanda-prio" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="">Todas as Prioridades</option>
+                        <option value="Baixa">Baixa</option>
+                        <option value="Média">Média</option>
+                        <option value="Alta">Alta</option>
+                    </select>
+
+                    <select id="ordenacao-demandas" class="p-2 border rounded-lg text-xs bg-white font-medium">
+                        <option value="recente">Mais Recentes</option>
+                        <option value="antiga">Mais Antigas</option>
+                        <option value="prio">Maior Prioridade</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <div class="inline-flex bg-slate-100 p-1 rounded-lg text-xs font-semibold">
+                        <button type="button" id="btn-visao-tabela" class="px-3 py-1.5 rounded-md bg-white text-blue-900 shadow-sm transition"><i class="fa-solid fa-table mr-1"></i> Tabela</button>
+                        <button type="button" id="btn-visao-calendario" class="px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition"><i class="fa-solid fa-calendar-week mr-1"></i> Calendário & Backlog</button>
+                    </div>
+                    <button type="button" data-modal-target="demanda" data-acao="demandas.criar" class="btn-abrir-form btn-admin-only bg-blue-900 hover:bg-blue-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer"><i class="fa-solid fa-plus"></i> Nova Demanda</button>
+                </div>
+            </div>
+
+            <!-- VISÃO 1: TABELA -->
+            <div id="container-visao-tabela" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto p-4">
+                <table class="w-full text-left border-collapse min-w-[1150px]">
+                    <thead class="bg-slate-50 border-b text-xs text-slate-500 uppercase font-semibold">
+                        <tr>
+                            <th class="p-4">Solicitante</th>
+                            <th class="p-4">Demanda</th>
+                            <th class="p-4">Detalhes</th>
+                            <th class="p-4">Resp. GRGD</th>
+                            <th class="p-4 text-center">Data Específica</th>
+                            <th class="p-4 text-center">Dia da Semana</th>
+                            <th class="p-4 text-center">Prioridade</th>
+                            <th class="p-4 text-center">Status</th>
+                            <th class="p-4 text-center">Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-demandas" class="divide-y text-sm"></tbody>
+                </table>
+            </div>
+
+            <!-- VISÃO 2: CALENDÁRIO & BACKLOG + CALENDÁRIO MENSAL -->
+            <div id="container-visao-calendario" class="hidden space-y-6">
+                <!-- Backlog -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-box-archive text-amber-600"></i> BACKLOG (Atividades Pendentes)</h4>
+                        <span id="backlog-count" class="text-xs bg-slate-100 px-2 py-0.5 rounded-full font-bold">0</span>
+                    </div>
+                    <div id="backlog-postits-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 min-h-[90px] p-2 bg-slate-50 rounded-lg border border-dashed border-slate-200"></div>
+                </div>
+
+                <!-- Calendário Semanal -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-900"></i> CALENDÁRIO SEMANAL</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Segunda-feira</span></div><div id="cal-segunda" class="space-y-2 flex-1"></div></div>
+                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Terça-feira</span></div><div id="cal-terca" class="space-y-2 flex-1"></div></div>
+                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Quarta-feira</span></div><div id="cal-quarta" class="space-y-2 flex-1"></div></div>
+                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Quinta-feira</span></div><div id="cal-quinta" class="space-y-2 flex-1"></div></div>
+                        <div class="bg-slate-50 border rounded-xl p-3 flex flex-col min-h-[240px]"><div class="font-bold text-xs text-blue-900 border-b pb-2 mb-2 uppercase tracking-wide"><span>Sexta-feira</span></div><div id="cal-sexta" class="space-y-2 flex-1"></div></div>
+                    </div>
+                </div>
+
+                <!-- Calendário Completo Mensal -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4 border-b pb-3">
+                        <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-calendar-alt text-indigo-700"></i> CALENDÁRIO MENSAL COMPLETO</h4>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="btn-mes-anterior" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition cursor-pointer"><i class="fa-solid fa-chevron-left mr-1"></i> Anterior</button>
+                            <span id="mes-atual-label" class="text-xs font-bold text-blue-900 min-w-[140px] text-center uppercase">Outubro 2026</span>
+                            <button type="button" id="btn-mes-proximo" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition cursor-pointer">Próximo <i class="fa-solid fa-chevron-right ml-1"></i></button>
+                            <button type="button" id="btn-mes-hoje" class="p-2 bg-blue-900 text-white rounded-lg text-xs font-bold transition cursor-pointer ml-2">Hoje</button>
+                        </div>
+                    </div>
+                    <!-- Grid do Calendário Mensal -->
+                    <div class="grid grid-cols-7 gap-1 text-center font-bold text-xs text-slate-500 mb-2">
+                        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                    </div>
+                    <div id="calendario-mensal-grid" class="grid grid-cols-7 gap-1.5"></div>
+                </div>
+            </div>
+        </div>

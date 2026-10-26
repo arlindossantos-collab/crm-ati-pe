@@ -50,7 +50,7 @@ export async function runTransaction(db,fn){
 `;
 (async()=>{
  fs.mkdirSync('test-results',{recursive:true});
- const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(fs.readFileSync('index.html'));});
+ const server=http.createServer(require('./helpers/browser.cjs').serveProjectAsset);
  await new Promise(r=>server.listen(0,'127.0.0.1',r));let browser;
  const errors=[];
  async function pageFor(fixture){
@@ -62,7 +62,7 @@ export async function runTransaction(db,fn){
    },fixture);
    // Reproduz utilitários de display chegando após o HTML, durante os 500ms de restauração simulada.
    await page.route('https://cdn.tailwindcss.com/**',r=>r.fulfill({contentType:'application/javascript',body:"document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{const s=document.createElement('style');s.textContent='.flex{display:flex}';document.head.appendChild(s);},50));"}));
-   await page.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
+   await page.route('**/src/services/firebase.js',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
    await page.route('**/*',r=>/googleapis\.com|firebaseio\.com|firebaseapp\.com/.test(r.request().url())?r.abort():r.fallback());
    await page.goto('http://127.0.0.1:'+server.address().port);if(process.env.PRGD_TEST_CSS)await page.addStyleTag({content:fs.readFileSync(process.env.PRGD_TEST_CSS,'utf8')});return {page,context};
  }
@@ -81,7 +81,7 @@ export async function runTransaction(db,fn){
    await page.locator('#btn-historico-alteracoes').click();
    await page.locator('#historico-registros tr').filter({hasText:'Nome atualizado'}).waitFor();
    const historico=await page.locator('#historico-registros').innerText();
-   assert.match(historico,/Administrador de teste/);assert.match(historico,/nome/);assert.match(historico,/21\/10\/2026/);
+   assert.match(historico,/Administrador de teste/);assert.match(historico,/\bNome\b/);assert.match(historico,/21\/10\/2026/);
    await page.screenshot({path:'test-results/historico-alteracoes.png'});
    await page.locator('[data-target="modal-historico-alteracoes"]').click();
    await page.locator('[data-usuario-excluir="outro"]').click();

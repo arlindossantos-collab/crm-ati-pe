@@ -19,12 +19,12 @@ function fixture(me){return {me,usuarios:[me,...[admin,nsi,sub,auditor,grgd,inte
  eventos:[{id:'e1',titulo:'Oficina de Governo Digital',dataInicio:day(7),eventoPublico:false,modeloInscricao:'institucional-v1',orgaosElegiveis:['orgao-a'],inscricoesAbertas:true,inscricaoInicio:now-60000,inscricaoFim:now+86400000,limiteVagas:40,inscritosCount:1,status:'Confirmado'},{id:'e2',titulo:'Encontro de relacionamento',dataInicio:day(14),eventoPublico:true},{id:'e3',titulo:'Evento reservado do órgão B',dataInicio:day(14),eventoPublico:false,orgaosElegiveis:['orgao-b']}]};}
 (async()=>{
  fs.mkdirSync('test-results',{recursive:true});let browser;const errors=[];
- const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(fs.readFileSync('index.html'));});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ const server=http.createServer(require('./helpers/browser.cjs').serveProjectAsset);await new Promise(r=>server.listen(0,'127.0.0.1',r));
  async function open(me){
   const context=await browser.newContext({viewport:{width:1440,height:1060}}),page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
   await page.addInitScript(f=>{globalThis.__fixture=JSON.parse(sessionStorage.getItem('__layoutFixture')||'null')||f;globalThis.__queries=[];globalThis.__transactions=[];globalThis.__reauths=0;globalThis.__refreshes=0;},fixture(me));
   await page.route('https://cdn.tailwindcss.com/**',r=>r.fulfill({contentType:'application/javascript',body:''}));
-  await page.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
+  await page.route('**/src/services/firebase.js',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
   await page.route('**/*',r=>/googleapis\.com|firebaseio\.com|firebaseapp\.com/.test(r.request().url())?r.abort():r.fallback());
   await page.goto('http://127.0.0.1:'+server.address().port);if(process.env.PRGD_TEST_CSS)await page.addStyleTag({content:fs.readFileSync(process.env.PRGD_TEST_CSS,'utf8')});await page.locator(me?'#main-content':'#modal-login').waitFor({state:'visible'});return {page,context};
  }

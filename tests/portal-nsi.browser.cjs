@@ -19,12 +19,12 @@ const admin={id:'admin',uid:'admin',nome:'Administrador fictício',email:'admin@
 function fixture(me,extra={}){return {me,usuarios:[admin,nsi],orgaos:[{id:'a',nome:'Órgão A de demonstração',sigla:'DEMO-A'},{id:'b',nome:'Órgão B reservado'}],setores:[{id:'a1',nome:'Núcleo de TIC',orgaoId:'a',ativo:true},{id:'a2',nome:'Diretoria administrativa',orgaoId:'a',ativo:true},{id:'b1',nome:'Setor de outro órgão',orgaoId:'b',ativo:true}],colaboradores:[],inscricoes:[],historicoAlteracoes:[],eventos:[{id:'hoje',titulo:'Disponível hoje para o órgão A',dataInicio:localToday,eventoPublico:false,modeloInscricao:'institucional-v1',orgaosElegiveis:['a'],inscricoesAbertas:true,inscricaoInicio:now-60000,inscricaoFim:now+3600000,limiteVagas:10,inscritosCount:0,status:'Confirmado'},{id:'publico',titulo:'Evento público de demonstração',dataInicio:'2099-01-01',eventoPublico:true},{id:'privado-b',titulo:'Evento reservado do órgão B',dataInicio:'2099-01-01',eventoPublico:false,orgaosElegiveis:['b']}],...extra};}
 (async()=>{
  fs.mkdirSync('test-results',{recursive:true});let browser;const errors=[];
- const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(fs.readFileSync('index.html'));});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ const server=http.createServer(require('./helpers/browser.cjs').serveProjectAsset);await new Promise(r=>server.listen(0,'127.0.0.1',r));
  async function open(me,extra={}){
   const context=await browser.newContext({viewport:{width:1440,height:1050}}),page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
   await page.addInitScript(f=>{globalThis.__fixture=f;globalThis.__queries=[];globalThis.__transactions=[];globalThis.__refreshes=0;globalThis.__reauths=0;globalThis.__reverseRows=false;},fixture(me,extra));
   await page.route('https://cdn.tailwindcss.com/**',r=>r.fulfill({contentType:'application/javascript',body:''}));
-  await page.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
+  await page.route('**/src/services/firebase.js',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
   await page.route('**/*',r=>/googleapis\.com|firebaseio\.com|firebaseapp\.com/.test(r.request().url())?r.abort():r.fallback());
   await page.goto('http://127.0.0.1:'+server.address().port);if(process.env.PRGD_TEST_CSS)await page.addStyleTag({content:fs.readFileSync(process.env.PRGD_TEST_CSS,'utf8')});await page.locator('#main-content').waitFor({state:'visible'});return {context,page};
  }

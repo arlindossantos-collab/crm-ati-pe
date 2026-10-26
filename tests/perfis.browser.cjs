@@ -21,14 +21,14 @@ const fixture=me=>({me,usuarios:[admin,nsi,auditor,grgd,user('novo')],
     historicoAlteracoes:[{id:'h1',orgaoId:'orgao-a',setorId:'a1',autorNome:'Autor de demonstração',acao:'editar',registroNome:'Registro de demonstração'}]});
 (async()=>{
     fs.mkdirSync('test-results',{recursive:true});
-    const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(fs.readFileSync(req.url.split('?')[0]==='/previa-perfis.html'?'previa-perfis.html':'index.html'));});
+    const server=http.createServer(require('./helpers/browser.cjs').serveProjectAsset);
     await new Promise(r=>server.listen(0,'127.0.0.1',r));let browser;
     const base='http://127.0.0.1:'+server.address().port,errors=[];
     async function appPage(me){
         const context=await browser.newContext({viewport:{width:1440,height:1100}}),page=await context.newPage();
         page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
         await page.addInitScript(f=>{globalThis.__fixture=f;globalThis.__queries=[];globalThis.__transactions=[];globalThis.__reauths=0;globalThis.__refreshes=0;},fixture(me));
-        await page.route('https://www.gstatic.com/firebasejs/**',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
+        await page.route('**/src/services/firebase.js',r=>r.fulfill({contentType:'application/javascript',headers:{'access-control-allow-origin':'*'},body:stub}));
         await page.route('**/*',r=>/googleapis\.com|firebaseio\.com|firebaseapp\.com/.test(r.request().url())?r.abort():r.fallback());
         await page.goto(base);if(process.env.PRGD_TEST_CSS)await page.addStyleTag({content:fs.readFileSync(process.env.PRGD_TEST_CSS,'utf8')});await page.locator('#main-content').waitFor({state:'visible'});return {page,context};
     }

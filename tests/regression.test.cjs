@@ -1,7 +1,5 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 const vm = require('node:vm');
 
 function vinculoTeste(extra={}) {
@@ -15,10 +13,8 @@ function vinculoTeste(extra={}) {
 
 // Exercita o módulo real com DOM/Firebase simulados, sem acessar serviços ou dados reais.
 function app({revisaoAutomatica=true}={}) {
-    const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-    const source = html.match(/<script type="module">([\s\S]*?)<\/script>/)[1]
-        .replace(/^\s*import .*?;\s*$/gm, '');
-    const nodes = new Map(), writes = [], audits = [], charts = [], listeners = new Map(), snapshots = [], storage = new Map();
+    const source = require('../scripts/lib/source.cjs').readApplicationSource();
+    const nodes = new Map(), writes = [], audits = [], charts = [], listeners = new Map(), snapshots = [], storage = new Map(), persistence = [];
     let autoId = 0;
     const element = id => {
         if (!nodes.has(id)) nodes.set(id, {
@@ -39,7 +35,7 @@ function app({revisaoAutomatica=true}={}) {
         alert() {}, confirm() { return true; },
         initializeApp(config, name = '[DEFAULT]') { return {name}; }, getApps() { return []; }, getFirestore() { return {}; }, getAuth(app) { return app; },
         async createUserWithEmailAndPassword(auth, email, password) { return {user:{uid:'novo-uid'}}; }, async deleteUser() {},
-        browserLocalPersistence: {tipo:'local'}, inMemoryPersistence: {tipo:'memory'}, setPersistence() { return Promise.resolve(); },
+        browserLocalPersistence: {tipo:'local'}, inMemoryPersistence: {tipo:'memory'}, setPersistence(auth,kind) { persistence.push({auth,kind});return Promise.resolve(); },
         signInWithEmailAndPassword() { return Promise.resolve(); }, signOut() { return Promise.resolve(); },
         collection(db, name) { return name; }, doc(db, collection, id, ...segments) { if(arguments.length===1){collection=db;id='auto-'+(++autoId);} return { collection, id, path:[collection,id,...segments].join('/') }; },
         increment(n){return {__increment:n};},serverTimestamp(){return {servidor:true};},orderBy(...v){return v;},limit(n){return n;},startAfter(v){return v;},
@@ -55,7 +51,7 @@ function app({revisaoAutomatica=true}={}) {
     });
     vm.runInContext(source, context);
     if(revisaoAutomatica)vm.runInContext("revisarUsuario=async()=>true",context);
-    return { run: code => vm.runInContext(code, context), element, writes, audits, charts, listeners, snapshots, context,storage };
+    return { run: code => vm.runInContext(code, context), element, writes, audits, charts, listeners, snapshots, context,storage,persistence };
 }
 
 async function confirmarExclusaoTeste(a) {
@@ -187,7 +183,8 @@ test('editor mantém controles booleanos e numéricos e protege histórico estru
     const a = app(); a.run("montarEdicaoEstruturada('eventos',{eventoPublico:true,limiteVagas:0,gruposPermitidos:['g1','g2'],historicoAcoes:[]})");
     const markup = a.element('edit-campos-dinamicos').innerHTML;
     assert.ok(markup.includes('data-field-type="boolean"')); assert.ok(markup.includes('type="number"'));
-    assert.ok(markup.includes('value="0"')); assert.ok(markup.includes('data-field-type="string-list"'));
+    assert.ok(markup.includes('value="0"')); assert.ok(markup.includes('data-field-type="reference-list"'));
+    assert.ok(markup.includes('value="g1" selected')); assert.ok(markup.includes('value="g2" selected'));
     assert.ok(!markup.includes('name="historicoAcoes"'));
 });
 
@@ -483,10 +480,13 @@ test('locais e fornecedores mostram autoria com foto nas colunas existentes', ()
     for(const id of ['tabela-locais','tabela-fornecedores'])assert.ok(a.element(id).innerHTML.includes('data-avatar'));
 });
 
-test('sessão principal persiste e cadastro auxiliar continua em memória', () => {
-    const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
-    assert.ok(html.includes('setPersistence(auth, browserLocalPersistence)'));
-    assert.ok(html.includes('setPersistence(authCadastro, inMemoryPersistence)'));
+test('sessão principal persiste e cadastro auxiliar continua em memória', async () => {
+    const a=app();preencherUsuario(a);a.run("currentUser={uid:'admin',perfil:'admin',nome:'Admin'}");
+    assert.equal(a.persistence[0].kind.tipo,'local');
+    await a.run('criarCadastroUsuario()');
+    assert.equal(a.persistence[1].kind.tipo,'memory');
+    assert.equal(a.persistence[1].auth.name,'prgd-cadastro');
+    assert.equal(a.run('currentUser.uid'),'admin');
 });
 test('usuário excluído sai da lista e do contador, preservando os dados carregados', () => {
     const a=app();
@@ -1143,4 +1143,55 @@ test('dados pessoais no painel são escapados e CSV mantém todas as inscriçõe
     a.element('painel-inscricoes-situacao').value='confirmada';a.run('atualizarPainelInscricoesEvento()');
     assert.doesNotMatch(a.element('painel-inscricoes-lista').innerHTML,/<img|<svg/);assert.match(a.element('painel-inscricoes-lista').innerHTML,/&lt;img/);
     assert.equal(a.run("prepararRelatorioInscricoes('doc-e').total"),5);assert.equal(a.writes.length,0);
+});
+
+test('cadastros apresentam rótulos, booleanos e datas sem serializar estruturas como código',()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin'};dbData.fornecedores=[{firestoreId:'f',nome:'São José',razaoSocial:'Órgãos e Ações',ativo:false,valorContrato:0,criadoEm:{seconds:1792843200},criadoPorUid:'codigo-interno',contatos:[{nome:'Conceição',telefone:'81 99999-0000'}]}];detalharRegistro('fornecedores','f')");
+    const html=a.element('detalhe-conteudo').innerHTML;
+    assert.match(html,/Razão social/);assert.match(html,/Órgãos e Ações/);assert.match(html,/24\/10\/2026/);assert.match(html,/>Não</);assert.match(html,/>0</);assert.match(html,/Conceição/);
+    assert.doesNotMatch(html,/\[object Object\]|Invalid Date|Timestamp\(/);
+    assert.match(html,/<details[^>]*><summary[^>]*>Referências técnicas/);assert.match(html,/codigo-interno/);
+    assert.equal(a.element('detalhe-titulo-modal').textContent,'Detalhes de fornecedor');
+});
+test('formatação de cadastro escapa textos e rótulos e não interpreta HTML cadastrado',()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin'}");
+    const html=a.run("detalhesCadastroHtml({'campo<svg>':{nome:'<img src=x onerror=alert(1)>',ativo:true},criadoEm:'data inválida',valor:0})");
+    assert.doesNotMatch(html,/<svg>|<img src=x/);assert.match(html,/&lt;img/);assert.match(html,/Data a conferir/);assert.match(html,/>Sim</);assert.match(html,/>0</);
+    assert.equal(a.run("formatarDataExibicao('2026-02-30T12:00:00Z')"),'Data a conferir');
+    assert.equal(a.run("formatarDataExibicao('2024-02-29T00:30:00Z')"),'28/02/2024');
+});
+test('editar listas de referências preserva IDs, vírgulas e repetições quando não há alteração',async()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin',nome:'Admin'};dbData.bases=[{firestoreId:'b',nome:'Original',grupos:['g,1','g2','g,1']}]");
+    a.element('edit-colecao').value='bases';a.element('edit-doc-id').value='b';
+    a.context.editEvent={preventDefault(){},target:{querySelectorAll:()=>[{name:'nome',value:'Novo',dataset:{}},{name:'grupos',dataset:{fieldType:'reference-list'},selectedOptions:[{value:'g,1'},{value:'g2'}]}]}};
+    await a.run('salvarEdicaoAdmin(editEvent)');assert.deepEqual(Array.from(a.writes[0].data.grupos),['g,1','g2','g,1']);assert.equal(a.writes[0].data.nome,'Novo');
+});
+test('referências sem nome não expõem códigos como órgão ou setor e não carregam novos dados',()=>{
+    const a=app();const before=a.snapshots.length;
+    assert.equal(a.run("nomeReferencia('setores','HASH-DO-SETOR')"),'Setor indisponível nesta consulta');
+    a.run("dbData.orgaos=[{firestoreId:'a',nome:'Secretaria de Administração'}]");
+    assert.equal(a.run("nomeReferencia('orgaos','a')"),'Secretaria de Administração');assert.equal(a.snapshots.length,before);
+});
+test('mensagens preservam validação de negócio e traduzem erros técnicos sem mostrar códigos',()=>{
+    const a=app();assert.equal(a.run("traduzirErroSistema(new Error('Não há vagas disponíveis.'))"),'Não há vagas disponíveis.');
+    for(const code of ['auth/network-request-failed','unavailable','auth/internal-error','permission-denied']){
+        a.context.uiError={code,message:'FirebaseError: INTERNAL_SQL_CODIGO'};
+        assert.doesNotMatch(a.run('traduzirErroSistema(uiError)'),/Firebase|SQL|auth\/|INTERNAL|undefined/);
+    }
+    assert.doesNotMatch(a.run("traduzirErroSistema(new TypeError('x is not a function'))"),/TypeError|function/);
+});
+test('histórico exibe nomes de campos legíveis e mantém os códigos para busca e referência',()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin'};historicoRegistros=[{autorNome:'João',autorUid:'UID-TECNICO',acao:'editar',colecao:'fornecedores',registroNome:'São José',registroId:'REGISTRO',campos:['produtoServicoPrincipal','criadoEm'],criadoEm:{seconds:1792843200}}];renderHistoricoAlteracoes()");
+    const html=a.element('historico-registros').innerHTML;assert.match(html,/Produto ou serviço principal/);assert.match(html,/Criado em/);assert.match(html,/24\/10\/2026/);assert.match(html,/<details/);assert.match(html,/UID-TECNICO/);
+    a.element('historico-busca').value='produto ou serviço';a.run('renderHistoricoAlteracoes()');assert.match(a.element('historico-registros').innerHTML,/São José/);
+});
+test('datas inválidas em vínculo não impedem abrir o cadastro nem aparecem como Invalid Date',()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin'};dbData.usuarios=[{firestoreId:'u',uid:'u',nome:'Pessoa',perfil:'comum',tipoUsuario:'externo',acessoInstitucional:{papel:'gestor_nsi',situacao:'aprovado',setoresIds:[],acoes:[],inicio:Date.now(),fim:'data inválida',revisao:'data inválida'}}];detalharRegistro('usuarios','u')");
+    assert.match(a.element('detalhe-conteudo').innerHTML,/Data a conferir/);assert.doesNotMatch(a.element('detalhe-conteudo').innerHTML,/Invalid Date/);
+    assert.equal(a.run("dataHoraLocalFormulario('data inválida')"),'');
+});
+test('comprovante com situação desconhecida não é apresentado como cancelado ou confirmado',async()=>{
+    const a=app();a.run("currentUser={uid:'admin',perfil:'admin'}");a.context.getDoc=async()=>({exists:()=>true,data:()=>({modeloInscricao:'institucional-v1',situacao:'a-conferir',participanteNome:'Pessoa',eventoTitulo:'Evento',orgaoId:'org-inacessivel',setorId:'setor-inacessivel'})});
+    await a.run("consultarComprovante('i')");const html=a.element('comprovante-conteudo').innerHTML;
+    assert.match(html,/Situação da inscrição não informada/);assert.doesNotMatch(html,/Inscrição cancelada|Inscrição confirmada|org-inacessivel|setor-inacessivel/);
 });

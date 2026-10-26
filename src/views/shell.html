@@ -1,0 +1,67 @@
+    <!-- Header Navbar -->
+    <header id="app-header" class="bg-blue-900 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-blue-900 px-3 py-1.5 rounded-lg font-bold text-xl tracking-wider">PRGD</div>
+                <div class="hidden md:block">
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-bold text-lg leading-tight">Plataforma de Relacionamento do Governo Digital</h1>
+                        <span class="bg-emerald-400 text-blue-950 font-black text-[10px] px-2 py-0.5 rounded-full shadow">v0.17.1</span>
+                    </div>
+                    <p class="text-xs text-blue-200">Agência Estadual de Tecnologia da Informação (ATI-PE)</p>
+                </div>
+            </div>
+            <div id="auth-actions">
+                <div id="user-logged" class="flex items-center gap-2 sm:gap-3">
+                    <button id="btn-meu-perfil" type="button" class="hidden flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-blue-800 focus-visible:ring-2 focus-visible:ring-white" aria-label="Abrir meu perfil"><span id="user-avatar"></span><span class="text-xs font-semibold">Perfil</span></button>
+                    <div class="text-right hidden sm:block">
+                        <p id="user-name-display" class="text-xs font-bold text-white"></p>
+                        <p id="user-role-display" class="text-[10px] text-blue-200 uppercase tracking-wider font-bold"></p>
+                    </div>
+                    <button type="button" id="btn-executar-logout" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 cursor-pointer">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main id="main-content" class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full hidden">
+        <div id="status-sessao" class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs mb-6 flex items-center justify-between shadow-sm">
+            <span><i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> <strong>Sessão Ativa:</strong> <span id="session-info">Acesso conforme o seu perfil.</span></span>
+            <span id="badge-perfil-acesso" class="bg-blue-200 text-blue-800 px-2.5 py-0.5 rounded font-bold uppercase"></span>
+        </div>
+
+        <!-- Uma única navegação; a disposição muda conforme o perfil. -->
+        <aside id="app-navegacao" class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div class="somente-portal"><p class="portal-sobre">Área de trabalho</p><p id="portal-orgao-nome"></p><p id="portal-papel-nome"></p></div>
+            <div id="container-abas-navegacao" role="navigation" aria-label="Navegação principal" class="flex bg-slate-200 p-1 rounded-xl w-fit max-w-full overflow-x-auto text-xs sm:text-sm">
+                <button type="button" data-tab="meu_orgao" class="nav-tab hidden px-3.5 py-2 rounded-lg">Meu órgão</button>
+                <button type="button" data-tab="colaboradores" class="nav-tab hidden px-3.5 py-2 rounded-lg">Colaboradores</button>
+                <button type="button" data-tab="inscricoes_orgao" class="nav-tab hidden px-3.5 py-2 rounded-lg">Inscrições do órgão</button>
+                <button type="button" data-tab="auditoria_orgao" class="nav-tab hidden px-3.5 py-2 rounded-lg">Auditoria do órgão</button>
+                <button type="button" data-tab="dashboard" class="nav-tab px-3.5 py-2 rounded-lg transition tab-active"><i class="fa-solid fa-chart-pie mr-1"></i> Dashboard</button>
+                <button type="button" data-tab="demandas" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-list-check mr-1"></i> Demandas <span id="cnt-tab-demandas" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+                <button type="button" data-tab="clientes" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-sitemap mr-1"></i> Clientes <span id="cnt-tab-clientes" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+                <button type="button" data-tab="eventos" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-calendar-day mr-1"></i> Eventos <span id="cnt-tab-eventos" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+                <button type="button" data-tab="locais" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-building-circle-check mr-1"></i> Locais <span id="cnt-tab-locais" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+                <button type="button" data-tab="fornecedores" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-handshake mr-1"></i> Fornecedores <span id="cnt-tab-fornecedores" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+
+                <button type="button" data-tab="bases" class="nav-tab px-3.5 py-2 rounded-lg transition tab-inactive"><i class="fa-solid fa-database mr-1"></i> Bases <span id="cnt-tab-bases" class="ml-1 px-1.5 py-0.2 bg-slate-300 text-slate-800 rounded-full text-[10px] font-bold">0</span></button>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" id="btn-historico-alteracoes" class="btn-admin-only hidden bg-blue-50 border border-blue-200 text-blue-900 text-xs px-3 py-2 rounded-lg font-medium"><i class="fa-solid fa-clock-rotate-left mr-1" aria-hidden="true"></i> Histórico de alterações</button>
+                <button type="button" id="btn-export-csv" class="btn-admin-only bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                    <i class="fa-solid fa-file-csv"></i> Exportar Dados
+                </button>
+            </div>
+            <div class="somente-portal portal-nota">Seu acesso considera o órgão, os setores e as ações autorizadas. Para solicitar alterações, fale com a GRGD.</div>
+        </aside>
+        <div id="app-conteudo" class="min-w-0">
+        <p id="aviso-sem-modulos" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm">Seu cadastro está ativo, mas ainda não há módulos liberados. Aguarde a definição de acesso pelo administrador.</p>
+            <p id="painel-identificacao" class="text-xs font-bold uppercase tracking-widest text-blue-900 mb-4"></p><div id="portal-topo" class="somente-portal"><p id="portal-saudacao"></p><p class="portal-sobre mt-3">Painel externo</p><h2 id="portal-pagina-titulo"></h2><p id="portal-pagina-descricao"></p></div>
+
+
+            <!-- ABA DASHBOARD -->
+        <p id="portal-erros" role="alert" class="text-sm text-red-700 mb-3"></p>
