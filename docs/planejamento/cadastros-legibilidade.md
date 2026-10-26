@@ -44,4 +44,4 @@ Na revisão incremental, a PR #27 teve como base refactor/organizacao-migracao-v
 
 Novas propostas seguem a mesma cadeia. Quando o usuário autorizar integrar o conjunto, a última proposta pode ser direcionada à main, revisando o diff acumulado, o CI e o estado remoto. Preferir merge commit para preservar a ancestralidade das propostas; conferir o encerramento das PRs anteriores depois. Não fazer squash/reaplicar cada lote sem avaliar a cadeia.
 
-A configuração Pages deve passar para GitHub Actions antes da integração da arquitetura da PR #26; publicar somente dist. Na preparação, a produção permaneceu na v0.16.0. A confirmação da nova implantação é separada do merge e consta no roteiro de publicação.
+A configuração Pages foi confirmada em GitHub Actions em 26/10/2026; publicar somente dist. Na preparação, a produção permaneceu na v0.16.0. As PRs #26/#27 foram integradas em 26/10/2026 e a implantação v0.17.1 foi confirmada separadamente do merge, conforme as evidências no roteiro de publicação.
